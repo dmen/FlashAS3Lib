@@ -1,0 +1,672 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Collision Detection Kit Documentation - CollisionGroup Class</title>
+<link href="documentation.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="header">
+<div style="padding-left:10px;">CollisionGroup<span style="font-size:16px;"><em><br/>class, extends <strong><a href="CDK.html">CDK</a></strong></em></span></div>
+</div>
+<br/>
+<div style="padding-left:10px;"><a href="#Properties">Properties</a>&nbsp;&nbsp;<a href="#Methods">Methods</a>&nbsp;&nbsp;<a href="#Examples">Examples</a>&nbsp;&nbsp;<a href="index.html">Index</a></div>
+
+<div id=documentation>
+
+<!-- 
+		CLASS LOCATION INFORMATION
+-->
+<table border=0 cellspacing=3>
+<tr>
+<td>
+<strong>Package</strong>
+</td>
+<td>
+com.coreyoneil.collision
+</td>
+</tr>
+<tr>
+<td>
+<strong>Class</strong>
+</td>
+<td>
+public class CollisionGroup
+</td>
+</tr>
+<tr>
+<td>
+<strong>Inheritance</strong>
+</td>
+<td>
+CollisionGroup —> <a href="CDK.html">CDK</a> —> Object
+</td>
+</tr>
+</table>
+
+
+<!-- 
+		CLASS DESCRIPTION
+-->
+
+<p><strong>Language Version: </strong>Actionscript 3.0<br/>
+<strong>Player Version: </strong>Flash Player 9</p>
+
+<p>The CollisionGroup class lets you perform pixel-precise (shape-based) collision detections for display objects in a many/many relationship.  All display objects added to a collision group will check for collisions with each other.  CollisionGroup works with all display objects, including MovieClips, Sprites, Bitmaps, TextFields, and FLVs.</p>
+
+<p>BitmapData is generated for display objects inside a collision group instance.  This data is then used to find any overlapping objects on the stage.  This is performed using logic extended from the <a href="CDK.html">CDK</a> class.</p>
+
+<p>CollisionGroup accounts for transformations (scale, rotation, color transforms, etc.) made to instances of objects.  It can return the angle of collision between two objects based on their shapes where the collision occurred, and tell you how much overlap there is between the two objects.</p> 
+
+<p>CollisionGroup is unique from its sister class <a href="CollisionList.html">CollisionList</a> in that it will check for collisions against <em>all</em> of its children.  For example, if you had four display objects in a collision group - let's call them A, B, C, and D - and checked for collisions, there would be six collision checks made:
+<ul>
+<li><strong>A</strong> colliding with <strong>B</strong></li>
+<li><strong>A</strong> colliding with <strong>C</strong></li>
+<li><strong>A</strong> colliding with <strong>D</strong></li>
+<li><strong>B</strong> colliding with <strong>C</strong></li>
+<li><strong>B</strong> colliding with <strong>D</strong></li>
+<li><strong>C</strong> colliding with <strong>D</strong></li>
+</ul>
+</p>
+
+<p>At least two display objects must be added to a collision group before you may check for collisions.  Display objects that you no longer want to check against for collisions can be removed from a collision list using the removeItem() method.</p>
+<hr/>
+
+<!--
+				PUBLIC PROPERTIES
+-->
+<h2>Public Properties</h2>
+<table class="properties" border="0" cellspacing=0 cellpadding=0>
+<tr>
+<th>
+Property
+</th>
+<th width="90">Defined By
+</th>
+</tr>
+<tr class="even">
+<td>
+<a href="#alphaThreshold">alphaThreshold</a> : Number<br/>
+A floating point value from 0 to 1 that determines the minimum alpha value to check for collisions.
+</td>
+<td>
+<a href="CDK.html">CDK</a>
+</td>
+</tr>
+<tr>
+<td>
+<a href="#numChildren">numChildren</a> : uint<br/>
+[read-only] Returns the number of display objects in the collision group.
+</td>
+<td>
+<a href="CDK.html">CDK</a>
+</td>
+</tr>
+<tr class="even">
+<td>
+<a href="#returnAngle">returnAngle</a> : Boolean<br/>
+If set to true, CollisionGroup will return an approximated angle of each collision that's detected.
+</td>
+<td>
+<a href="CDK.html">CDK</a>
+</td>
+</tr>
+<tr>
+<td>
+<a href="#returnAngleType">returnAngleType</a> : String<br/>
+A value that determines if the angle returned from a collision is in degrees or radians.
+</td>
+<td>
+<a href="CDK.html">CDK</a>
+</td>
+</tr>
+</table>
+
+<br/><br/>
+<!--
+				PUBLIC METHODS
+-->
+<h2>Public Methods</h2>
+<table class="properties" border="0" cellspacing=0 cellpadding=0>
+<tr>
+<th>
+Method
+</th>
+<th width="90">Defined By
+</th>
+</tr>
+<tr class="even">
+<td>
+<a href="#CollisionGroup">CollisionGroup</a>(... objs)<br/>
+Creates a CollisionGroup object with optional display object parameters.
+</td>
+<td>
+CollisionGroup
+</td>
+</tr>
+<tr>
+<td>
+<a href="#addItem">addItem</a>(obj:DisplayObject)<br/>
+Adds a display object to the collision group's list of objects to check for collisions.
+</td>
+<td>
+<a href="CDK.html">CDK</a>
+</td>
+</tr>
+<tr class="even">
+<td>
+<a href="#checkCollisions">checkCollisions</a>():Array<br/>
+Takes every possible pairing of display objects in the collision group and checks for collisions.  If a pair of objects have collided, they are recorded and returned by checkCollisions() as an array.
+</td>
+<td>
+CollisionGroup
+</td>
+</tr>
+<tr>
+<td>
+<a href="#excludeColor">excludeColor</a><span style="font-size:13px;">(theColor:uint, alphaRange:uint = 0, redRange:uint = 0, greenRange:uint = 0, blueRange:uint = 0)</span><br/>
+Defines a color or color range to exclude from collision detections.  The excludeColor() method expects a 32 bit color value.  Optional ranges based on this color can be specified for all channels using the additional parameters.
+</td>
+<td>
+<a href="CDK.html">CDK</a>
+</td>
+</tr>
+<tr class="even">
+<td>
+<a href="#removeExcludeColor">removeExcludeColor</a>(theColor:uint)<br/>
+Removes the color specified from the list of colors to exclude from collision detections. Expects a 32 bit color value.</td>
+<td>
+<a href="CDK.html">CDK</a>
+</td>
+</tr>
+<tr>
+<td>
+<a href="#removeItem">removeItem</a>(obj:DisplayObject)<br/>
+Removes the specified display object from the collision group.
+</td>
+<td>
+<a href="CDK.html">CDK</a>
+</td>
+</tr>
+</table>
+<br/><br/>
+
+<br/>
+
+
+<!--
+							PROPERTY DETAILS
+-->
+
+<a name="Properties"></a>
+<h2>Property Detail</h2>
+<hr/>
+
+<a name="alphaThreshold"></a>
+<span style="font-size:18px;">alphaThreshold</span>&nbsp;&nbsp;property<br/>
+<span style="font-size:12px;">alphaThreshold:Number [read-write]</span>
+<p>
+A floating point value from 0 to 1 that determines the minimum alpha value to check for collisions.  The default setting is 0.</p>
+<p>
+If alphaThreshold were set to .5, then CollisionGroup would ignore any collisions that occurred where either of the display objects' overlapping pixels had an alpha equal to or below .5 <br/>
+</p>
+<p>
+<a href="#alphaThresholdExample">View an Example</a>
+</p>
+<span style="color:#666666; font-weight:bold;">Implementation</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;">public function get alphaThreshold():Number</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;">public function set alphaThreshold(theAlpha:Number)</span><br/>
+<hr />
+
+<a name="numChildren"></a>
+<span style="font-size:18px;">numChildren</span>&nbsp;&nbsp;property<br/>
+<span style="font-size:12px;">numChildren:uint [read-only]</span>
+<p>
+Returns the number of display objects in the collision group.<br/>
+</p>
+<span style="color:#666666; font-weight:bold;">Implementation</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;">public function get numChildren():uint</span><br/>
+<hr />
+
+<a name="returnAngle"></a>
+<span style="font-size:18px;">returnAngle</span>&nbsp;&nbsp;property<br/>
+<span style="font-size:12px;">returnAngle:Boolean [read-write]</span>
+<p>
+If set to true, CollisionGroup will return an approximated angle of each collision that's detected.  The default setting is false.
+</p>
+<p>
+The angle of collision for each collision is returned by the checkCollisions() method.<br/>
+</p>
+<span style="color:#666666; font-weight:bold;">Implementation</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;">public function get returnAngle():Boolean</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;">public function set returnAngle(option:Boolean)</span><br/><br/>
+<span style="color:#666666; font-weight:bold;">See Also</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><a href="#returnAngleType">returnAngleType</a></span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><a href="#checkCollisions">checkCollisions()</a></span><br/>
+<hr />
+
+<a name="returnAngleType"></a>
+<span style="font-size:18px;">returnAngleType</span>&nbsp;&nbsp;property<br/>
+<span style="font-size:12px;">returnAngleType:String [read-write]</span>
+<p>
+A value that determines if the angle returned from a collision is in degrees or radians.  The following values are accepted by returnAngleType (not case-sensitive):
+<ul>
+<li>DEGREES</li>
+<li>DEGREE</li>
+<li>DEGS</li>
+<li>DEG</li>
+<li>RADIANS</li>
+<li>RADIAN</li>
+<li>RADS</li>
+<li>RAD</li>
+</ul>
+
+The default setting is RADIANS.</p>
+<br/><br/>
+<span style="color:#666666; font-weight:bold;">Implementation</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;">public function get returnAngle():Boolean</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;">public function set returnAngle(option:Boolean)</span><br/><br/>
+<span style="color:#666666; font-weight:bold;">See Also</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><a href="#returnAngle">returnAngle</a></span><br/>
+
+<br/><br/>
+
+<!--
+					METHOD DETAILS
+-->
+
+<a name="Methods"></a>
+<h2>Method Detail</h2>
+<hr/>
+
+<a name="CollisionGroup"></a>
+<span style="font-size:18px;">CollisionGroup()</span>&nbsp;&nbsp;Constructor<br/>
+<span style="font-size:12px;">public function CollisionGroup(... objs)</span>
+<p>
+Creates a CollisionGroup object with optional display object parameters.  If you want to add display objects to the collision group during instantiation, you can pass them into the constructor.  For example, if you had three display objects called A, B, and C that you wanted to add for collision detection, you could create the group like this:
+</p>
+<p>
+<span style="font-family:'Courier New', Courier, monospace;">var collisions:CollisionGroup = new CollisionGroup(A, B, C);</span>
+</p>
+<span style="color:#666666; font-weight:bold;">Parameters</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">... objs</span> — Optional list of display objects to add to the collision group.</span><br/><br/>
+
+<span style="color:#666666; font-weight:bold;">Throws</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">Error</span> — Object passed isn't a valid display object</span><br/><br/>
+<hr />
+
+<a name="addItem"></a>
+<span style="font-size:18px;">addItem()</span>&nbsp;&nbsp;method<br/>
+<span style="font-size:12px;">public function addItem(obj:DisplayObject):void</span>
+<p>
+Adds a display object to the collision group's list of objects to check for collisions.  <br/>
+</p>
+<span style="color:#666666; font-weight:bold;">Parameters</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">obj : DisplayObject</span> — The display object to add to the collision group.</span><br/><br/>
+<span style="color:#666666; font-weight:bold;">Throws</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">Error</span> — Object added isn't a valid display object</span><br/><br/>
+
+<span style="color:#666666; font-weight:bold;">See Also</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><a href="#removeItem">removeItem()</a></span><br/>
+<hr />
+
+<a name="checkCollisions"></a>
+<span style="font-size:18px;">checkCollisions()</span>&nbsp;&nbsp;method<br/>
+<span style="font-size:12px;">public function checkCollisions():Array</span>
+<p>
+Takes every possible pairing of display objects in the collision group and checks for collisions. If a pair of objects have collided, they are recorded and returned by checkCollisions() as an array.
+</p>
+<p>
+The array returned by checkCollisions() is an array of objects representing each collision, with each object containing the following properties:
+<ul>
+<li><span style="font-size:12px;"><span style="color:666666; font-weight:bold;">object1 : DisplayObject</span> — The first object involved in the collision.  This is always the smallest object of the two.</span></li>
+<li><span style="font-size:12px;"><span style="color:666666; font-weight:bold;">object2 : DisplayObject</span> — The second object involved in the collision.  This is always the largest object of the two.</span></li>
+<li><span style="font-size:12px;"><span style="color:666666; font-weight:bold;">angle : Number</span> — The angle of the collision.  This is only returned if returnAngle is set to true; otherwise it will return -1.</span></li>
+<li><span style="font-size:12px;"><span style="color:666666; font-weight:bold;">overlapping : Array</span> — An array of all overlapping points between the two display objects during collision, in stage coordinates.</span></li>
+</ul>
+</p>
+
+<span style="color:#666666; font-weight:bold;">Returns</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-size:12px;"><span style="color:666666; font-weight:bold;">Array</span> — An array containing information for each collision that was recorded.  Each element in the array is an object containing the two display objects<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; that collided, their angle of collision, and the overlapping points between the two display objects.</span><br/>
+<br/>
+<span style="color:#666666; font-weight:bold;">See Also</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><a href="#returnAngle">returnAngle</a></span><br/>
+<hr />
+
+<a name="excludeColor"></a>
+<span style="font-size:18px;">excludeColor()</span>&nbsp;&nbsp;method<br/>
+<span style="font-size:12px;">public function excludeColor(theColor:uint, alphaRange:uint = 255, redRange:uint = 20, greenRange:uint = 20, blueRange:uint = 20):void</span>
+<p>
+Defines a color or color range to exclude from collision detections. <em>The excludeColor() method expects a 32 bit color value.</em> Optional ranges based on this color can be specified for all channels using the additional parameters.  Each range accepts integral values from 0 to 255, accounting for all values for each color channel.  The ranges move in both directions at the amount specified for each channel.  For example, if you had a collision group named "collisions" and called excludeColor() like so:
+</p>
+<p>
+<span style="font-family:'Courier New', Courier, monospace;">collisions.excludeColor(0xFFCCAADD, 0, 0, 20, 0);</span>
+</p>
+<p>
+... then all pixels with colors between 0xFFCC95DD and 0xFFCCBDDD would be excluded from collisions.  Pixels are only excluded from collisions if all four channels (ARGB) are within their respective ranges.  You may exclude as many colors/ranges as you want by making multiples calls to excludeColor().
+</p>
+<p>
+Because the Collision Detection Kit performs its detections based on pixel values, it's not uncommon for pixels on the edge of a display object to have alpha values lower than the main color of its shape.  This is caused by anti-aliasing performed on the display object.  Because of this, the excludeColor() method defaults its ranges so that it accounts for all alpha values, and provides a small range of 20 for red, green, and blue.  This accounts for most discrepancies, allowing you to simply pass the color value you wish to exclude without needing to adjust ranges.
+</p>
+<p>
+excludeColor() is CPU-intensive.  It's suggested that you only exclude one or two colors when working with larger display objects or a large number of display objects in your collision list.  Whenever possible, use <a href="#alphaThreshold">alphaThreshold</a> instead.
+</p>
+<p>
+<a href="#excludeColorExample">View an Example</a>
+</p>
+<span style="color:#666666; font-weight:bold;">Parameters</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">theColor : uint</span> — The color to exclude.  Must be a 32 bit value (Example: 0xFF663322)</span><br/><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">alphaRange : uint</span> (default = 255) — The integral range of alpha values to exclude, based on the color's alpha value.  Valid values are 0 - 255</span><br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">redRange : uint</span> (default = 20) — The integral range of red values to exclude, based on the color's red value.  Valid values are 0 - 255</span><br/><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">greenRange : uint</span> (default = 20) — The integral range of green values to exclude, based on the color's green value.  Valid values are 0 - 255</span><br/><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">blueRange : uint</span> (default = 20) — The integral range of blue values to exclude, based on the color's blue value.  Valid values are 0 - 255</span><br/><br/>
+
+<span style="color:#666666; font-weight:bold;">See Also</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><a href="#removeExcludeColor">removeExcludeColor()</a></span><br/>
+<hr />
+
+<a name="removeExcludeColor"></a>
+<span style="font-size:18px;">removeExcludeColor()</span>&nbsp;&nbsp;method<br/>
+<span style="font-size:12px;">public function removeExcludeColor(theColor:uint):void</span>
+<p>
+Removes the color specified from the list of colors to exclude from collision detections. Must be a color previously added using the excludeColor() method.  Expects a 32 bit color value.
+</p>
+<span style="color:#666666; font-weight:bold;">Parameters</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">theColor : uint</span> — The color to remove from exclusions.  Must be a 32 bit value (Example: 0xFF663322)</span><br/><br/>
+
+<span style="color:#666666; font-weight:bold;">Throws</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">Error</span> — Color specified isn't in the exclusion list.</span><br/><br/>
+
+<span style="color:#666666; font-weight:bold;">See Also</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><a href="#excludeColor">excludeColor()</a></span><br/>
+<hr />
+
+<a name="removeItem"></a>
+<span style="font-size:18px;">removeItem()</span>&nbsp;&nbsp;method<br/>
+<span style="font-size:12px;">public function removeItem(obj:DisplayObject):void</span>
+<p>
+Removes the specified display object from the collision group.<br/>
+</p>
+<span style="color:#666666; font-weight:bold;">Parameters</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">obj : DisplayObject</span> — The display object to remove from the collision group.</span><br/><br/>
+<span style="color:#666666; font-weight:bold;">Throws</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><span style="color:666666; font-weight:bold;">Error</span> — Display object isn't in the collision group</span><br/><br/>
+
+<span style="color:#666666; font-weight:bold;">See Also</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-size:12px;"><a href="#addItem">addItem()</a></span><br/>
+<br/><br/>
+
+<!-- 
+						EXAMPLES
+-->
+<a name="Examples"></a>
+<h2>Examples</h2>
+<hr/>
+<p>
+All of the following examples make use of a simple setup to show how to make use of CollisionGroup.  To run them, you will have to have downloaded the Collision Detection Kit and included it in your list of classpaths.</p>
+<p>
+In this first example, CollisionGroup is used to detect collisions between four display objects.  The four display objects are Sprites containing two overlaying ellipses.  This was done to provide a more unique shape to better show that the collision detection is shape-based.  The user can drag the shapes around the stage, and when any of them collide with each other, a text box displays which shapes collided.  This task is accomplished using the following steps: 
+<ul>
+<li>The CDK and CollisionGroup classes are imported.</li>
+<li>A text field called "messageBox" is created and added to the stage.</li>
+<li>An instance of CollisionGroup is created, named collisionGroup.</li>
+<li>The shapes are created with random colors, rotation, and scale.  Then they're added to collisionGroup via the addItem() method.  An event listener is added to each one for the MOUSE_DOWN mouse event.</li>
+<li>The handler for the mouse down events starts the drag for whichever shape the user clicks on.  Mouse move and mouse up listeners are added.</li>
+<li>When the user moves a circle on the stage, the mouse move handler checks for collisions using the checkCollisions() method.  Any collisions detected are displayed in the messageBox text field.</li>
+<li>The handler for mouse up events stops the dragging.</li>
+</ul>
+Copy and paste the code into the timeline of a new FLA and compile to see it in action.
+</p>
+
+<pre style="background-color:#CCCCCC; padding:10px; border:1px inset;">
+import com.coreyoneil.collision.CollisionGroup;
+
+var messageBox:TextField = new TextField();
+addChild(messageBox);
+
+var collisionGroup:CollisionGroup = new CollisionGroup();
+
+for(var i:uint = 0; i < 4; i++)
+{
+	var shape:Sprite = new Sprite();
+	shape.name = "shape " + i;
+	addChild(shape);
+	
+	shape.graphics.beginFill(Math.random() * 0xFFFFFF);
+	shape.graphics.drawEllipse(-40, -20, 80, 40);
+	shape.graphics.drawEllipse(-20, -40, 40, 80);
+	shape.graphics.endFill();
+
+	shape.rotation = Math.random() * 180;
+	shape.scaleX = shape.scaleY = Math.random() + .5;
+	
+	shape.x = stage.stageWidth / 4 * i + 40;
+	shape.y = stage.stageHeight / 4 * i + 40;
+	
+	shape.buttonMode = true;
+	
+	shape.addEventListener(MouseEvent.MOUSE_DOWN, mouseDown_Handler);
+	
+	collisionGroup.addItem(shape);
+}
+
+function mouseDown_Handler(e:MouseEvent):void
+{
+	var shape:Sprite = e.currentTarget as Sprite;
+	stage.addChild(shape);
+	
+	e.currentTarget.startDrag();
+	e.currentTarget.addEventListener(MouseEvent.MOUSE_MOVE, checkForCollision);
+	e.currentTarget.addEventListener(MouseEvent.MOUSE_UP, mouseUp_Handler);
+}
+
+function mouseUp_Handler(e:MouseEvent):void
+{
+	e.currentTarget.stopDrag();
+	
+	e.currentTarget.removeEventListener(MouseEvent.MOUSE_MOVE, checkForCollision);
+	e.currentTarget.removeEventListener(MouseEvent.MOUSE_UP, mouseUp_Handler);
+}
+
+function checkForCollision(e:MouseEvent):void
+{
+	var collisions:Array = collisionGroup.checkCollisions();
+	
+	messageBox.text = "";
+
+	for(var i:uint = 0; i < collisions.length; i++)
+	{
+		var firstShape:Sprite = collisions[i].object1;
+		var secondShape:Sprite = collisions[i].object2;
+		messageBox.appendText(firstShape.name + " colliding with " + secondShape.name + "\n");
+		messageBox.autoSize = "center";
+		messageBox.x = stage.stageWidth / 2 - messageBox.width / 2;
+	}
+}
+</pre>
+<br/>
+
+<a name="alphaThresholdExample"></a>
+<hr/>
+<p>
+This example shows the basic usage of the <a href="#alphaThreshold">alphaThreshold</a> property.  Four Sprites are created and set up so that they can be dragged over one another.  Each Sprite contains two circles laying overtop one another.  The inner circle is red with an alpha of 1.  The larger circle is also red, with a .25 alpha value.  The Sprites will ignore the lower alpha values and only detect collisions with the more opaque value.  All collisions are reported via a text field.  This is accomplished through the following steps:
+<ul>
+<li>The CDK and CollisionGroup classes are imported.</li>
+<li>A text field called "messageBox" is created and added to the stage.</li>
+<li>An instance of CollisionGroup is created, named collisionGroup.</li>
+<li>collisionGroup has its alphaThreshold value set to .25</li>
+<li>The four Sprites are created, each with two circles inside of them.  Both circles are red, with the larger one having an alpha value of .25, and the smaller inner cicle having an alpha of 1.</li>
+<li>The Sprites are added to collisionGroup via the addItem() method.  An event listener is added to each one for the MOUSE_DOWN mouse event.</li>
+<li>The handler for the mouse down events starts the drag for whichever circle the user clicks on.  Mouse move and mouse up listeners are added.</li>
+<li>When the user moves a circle on the stage, the mouse move handler checks for collisions using the checkCollisions() method.  Any collisions detected are displayed in the messageBox text field.</li>
+<li>The handler for mouse up events stops the dragging.</li>
+</ul>
+Copy and paste the code into the timeline of a new FLA and compile to see it in action.
+</p>
+
+<pre style="background-color:#CCCCCC; padding:10px; border:1px inset;">
+import com.coreyoneil.collision.CollisionGroup;
+
+var messageBox:TextField = new TextField();
+addChild(messageBox);
+
+var collisionGroup:CollisionGroup = new CollisionGroup();
+
+collisionGroup.alphaThreshold = .25;
+
+for(var i:uint = 0; i < 4; i++)
+{
+	var shape:Sprite = new Sprite();
+	shape.name = "shape " + i;
+	addChild(shape);
+	
+	shape.graphics.beginFill(0xFF0000, .25);
+	shape.graphics.drawCircle(0, 0, 40);
+	shape.graphics.endFill();
+	
+	shape.graphics.beginFill(0xFF0000, 1);
+	shape.graphics.drawCircle(0, 0, 20);
+	shape.graphics.endFill();
+
+	shape.scaleX = shape.scaleY = Math.random() + .5;
+	
+	shape.x = stage.stageWidth / 4 * i + 40;
+	shape.y = stage.stageHeight / 4 * i + 40;
+	
+	shape.buttonMode = true;
+	
+	shape.addEventListener(MouseEvent.MOUSE_DOWN, mouseDown_Handler);
+	
+	collisionGroup.addItem(shape);
+}
+
+function mouseDown_Handler(e:MouseEvent):void
+{
+	var shape:Sprite = e.currentTarget as Sprite;
+	stage.addChild(shape);
+	e.currentTarget.startDrag();
+	
+	e.currentTarget.addEventListener(MouseEvent.MOUSE_MOVE, checkForCollision);
+	e.currentTarget.addEventListener(MouseEvent.MOUSE_UP, mouseUp_Handler);
+}
+
+function mouseUp_Handler(e:MouseEvent):void
+{
+	e.currentTarget.stopDrag();
+	
+	e.currentTarget.removeEventListener(MouseEvent.MOUSE_MOVE, checkForCollision);
+	e.currentTarget.removeEventListener(MouseEvent.MOUSE_UP, mouseUp_Handler);
+}
+
+function checkForCollision(e:MouseEvent):void
+{
+	var collisions:Array = collisionGroup.checkCollisions();
+	
+	messageBox.text = "";
+
+	for(var i:uint = 0; i < collisions.length; i++)
+	{
+		var firstShape:Sprite = collisions[i].object1;
+		var secondShape:Sprite = collisions[i].object2;
+		messageBox.appendText(firstShape.name + " colliding with " + secondShape.name + "\n");
+		messageBox.autoSize = "center";
+		messageBox.x = stage.stageWidth / 2 - messageBox.width / 2;
+	}
+}
+</pre>
+<br/>
+
+<a name="excludeColorExample"></a>
+<hr/>
+<p>
+This example shows the basic usage of the <a href="#excludeColor">excludeColor()</a> method.  Sprites containing circles will be set up and placed in a CollisionGroup instance so that they can be dragged overtop one another.  Each Sprite will contain two circles, one red and one green.  The Sprites will ignore all red pixels, and only detect collisions on green.  All collisions are reported via a text field.  This is accomplished through the following steps:
+<ul>
+<li>The CDK and CollisionGroup classes are imported.</li>
+<li>A text field called "messageBox" is created and added to the stage.</li>
+<li>An instance of CollisionGroup is created, named collisionGroup.</li>
+<li>collisionGroup calls the excludeColor() method and passes the 32 bit red value (0xFFFF0000).</li>
+<li>The Sprites are created and added to collisionGroup via the addItem() method.  An event listener is added to each one for the MOUSE_DOWN mouse event.</li>
+<li>The handler for the mouse down events starts the drag for whichever circle the user clicks on.  Mouse move and mouse up listeners are added.</li>
+<li>When the user moves a circle on the stage, the mouse move handler checks for collisions using the checkCollisions() method.  Any collisions detected are displayed in the messageBox text field.</li>
+<li>The handler for mouse up events stops the dragging.</li>
+</ul>
+Copy and paste the code into the timeline of a new FLA and compile to see it in action.
+</p>
+
+<pre style="background-color:#CCCCCC; padding:10px; border:1px inset;">
+import com.coreyoneil.collision.CollisionGroup;
+
+var messageBox:TextField = new TextField();
+addChild(messageBox);
+
+var collisionGroup:CollisionGroup = new CollisionGroup();
+
+collisionGroup.excludeColor(0xFFFF0000);
+
+for(var i:uint = 0; i < 4; i++)
+{
+	var shape:Sprite = new Sprite();
+	shape.name = "shape " + i;
+	addChild(shape);
+	
+	shape.graphics.beginFill(0xFF0000);
+	shape.graphics.drawCircle(0, 0, 40);
+	shape.graphics.endFill();
+	
+	shape.graphics.beginFill(0x00AA00);
+	shape.graphics.drawCircle(0, 0, 20);
+	shape.graphics.endFill();
+
+	shape.scaleX = shape.scaleY = Math.random() + .5;
+	
+	shape.x = stage.stageWidth / 4 * i + 40;
+	shape.y = stage.stageHeight / 4 * i + 40;
+	
+	shape.buttonMode = true;
+	
+	shape.addEventListener(MouseEvent.MOUSE_DOWN, mouseDown_Handler);
+	
+	collisionGroup.addItem(shape);
+}
+
+function mouseDown_Handler(e:MouseEvent):void
+{
+	var shape:Sprite = e.currentTarget as Sprite;
+	stage.addChild(shape);
+	e.currentTarget.startDrag();
+	
+	e.currentTarget.addEventListener(MouseEvent.MOUSE_MOVE, checkForCollision);
+	e.currentTarget.addEventListener(MouseEvent.MOUSE_UP, mouseUp_Handler);
+}
+
+function mouseUp_Handler(e:MouseEvent):void
+{
+	e.currentTarget.stopDrag();
+	
+	e.currentTarget.removeEventListener(MouseEvent.MOUSE_MOVE, checkForCollision);
+	e.currentTarget.removeEventListener(MouseEvent.MOUSE_UP, mouseUp_Handler);
+}
+
+function checkForCollision(e:MouseEvent):void
+{
+	var collisions:Array = collisionGroup.checkCollisions();
+	
+	messageBox.text = "";
+
+	for(var i:uint = 0; i < collisions.length; i++)
+	{
+		var firstShape:Sprite = collisions[i].object1;
+		var secondShape:Sprite = collisions[i].object2;
+		messageBox.appendText(firstShape.name + " colliding with " + secondShape.name + "\n");
+		messageBox.autoSize = "center";
+		messageBox.x = stage.stageWidth / 2 - messageBox.width / 2;
+	}
+}
+</pre>
+
+</div>
+</body>
+</html>

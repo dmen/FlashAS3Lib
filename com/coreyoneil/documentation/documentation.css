@@ -1,0 +1,93 @@
+@charset "utf-8";
+/* CSS Document */
+
+html
+{
+	margin:0px 0px 0px 0px;
+}
+
+body
+{
+	margin:0px 0px 0px 0px;
+	background-color:#FFFFFF;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:14px;
+}
+
+a
+{
+	text-decoration:none;
+	color:#3333CC;
+}
+
+a:hover
+{
+	text-decoration:underline;
+	color:#3333CC;
+}
+
+hr
+{
+	width:100%;
+	color:#CCCCCC;
+}
+
+#header
+{
+	width:100%;
+	height:60px;
+	padding-top:5px;
+	background-color:#CCFFFF;
+	font-size:30px;
+}
+
+#documentation
+{
+	width:840px;
+	padding:30px;
+	margin-left:auto;
+	margin-right:auto;
+}
+
+li
+{
+	list-style:circle;
+}
+
+table.properties
+{
+	width:100%;
+	border:1px solid #999999;
+}
+
+table.properties a
+{
+	font-weight:bold;
+}
+
+table.properties td
+{
+	border-top:1px solid #999999;
+	line-height:18px;
+}
+
+table.properties th
+{
+	background-color:#006699;
+	color:#FFFFFF;
+	padding-top:20px;
+	padding-bottom:5px;
+	padding-left:5px;
+	text-align:left;
+	border:none;
+}
+
+table.properties td
+{
+	padding: 5px;
+}
+
+tr.even
+{
+	background-color:#FFFFCC;
+}

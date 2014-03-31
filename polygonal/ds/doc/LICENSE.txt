@@ -1,0 +1,5 @@
+The icons used in the template are part of the Eclipse Project and licensed under the EPL:
+License: http://www.eclipse.org/legal/epl-v10.html
+
+The documentation uses google-code-prettify for sytax highlighting of source code snippets.
+License: http://www.apache.org/licenses/LICENSE-2.0

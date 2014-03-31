@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Collision Detection Kit - Documentation</title>
+<link href="documentation.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="header">
+<div style="padding-left:10px;">Collision Detection Kit<span style="font-size:16px;"><em><br/>package, com.coreyoneil.collision</em></span></div>
+</div>
+<br/>
+<div style="padding-left:10px;"><a href="CDK.html">CDK</a>&nbsp;&nbsp;<a href="CollisionGroup.html">CollisionGroup</a>&nbsp;&nbsp;<a href="CollisionList.html">CollisionList</a></div>
+
+<div id=documentation>
+
+<!-- 
+		PACKAGE INFORMATION
+-->
+<table border=0 cellspacing=3>
+<tr>
+<td>
+<strong>Package</strong>
+</td>
+<td>
+com.coreyoneil.collision
+</td>
+</tr>
+<tr>
+<td>
+<strong>Classes</strong>
+</td>
+<td>
+<a href="CDK.html">CDK</a>, <a href="CollisionGroup.html">CollisionGroup</a>, <a href="CollisionList.html">CollisionList</a>
+</td>
+</tr>
+</table>
+
+
+<!-- 
+		PACKAGE DESCRIPTION
+-->
+
+<p><strong>Language Version: </strong>Actionscript 3.0<br/>
+<strong>Player Version: </strong>Flash Player 9</p>
+
+<p>
+The Collision Detection Kit is a package of classes created for pixel-precise, shape-based collision detection for all display objects.  It is written in Actionscript 3.0 and meant for Flash Player version 9 and higher.  The Collision Detection Kit consists of three classes:
+<ul>
+<li><a href="CDK.html">CDK</a> - an abstract class that provides the majority of the logic.  Cannot be instantiated.</li>
+<li><a href="CollisionGroup.html">CollisionGroup</a> - extends CDK, detects collisions against all possible pairings of display objects within it.</li>
+<li><a href="CollisionList.html">CollisionList</a> - extends CDK, takes each display object within it and checks for collisions against a single target display object.</li>
+</ul>
+</p>
+<p>
+The Collision Detection Kit comes with several features to control how collisions are detected, and provides useful data so the user of the class can <em>do something</em> about the collision:
+<ul style="line-height:20px;">
+<li>Set an alpha threshold to ignore colors below the threshold.</li>
+<li>Specify colors and color ranges to exclude from collision detection.</li>
+<li>Receive an <strong>angle of collision</strong> for each collision.  We're not talking about bounding boxes here - the angle is calculated based on the shapes of the display objects <em>at the site of the collision</em>. Great for when you're working with physics!</li>
+<li>Receive the pixels that overlapped in a collision in stage coordinates.  Combined with the returned angle, and your physics engine will have no problems traversing complicated shapes or performing off-axis rotation.</li>
+<li>Takes transformations (scale, rotation, color transforms, etc.) of individual instances of your display objects into account, as well as the transformations of any parent display objects.</li>
+<li>Add items for collision detection regardless of their nesting.</li>
+<li>Works with display objects not on the display list; great with blitting!</li>
+<li>You can have as many CollisionGroup and CollisionList instances as you want, allowing you to easily manage different interactions and behaviors.</li>
+<li>Works with all display objects - MovieClips, Sprites, Bitmaps, TextFields, FLVs, and on and on!</li>
+</ul>
+</p>
+
+<p>
+To learn more about this package and what it can do for you, reference the documentation for its classes:
+<p style="font-size:18px;">
+<a href="CDK.html">CDK</a><br/>
+<a href="CollisionGroup.html">CollisionGroup</a><br/>
+<a href="CollisionList.html">CollisionList</a>
+</p>
+
+</div>
+</body>
+</html>
