@@ -116,11 +116,11 @@ package com.gmrmarketing.htc.movies
 			lo.x -= lo.width * .5;
 			lo.y -= lo.height * .5;
 			
-			if (ConfigData.USE_KEN_BURNS) {
+			if (ConfigData.USE_KEN_BURNS) {				
 				TweenMax.to(lo, 0, { colorMatrixFilter: { amount:1, brightness:3, saturation:3 } } );
 				TweenMax.to(lo, 3, { colorMatrixFilter:{amount:0, brightness:1, saturation:1}, onComplete:removeOld } );
 				TweenMax.to(s, viewTime + 2, { scaleX:ConfigData.SCALE_AMOUNT, scaleY:ConfigData.SCALE_AMOUNT, overwrite:0, ease:Linear.easeNone } );
-			}else {
+			}else {				
 				s.alpha = 0;
 				TweenMax.to(s, 2, { alpha:1, onComplete:removeOld } );
 			}
