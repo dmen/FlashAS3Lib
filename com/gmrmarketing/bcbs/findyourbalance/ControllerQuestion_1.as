@@ -17,11 +17,11 @@ package com.gmrmarketing.bcbs.findyourbalance
 		{
 			clip = new mcQuestion1();
 			
-			combo = new ComboBox();
+			combo = new ComboBox("Choose Answer");
 			combo.populate([1,3,5,7,9,50,75,100,500,10000]);
 			clip.addChild(combo);
-			combo.x = 128;
-			combo.y = 250;		
+			combo.x = 483;
+			combo.y = 290;		
 		}
 		
 		
@@ -36,7 +36,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			if (!container.contains(clip)) {
 				container.addChild(clip);
 			}
-			combo.setSelection("");
+			combo.reset(); //shows reset message
 			clip.btnSubmit.addEventListener(MouseEvent.MOUSE_DOWN, submitClicked, false, 0, true);
 		}
 		
@@ -58,7 +58,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		private function submitClicked(e:MouseEvent):void
 		{
-			if (combo.getSelection() == "") {
+			if (combo.getSelection() == "" || combo.getSelection() == combo.getResetMessage()) {
 				dispatchEvent(new Event(NO_Q1));
 			}else {
 				dispatchEvent(new Event(Q1));

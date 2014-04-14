@@ -33,9 +33,9 @@ package com.gmrmarketing.nissan.rodale2013
 		
 		public function Main()
 		{
-			stage.displayState = StageDisplayState.FULL_SCREEN;
+			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			Mouse.hide();
+			//Mouse.hide();
 			
 			so = SharedObject.getLocal("nissanData", "/");
 			

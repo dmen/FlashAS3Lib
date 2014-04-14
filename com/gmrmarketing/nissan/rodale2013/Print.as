@@ -28,7 +28,7 @@ package com.gmrmarketing.nissan.rodale2013
 			var options:PrintJobOptions = new PrintJobOptions();
             //options.printAsBitmap = true;           
 			
-			if (printJob.start2(null, false)) {	
+			if (printJob.start2(null, false)) {				
 				
 				var page:Sprite = new Sprite();
 				var bmp:Bitmap = new Bitmap(bmd);				

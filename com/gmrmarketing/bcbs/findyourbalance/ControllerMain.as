@@ -9,7 +9,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 	import com.greensock.TweenMax;
 	import com.gmrmarketing.utilities.CornerQuit;
 	import flash.desktop.NativeApplication;
- 
+	import com.gmrmarketing.intel.girls20.ComboBox;
+	
 	
 	public class ControllerMain extends MovieClip
 	{
@@ -26,6 +27,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var q1:ControllerQuestion_1; //goes between level 1 and 2
 		private var q2:ControllerQuestion_2; //goes between level 2 and 3
 		private var inGame:ControllerInGame; //shows message on controller while game is playing
+		private var webService:ControllerWeb; //for getting the event list
 		private var cq:CornerQuit;
 		private var currentIPPort:String;
 		
@@ -35,7 +37,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var LED:MovieClip; //mcLED in lib
 		
 		private var playingGame:Boolean = false; //when false accel updates aren't sent
-		
+		private var eventDropdown:ComboBox;
 		
 		public function ControllerMain()
 		{
@@ -49,7 +51,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			socket.addEventListener(ProgressEvent.SOCKET_DATA, onServerData );
 			
 			accel = new Accelerometer();			
-			accel.setRequestedUpdateInterval(75);//ms - can be changed through ip dialog
+			accel.setRequestedUpdateInterval(50);//ms - can be changed through ip dialog
 			accel.addEventListener(AccelerometerEvent.UPDATE, updateHandler);			
 			
 			mainContainer = new Sprite();
@@ -85,7 +87,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			q2.setContainer(mainContainer);
 			
 			inGame = new ControllerInGame();
-			inGame.setContainer(mainContainer);
+			inGame.setContainer(mainContainer);			
 			
 			//auto connection to game server
 			tim = new Timer(2000);
@@ -103,8 +105,24 @@ package com.gmrmarketing.bcbs.findyourbalance
 			ipDialog = new mcIPDialog();
 			dialogContainer.addChild(ipDialog);
 			ipDialog.y = - ipDialog.height;
+			eventDropdown = new ComboBox("Choose Event");			
+			eventDropdown.x = 26;
+			eventDropdown.y = 229;
+			
+			webService = new ControllerWeb();
+			webService.addEventListener(ControllerWeb.CONTROLLER_EVENTS, gotEventList, false, 0, true);
+			webService.retrieveEvents();			
 			
 			doReset();
+		}
+		
+		
+		private function gotEventList(e:Event):void
+		{			
+			eventDropdown.populate(webService.getEvents());
+			ipDialog.theError.text = webService.getEvents()[0];
+			ipDialog.addChild(eventDropdown);
+			eventDropdown.reset();//shows reset message
 		}
 		
 		
@@ -194,7 +212,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		}
 		private function noRules(e:Event):void
 		{
-			dialog.show("You must accept the official rules");
+			dialog.show("You must accept the terms and conditions");
 		}
 		private function noState(e:Event):void
 		{
@@ -209,7 +227,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 */
 		private function doStart(e:Event):void
 		{
-			intro.hide();			
+			intro.hide();		
+			
+			if(socketConnected){
+				socket.writeUTFBytes("***instructions***");
+				socket.flush();				
+			}
 			
 			instructions.show();
 			instructions.addEventListener(ControllerInstructions.READY, instructionsDone, false, 0, true);			
@@ -253,6 +276,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 				socket.writeUTFBytes("***start***" + String(avatars.getAvatar()));
 				socket.flush();				
 			}
+			
 			inGame.show();//shows game in progress....
 		}
 		
@@ -325,7 +349,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 				q2.show();
 				q2.addEventListener(ControllerQuestion_2.Q2, q2Answered, false, 0, true);
 				q2.addEventListener(ControllerQuestion_2.NO_Q2, qNotAnswered, false, 0, true);
-			}
+			}			
 		}
 		
 		
@@ -373,10 +397,18 @@ package com.gmrmarketing.bcbs.findyourbalance
 		{			
 			sweeps.removeEventListener(ControllerSweeps.DONE, sweepsDone);
 			
-			//userData is: fname,lname,email,phone,state,entry,optin,q1a,q2a
+			//userData is: fname,lname,email,phone,state,entry,optin,q1a,q2a,event
 			var userData:Array = intro.getData().concat(sweeps.getData());			
 			userData.push(q1.getAnswer());
 			userData.push(q2.getAnswer());
+			
+			//event
+			if (eventDropdown.getSelection() == "" || eventDropdown.getSelection() == eventDropdown.getResetMessage()) {
+				userData.push(new Date().toString());
+			}else {
+				userData.push(eventDropdown.getSelection());
+			}
+			
 			
 			var uds:String = userData.join(); //comma sep string
 			

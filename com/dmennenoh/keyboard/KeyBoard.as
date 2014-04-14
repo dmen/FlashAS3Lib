@@ -252,6 +252,16 @@ package com.dmennenoh.keyboard
 			}
 		}		
 		
+		private function tabToNextField():void
+		{
+			var curInd:int = focusFields.indexOf(targetField);
+			curInd++;
+			if (curInd >= focusFields.length) {
+				curInd = 0;
+			}
+			targetField = focusFields[curInd];
+			stage.focus = targetField;
+		}
 		
 		/**
 		 * Called by listener on each Key object created in draw()
@@ -287,6 +297,8 @@ package com.dmennenoh.keyboard
 				}else if (lastChar == "Enter" && targetField) {
 					if(targetField.multiline){
 						targetField.appendText("\n");
+					}else {
+						tabToNextField();
 					}
 				}else if (lastChar == "Submit" || lastChar == "Send") {
 					dispatchEvent(new Event(SUBMIT));

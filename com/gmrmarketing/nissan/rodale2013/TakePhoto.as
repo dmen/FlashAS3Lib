@@ -1,17 +1,15 @@
 package com.gmrmarketing.nissan.rodale2013
 {
-	import flash.display.BitmapData;
-	import flash.display.DisplayObjectContainer;
-	import flash.display.MovieClip;
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
+	import flash.display.*;	
+	import flash.events.*;	
 	import com.greensock.TweenMax;
-	import com.gmrmarketing.utilities.CamPic;
-	import flash.events.MouseEvent;
-	import flash.events.TimerEvent;
+	import com.gmrmarketing.utilities.CamPic;	
+	import flash.geom.Matrix;
+	import flash.media.Video;
 	import flash.utils.Timer;
 	import com.gmrmarketing.utilities.TimeoutHelper;
 	import flash.media.Sound;
+	import flash.media.Camera;	
 	
 	public class TakePhoto extends EventDispatcher
 	{
@@ -22,7 +20,14 @@ package com.gmrmarketing.nissan.rodale2013
 		private var clip:MovieClip;
 		private var timer:Timer;
 		private var curCount:int;
-		private var cam:CamPic;
+		
+		private var cam:Camera;
+		private var vid:Video;
+		private var camTimer:Timer;
+		private var displayMatrix:Matrix;
+		private var displayData:BitmapData;
+		private var displayBMP:Bitmap;
+		
 		private var thePic:BitmapData;
 		private var btnTake:Button;
 		private var tim:TimeoutHelper;
@@ -33,9 +38,22 @@ package com.gmrmarketing.nissan.rodale2013
 		
 		public function TakePhoto():void
 		{
-			clip = new mcTakePhoto();
-			cam = new CamPic();
-			cam.init(1405, 791, 0, 0, 1405, 791, 24, true);//1405x791 is the size of camHolder clip on stage
+			clip = new mcTakePhoto();			
+			
+			vid = new Video(1405, 791);
+			cam = Camera.getCamera();
+			cam.setQuality(0, 90);//bandwidth, quality
+			cam.setMode(1405, 791, 24, false);//width, height, fps, favorArea
+			displayData = new BitmapData(1405, 791);
+			displayBMP = new Bitmap(displayData, "auto", true);
+			displayMatrix = new Matrix( -1, 0, 0, 1, 1405, 0);	
+			
+			displayBMP.x = -58;
+			displayBMP.y = 188;
+			clip.addChildAt(displayBMP, 1);
+			
+			camTimer = new Timer(1000 / 24);
+			
 			btnTake = new Button(clip, "red", "Take Photo", 1400, 614);	
 			tim = TimeoutHelper.getInstance();
 			
@@ -55,6 +73,7 @@ package com.gmrmarketing.nissan.rodale2013
 			if (!container.contains(clip)) {
 				container.addChild(clip);
 			}
+			
 			clip.alpha = 0;
 			clip.countdown.pulse.scaleX = clip.countdown.pulse.scaleY = 0;
 			clip.countdown.pulse.alpha = 1;
@@ -62,14 +81,22 @@ package com.gmrmarketing.nissan.rodale2013
 			clip.countdown.theText.text = "3";
 			
 			btnTake.addEventListener(Button.PRESSED, startCountdown, false, 0, true);
-			cam.show(clip.camHolder);
 			
-			tim.buttonClicked();
+			vid.attachCamera(cam);
+			
+			camTimer.addEventListener(TimerEvent.TIMER, camUpdate, false, 0, true);
+			camTimer.start(); //start calling camUpdate
+			
+			tim.buttonClicked();//reset timeout
 			
 			TweenMax.to(clip, 1, { alpha:1, delay:.25, onComplete:showing } );
 			TweenMax.from(clip.theText, 1, { alpha:0, x:"100", delay:.5 } );
 		}
 		
+		private function camUpdate(e:TimerEvent):void
+		{
+			displayData.draw(vid, displayMatrix, null, null, null, true);			
+		}
 		
 		public function hide():void
 		{
@@ -77,13 +104,16 @@ package com.gmrmarketing.nissan.rodale2013
 			if (container.contains(clip)) {
 				container.removeChild(clip);
 			}
-			cam.dispose();
+			
+			vid.attachCamera(null);
+			camTimer.removeEventListener(TimerEvent.TIMER, camUpdate);
+			camTimer.reset();
 		}
 		
 		
 		public function getPic():BitmapData
 		{
-			return thePic;
+			return displayData;
 		}
 		
 		
@@ -122,7 +152,7 @@ package com.gmrmarketing.nissan.rodale2013
 			if (curCount == 0) {
 				timer.stop();
 				shutter.play();
-				thePic = cam.getDisplay(false);
+				//thePic = cam.getDisplay(false);
 				TweenMax.from(clip.whiteFlash, .5, { alpha:1, onComplete:picTaken } );
 			}
 		}

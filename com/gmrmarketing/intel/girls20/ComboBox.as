@@ -24,11 +24,13 @@ package com.gmrmarketing.intel.girls20
 		private var opened:Boolean;
 		private var myRect:Rectangle;
 		private var dragOffset:int;
+		private var resetMessage:String;
 		
 		
-		
-		public function ComboBox()
-		{
+		public function ComboBox($resetMessage:String = "")
+		{			
+			resetMessage = $resetMessage;
+			
 			itemContainer = new Sprite();
 			listContainer.addChild(itemContainer);
 			
@@ -42,18 +44,18 @@ package com.gmrmarketing.intel.girls20
 			btn.addEventListener(MouseEvent.MOUSE_DOWN, toggleDrop, false, 0, true);
 			listContainer.drag.addEventListener(MouseEvent.MOUSE_DOWN, beginDrag, false, 0, true);
 			
-			addEventListener(Event.ADDED_TO_STAGE, calcRect, false, 0, true);			
-			//addEventListener(Event.REMOVED_FROM_STAGE, cleanUp, false, 0, true);
+			addEventListener(Event.ADDED_TO_STAGE, calcRect, false, 0, true);	
 		}
 		
 		
-		private function calcRect(e:Event):void
+		private function calcRect(e:Event = null):void
 		{
-			myRect = new Rectangle(x, y, width, 54 + listHeight);			
+			myRect = new Rectangle(x, y, listContainer.width, whiteBox.height + listHeight);
+			closeCombo();
 		}
 		
 		
-		private function toggleDrop(e:MouseEvent):void
+		private function toggleDrop(e:MouseEvent = null):void
 		{
 			e.stopImmediatePropagation();
 			if(opened){
@@ -67,7 +69,7 @@ package com.gmrmarketing.intel.girls20
 		private function closeCombo():void
 		{			
 			opened = false;
-			TweenMax.to(listContainer, .5, { y: -252 } );
+			TweenMax.to(listContainer, 0, { y: -listContainer.height } );
 			stage.removeEventListener(MouseEvent.MOUSE_DOWN, checkForClose);
 		}
 		
@@ -77,7 +79,7 @@ package com.gmrmarketing.intel.girls20
 			opened = true;
 			listContainer.drag.y = 0;
 			itemContainer.y = 0;			
-			TweenMax.to(listContainer, .5, { y:52 } );
+			TweenMax.to(listContainer, 0, { y:whiteBox.height } );
 			stage.addEventListener(MouseEvent.MOUSE_DOWN, checkForClose, false, 0, true);
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, keyPressed, false, 0, true);
 		}
@@ -114,7 +116,7 @@ package com.gmrmarketing.intel.girls20
 				item.addEventListener(MouseEvent.MOUSE_DOWN, itemClicked, false, 0, true);
 			}
 			
-			theText.text = "";
+			theText.text = resetMessage;
 			
 			fullHeight = itemContainer.height - listHeight; //height of all items
 			dragRatio = fullHeight / dragRange;
@@ -135,10 +137,14 @@ package com.gmrmarketing.intel.girls20
 			return theText.text;
 		}
 		
+		public function getResetMessage():String
+		{
+			return resetMessage;
+		}
 		
 		public function reset():void
 		{
-			theText.text = "";
+			theText.text = resetMessage;
 		}
 		
 		
@@ -147,8 +153,8 @@ package com.gmrmarketing.intel.girls20
 			dispatchEvent(new Event(CHANGE));
 			theText.text = e.currentTarget.theText.text;
 			e.currentTarget.highlight.alpha = 1;
-			TweenMax.to(e.currentTarget.highlight, .25, { alpha:0 } );
-			closeCombo();			
+			TweenMax.to(e.currentTarget.highlight, .25, { alpha:0, onComplete:closeCombo } );
+			//closeCombo();			
 		}
 
 		

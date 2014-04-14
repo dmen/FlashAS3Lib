@@ -24,14 +24,15 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var statesDropdown:ComboBox;
 		
 		
+		
 		public function ControllerIntro()
 		{
 			clip = new mcIntro();//lib clip			
-			statesDropdown = new ComboBox();
+			statesDropdown = new ComboBox("Select State");			
 			statesDropdown.populate(US_StateList.getStates());
 			clip.addChild(statesDropdown);
-			statesDropdown.x = 100;
-			statesDropdown.y = 282;
+			statesDropdown.x = 206;
+			statesDropdown.y = 501;
 		}
 		
 		
@@ -48,6 +49,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			}
 			
 			statesDropdown.setSelection("");
+			statesDropdown.reset();
 			
 			/*
 			clip.fname.text = "";
@@ -98,7 +100,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 				dispatchEvent(new Event(EMAIL));
 			}else if (!Validator.isValidPhoneNumber(clip.phone.text)) {
 				dispatchEvent(new Event(PHONE));			
-			}else if (statesDropdown.getSelection() == "") {
+			}else if (statesDropdown.getSelection() == "" || statesDropdown.getSelection() == statesDropdown.getResetMessage()) {
 				dispatchEvent(new Event(STATE));
 			}else if (clip.check.currentFrame == 1) {
 				dispatchEvent(new Event(RULES));

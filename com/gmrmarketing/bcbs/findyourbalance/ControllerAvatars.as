@@ -42,8 +42,6 @@ package com.gmrmarketing.bcbs.findyourbalance
 			clip.a5.addEventListener(MouseEvent.MOUSE_DOWN, avatarClicked, false, 0, true);
 			clip.a6.addEventListener(MouseEvent.MOUSE_DOWN, avatarClicked, false, 0, true);
 			clip.a7.addEventListener(MouseEvent.MOUSE_DOWN, avatarClicked, false, 0, true);
-			clip.a8.addEventListener(MouseEvent.MOUSE_DOWN, avatarClicked, false, 0, true);
-			clip.a9.addEventListener(MouseEvent.MOUSE_DOWN, avatarClicked, false, 0, true);
 			
 			avatarNum = 0;
 			clip.highlight.x = clip.a0.x;
@@ -68,7 +66,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 					TweenMax.to(clip.highlight, .5, { y:m.y } );
 				}
 			}
-			avatarNum = parseInt(m.name.substr(1)); // 0 - 9			
+			avatarNum = parseInt(m.name.substr(1)); // 0 - 7			
 			dispatchEvent(new Event(NEW_AVATAR));
 		}
 		
@@ -96,8 +94,6 @@ package com.gmrmarketing.bcbs.findyourbalance
 			clip.a5.removeEventListener(MouseEvent.MOUSE_DOWN, avatarClicked);
 			clip.a6.removeEventListener(MouseEvent.MOUSE_DOWN, avatarClicked);
 			clip.a7.removeEventListener(MouseEvent.MOUSE_DOWN, avatarClicked);
-			clip.a8.removeEventListener(MouseEvent.MOUSE_DOWN, avatarClicked);
-			clip.a9.removeEventListener(MouseEvent.MOUSE_DOWN, avatarClicked);
 			clip.btnReady.removeEventListener(MouseEvent.MOUSE_DOWN, readyClicked);
 		}
 		

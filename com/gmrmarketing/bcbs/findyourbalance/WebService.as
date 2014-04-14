@@ -9,9 +9,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 	import flash.net.*;
 	
 	
-	public class WebService 
+	public class WebService extends EventDispatcher
 	{
+		public static const EVENTS:String = "gotEventList";
 		private const URL:String = "http://thesocialtab";
+		private const EVENT_URL:String = "http://thesocialtab";
+		private var events:Array;
 		
 		private var isPosting:Boolean; //true while posting
 		
@@ -48,7 +51,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		/**
 		 * adds a user to allUsers/allData 
 		 * also adds to the send queue
-		 * @param	user Array fname,lname,email,phone,state,sweeps entry,optin,q1a,q2a,score
+		 * @param	user Array fname,lname,email,phone,state,sweeps entry,optin,q1a,q2a,event,score
 		 */
 		public function addUser(user:Array):void
 		{
@@ -61,23 +64,23 @@ package com.gmrmarketing.bcbs.findyourbalance
 			if (!isPosting) {
 				postNextUser();
 			}
-		}
+		}		
 		
 		
 		/**
 		 * Returns a score sorted array for leaderboard display
-		 * @return Array - max 20 items
+		 * @return Array - max 10 items
 		 */
 		public function getLeaderboard():Array
 		{
-			//array of arrays. Sub arrays contain: fname,lname,email,phone,state,sweeps entry,optin,q1a,q2a,score
+			//array of arrays. Sub arrays contain: fname,lname,email,phone,state,sweeps entry,optin,q1a,q2a,event,score
 			
 			var ad:Array = allUsers.concat();//duplicate array for sorting
 			
-			ad.sortOn('9', Array.DESCENDING | Array.NUMERIC);//index 9 is score field
+			ad.sortOn('10', Array.DESCENDING | Array.NUMERIC);//index 10 is score field
 			
 			var ret:Array = new Array();
-			while (ad.length > 0 && ret.length < 20) {
+			while (ad.length > 0 && ret.length < 10) {
 				ret.push(ad.shift());
 			}
 			
@@ -102,7 +105,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 				vars.optin = currUser[6];
 				vars.q1a = currUser[7];
 				vars.q2a = currUser[8];
-				vars.score = currUser[9];
+				vars.event = currUser[9];
+				vars.score = currUser[10];
 				
 				var request:URLRequest = new URLRequest(URL);
 				request.data = vars;

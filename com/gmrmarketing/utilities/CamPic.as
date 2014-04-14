@@ -6,24 +6,24 @@
  * 
  * Allows the addition of camera filters from the CamPicFilters class
  * 
- * usage:
- * import com.gmrmarketing.utilities.CamPic;
- * 
- * var a:CamPic = new CamPic();
- * a.init(800, 600, 0, 0, 342, 223, 24); //set camera and capture res to 800x600 and display at 342x223 (24 fps)
- * a.show(container);
- * 
- * Use getCamera(), getCapture(), getDisplay() to return the image at the set size
- * Note these return a copy of the display data bitmap data object. 
- * 
- * If you need a direct reference to the displayData bitmap data
- * you can use getCameraDirect() which returns the displayData object and not a copy
- * 
- * Use pause()to stop on the captured pic
- * Use resume() to return to showing live video
- * 
- * Use addFilter() to add filters from the CamPicFilters class
- * Any filters affect the live video, and any returned captures
+  usage:
+  import com.gmrmarketing.utilities.CamPic;
+  
+  var a:CamPic = new CamPic();
+  a.init(800, 600, 0, 0, 342, 223, 24); //set camera and capture res to 800x600 and display at 342x223 (24 fps)
+  a.show(container);
+  
+  Use getCamera(), getCapture(), getDisplay() to return the image at the set size
+  Note these return a copy of the display data bitmap data object. 
+  
+  If you need a direct reference to the displayData bitmap data
+  you can use getCameraDirect() which returns the displayData object and not a copy
+  
+  Use pause()to stop on the captured pic
+  Use resume() to return to showing live video
+  
+  Use addFilter() to add filters from the CamPicFilters class
+  Any filters affect the live video, and any returned captures
  * 
  */
 package com.gmrmarketing.utilities
@@ -76,7 +76,7 @@ package com.gmrmarketing.utilities
 		public function CamPic() 
 		{			
 			cam = Camera.getCamera();
-			camAvailable = cam == null ? false : true;
+			camAvailable = cam == null ? false : true;			
 			if (camAvailable) {					
 				dispatchEvent(new Event(CAMERA_READY));
 			}		
@@ -146,10 +146,9 @@ package com.gmrmarketing.utilities
 			
 			theVideo = new Video(camWidth, camHeight);			
 			
-			camTimer = new Timer(1000 / fps);
+			camTimer = new Timer(1000 / fps);			
 			
-			//removed from show()
-			if(camAvailable){
+			if (camAvailable) {				
 				theVideo.attachCamera(cam);
 			}
 		}		
@@ -205,7 +204,7 @@ package com.gmrmarketing.utilities
 		 * @param	$container
 		 */
 		public function show($container:DisplayObjectContainer):void
-		{	
+		{
 			container = $container;				
 			
 			if(!container.contains(displayBMP)){
@@ -372,7 +371,7 @@ package com.gmrmarketing.utilities
 		 * @param	e TIMER TimerEvent
 		 */
 		private function update(e:TimerEvent):void
-		{	
+		{			
 			displayData.draw(theVideo, displayMatrix, null, null, null, true);			
 			
 			var p:Point = new Point(0, 0);
