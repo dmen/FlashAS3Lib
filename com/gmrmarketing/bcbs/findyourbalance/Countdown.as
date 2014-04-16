@@ -29,13 +29,13 @@ package com.gmrmarketing.bcbs.findyourbalance
 			if (!container.contains(clip)) {
 				container.addChild(clip);
 			}
-			clip.white3.alpha = 0;
-			clip.white2.alpha = 0;
-			clip.white1.alpha = 0;
+			clip.n3.alpha = 1;
+			clip.n2.alpha = 1;
+			clip.n1.alpha = 1;
 			
-			TweenMax.to(clip.white3, 1, { alpha:1 } );
-			TweenMax.to(clip.white2, 1, { alpha:1, delay:1 } );
-			TweenMax.to(clip.white1, 1, { alpha:1, delay:2, onComplete:countComplete } );
+			TweenMax.to(clip.n3, 1, { alpha:.1 } );
+			TweenMax.to(clip.n2, 1, { alpha:.1, delay:1 } );
+			TweenMax.to(clip.n1, 1, { alpha:.1, delay:2, onComplete:countComplete } );
 		}
 		
 		

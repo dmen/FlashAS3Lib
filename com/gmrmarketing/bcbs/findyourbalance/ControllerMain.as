@@ -39,6 +39,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var playingGame:Boolean = false; //when false accel updates aren't sent
 		private var eventDropdown:ComboBox;
 		
+		
 		public function ControllerMain()
 		{
 			socketConnected = false;
@@ -174,6 +175,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			ipDialog.btnShutdown.addEventListener(MouseEvent.MOUSE_DOWN, shutdown, false, 0, true);
 		}
 		
+		
 		private function closeIPDialog(e:MouseEvent):void
 		{
 			TweenMax.to(ipDialog, .5, { y: - ipDialog.height } );
@@ -188,6 +190,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			accel.setRequestedUpdateInterval(parseInt(ipDialog.theInterval.text));
 		}
 		
+		
 		private function shutdown(e:MouseEvent):void
 		{
 			if(socketConnected){
@@ -196,6 +199,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			}
 			NativeApplication.nativeApplication.exit();
 		}
+		
 		
 		//Intro Form error/validation callbacks
 		private function fieldsRequired(e:Event):void
@@ -273,7 +277,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			playingGame = true; //accel updates are now sent in updateHandler()
 			if(socketConnected){
-				socket.writeUTFBytes("***start***" + String(avatars.getAvatar()));
+				socket.writeUTFBytes("***start***");
 				socket.flush();				
 			}
 			
@@ -397,12 +401,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 		{			
 			sweeps.removeEventListener(ControllerSweeps.DONE, sweepsDone);
 			
-			//userData is: fname,lname,email,phone,state,entry,optin,q1a,q2a,event
+			//userData is: fname,lname,email,phone,state,entry,optin,moreInfo,q1a,q2a,event
 			var userData:Array = intro.getData().concat(sweeps.getData());			
 			userData.push(q1.getAnswer());
 			userData.push(q2.getAnswer());
 			
-			//event
+			//event - send date if no event is selected
 			if (eventDropdown.getSelection() == "" || eventDropdown.getSelection() == eventDropdown.getResetMessage()) {
 				userData.push(new Date().toString());
 			}else {

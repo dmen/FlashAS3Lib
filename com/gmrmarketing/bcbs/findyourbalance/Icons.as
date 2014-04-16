@@ -5,9 +5,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 	
 	public class Icons	
 	{	
-		private const L1ICONS:int = 6;
-		private const L2ICONS:int = 1;
-		private const L3ICONS:int = 1;
+		private const L1ICONS:int = 8;
+		private const L2ICONS:int = 8;
+		private const L3ICONS:int = 8;
 		
 		public function Icons(){}
 		
@@ -19,17 +19,17 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			switch(level) {
 				case 1:
-					i = Math.floor(Math.random() * L1ICONS);
-					classRef = getDefinitionByName( "mcIcon_med" + i ) as Class;
+					i = Math.ceil(Math.random() * L1ICONS);
+					classRef = getDefinitionByName( "mcIcon_home" + i ) as Class;
 					clip = new classRef();
 					break;
 				case 2:
-					i = Math.floor(Math.random() * L2ICONS);
+					i = Math.ceil(Math.random() * L2ICONS);
 					classRef = getDefinitionByName( "mcIcon_work" + i ) as Class;
 					clip = new classRef();
 					break;
 				case 3:
-					i = Math.floor(Math.random() * L3ICONS);
+					i = Math.ceil(Math.random() * L3ICONS);
 					classRef = getDefinitionByName( "mcIcon_extra" + i ) as Class;
 					clip = new classRef();
 					break;

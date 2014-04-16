@@ -11,7 +11,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		private var clip:MovieClip;
 		private var container:DisplayObjectContainer;		
-		
+		private var avNum:int;
 		
 		public function Avatars()
 		{
@@ -34,6 +34,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 		}
 		
 		
+		public function getAvatarNumber():int
+		{
+			return avNum;
+		}
+		
+		
 		/**
 		 * Called from Main when user selects a avatar on the controller
 		 * ie - ***avpoint***n is received
@@ -41,7 +47,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 */
 		public function avatarClicked(i:int):void
 		{			
-			var toX:int = firstEdge + (iconSpacing * i);
+			avNum = i;
+			var toX:int = firstEdge + (iconSpacing * avNum);
 			TweenMax.to(clip.highlight, 1, { x:toX } );
 		}
 		

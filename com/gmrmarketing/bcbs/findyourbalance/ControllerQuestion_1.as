@@ -18,9 +18,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 			clip = new mcQuestion1();
 			
 			combo = new ComboBox("Choose Answer");
-			combo.populate([1,3,5,7,9,50,75,100,500,10000]);
+			combo.populate(["Horizon Blue Cross Blue Shield of New Jersey", "Aetna AmeriHealth","United Healthcare", "Cigna", "Other", "I do not have health insurance"]);
 			clip.addChild(combo);
-			combo.x = 483;
+			combo.x = 415;
 			combo.y = 290;		
 		}
 		

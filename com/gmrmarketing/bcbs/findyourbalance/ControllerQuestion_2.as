@@ -18,9 +18,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 			clip = new mcQuestion2();
 			
 			combo = new ComboBox("Choose Answer");
-			combo.populate(["Red","Green","Yellow","Blue","Black","Pink"]);
+			combo.populate(["Individual coverage", "Medicare coverage", "Small employer coverage (for your employees)", "Not interested"]);
 			clip.addChild(combo);
-			combo.x = 483;
+			combo.x = 415;
 			combo.y = 290;		
 		}
 		

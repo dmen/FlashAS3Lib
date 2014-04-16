@@ -3,6 +3,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 	import flash.display.*;
 	import flash.events.*;
 	import com.greensock.TweenMax;
+	import com.gmrmarketing.intel.girls20.ComboBox;
 	
 	public class ControllerSweeps extends EventDispatcher
 	{
@@ -11,12 +12,19 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var clip:MovieClip;
 		private var clip2:MovieClip;
 		private var container:DisplayObjectContainer;
+		private var combo:ComboBox;
 		
 		
 		public function ControllerSweeps()
 		{
 			clip = new mcSweeps();//lib clips
 			clip2 = new mcThanks();//fades in at end
+			
+			combo = new ComboBox("More Information:");
+			combo.populate(["Medical", "Pharmacy", "Journey to Health (Total Care Management)", "No Thanks"]);
+			clip.addChild(combo);
+			combo.x = 430;
+			combo.y = 493;
 		}
 		
 		
@@ -106,6 +114,11 @@ package com.gmrmarketing.bcbs.findyourbalance
 				r.push("false");
 			}else {
 				r.push("true");
+			}
+			if (combo.getSelection() == combo.getResetMessage()) {
+				r.push("No Thanks");
+			}else {
+				r.push(combo.getSelection());
 			}
 			return r;
 		}

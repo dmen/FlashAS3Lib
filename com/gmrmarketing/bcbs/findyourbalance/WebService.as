@@ -51,7 +51,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		/**
 		 * adds a user to allUsers/allData 
 		 * also adds to the send queue
-		 * @param	user Array fname,lname,email,phone,state,sweeps entry,optin,q1a,q2a,event,score
+		 * @param	user Array fname,lname,email,phone,state,sweeps entry,optin,moreInfo,q1a,q2a,event,score
 		 */
 		public function addUser(user:Array):void
 		{
@@ -73,11 +73,11 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 */
 		public function getLeaderboard():Array
 		{
-			//array of arrays. Sub arrays contain: fname,lname,email,phone,state,sweeps entry,optin,q1a,q2a,event,score
+			//array of arrays. Sub arrays contain: fname,lname,email,phone,state,sweeps entry,optin,moreInfo,q1a,q2a,event,score
 			
 			var ad:Array = allUsers.concat();//duplicate array for sorting
 			
-			ad.sortOn('10', Array.DESCENDING | Array.NUMERIC);//index 10 is score field
+			ad.sortOn('11', Array.DESCENDING | Array.NUMERIC);//index 11 is score field
 			
 			var ret:Array = new Array();
 			while (ad.length > 0 && ret.length < 10) {
@@ -103,10 +103,11 @@ package com.gmrmarketing.bcbs.findyourbalance
 				vars.state = currUser[4];				
 				vars.sweeps = currUser[5];//true false
 				vars.optin = currUser[6];
-				vars.q1a = currUser[7];
-				vars.q2a = currUser[8];
-				vars.event = currUser[9];
-				vars.score = currUser[10];
+				vars.info = currUser[7];
+				vars.q1a = currUser[8];
+				vars.q2a = currUser[9];
+				vars.event = currUser[10];
+				vars.score = currUser[11];
 				
 				var request:URLRequest = new URLRequest(URL);
 				request.data = vars;

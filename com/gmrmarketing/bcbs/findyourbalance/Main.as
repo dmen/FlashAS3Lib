@@ -80,6 +80,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var levelIntro:LevelIntro;//level intro right before countdown
 		private var countdown:Countdown;//3-2-1
 		
+		private var gameOverClip:MovieClip;
+		
 		private var theLevel:int;//current game level - init'd in newGame()
 		
 		
@@ -106,7 +108,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			shieldIconCollisionType = new CbType();
 			shieldActiveCollisionType = new CbType();
 			
-			var pos:Vec2 = new Vec2(960, 1030);//fulcrum center
+			var pos:Vec2 = new Vec2(960, 1050);//fulcrum center
 			var triangleSize:Number = 128;
 			var planeSize:Vec2 = new Vec2(900, 20);
 			
@@ -132,8 +134,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			playerCircle.material.rollingFriction = .65; //.01 is default
 			playerCircleBody.shapes.add(playerCircle);
 			playerCircleBody.position.setxy(960, 727);
-			playerClip = new mcSmiles();
-			playerCircleBody.userData.graphic = playerClip;
+			//playerClip = new mcSmiles();
+			//playerCircleBody.userData.graphic = playerClip;
 			playerCircleBody.userData.player = true;
 			playerCircleBody.cbTypes.add(shapeCollisionType);
 			playerCircleBody.cbTypes.add(playerCollisionType);
@@ -192,11 +194,6 @@ package com.gmrmarketing.bcbs.findyourbalance
 			totterClip = new plank(); //lib clip			
 			teeterBody.userData.graphic = totterClip;
 			
-			if(!DEBUG){
-				addChild(totterClip);
-				addChild(playerClip);
-			}
-			
 			shapeTimer = new Timer(500);
 			shapeTimer.addEventListener(TimerEvent.TIMER, addShape, false, 0, true);
 			
@@ -224,6 +221,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			instructions = new Instructions();
 			instructions.setContainer(this);
 			
+			gameOverClip = new mcGameOver(); //lib clip
+			
 			newGame();
 		}		
 		
@@ -238,6 +237,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 			//intro swaps between play and leaderboard screens
 			
 			theLevel = 1;
+			bg.gotoAndStop(1);//background level graphic on stage
+			if(contains(gameOverClip)){
+				removeChild(gameOverClip);
+			}
 			playingGame = false;
 			if (clientConnected) {
 				server.sendToClient("reset");//reset the controller and show the initial data collection form
@@ -252,6 +255,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 		{
 			if (clientConnected) {
 				server.sendToClient("gameOver");//show sweeps and thank you
+				
+				addChild(gameOverClip);
 				//now wait for "***userData***" from the client
 			}
 		}
@@ -279,10 +284,42 @@ package com.gmrmarketing.bcbs.findyourbalance
 			var s:String = server.getMessage();
 			
 			if (!playingGame) {
-				if (s.indexOf("***start***") != -1) {
+				if (s.indexOf("***start***") != -1) {					
 					
-					var avatarNumber:int = parseInt(s.substr(s.indexOf("***start***") + 11, 1));				
-				
+					switch(avatars.getAvatarNumber()) { //0-7
+						case 0:
+							playerClip = new av1();
+							break;
+						case 1:
+							playerClip = new av2();
+							break;
+						case 2:
+							playerClip = new av3();
+							break;
+						case 3:
+							playerClip = new av4();
+							break;
+						case 4:
+							playerClip = new av5();
+							break;
+						case 5:
+							playerClip = new av6();
+							break;
+						case 6:
+							playerClip = new av7();
+							break;
+						case 7:
+							playerClip = new av8();
+							break;
+					}
+					
+					playerCircleBody.userData.graphic = playerClip;
+					
+					if(!DEBUG){
+						addChild(totterClip);
+						addChild(playerClip);
+					}
+					
 					avatars.hide();					
 					levelIntro.show(1);	
 					var t:Timer = new Timer(10000, 1);
@@ -293,7 +330,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 					//userData is sent once sweeps entry and thank you are shown
 					var user:String = s.substr(s.indexOf("***userData***") + 14);
 					var userData:Array = user.split(",");				
-					//array is: fname,lname,email,phone,state,sweeps entry,optin,q1a,q2a,event
+					//array is: fname,lname,email,phone,state,entry,optin,moreInfo,q1a,q2a,event
 					userData.push(timeDisplay.getScore());
 					webService.addUser(userData);
 					
@@ -319,6 +356,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 					levelIntro.hide();
 					countdown.addEventListener(Countdown.COMPLETE, countdownComplete, false, 0, true);
 					countdown.show();
+					
 				}else if (s.indexOf("***shutdown***") != -1) {
 					NativeApplication.nativeApplication.exit();
 				}
@@ -426,7 +464,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 						server.sendToClient("questionTwo");
 					}
 				 }
-				
+				bg.gotoAndStop(theLevel);//background level graphic on stage
 				levelIntro.show(theLevel);	
 			}
 		}
@@ -488,7 +526,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 					break;
 			}
 			
-			pointsDisplay.show(new Point(960, 500), lev);
+			pointsDisplay.show(new Point(960, 500), lev);//expanding text display
 			timeDisplay.setLevel(theLevel);
 			
 			shapeTimer.start();
