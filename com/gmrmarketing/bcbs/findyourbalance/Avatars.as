@@ -30,7 +30,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			if (!container.contains(clip)) {
 				container.addChild(clip);
 			}			
-			clip.highlight.x = firstEdge;	//left edge of first icon		
+			clip.highlight.x = firstEdge;	//left edge of first icon
+			avNum = 0;
 		}
 		
 		

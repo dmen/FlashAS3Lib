@@ -26,9 +26,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 	
 	public class Main extends Sprite 
 	{
-		private const DEBUG:Boolean = false;//set to true to show physics debug
 		private const RAD:Number = 180 / Math.PI; //one radian
-		private const LEVEL1_SHIELD_LENGTH:int = 10; //length, in seconds, for shield to last		
 		
 		private var space:Space;//physics spacs
 		private var debug:BitmapDebug;//if DEBUG flag is true this shows the debug physics
@@ -185,12 +183,6 @@ package com.gmrmarketing.bcbs.findyourbalance
 			playerCircleBody.allowMovement = false;
 			teeterBody.allowMovement = false;
 			
-			if(DEBUG){
-				debug = new BitmapDebug(stage.stageWidth, stage.stageHeight, stage.color);
-				debug.drawConstraints = true;
-				addChild(debug.display);
-			}
-			
 			totterClip = new plank(); //lib clip			
 			teeterBody.userData.graphic = totterClip;
 			
@@ -230,6 +222,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 		/**
 		 * Starts a new game
 		 * sends reset to the controller to show the initial login form
+		 * initially called from Constructor
+		 * called from clientMessage() when message is ***userData***
 		 */
 		private function newGame():void
 		{			
@@ -244,8 +238,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 			playingGame = false;
 			if (clientConnected) {
 				server.sendToClient("reset");//reset the controller and show the initial data collection form
+				//wait for ***start*** from controller
 			}
 		}
+		
 		
 		/**
 		 * called from levelEnd when the level > 3
@@ -253,13 +249,14 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 */
 		private function gameOver():void
 		{
+			stage.removeEventListener(Event.ENTER_FRAME, update);
 			if (clientConnected) {
-				server.sendToClient("gameOver");//show sweeps and thank you
-				
+				server.sendToClient("gameOver");//show sweeps and thank you				
 				addChild(gameOverClip);
 				//now wait for "***userData***" from the client
 			}
 		}
+		
 		
 		/**
 		 * Called when client connects
@@ -286,6 +283,13 @@ package com.gmrmarketing.bcbs.findyourbalance
 			if (!playingGame) {
 				if (s.indexOf("***start***") != -1) {					
 					
+					if(playerClip){
+						if (contains(playerClip)) {
+							removeChild(playerClip);
+						}
+					}
+					playerClip = null;
+					
 					switch(avatars.getAvatarNumber()) { //0-7
 						case 0:
 							playerClip = new av1();
@@ -311,17 +315,22 @@ package com.gmrmarketing.bcbs.findyourbalance
 						case 7:
 							playerClip = new av8();
 							break;
-					}
+					}					
 					
-					playerCircleBody.userData.graphic = playerClip;
-					
-					if(!DEBUG){
-						addChild(totterClip);
-						addChild(playerClip);
+					trace("av clip:", playerClip);
+					playerCircleBody.userData.graphic = playerClip;					
+
+					if(!contains(totterClip)){
+						addChild(totterClip);						
 					}
+					addChild(playerClip);
 					
 					avatars.hide();					
-					levelIntro.show(1);	
+					levelIntro.show(1);
+					
+					//show bodies
+					space.liveBodies.foreach(updateGraphics);
+					
 					var t:Timer = new Timer(10000, 1);
 					t.addEventListener(TimerEvent.TIMER, levelIntroComplete, false, 0, true);
 					t.start();
@@ -390,9 +399,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			playerCircleBody.angularVel = 0;
 			
 			currentBallSize = 15 + ((theLevel - 1) * 8);//15,23,31
-			maxBallSize = 25 + ((theLevel - 1) * 10);//25,35,45			
-			
-			stage.addEventListener(Event.ENTER_FRAME, update);			
+			maxBallSize = 25 + ((theLevel - 1) * 10);//25,35,45	
 			
 			countdown.addEventListener(Countdown.COMPLETE, countdownComplete, false, 0, true);
 			countdown.show();		
@@ -426,6 +433,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			sizeTimer.reset();
 			timeDisplay.stop();
 			
+			//reset player and teeter position
 			playerCircleBody.position.setxy(960, 727);
 			playerCircleBody.rotation = 0;
 			playerCircleBody.angularVel = 0;
@@ -447,7 +455,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			playingGame = false;
 			
-			//stage.removeEventListener(Event.ENTER_FRAME, update);
+			
 			theLevel++;
 			if (theLevel > 3) {
 				gameOver();				
@@ -499,6 +507,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 		{			
 			playingGame = true;			
 			
+			stage.addEventListener(Event.ENTER_FRAME, update);
+			
 			teeterBody.allowMovement = true;
 			playerCircleBody.allowMovement = true;
 			playerCircleBody.allowRotation = true;
@@ -546,20 +556,33 @@ package com.gmrmarketing.bcbs.findyourbalance
 				var ballShape:Circle;
 				var body:Body = new Body(BodyType.DYNAMIC);				
 				
-				body.cbTypes.add(shapeCollisionType);//all falling circles - for collisions with floor
-				
+				body.cbTypes.add(shapeCollisionType);//all falling circles - for collisions with floor				
 				body.position.setxy(540 + Math.random() * 860, 50);
 				
 				if (Math.random() < .1) {
-					//SHIELD ICON
+					
+					//Add a Special icon
 					ballShape = new Circle(30);
-					graphic = new mcShield();
+					switch(theLevel) {
+						case 1:
+							graphic = new mcShield();
+							break;
+						case 2:
+							graphic = new mcCross();
+							break;
+						case 3:
+							graphic = new mcSkull();
+							break;
+					}
+					
 					ballShape.material.density = 1;
 					ballShape.material.elasticity = .2;
 					body.cbTypes.add(shieldIconCollisionType);//for collisions with player
 					graphic.width = graphic.height = 60;//radius * 2
+					
 				}else {		
-					//NORMAL CIRCLE ICON
+					
+					//Add a normal icon
 					var randomSize:Number = Math.random() * 8;
 					if (Math.random() < .5) {
 						randomSize *= -1;
@@ -575,13 +598,11 @@ package com.gmrmarketing.bcbs.findyourbalance
 				body.shapes.add(ballShape);
 				body.userData.graphic = graphic;
 				body.userData.ball = true;
-				body.space = space;
+				body.space = space;				
 				
-				if(!DEBUG){
-					addChild(graphic);
-					graphic.x = body.position.x;
-					graphic.y = body.position.y;
-				}
+				addChild(graphic);
+				graphic.x = body.position.x;
+				graphic.y = body.position.y;				
 			}
 		}
 
@@ -591,53 +612,60 @@ package com.gmrmarketing.bcbs.findyourbalance
 			//TODO: store in array so the bodies can react a bit before beign removed
 			var body:Body = collision.int2 as Body;			
 			
-			if (!DEBUG) {				
-				if (body.userData.player) {					
-					levelEnd();
-				}else {
-					try{
-						body.space = null;
-						removeChild(body.userData.graphic);
-					}catch (e:Error) {
-						
-					}
-		
-				}
-			}
+			if (body.userData.player) {					
+				levelEnd();
+			}else {
+				try{
+					body.space = null;
+					removeChild(body.userData.graphic);
+				}catch (e:Error) {
+					
+				}	
+			}			
 		}
 		
 		
 		/**
 		 * Callback for playerCollisionType vs shieldIconCollisionType
-		 * Called when player hits a falling shield icon
+		 * Called when player hits a falling special icon
 		 * @param	collision
 		 */
 		private function playerGotShield(collision:InteractionCallback):void 
 		{
-			if(!shieldActive){
-				var body:Body = collision.int2 as Body; //shield icon				
-				body.space = null;
-				removeChild(body.userData.graphic);//remove shield icon
-				
-				pointsDisplay.show(new Point(body.position.x, body.position.y), "Shield!");
-				
-				shieldActive = true;
-				
-				playerShield.position.setxy(playerCircleBody.position.x, playerCircleBody.position.y);				
-				playerShield.space = space;
-				if(!contains(shieldClip)){
-					addChild(shieldClip);
-					shieldClip.alpha = .6;				
-				}
-				
-				//fade shield out with Expo - so it fades right at the end of the period
-				TweenMax.to(shieldClip, LEVEL1_SHIELD_LENGTH, { alpha:0, ease:Expo.easeIn, onComplete:disableShield});
-				
-				var weldPoint:Vec2 = new Vec2(playerCircleBody.position.x, playerCircleBody.position.y);
-				shieldJoint = new WeldJoint(playerCircleBody, playerShield, playerCircleBody.worldPointToLocal(weldPoint), playerShield.worldPointToLocal(weldPoint));
-				shieldJoint.ignore = true;//ignore interactions between player and shield - so shield is centered over player
-				shieldJoint.space = space;
-			}
+			switch(theLevel) {
+				case 1:
+					if(!shieldActive){
+						var body:Body = collision.int2 as Body; //shield icon				
+						body.space = null;
+						removeChild(body.userData.graphic);//remove shield icon
+						
+						pointsDisplay.show(new Point(body.position.x, body.position.y), "HORIZON!");
+						
+						shieldActive = true;
+						
+						playerShield.position.setxy(playerCircleBody.position.x, playerCircleBody.position.y);				
+						playerShield.space = space;
+						if(!contains(shieldClip)){
+							addChild(shieldClip);
+							shieldClip.alpha = .6;				
+						}
+						
+						//fade shield out with Expo - so it fades right at the end of the period
+						TweenMax.to(shieldClip, 10, { alpha:0, ease:Expo.easeIn, onComplete:disableShield});
+						
+						var weldPoint:Vec2 = new Vec2(playerCircleBody.position.x, playerCircleBody.position.y);
+						shieldJoint = new WeldJoint(playerCircleBody, playerShield, playerCircleBody.worldPointToLocal(weldPoint), playerShield.worldPointToLocal(weldPoint));
+						shieldJoint.ignore = true;//ignore interactions between player and shield - so shield is centered over player
+						shieldJoint.space = space;
+					}
+					break;
+					
+				case 2:
+					break;
+					
+				case 3:
+					break;
+			}			
 		}
 		
 		
@@ -667,12 +695,17 @@ package com.gmrmarketing.bcbs.findyourbalance
 			space.step(.0167);	//1/stage.frameRate
 			space.liveBodies.foreach(updateGraphics);
 						
-			
-			//debug
-			if(DEBUG){
-				debug.clear();
-				debug.draw(space);
-				debug.flush();
+			switch(theLevel) {
+				case 1:
+					bg.clouds1.x += .2;
+					bg.clouds2.x -= .1;
+					if (bg.clouds1.x > 2100) {
+						bg.clouds.x = -200;
+					}
+					if (bg.clouds2.x < -200) {
+						bg.clouds.x = 2100;
+					}
+					break;
 			}
 		}
 		
