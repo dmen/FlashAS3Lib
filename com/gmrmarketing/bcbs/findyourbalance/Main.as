@@ -49,7 +49,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var shieldActivePreListener:PreListener;//callback for balls hitting shield	
 		
 		private var totterClip:MovieClip;//library images for the physics objects
-		private var playerClip:MovieClip; 
+		private var playerClip:MovieClip;
+		private var playerCrossClip:MovieClip;
 		private var shieldClip:MovieClip;
 		
 		private var clientConnected:Boolean = false;//true once the controller connects
@@ -213,6 +214,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			instructions = new Instructions();
 			instructions.setContainer(this);
 			
+			playerCrossClip = new avCross(); //lib clip
+			
 			gameOverClip = new mcGameOver(); //lib clip
 			
 			newGame();
@@ -315,9 +318,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 						case 7:
 							playerClip = new av8();
 							break;
-					}					
+					}
 					
-					trace("av clip:", playerClip);
 					playerCircleBody.userData.graphic = playerClip;					
 
 					if(!contains(totterClip)){
@@ -331,7 +333,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 					//show bodies
 					space.liveBodies.foreach(updateGraphics);
 					
-					var t:Timer = new Timer(10000, 1);
+					var t:Timer = new Timer(7000, 1);
 					t.addEventListener(TimerEvent.TIMER, levelIntroComplete, false, 0, true);
 					t.start();
 				
@@ -454,7 +456,6 @@ package com.gmrmarketing.bcbs.findyourbalance
 			});			
 			
 			playingGame = false;
-			
 			
 			theLevel++;
 			if (theLevel > 3) {
@@ -632,14 +633,16 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 */
 		private function playerGotShield(collision:InteractionCallback):void 
 		{
+			var body:Body;
+			
 			switch(theLevel) {
 				case 1:
 					if(!shieldActive){
-						var body:Body = collision.int2 as Body; //shield icon				
+						body = collision.int2 as Body; //reference to shield icon				
 						body.space = null;
 						removeChild(body.userData.graphic);//remove shield icon
 						
-						pointsDisplay.show(new Point(body.position.x, body.position.y), "HORIZON!");
+						pointsDisplay.show(new Point(body.position.x, body.position.y), "BONUS!");
 						
 						shieldActive = true;
 						
@@ -661,6 +664,22 @@ package com.gmrmarketing.bcbs.findyourbalance
 					break;
 					
 				case 2:
+					if(!shieldActive){
+						body = collision.int2 as Body; //reference to shield icon				
+						body.space = null;
+						removeChild(body.userData.graphic);//remove shield icon
+							
+						//remove current circle avatar player from space
+						playerCircleBody.space = null;
+						removeChild(playerClip);
+						
+						shieldActive = true;
+						
+						makeCross();
+						
+						pointsDisplay.show(new Point(body.position.x, body.position.y), "BONUS!");
+					}
+					
 					break;
 					
 				case 3:
@@ -747,6 +766,65 @@ package com.gmrmarketing.bcbs.findyourbalance
 			currentBallSize += 1;
 			currentBallSize = Math.min(currentBallSize, maxBallSize);			
 		}
+		
+		
+		
+		private function makeCross()
+		{
+			var body:Body = new Body(BodyType.DYNAMIC);
+			var squareSize:int = 60;
+			var density:Number = 3;
+			var elasticity:Number = .1;
+			var staticFriction:Number = 50;
+			var dynamicFriction:Number = 50;
+			
+			var polygon:Polygon = new Polygon(Polygon.box(squareSize, squareSize));
+			polygon.material.elasticity = elasticity;
+			polygon.material.density = density;
+			polygon.material.staticFriction = staticFriction;
+			polygon.material.dynamicFriction = dynamicFriction;
+			
+			var polygon3:Polygon = new Polygon(Polygon.box(squareSize, squareSize));
+			polygon3.material.elasticity = elasticity;
+			polygon3.material.density = density;
+			polygon3.material.staticFriction = staticFriction;
+			polygon3.material.dynamicFriction = dynamicFriction;
+			
+			var polygon4:Polygon = new Polygon(Polygon.box(squareSize, squareSize));
+			polygon4.material.elasticity = elasticity;
+			polygon4.material.density = density;
+			polygon4.material.staticFriction = staticFriction;
+			polygon4.material.dynamicFriction = dynamicFriction;
+			
+			var polygon5:Polygon = new Polygon(Polygon.box(squareSize, squareSize));
+			polygon5.material.elasticity = elasticity;
+			polygon5.material.density = density;
+			polygon5.material.staticFriction = staticFriction;
+			polygon5.material.dynamicFriction = dynamicFriction;
+			
+			body.shapes.add(polygon);			
+			body.shapes.add(polygon3);
+			body.shapes.add(polygon4);
+			body.shapes.add(polygon5);			
+			
+			polygon.translate(new Vec2(-squareSize, 0));
+			polygon3.translate(new Vec2(squareSize, 0));
+			polygon4.translate(new Vec2(0, -squareSize));
+			polygon5.translate(new Vec2(0, squareSize));
+			
+			body.cbTypes.add(shapeCollisionType);
+			
+			body.position.setxy(960, 727);	
+			
+			body.userData.player = true;
+			body.cbTypes.add(shapeCollisionType);
+			body.cbTypes.add(playerCollisionType);			
+			body.userData.graphic = playerCrossClip;
+			
+			addChild(playerCrossClip);
+			
+			body.space = space;		
+		}	
 		
 	}
 	

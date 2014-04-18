@@ -50,7 +50,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		{			
 			avNum = i;
 			var toX:int = firstEdge + (iconSpacing * avNum);
-			TweenMax.to(clip.highlight, 1, { x:toX } );
+			TweenMax.to(clip.highlight, .5, { x:toX } );
 		}
 		
 		
