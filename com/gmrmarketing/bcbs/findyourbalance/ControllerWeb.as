@@ -12,22 +12,25 @@ package com.gmrmarketing.bcbs.findyourbalance
 	{
 		public static const CONTROLLER_EVENTS:String = "gotEvents";
 		
-		private static const EVENT_URL:String = "http://socialtab/";
-		private var events:Array;
+		private static const EVENT_URL:String = "http://bluecrosshorizon.thesocialtab.net/home/getprograms";
+		private var events:Object; //array of objects - objects have pid and descr properties
 		
 		
 		public function ControllerWeb()
 		{
-			events = new Array();
+			events = new Object();
 		}
 		
 		
 		/**
-		 * gets the event list from the web server
+		 * gets the JSON event list from the web server
 		 */
 		public function retrieveEvents():void
 		{
 			var request:URLRequest = new URLRequest(EVENT_URL);			
+			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
+			
+			request.requestHeaders.push(hdr);
 			
 			var lo:URLLoader = new URLLoader();
 			lo.addEventListener(Event.COMPLETE, gotEvents, false, 0, true);
@@ -38,28 +41,19 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		private function gotEvents(e:Event):void
 		{			
-			var lo:URLLoader = URLLoader(e.target);
-			var vars:URLVariables = new URLVariables(lo.data);
-			//trace(vars.success);
-			events = new Array("error-good");
+			events = JSON.parse(e.currentTarget.data);
 			dispatchEvent(new Event(CONTROLLER_EVENTS));
 		}
 		
 		
 		private function eventsError(e:IOErrorEvent):void
 		{
-			events = new Array("error-bad");
+			events = new Object();
 			dispatchEvent(new Event(CONTROLLER_EVENTS));			
-		}
+		}		
 		
 		
-		private function httpStatus(e:HTTPStatusEvent):void
-		{
-			
-		}
-		
-		
-		public function getEvents():Array
+		public function getEvents():Object
 		{
 			return events;
 		}

@@ -61,6 +61,9 @@ package com.gmrmarketing.utilities
 		public function addBonus(bonus:int):void
 		{
 			totalScore += bonus;
+			if (totalScore <= 0) {
+				totalScore = 0;
+			}
 			scoreDisplay.text = String(totalScore + levelScore);
 		}
 		

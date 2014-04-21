@@ -2,6 +2,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 {
 	import flash.display.*;
 	import flash.events.*;
+	import flash.net.SharedObject;
 	import flash.net.Socket;
 	import flash.sensors.Accelerometer;
 	import flash.utils.ByteArray;
@@ -39,6 +40,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var playingGame:Boolean = false; //when false accel updates aren't sent
 		private var eventDropdown:ComboBox;
 		
+		private var ipStore:SharedObject; //stores the last ip in the dropdown
+		private var dataTimeout:Timer; //timeout timer for sending data to server
+		private var dataTimeoutAttempts:int;
 		
 		public function ControllerMain()
 		{
@@ -110,9 +114,18 @@ package com.gmrmarketing.bcbs.findyourbalance
 			eventDropdown.x = 26;
 			eventDropdown.y = 229;
 			
+			ipStore = SharedObject.getLocal("bcbs_ip");
+			var ip:String = ipStore.data.ip;
+			if (ip != null) {
+				ipDialog.theIP.text = ip;			
+			}
+			
 			webService = new ControllerWeb();
 			webService.addEventListener(ControllerWeb.CONTROLLER_EVENTS, gotEventList, false, 0, true);
-			webService.retrieveEvents();			
+			webService.retrieveEvents();
+			
+			dataTimeout = new Timer(10000, 1);
+			dataTimeout.addEventListener(TimerEvent.TIMER, userDataTimedOut);
 			
 			doReset();
 		}
@@ -120,8 +133,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		private function gotEventList(e:Event):void
 		{			
-			eventDropdown.populate(webService.getEvents());
-			ipDialog.theError.text = webService.getEvents()[0];
+			var o:Object = webService.getEvents();
+			var a:Array = new Array();
+			for (var i:int = 0; i < o.length; i++) {
+				a.push(o[i].pid + ":" + o[i].descr);
+			}
+			eventDropdown.populate(a);			
 			ipDialog.addChild(eventDropdown);
 			eventDropdown.reset();//shows reset message
 		}
@@ -132,6 +149,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 */
 		private function doReset(e:Event = null):void
 		{
+			dataTimeout.reset(); //stop timeout timer
+			dataTimeoutAttempts = 1;
+			
 			inGame.hide();
 			sweeps.removeEventListener(ControllerSweeps.DONE, sweepsDone);
 			sweeps.hide();
@@ -187,6 +207,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 					tim.start();
 				}
 			}
+			
+			ipStore.data.ip = ipDialog.theIP.text;
+			ipStore.flush();
+			
 			accel.setRequestedUpdateInterval(parseInt(ipDialog.theInterval.text));
 		}
 		
@@ -339,6 +363,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			}
 			if (m == "gameOver") {
 				playingGame = false; //stop accel events
+				dataTimeoutAttempts = 1;
 				sweeps.show();
 				sweeps.addEventListener(ControllerSweeps.DONE, sweepsDone, false, 0, true);
 			}
@@ -390,6 +415,20 @@ package com.gmrmarketing.bcbs.findyourbalance
 			dialog.show("Please select an answer");
 		}
 		
+		private function userDataTimedOut(e:TimerEvent):void
+		{
+			dataTimeout.reset();
+			//sending user data to the server timeout after 10 seconds...
+			//try again
+			dataTimeoutAttempts++; //reset to 1 in onServerData() when gameOver is received
+			if(dataTimeoutAttempts < 3){				
+				//if do this twice and it fails again - stop trying
+				sweepsDone();
+			}else {
+				//tried twice... stop trying
+				doReset();
+			}
+		}
 		
 		/**
 		 * listener on sweeps
@@ -397,7 +436,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 * sends userdata to game server
 		 * @param	e
 		 */
-		private function sweepsDone(e:Event):void
+		private function sweepsDone(e:Event = null):void
 		{			
 			sweeps.removeEventListener(ControllerSweeps.DONE, sweepsDone);
 			
@@ -410,12 +449,15 @@ package com.gmrmarketing.bcbs.findyourbalance
 			if (eventDropdown.getSelection() == "" || eventDropdown.getSelection() == eventDropdown.getResetMessage()) {
 				userData.push(new Date().toString());
 			}else {
-				userData.push(eventDropdown.getSelection());
+				userData.push(eventDropdown.getSelection()); //this is program id:program description     aka: 45:Trenton Super
 			}
 			
 			
 			var uds:String = userData.join(); //comma sep string
 			
+			dataTimeout.start(); //calls userDataTimedOut in 10 seconds
+			
+			//now waits for reset from server
 			if(socketConnected){
 				socket.writeUTFBytes("***userData***" + uds);
 				socket.flush();

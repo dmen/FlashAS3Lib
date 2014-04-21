@@ -56,7 +56,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		public function addUser(user:Array):void
 		{
 			allUsers.push(user);
-			updateAllData();//updates sharedObject with array
+			updateAllData();//updates sharedObject with allUsers array
 			
 			currQueue.push(user);
 			updateQueue();//updates sharedObject with array
@@ -101,12 +101,17 @@ package com.gmrmarketing.bcbs.findyourbalance
 				vars.email = currUser[2];
 				vars.phone = currUser[3];				
 				vars.state = currUser[4];				
-				vars.sweeps = currUser[5];//true false
-				vars.optin = currUser[6];
-				vars.info = currUser[7];
-				vars.q1a = currUser[8];
-				vars.q2a = currUser[9];
-				vars.event = currUser[10];
+				vars.sweeps = currUser[5];//true false - sweeps page
+				vars.optin = currUser[6]; //true false - sweeps page
+				vars.info = currUser[7];//more info on from dropdown
+				vars.currentHealthIns = currUser[8];//answer to question 1
+				vars.interestedIn = currUser[9]; //answer to question 2
+				
+				//get event pid from event string: pid:desc
+				var ev:String = currUser[10];
+				var a:Array = ev.split(":");				
+				vars.programId = a[0];
+				
 				vars.score = currUser[11];
 				
 				var request:URLRequest = new URLRequest(URL);

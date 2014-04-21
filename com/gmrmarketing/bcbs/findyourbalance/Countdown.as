@@ -8,6 +8,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 	public class Countdown extends EventDispatcher
 	{
 		public static const COMPLETE:String = "countFinished";
+		public static const START:String = "numberStarted";
+		
 		private var clip:MovieClip;
 		private var container:DisplayObjectContainer;
 		
@@ -33,11 +35,17 @@ package com.gmrmarketing.bcbs.findyourbalance
 			clip.n2.alpha = 1;
 			clip.n1.alpha = 1;
 			
-			TweenMax.to(clip.n3, 1, { alpha:.1 } );
-			TweenMax.to(clip.n2, 1, { alpha:.1, delay:1 } );
-			TweenMax.to(clip.n1, 1, { alpha:.1, delay:2, onComplete:countComplete } );
+			dispStart();
+			
+			TweenMax.to(clip.n3, 1, { alpha:0 } );
+			TweenMax.to(clip.n2, 1, { alpha:0, delay:1, onStart:dispStart } );
+			TweenMax.to(clip.n1, 1, { alpha:0, delay:2, onStart:dispStart, onComplete:countComplete } );
 		}
 		
+		private function dispStart():void
+		{
+			dispatchEvent(new Event(START));
+		}
 		
 		public function hide():void
 		{
