@@ -52,7 +52,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 			dispatchEvent(new Event(CONTROLLER_EVENTS));			
 		}		
 		
-		
+		/**
+		 * returns the JSON event list
+		 * @return
+		 */
 		public function getEvents():Object
 		{
 			return events;

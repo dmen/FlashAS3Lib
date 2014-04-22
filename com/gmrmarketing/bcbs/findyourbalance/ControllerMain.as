@@ -44,6 +44,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var dataTimeout:Timer; //timeout timer for sending data to server
 		private var dataTimeoutAttempts:int;
 		
+		private var rules:ControllerRules; //webservice and rules text
+		
+		
+		
 		public function ControllerMain()
 		{
 			socketConnected = false;
@@ -72,6 +76,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			intro.addEventListener(ControllerIntro.PHONE, badPhone);
 			intro.addEventListener(ControllerIntro.RULES, noRules);
 			intro.addEventListener(ControllerIntro.STATE, noState);			
+			intro.addEventListener(ControllerIntro.SHOW_RULES, showRules);			
 			
 			instructions = new ControllerInstructions();
 			instructions.setContainer(mainContainer);
@@ -79,7 +84,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			dialog = new ControllerDialog();//for messages
 			dialog.setContainer(mainContainer);
 			
-			sweeps = new ControllerSweeps();
+			sweeps = new ControllerSweeps();			
 			sweeps.setContainer(mainContainer);
 			
 			avatars = new ControllerAvatars();
@@ -127,6 +132,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 			dataTimeout = new Timer(10000, 1);
 			dataTimeout.addEventListener(TimerEvent.TIMER, userDataTimedOut);
 			
+			rules = new ControllerRules();
+			rules.setContainer(dialogContainer);
+			
 			doReset();
 		}
 		
@@ -144,6 +152,19 @@ package com.gmrmarketing.bcbs.findyourbalance
 		}
 		
 		
+		private function showRules(e:Event):void
+		{
+			rules.show();
+			rules.addEventListener(ControllerRules.RULES_DONE, hideRules, false, 0, true);
+		}
+		
+		private function hideRules(e:Event):void
+		{
+			rules.removeEventListener(ControllerRules.RULES_DONE, hideRules);
+			rules.hide();
+		}
+		
+		
 		/**
 		 * called from constructor and from onServerData() when 'reset' is received
 		 */
@@ -154,6 +175,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			inGame.hide();
 			sweeps.removeEventListener(ControllerSweeps.DONE, sweepsDone);
+			sweeps.removeEventListener(ControllerSweeps.RULES, showRules);
 			sweeps.hide();
 			avatars.hide();
 			avatars.removeEventListener(ControllerAvatars.READY, avatarSelected);
@@ -208,11 +230,18 @@ package com.gmrmarketing.bcbs.findyourbalance
 				}
 			}
 			
+			//update rules
+			if (eventDropdown.getSelection() != "" && eventDropdown.getSelection() != eventDropdown.getResetMessage()) {
+				var ev:String = eventDropdown.getSelection();
+				var a:Array = ev.split(":");
+				rules.getRuleData(parseInt(a[0]));
+			}			
+			
 			ipStore.data.ip = ipDialog.theIP.text;
 			ipStore.flush();
 			
 			accel.setRequestedUpdateInterval(parseInt(ipDialog.theInterval.text));
-		}
+		}		
 		
 		
 		private function shutdown(e:MouseEvent):void
@@ -352,35 +381,51 @@ package com.gmrmarketing.bcbs.findyourbalance
 		}
 
 		
+		/**
+		 * Called when a message arrives from the server
+		 * @param	e
+		 */
 		private function onServerData(e:ProgressEvent):void
 		{
 			var buffer:ByteArray = new ByteArray();
 			socket.readBytes( buffer, 0, socket.bytesAvailable );
 			var m:String = buffer.toString();
 			
-			if(m == "reset"){				
+			if (m == "reset") {
+				acknowledge();
 				doReset();
 			}
 			if (m == "gameOver") {
 				playingGame = false; //stop accel events
+				acknowledge();
 				dataTimeoutAttempts = 1;
 				sweeps.show();
 				sweeps.addEventListener(ControllerSweeps.DONE, sweepsDone, false, 0, true);
+				sweeps.addEventListener(ControllerSweeps.RULES, showRules, false, 0, true);
 			}
 			if (m == "questionOne") {
 				playingGame = false; //stop accel events
+				acknowledge();
 				q1.show();
 				q1.addEventListener(ControllerQuestion_1.Q1, q1Answered, false, 0, true);
 				q1.addEventListener(ControllerQuestion_1.NO_Q1, qNotAnswered, false, 0, true);
 			}
 			if (m == "questionTwo") {
 				playingGame = false; //stop accel events
+				acknowledge();
 				q2.show();
 				q2.addEventListener(ControllerQuestion_2.Q2, q2Answered, false, 0, true);
 				q2.addEventListener(ControllerQuestion_2.NO_Q2, qNotAnswered, false, 0, true);
 			}			
 		}
 		
+		private function acknowledge():void
+		{
+			if(socketConnected){
+				socket.writeUTFBytes("***ack***");
+				socket.flush();
+			}
+		}
 		
 		private function q1Answered(e:Event):void
 		{
@@ -450,8 +495,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 				userData.push(new Date().toString());
 			}else {
 				userData.push(eventDropdown.getSelection()); //this is program id:program description     aka: 45:Trenton Super
-			}
-			
+			}			
 			
 			var uds:String = userData.join(); //comma sep string
 			

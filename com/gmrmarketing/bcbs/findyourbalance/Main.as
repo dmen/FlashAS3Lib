@@ -4,8 +4,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 	import flash.display.StageScaleMode;
 	import flash.geom.Point;
 	import flash.ui.Mouse;
-	import com.gmrmarketing.utilities.SocketServer;
-	import com.gmrmarketing.utilities.TimerDisplay;
+	import com.gmrmarketing.utilities.SocketServer;	
 	import flash.display.*;
 	import flash.events.*;
 	import flash.utils.Timer;
@@ -60,9 +59,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var timeDisplay:TimerDisplay;//timer and display - takes a field to display in
 		
 		private var maxBallSize:Number;//max ball size per the level - set in startLevel()
-		private var currentBallSize:Number;//the current size of the dropping balls - used to determine density - set in startLevel()
+		private var currentBallSize:Number;//current size of dropping icons - set in startLevel() - modified in makeHarder()
 		private var sizeTimer:Timer;//timer to call makeHarder() on some interval
-		private var shapeTimer:Timer;//used to drop shapes at some interval	
+		private var shapeTimer:Timer;//used to call addShape() on some interval
 		
 		private var shieldGroup:InteractionGroup; //group for shield to ignore teeter plank
 		private var floorPlankGroup:InteractionGroup; //so floor and plank can still interact
@@ -79,10 +78,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var countdown:Countdown;//3-2-1
 		private var sounds:Sounds; //all game sound
 		
-		private var gameOverClip:MovieClip;
+		private var gameOverClip:MovieClip;//lib clip
 		
 		private var theLevel:int;//current game level - init'd in newGame()
 		
+		private var lastClientMessage:String; //the last message sent to the client
+		private var ackTimer:Timer; //used for waiting for acknowledge message from the client
 		
 		
 		public function Main():void 
@@ -93,7 +94,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 
 			server = new SocketServer(); //use default port: 1080
 			server.addEventListener(SocketServer.CONNECT, clientConnect, false, 0, true);//set clientConnected to true
-			server.addEventListener(SocketServer.MESSAGE, clientMessage, false, 0, true);//angle changed
+			server.addEventListener(SocketServer.MESSAGE, clientMessage, false, 0, true);
 			server.addEventListener(SocketServer.DISCONNECT, clientDisconnect, false, 0, true);//set clientConnected to false
 			
 			timeDisplay = new TimerDisplay(theTime, theScore);
@@ -224,6 +225,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			gameOverClip = new mcGameOver(); //lib clip
 			
+			ackTimer = new Timer(500, 1);
+			ackTimer.addEventListener(TimerEvent.TIMER, ackResend, false, 0, true);
+			
 			makeCross();
 			
 			newGame();
@@ -248,7 +252,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			}
 			playingGame = false;
 			if (clientConnected) {
-				server.sendToClient("reset");//reset the controller and show the initial data collection form
+				server.sendToClient("reset");//reset the controller and show the initial data collection form	
+				lastClientMessage = "reset";
 				//wait for ***start*** from controller
 			}
 		}
@@ -262,7 +267,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 		{
 			stage.removeEventListener(Event.ENTER_FRAME, update);
 			if (clientConnected) {
-				server.sendToClient("gameOver");//show sweeps and thank you				
+				server.sendToClient("gameOver");//show sweeps and thank you
+				lastClientMessage = "gameOver";
+				
 				addChild(gameOverClip);
 				//now wait for "***userData***" from the client
 			}
@@ -278,9 +285,39 @@ package com.gmrmarketing.bcbs.findyourbalance
 			clientConnected = true;
 			if(!playingGame){
 				server.sendToClient("reset");//reset the controller and show the initial data collection form
+				lastClientMessage = "reset";
 			}
 		}
-
+	
+		private function waitForClientAck():void
+		{
+			ackTimer.reset();
+			ackTimer.start();//calls ackResend() in 500ms
+			server.removeEventListener(SocketServer.MESSAGE, clientMessage);
+			server.addEventListener(SocketServer.MESSAGE, clientAckMessage, false, 0, true);
+		}
+		
+		private function ackResend(e:TimerEvent):void
+		{
+			if (clientConnected) {
+				server.sendToClient(lastClientMessage);
+			}
+			waitForClientAck();
+		}
+		
+		/**
+		 * got ack back from the client
+		 * @param	e
+		 */
+		private function clientAckMessage(e:Event):void
+		{
+			var s:String = server.getMessage();
+			if (s == "***ack***") {
+				ackTimer.reset();
+				server.removeEventListener(SocketServer.MESSAGE, clientAckMessage);
+				server.addEventListener(SocketServer.MESSAGE, clientMessage, false, 0, true);
+			}			
+		}
 		
 		/**
 		 * listener for socket server
@@ -447,8 +484,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			disableShield();
 			disableCross();
 			
-			shapeTimer.reset(); //stop adding shapes
-			sizeTimer.reset();
+			shapeTimer.reset(); //stop calling addShape()
+			sizeTimer.reset();//stop calling makeHarder()
 			timeDisplay.stop();
 			
 			//reset player and teeter position
@@ -480,11 +517,13 @@ package com.gmrmarketing.bcbs.findyourbalance
 					 //level is 2 - show question 1
 					 if (clientConnected) {
 						server.sendToClient("questionOne");
+						lastClientMessage = "questionOne";
 					}
 				 }else {
 					 //level is 3 - show question 2
 					 if (clientConnected) {
 						server.sendToClient("questionTwo");
+						lastClientMessage = "questionTwo";
 					}
 				 }
 				bg.gotoAndStop(theLevel);//background level graphic on stage
@@ -552,8 +591,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			teeterBody.angularVel = 0;
 			playerCircleBody.angularVel = 0;
 			
-			currentBallSize = 15 + ((theLevel - 1) * 8);//15,23,31
-			maxBallSize = 25 + ((theLevel - 1) * 15);//25,40,55			
+			currentBallSize = 20 + ((theLevel - 1) * 8);//20,28,36
+			maxBallSize = 32 + ((theLevel - 1) * 15);//32,47,62
 			
 			shapeTimer.delay = 500 - ((theLevel - 1) * 100);//500,400,300					
 			
@@ -583,13 +622,13 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		
 		/**
-		 * Called by shapeTimer every 500ms
-		 * Adds falling circle shapes
+		 * Called by shapeTimer every 500,400,300ms depending on level
+		 * Adds falling icons and special icons
 		 * @param	e
 		 */
 		private function addShape(e:TimerEvent = null):void
 		{
-			if(Math.random() < .55){
+			if(Math.random() < .65){
 				var graphic:MovieClip;
 				var ballShape:Circle;
 				var body:Body = new Body(BodyType.DYNAMIC);				
@@ -619,10 +658,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 					graphic.width = graphic.height = 60;//radius * 2
 					
 				}else {		
+					//Add a normal icon
 					
 					sounds.dropIcon();
 					
-					//Add a normal icon
 					var randomSize:Number = Math.random() * 8;
 					if (Math.random() < .5) {
 						randomSize *= -1;
@@ -884,7 +923,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 		}
 		
 		
-		
+		/**
+		 * creates playerCrossBody for level 2
+		 * called once from constructor
+		 */
 		private function makeCross()
 		{
 			//uses playerCrossBody
@@ -938,7 +980,11 @@ package com.gmrmarketing.bcbs.findyourbalance
 			playerCrossBody.userData.graphic = playerCrossClip;					
 		}	
 		
-		
+		/**
+		 * callback for listener on countdown 3-2-1 
+		 * called on start of each  number fade out
+		 * @param	e
+		 */
 		private function beepCount(e:Event):void
 		{
 			sounds.countBeep();

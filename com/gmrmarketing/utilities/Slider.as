@@ -139,7 +139,7 @@ package com.gmrmarketing.utilities
 		 * @param	e MOUSE_DOWN
 		 */
 		private function beginDrag(e:MouseEvent):void
-		{				
+		{		
 			if (direction == "h") {
 				clickOffset = slide.mouseX;
 			}else {

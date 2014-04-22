@@ -8,6 +8,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 	public class ControllerSweeps extends EventDispatcher
 	{
 		public static const DONE:String = "sweepsComplete";
+		public static const RULES:String = "showRules";
 		
 		private var clip:MovieClip;
 		private var clip2:MovieClip;
@@ -44,6 +45,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			clip.btnSweeps.addEventListener(MouseEvent.MOUSE_DOWN, sweepsClicked, false, 0, true);
 			clip.btnOptin.addEventListener(MouseEvent.MOUSE_DOWN, optInClicked, false, 0, true);
 			clip.btnSubmit.addEventListener(MouseEvent.MOUSE_DOWN, submitClicked, false, 0, true);
+			clip.btnRules.addEventListener(MouseEvent.MOUSE_DOWN, rulesClicked, false, 0, true);
 			
 			clip.checkSweeps.gotoAndStop(1);
 			clip.checkOptin.gotoAndStop(1);
@@ -57,6 +59,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			clip.btnSweeps.removeEventListener(MouseEvent.MOUSE_DOWN, sweepsClicked);
 			clip.btnOptin.removeEventListener(MouseEvent.MOUSE_DOWN, optInClicked);
 			clip.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, submitClicked);
+			clip.btnRules.removeEventListener(MouseEvent.MOUSE_DOWN, rulesClicked);
 			
 			//sweeps
 			if (container.contains(clip)) {
@@ -94,6 +97,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 			container.addChild(clip2);
 			clip2.alpha = 0;
 			TweenMax.to(clip2, 1, { alpha:1, onComplete:done } );
+		}
+		
+		
+		private function rulesClicked(e:MouseEvent):void
+		{
+			dispatchEvent(new Event(RULES));
 		}
 		
 		

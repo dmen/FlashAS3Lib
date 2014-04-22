@@ -18,6 +18,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		public static const PHONE:String = "badPhone";
 		public static const RULES:String = "rulesNotChecked";
 		public static const STATE:String = "noState";
+		public static const SHOW_RULES:String = "showTheRules";
 		
 		private var clip:MovieClip;
 		private var container:DisplayObjectContainer;
@@ -60,7 +61,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			clip.fname.maxChars = 25;
 			clip.lname.maxChars = 1;//just last initial
-			clip.email.maxChars = 25;			
+			clip.email.maxChars = 35;			
 			
 			clip.phone.restrict = "-0-9";
 			clip.phone.maxChars = 12;
@@ -69,6 +70,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			clip.btnStart.addEventListener(MouseEvent.MOUSE_DOWN, startClicked, false, 0, true);
 			clip.btnCheck.addEventListener(MouseEvent.MOUSE_DOWN, checkClicked, false, 0, true);
+			clip.btnRules.addEventListener(MouseEvent.MOUSE_DOWN, showRulesClicked, false, 0, true);
 		}
 		
 		
@@ -79,6 +81,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			}
 			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, startClicked);
 			clip.btnCheck.removeEventListener(MouseEvent.MOUSE_DOWN, checkClicked);
+			clip.btnRules.removeEventListener(MouseEvent.MOUSE_DOWN, showRulesClicked);
 		}
 		
 		
@@ -117,6 +120,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 			}else {
 				clip.check.gotoAndStop(1);
 			}
+		}
+		
+		
+		private function showRulesClicked(e:MouseEvent):void
+		{
+			dispatchEvent(new Event(SHOW_RULES));
 		}
 		
 	}

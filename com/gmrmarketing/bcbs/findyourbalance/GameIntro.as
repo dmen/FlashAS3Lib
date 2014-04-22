@@ -59,6 +59,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 			if (container.contains(clip2)) {
 				container.removeChild(clip2);
 			}
+			
+			TweenMax.killTweensOf(clip.balance);
+			
 			container.addChild(clip2);
 			clip2.alpha = 0;
 			TweenMax.to(clip2, 1, { alpha:1 } );			
@@ -80,10 +83,23 @@ package com.gmrmarketing.bcbs.findyourbalance
 			clip.alpha = 0;
 			
 			TweenMax.to(clip, 1, { alpha:1 } );
+			animRight();
 			
 			switchTimer.reset();
 			switchTimer.addEventListener(TimerEvent.TIMER, showLeaderboard, false, 0, true);
 			switchTimer.start();
+		}
+		
+		
+		private function animRight():void
+		{
+			TweenMax.to(clip.balance, 1, { rotation:Math.random() * 8, onComplete:animLeft } );
+		}
+		
+		
+		private function animLeft():void
+		{
+			TweenMax.to(clip.balance, 1, { rotation:-(Math.random() * 8), onComplete:animRight } );
 		}
 		
 		

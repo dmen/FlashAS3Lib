@@ -1,8 +1,8 @@
-package com.gmrmarketing.utilities
+package com.gmrmarketing.bcbs.findyourbalance
 {
 	import flash.events.TimerEvent;
 	import flash.text.TextField;
-	import flash.utils.Timer;
+	import flash.utils.*;
 	
 	
 	public class TimerDisplay
@@ -10,7 +10,7 @@ package com.gmrmarketing.utilities
 		private var timeDisplay:TextField;
 		private var scoreDisplay:TextField;
 		private var timer:Timer;
-		private var startTime:Date;
+		private var startTime:int;
 		private var gameLevel:int;
 		private var levelScore:int = 0;
 		private var totalScore:int = 0;
@@ -20,6 +20,7 @@ package com.gmrmarketing.utilities
 		{
 			timeDisplay = timeField;
 			scoreDisplay = scoreField;
+			
 			timer = new Timer(200);
 			timer.addEventListener(TimerEvent.TIMER, update, false, 0, true);
 		}
@@ -27,10 +28,11 @@ package com.gmrmarketing.utilities
 		
 		public function start():void
 		{
-			timeDisplay.text = "0.0";
-			scoreDisplay.text = String(totalScore + levelScore);;
+			timeDisplay.text = "0.00";
+			scoreDisplay.text = String(totalScore + levelScore);
+			
+			startTime = getTimer();//ms
 			timer.start();
-			startTime = new Date();
 		}
 		
 		
@@ -40,6 +42,10 @@ package com.gmrmarketing.utilities
 		}
 		
 		
+		/**
+		 * called from Main.startLevel()
+		 * @param	l
+		 */
 		public function setLevel(l:int):void
 		{
 			gameLevel = l;
@@ -68,15 +74,20 @@ package com.gmrmarketing.utilities
 		}
 		
 		
+		/**
+		 * called by timer every 200ms
+		 * @param	e
+		 */
 		private function update(e:TimerEvent):void
 		{
-			var delta:Number = (new Date().valueOf() - startTime.valueOf()) / 1000;
+			var delta:Number = (getTimer() - startTime) / 1000;
+			
 			var deltaString:String = String(delta);
 			var i:int = deltaString.indexOf(".");
 			if (i != -1) {
 				deltaString = deltaString.substr(0, i + 2);
 			}
-			timeDisplay.text = deltaString;
+			timeDisplay.text = String(deltaString);
 			
 			levelScore = (gameLevel * 10) * delta; //10 pts per sec lev 1, 20 per sec lev 2, 30 per sec lev 3
 			scoreDisplay.text = String(totalScore + levelScore);

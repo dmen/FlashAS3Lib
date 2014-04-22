@@ -10,11 +10,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 	
 	
 	public class WebService extends EventDispatcher
-	{
-		public static const EVENTS:String = "gotEventList";
-		private const URL:String = "http://thesocialtab";
-		private const EVENT_URL:String = "http://thesocialtab";
-		private var events:Array;
+	{		
+		private const URL:String = "http://bluecrosshorizon.thesocialtab.net/home/SaveGame";
 		
 		private var isPosting:Boolean; //true while posting
 		
@@ -96,23 +93,26 @@ package com.gmrmarketing.bcbs.findyourbalance
 				isPosting = true;
 				
 				var vars:URLVariables = new URLVariables();
+				
 				vars.fname = currUser[0];
 				vars.lname = currUser[1];
 				vars.email = currUser[2];
 				vars.phone = currUser[3];				
-				vars.state = currUser[4];				
-				vars.sweeps = currUser[5];//true false - sweeps page
-				vars.optin = currUser[6]; //true false - sweeps page
-				vars.info = currUser[7];//more info on from dropdown
-				vars.currentHealthIns = currUser[8];//answer to question 1
-				vars.interestedIn = currUser[9]; //answer to question 2
+				vars.state = currUser[4];
 				
 				//get event pid from event string: pid:desc
 				var ev:String = currUser[10];
 				var a:Array = ev.split(":");				
 				vars.programId = a[0];
 				
-				vars.score = currUser[11];
+				vars.interestedIn = currUser[9]; //answer to question 2
+				vars.currentHealthIns = currUser[8];//answer to question 1
+				
+				vars.moreInfo = currUser[7];//more info on from sweeps page dropdown
+				
+				vars.sweepsEntry = currUser[5] == "true" ? true : false;//true false - sweeps page
+				vars.optIn = currUser[6] == "true" ? true : false; //true false - sweeps page
+				vars.gameScore = parseInt(currUser[11]);				
 				
 				var request:URLRequest = new URLRequest(URL);
 				request.data = vars;
