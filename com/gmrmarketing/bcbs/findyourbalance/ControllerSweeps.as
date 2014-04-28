@@ -25,7 +25,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			combo.populate(["Medical", "Pharmacy", "Journey to Health (Total Care Management)", "No Thanks"]);
 			clip.addChild(combo);
 			combo.x = 430;
-			combo.y = 493;
+			combo.y = 455;
 		}
 		
 		
@@ -40,6 +40,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			if (!container.contains(clip)) {
 				container.addChild(clip);
 			}
+			
+			combo.reset();
 			
 			clip.alpha = 0;
 			clip.btnSweeps.addEventListener(MouseEvent.MOUSE_DOWN, sweepsClicked, false, 0, true);

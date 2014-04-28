@@ -37,6 +37,7 @@ package com.gmrmarketing.puma.startbelieving
 			
 			kbd = new KeyBoard();
 			kbd.addEventListener(KeyBoard.KEYFILE_LOADED, kbdInit, false, 0, true);
+			//kbd.addEventListener(KeyBoard.SUBMIT, submitForm, false, 0, true);
 			kbd.loadKeyFile("keyboard.xml");
 		}
 		
@@ -46,7 +47,7 @@ package com.gmrmarketing.puma.startbelieving
 			kbd.removeEventListener(KeyBoard.KEYFILE_LOADED, kbdInit);
 			clip.addChild(kbd);
 			kbd.x = 450;
-			kbd.y = 700;
+			kbd.y = 680;
 		}
 		
 		
@@ -78,8 +79,8 @@ package com.gmrmarketing.puma.startbelieving
 			clip.btnCheckNews.addEventListener(MouseEvent.MOUSE_DOWN, toggleCheckNews, false, 0, true);
 			clip.btnCheckTerms.addEventListener(MouseEvent.MOUSE_DOWN, toggleCheckTerms, false, 0, true);
 			
-			clip.btnTerms.addEventListener(MouseEvent.MOUSE_DOWN, showTerms, false, 0, true);
-			clip.btnSubmit.addEventListener(MouseEvent.MOUSE_DOWN, submitForm, false, 0, true);
+			clip.btnTerms.addEventListener(MouseEvent.MOUSE_DOWN, showTerms, false, 0, true);			
+			clip.btnSubmit.addEventListener(MouseEvent.MOUSE_DOWN, submitForm, false, 0, true);			
 			clip.btnRestart.addEventListener(MouseEvent.MOUSE_DOWN, doRestart, false, 0, true);
 			
 			kbd.setFocusFields([clip.fname, clip.lname, clip.email]);
@@ -91,9 +92,9 @@ package com.gmrmarketing.puma.startbelieving
 		{
 			clip.btnCheckNews.removeEventListener(MouseEvent.MOUSE_DOWN, toggleCheckNews);
 			clip.btnCheckTerms.removeEventListener(MouseEvent.MOUSE_DOWN, toggleCheckTerms);
-			clip.btnTerms.removeEventListener(MouseEvent.MOUSE_DOWN, showTerms);
-			clip.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, submitForm);
+			clip.btnTerms.removeEventListener(MouseEvent.MOUSE_DOWN, showTerms);			
 			clip.btnRestart.removeEventListener(MouseEvent.MOUSE_DOWN, doRestart);
+			clip.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, submitForm);
 			
 			if (container.contains(clip)) {
 				container.removeChild(clip);
@@ -139,7 +140,7 @@ package com.gmrmarketing.puma.startbelieving
 		}
 		
 		
-		private function submitForm(e:MouseEvent):void
+		private function submitForm(e:Event):void
 		{
 			if (clip.checkTerms.currentFrame == 2) {
 				if (clip.fname.text == "" || clip.lname.text == "" || clip.email.text == "") {

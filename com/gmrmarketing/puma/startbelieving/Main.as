@@ -28,7 +28,7 @@ package com.gmrmarketing.puma.startbelieving
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			//Mouse.hide();
+			Mouse.hide();
 
 			intro = new Intro();
 			intro.setContainer(this);

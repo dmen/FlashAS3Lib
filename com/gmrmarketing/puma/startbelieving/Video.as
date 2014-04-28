@@ -8,7 +8,7 @@ package com.gmrmarketing.puma.startbelieving
 	import flash.net.*;	
 	import flash.media.*;
 	import flash.events.*;
-	import flash.utils.Timer;	
+	import flash.utils.*;	
 	
 	
 	public class Video extends EventDispatcher  
@@ -24,7 +24,9 @@ package com.gmrmarketing.puma.startbelieving
 		private var vidStream:NetStream;		
 		private var cam:Camera;
 		private var mic:Microphone;		
+		
 		private var curTime:int;
+		private var recTimer:Timer;
 		
 		private var guidName:String;
 		private var isRecording:Boolean;
@@ -37,6 +39,8 @@ package com.gmrmarketing.puma.startbelieving
 			cam.setQuality(0, 90);//bandwidth, quality
 			cam.setMode(640, 400, 30, false);//width, height, fps, favorArea
 			mic = Microphone.getMicrophone();	
+			recTimer = new Timer(1000);
+			recTimer.addEventListener(TimerEvent.TIMER, updateTime, false, 0, true);
 		}
 		
 		
@@ -55,6 +59,9 @@ package com.gmrmarketing.puma.startbelieving
 				container.addChild(clip);
 			}
 			
+			clip.mcStart.gotoAndStop(1); //show start recording
+			clip.btnStart.addEventListener(MouseEvent.MOUSE_DOWN, beginRecording, false, 0, true);
+			
 			vidConnection = new NetConnection();
 			vidConnection.addEventListener(NetStatusEvent.NET_STATUS, statusHandler);	
 			vidConnection.connect("rtmp://localhost/puma");			
@@ -71,8 +78,7 @@ package com.gmrmarketing.puma.startbelieving
 		
 		public function hide():void
 		{
-			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, beginRecording);
-			clip.btnStop.removeEventListener(MouseEvent.MOUSE_DOWN, stopRecording);
+			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, beginRecording);			
 			clip.btnRestart.removeEventListener(MouseEvent.MOUSE_DOWN, doReset);
 			
 			clip.vid.attachCamera(null);
@@ -110,8 +116,12 @@ package com.gmrmarketing.puma.startbelieving
 		
 		private function beginRecording(e:MouseEvent):void
 		{	
-			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, beginRecording);			
-			clip.btnStop.addEventListener(MouseEvent.MOUSE_DOWN, stopRecording, false, 0, true);
+			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, beginRecording);	
+			clip.mcStart.gotoAndStop(2); //show stop recording
+			curTime = getTimer();
+			clip.mcStart.theTime.text = 15;
+			recTimer.start();
+			clip.btnStart.addEventListener(MouseEvent.MOUSE_DOWN, stopRecording, false, 0, true);
 			
 			mic.setSilenceLevel(0);			
 			mic.rate = 44; //KHz
@@ -124,6 +134,18 @@ package com.gmrmarketing.puma.startbelieving
 			
 			isRecording = true;
 			showRedBlink();
+		}
+		
+		
+		private function updateTime(e:TimerEvent):void
+		{
+			var timeRemaining:int = 15 - (Math.round((getTimer() - curTime) / 1000));
+			clip.mcStart.theTime.text = String(timeRemaining);
+			if (timeRemaining <= 0) {
+				clip.mcStart.theTime.text = 0;
+				stopRecording();
+				dispatchEvent(new Event(DONE_RECORDING));
+			}
 		}
 		
 		
@@ -146,7 +168,8 @@ package com.gmrmarketing.puma.startbelieving
 		 */
 		private function stopRecording(e:MouseEvent = null):void
 		{			
-			clip.btnStop.removeEventListener(MouseEvent.MOUSE_DOWN, stopRecording);
+			recTimer.reset();
+			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, stopRecording);
 			TweenMax.killTweensOf(clip.blink);
 			clip.blink.alpha = 0;
 			clip.vid.attachCamera(null);
@@ -180,7 +203,7 @@ package com.gmrmarketing.puma.startbelieving
 			}
 			
 			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, beginRecording);
-			clip.btnStop.removeEventListener(MouseEvent.MOUSE_DOWN, stopRecording);
+			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, stopRecording);
 			clip.btnRestart.removeEventListener(MouseEvent.MOUSE_DOWN, doReset);
 			
 			dispatchEvent(new Event(VID_RESET));

@@ -29,9 +29,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			totalMove = clip.theText.height - clip.theMask.height;
 			moveRatio = 1 / totalMove;
 			
-			slider = new Slider(clip.slider, clip.track, "v");			
-			slider.reset();
-			slider.addEventListener(Slider.DRAGGING, updateRules, false, 0, true);
+			slider = new Slider(clip.slider, clip.track, "v");
 		}
 		
 		
@@ -46,6 +44,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 			if (!container.contains(clip)) {
 				container.addChild(clip);
 			}
+			
+			slider.reset();
+			slider.addEventListener(Slider.DRAGGING, updateRules, false, 0, true);
+			
 			clip.theText.y = 75;
 			clip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, closeRules, false, 0, true);
 		}

@@ -27,7 +27,7 @@ package com.dmennenoh.keyboard
 	import flash.events.*;	
 	import flash.net.*;	
 	import flash.text.*;
-	import flash.geom.Matrix;	
+	import flash.geom.*;	
 	import flash.utils.*;	
 	
 	
@@ -36,6 +36,8 @@ package com.dmennenoh.keyboard
 		public static const KBD:String = "KBD_KEY_PRESSED"; //Dispatched anytime any key is pressed
 		public static const SUBMIT:String = "SUBMIT_PRESSED"; //Special - dispatched only when a key with the value Submit or Send is pressed
 		public static const KEYFILE_LOADED:String = "keyFileLoaded"; //Dispatched when keyFileLoaded() is called, ie when loadKeyFile() is used
+		
+		private const IS_ANDROID:Boolean = true; //if true hacks are employed to deselect the text fields...
 		
 		private var keyContainer:Sprite;//container for all the Key objects
 		private var bgContainer:Sprite; //container for the background shape
@@ -129,9 +131,27 @@ package com.dmennenoh.keyboard
 		{
 			focusFields = fields;
 			targetField = focusFields[0];
-			stage.focus = targetField;			
+			if(stage){
+				stage.focus = targetField;
+			}
 			
 			focusTimer.start();
+		}
+		
+		
+		public function setFocus(ind:int, tx:int, ty:int):void
+		{
+			
+			targetField = focusFields[ind];
+			var p:Point = targetField.globalToLocal(new Point(tx, ty));
+			var i:int = targetField.getCharIndexAtPoint(p.x, p.y);
+			
+			stage.focus = targetField;
+			if(i == -1){
+				targetField.setSelection(targetField.length, targetField.length );
+			}else {
+				targetField.setSelection(i, i);
+			}
 		}
 		
 		
@@ -249,8 +269,16 @@ package com.dmennenoh.keyboard
 						targetField = TextField(stage.focus);
 					}
 				}
+				
+				//hack for android
+				if(IS_ANDROID){
+					if (targetField.selectionEndIndex != targetField.selectionBeginIndex) {
+						targetField.setSelection(targetField.selectionEndIndex, targetField.selectionEndIndex);
+					}
+				}
 			}
 		}		
+		
 		
 		private function tabToNextField():void
 		{
@@ -263,6 +291,7 @@ package com.dmennenoh.keyboard
 			stage.focus = targetField;
 		}
 		
+		
 		/**
 		 * Called by listener on each Key object created in draw()
 		 * Gets the keys value and places the text into the targetField text field
@@ -272,6 +301,13 @@ package com.dmennenoh.keyboard
 		private function keypress(e:Event):void
 		{			
 			if (enabled) {
+				
+				//hack for android
+				if(stage && IS_ANDROID){
+					if (targetField.selectionEndIndex != targetField.selectionBeginIndex) {
+						targetField.setSelection(targetField.selectionEndIndex, targetField.selectionEndIndex);
+					}
+				}
 				
 				//call getters in the Key object
 				lastChar = e.currentTarget.value; //current key value depending on Shift
@@ -284,6 +320,8 @@ package com.dmennenoh.keyboard
 					var bo:Boolean = targetField.selectionBeginIndex == 1 ? true : false;
 					num = targetField.selectionBeginIndex == targetField.selectionEndIndex ? targetField.selectionBeginIndex - 1 : targetField.selectionBeginIndex;
 					targetField.replaceText(num, targetField.selectionEndIndex, '');
+					//targetField.setSelection(targetField.selectionEndIndex, targetField.selectionEndIndex);
+					//trace("bs", targetField.selectionBeginIndex, targetField.selectionEndIndex, bo);
 					if (bo) {
 						stage.focus = targetField;
 						targetField.setSelection(0,0);
@@ -337,7 +375,8 @@ package com.dmennenoh.keyboard
 							}
 						}
 					}
-				}			
+				}
+				//targetField.setSelection(targetField.selectionEndIndex, targetField.selectionEndIndex);				
 				dispatchEvent(new Event(KBD));
 			}
 		}

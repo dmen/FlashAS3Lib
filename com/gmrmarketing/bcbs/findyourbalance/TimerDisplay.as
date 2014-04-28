@@ -14,6 +14,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var gameLevel:int;
 		private var levelScore:int = 0;
 		private var totalScore:int = 0;
+		private var delta:Number;
 		
 		
 		public function TimerDisplay(timeField:TextField, scoreField:TextField)
@@ -26,9 +27,21 @@ package com.gmrmarketing.bcbs.findyourbalance
 		}
 		
 		
+		public function resetTime():void
+		{
+			timeDisplay.text = "0.0";
+		}
+		
+		
+		public function resetScore():void
+		{
+			scoreDisplay.text = "0";
+		}
+		
+		
 		public function start():void
 		{
-			timeDisplay.text = "0.00";
+			timeDisplay.text = "0.0";
 			scoreDisplay.text = String(totalScore + levelScore);
 			
 			startTime = getTimer();//ms
@@ -75,12 +88,22 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		
 		/**
+		 * retrns the elapsed seconds
+		 * @return
+		 */
+		public function getElapsed():Number
+		{
+			return delta;
+		}
+		
+		
+		/**
 		 * called by timer every 200ms
 		 * @param	e
 		 */
 		private function update(e:TimerEvent):void
 		{
-			var delta:Number = (getTimer() - startTime) / 1000;
+			delta = (getTimer() - startTime) / 1000;
 			
 			var deltaString:String = String(delta);
 			var i:int = deltaString.indexOf(".");

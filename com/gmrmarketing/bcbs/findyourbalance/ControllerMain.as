@@ -2,6 +2,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 {
 	import flash.display.*;
 	import flash.events.*;
+	import flash.geom.Point;
 	import flash.net.SharedObject;
 	import flash.net.Socket;
 	import flash.sensors.Accelerometer;
@@ -45,11 +46,14 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var dataTimeoutAttempts:int;
 		
 		private var rules:ControllerRules; //webservice and rules text
-		
+		private var refreshing:Boolean;
 		
 		
 		public function ControllerMain()
 		{
+			stage.displayState = StageDisplayState.FULL_SCREEN;
+			stage.scaleMode = StageScaleMode.EXACT_FIT;
+			
 			socketConnected = false;
 			
 			socket = new Socket();
@@ -60,8 +64,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			socket.addEventListener(ProgressEvent.SOCKET_DATA, onServerData );
 			
 			accel = new Accelerometer();			
-			accel.setRequestedUpdateInterval(50);//ms - can be changed through ip dialog
-			accel.addEventListener(AccelerometerEvent.UPDATE, updateHandler);			
+			accel.setRequestedUpdateInterval(120);//ms - can be changed through ip dialog
+			accel.addEventListener(AccelerometerEvent.UPDATE, updateHandler);				
 			
 			mainContainer = new Sprite();
 			dialogContainer = new Sprite();
@@ -105,6 +109,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			cq = new CornerQuit();
 			cq.init(dialogContainer, "ur");
+			cq.customLoc(1, new Point(1130, 0));
 			cq.addEventListener(CornerQuit.CORNER_QUIT, openIPDialog, false, 0, true);
 			
 			LED = new mcLED();
@@ -135,7 +140,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 			rules = new ControllerRules();
 			rules.setContainer(dialogContainer);
 			
+			refreshing = false;
+			
 			doReset();
+			openIPDialog(); //in order to help ba to remember to pick event
 		}
 		
 		
@@ -191,7 +199,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			tim.reset();
 			intro.show();	//show form
 			playingGame = false;
-			tim.start();
+			tim.start();//start calling checkConnection()
 		}
 		
 		
@@ -210,11 +218,13 @@ package com.gmrmarketing.bcbs.findyourbalance
 		}
 		
 		
-		private function openIPDialog(e:Event):void
+		private function openIPDialog(e:Event = null):void
 		{
 			TweenMax.to(ipDialog, .5, { y:0 } );
+			webService.retrieveEvents();//refresh the event list
 			ipDialog.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, closeIPDialog, false, 0, true);
 			ipDialog.btnShutdown.addEventListener(MouseEvent.MOUSE_DOWN, shutdown, false, 0, true);
+			ipDialog.btnRefresh.addEventListener(MouseEvent.MOUSE_DOWN, refreshConnection, false, 0, true);
 		}
 		
 		
@@ -241,13 +251,26 @@ package com.gmrmarketing.bcbs.findyourbalance
 			ipStore.flush();
 			
 			accel.setRequestedUpdateInterval(parseInt(ipDialog.theInterval.text));
-		}		
+			
+			ipDialog.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, closeIPDialog);
+			ipDialog.btnShutdown.removeEventListener(MouseEvent.MOUSE_DOWN, shutdown);
+			ipDialog.btnRefresh.removeEventListener(MouseEvent.MOUSE_DOWN, refreshConnection);
+		}
+		
+		
+		private function refreshConnection(e:MouseEvent):void
+		{
+			if(socketConnected){
+				socket.writeUTFBytes("refresh");//asks server to send last message it sent
+				socket.flush();				
+			}
+		}
 		
 		
 		private function shutdown(e:MouseEvent):void
 		{
 			if(socketConnected){
-				socket.writeUTFBytes("***shutdown***");
+				socket.writeUTFBytes("shutdown");
 				socket.flush();				
 			}
 			NativeApplication.nativeApplication.exit();
@@ -287,12 +310,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 			intro.hide();		
 			
 			if(socketConnected){
-				socket.writeUTFBytes("***instructions***");
-				socket.flush();				
+				socket.writeUTFBytes("instructions");
+				socket.flush();
 			}
 			
 			instructions.show();
-			instructions.addEventListener(ControllerInstructions.READY, instructionsDone, false, 0, true);			
+			instructions.addEventListener(ControllerInstructions.READY, instructionsDone, false, 0, true);
 		}
 		
 		
@@ -307,13 +330,13 @@ package com.gmrmarketing.bcbs.findyourbalance
 			instructions.removeEventListener(ControllerInstructions.READY, instructionsDone);
 			
 			if(socketConnected){
-				socket.writeUTFBytes("***avatar***");
-				socket.flush();				
+				socket.writeUTFBytes("avatar");
+				socket.flush();
 			}
 			
 			avatars.show();
-			avatars.addEventListener(ControllerAvatars.READY, avatarSelected, false, 0, true);			
-			avatars.addEventListener(ControllerAvatars.NEW_AVATAR, newAvatar, false, 0, true);			
+			avatars.addEventListener(ControllerAvatars.READY, avatarSelected, false, 0, true);
+			avatars.addEventListener(ControllerAvatars.NEW_AVATAR, newAvatar, false, 0, true);
 		}
 		
 		
@@ -330,7 +353,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			playingGame = true; //accel updates are now sent in updateHandler()
 			if(socketConnected){
-				socket.writeUTFBytes("***start***");
+				socket.writeUTFBytes("start");
 				socket.flush();				
 			}
 			
@@ -341,7 +364,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private function newAvatar(e:Event):void
 		{			
 			if(socketConnected){
-				socket.writeUTFBytes("***avpoint***" + String(avatars.getAvatar()));
+				socket.writeUTFBytes("avpoint" + String(avatars.getAvatar()));
 				socket.flush();				
 			}
 		}
@@ -353,6 +376,11 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 */
 		private function onConnect(e:Event):void
 		{	
+			if (refreshing) {
+				refreshing = false;
+				//socket.writeUTFBytes("***refresh***");
+				//socket.flush();			
+			}
 			tim.reset();
 			socketConnected = true;
 			currentIPPort = ipDialog.theIP.text + ipDialog.thePort.text;
@@ -392,12 +420,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 			var m:String = buffer.toString();
 			
 			if (m == "reset") {
-				acknowledge();
+				//acknowledge();
 				doReset();
 			}
 			if (m == "gameOver") {
 				playingGame = false; //stop accel events
-				acknowledge();
+				//acknowledge();
 				dataTimeoutAttempts = 1;
 				sweeps.show();
 				sweeps.addEventListener(ControllerSweeps.DONE, sweepsDone, false, 0, true);
@@ -405,20 +433,20 @@ package com.gmrmarketing.bcbs.findyourbalance
 			}
 			if (m == "questionOne") {
 				playingGame = false; //stop accel events
-				acknowledge();
+				//acknowledge();
 				q1.show();
 				q1.addEventListener(ControllerQuestion_1.Q1, q1Answered, false, 0, true);
 				q1.addEventListener(ControllerQuestion_1.NO_Q1, qNotAnswered, false, 0, true);
 			}
 			if (m == "questionTwo") {
 				playingGame = false; //stop accel events
-				acknowledge();
+				//acknowledge();
 				q2.show();
 				q2.addEventListener(ControllerQuestion_2.Q2, q2Answered, false, 0, true);
 				q2.addEventListener(ControllerQuestion_2.NO_Q2, qNotAnswered, false, 0, true);
 			}			
 		}
-		
+		/*
 		private function acknowledge():void
 		{
 			if(socketConnected){
@@ -426,7 +454,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 				socket.flush();
 			}
 		}
-		
+		*/
 		private function q1Answered(e:Event):void
 		{
 			//could change message in inGame here
@@ -435,8 +463,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			q1.removeEventListener(ControllerQuestion_1.NO_Q1, qNotAnswered);
 			playingGame = true;
 			if(socketConnected){
-				socket.writeUTFBytes("***answered***");
-				socket.flush();
+				socket.writeUTFBytes("answered");
+				socket.flush();				
 			}
 		}
 		
@@ -449,7 +477,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			q2.removeEventListener(ControllerQuestion_2.NO_Q2, qNotAnswered);
 			playingGame = true;
 			if(socketConnected){
-				socket.writeUTFBytes("***answered***");
+				socket.writeUTFBytes("answered");
 				socket.flush();
 			}
 		}
@@ -503,7 +531,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			//now waits for reset from server
 			if(socketConnected){
-				socket.writeUTFBytes("***userData***" + uds);
+				socket.writeUTFBytes("userData" + uds);
 				socket.flush();
 			}
 		}
@@ -543,6 +571,5 @@ package com.gmrmarketing.bcbs.findyourbalance
 				socket.flush();
 			}
 		}
-
 	}	
 }

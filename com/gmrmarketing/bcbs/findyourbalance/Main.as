@@ -1,7 +1,5 @@
 package com.gmrmarketing.bcbs.findyourbalance
-{
-	import flash.display.StageDisplayState;
-	import flash.display.StageScaleMode;
+{	
 	import flash.geom.Point;
 	import flash.ui.Mouse;
 	import com.gmrmarketing.utilities.SocketServer;	
@@ -34,6 +32,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var playerCollisionType:CbType;//added to playerCircleBody for detecting collisions with shield icons
 		private var shieldIconCollisionType:CbType;//added to shield icons for collisions with player
 		private var shieldActiveCollisionType:CbType;//added to shield for collisions with falling shapes
+		private var plankCollisionType:CbType;//added to plank for collisions between shapes and teeter - for sound effect only
+		private var plankBallCollisionType:CbType;//added to balls for collisions between shapes and teeter - for sound effect only
+		private var playerCircleCollisionType:CbType; //added to player for general collisions with all falling icons
+		private var circlePlayerCollisionType:CbType; //added to icons for general collisions with player
 		
 		private var teeterBody:Body;//teeter beam
 		private var playerCircleBody:Body;//main player
@@ -42,9 +44,11 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private var pivotJoint:PivotJoint;//joint between teeter and fulcrum
 		private var shieldJoint:WeldJoint;//joint between player and shield
 		private var floorListener:InteractionListener;//callback for circle hitting floor
+		private var plankListener:InteractionListener;//callback for circle hitting plank
 		private var shieldListener:InteractionListener;//callback for shield icon hitting player
 		private var shieldActiveListener:InteractionListener;//callback for balls hitting shield	
 		private var shieldActivePreListener:PreListener;//callback for balls hitting shield	
+		private var playerIconListener:InteractionListener; //callback for icon hitting player
 		
 		private var totterClip:MovieClip;//library images for the physics objects
 		private var playerClip:MovieClip;
@@ -82,8 +86,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		private var theLevel:int;//current game level - init'd in newGame()
 		
-		private var lastClientMessage:String; //the last message sent to the client
-		private var ackTimer:Timer; //used for waiting for acknowledge message from the client
+		private var lastMessage:String; //the last message sent to the client
+		private var delayChanged:Boolean; //used to increase difficulty after 60 seconds playing in the same level
 		
 		
 		public function Main():void 
@@ -104,9 +108,13 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			floorCollisionType = new CbType();
 			shapeCollisionType = new CbType();
+			plankCollisionType = new CbType();
+			plankBallCollisionType = new CbType();
 			playerCollisionType = new CbType();
 			shieldIconCollisionType = new CbType();
 			shieldActiveCollisionType = new CbType();
+			playerCircleCollisionType = new CbType();
+			circlePlayerCollisionType = new CbType();
 			
 			var pos:Vec2 = new Vec2(960, 1050);//fulcrum center
 			var triangleSize:Number = 128;
@@ -126,6 +134,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			var teeterShape:Polygon = new Polygon(Polygon.box(planeSize.x, planeSize.y));
 			teeterShape.material.density = 1.5;
 			teeterBody.shapes.add(teeterShape);
+			teeterBody.cbTypes.add(plankCollisionType);
 			
 			//PLAYER
 			playerCircleBody = new Body(BodyType.DYNAMIC);
@@ -139,6 +148,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			playerCircleBody.userData.player = true;
 			playerCircleBody.cbTypes.add(shapeCollisionType);
 			playerCircleBody.cbTypes.add(playerCollisionType);
+			playerCircleBody.cbTypes.add(plankBallCollisionType);
+			playerCircleBody.cbTypes.add(playerCircleCollisionType);
 			
 			//CROSS
 			playerCrossBody = new Body(BodyType.DYNAMIC);
@@ -171,6 +182,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 			pivotJoint.stiff = true;
 			pivotJoint.space = space;
 			
+			plankListener = new InteractionListener(CbEvent.BEGIN, InteractionType.COLLISION, plankCollisionType, plankBallCollisionType, shapeHitPlank);
+			space.listeners.add(plankListener);
+			
 			floorListener = new InteractionListener(CbEvent.BEGIN, InteractionType.COLLISION, floorCollisionType, shapeCollisionType, shapeHitFloor);
 			space.listeners.add(floorListener);
 			
@@ -179,6 +193,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			shieldActiveListener = new InteractionListener(CbEvent.BEGIN, InteractionType.COLLISION, shieldActiveCollisionType, shapeCollisionType, ballHitShield);
 			space.listeners.add(shieldActiveListener);
+			
+			playerIconListener = new InteractionListener(CbEvent.BEGIN, InteractionType.COLLISION, playerCircleCollisionType, circlePlayerCollisionType, ballHitPlayer);
+			space.listeners.add(playerIconListener);
 			
 			space.bodies.add(floorBody);//add body to space
 			space.bodies.add(fulcrumBody);//add body to space
@@ -221,14 +238,14 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			sounds = new Sounds();
 			
-			playerCrossClip = new avCross(); //lib clip
+			//playerCrossClip = new avCross(); //lib clip
 			
 			gameOverClip = new mcGameOver(); //lib clip
 			
-			ackTimer = new Timer(500, 1);
-			ackTimer.addEventListener(TimerEvent.TIMER, ackResend, false, 0, true);
+			//ackTimer = new Timer(500, 1);
+			//ackTimer.addEventListener(TimerEvent.TIMER, ackResend, false, 0, true);
 			
-			makeCross();
+			makeCross();//builds cross body from four box polys
 			
 			newGame();
 		}		
@@ -242,6 +259,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 */
 		private function newGame():void
 		{			
+			sounds.playIntroMusic();
+			
 			intro.show(webService.getLeaderboard());//show the find your balance - play this game intro screen
 			//intro swaps between play and leaderboard screens
 			
@@ -253,8 +272,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			playingGame = false;
 			if (clientConnected) {
 				server.sendToClient("reset");//reset the controller and show the initial data collection form	
-				lastClientMessage = "reset";
-				//wait for ***start*** from controller
+				lastMessage = "reset";				
 			}
 		}
 		
@@ -268,11 +286,16 @@ package com.gmrmarketing.bcbs.findyourbalance
 			stage.removeEventListener(Event.ENTER_FRAME, update);
 			if (clientConnected) {
 				server.sendToClient("gameOver");//show sweeps and thank you
-				lastClientMessage = "gameOver";
+				lastMessage = "gameOver";
+				
+				gameOverClip.theScore.text = "Your final score: " + String(timeDisplay.getScore());
 				
 				addChild(gameOverClip);
 				//now wait for "***userData***" from the client
 			}
+			
+			timeDisplay.resetTime();
+			timeDisplay.resetScore();
 		}
 		
 		
@@ -282,42 +305,30 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 */
 		private function clientConnect(e:Event):void
 		{
+			//trace("clientConnect");
 			clientConnected = true;
+			//server.removeEventListener(SocketServer.CONNECT, clientConnect);
 			if(!playingGame){
 				server.sendToClient("reset");//reset the controller and show the initial data collection form
-				lastClientMessage = "reset";
+				lastMessage = "reset";
+				//waitForClientAck();
 			}
 		}
-	
+	/*
 		private function waitForClientAck():void
 		{
 			ackTimer.reset();
-			ackTimer.start();//calls ackResend() in 500ms
-			server.removeEventListener(SocketServer.MESSAGE, clientMessage);
-			server.addEventListener(SocketServer.MESSAGE, clientAckMessage, false, 0, true);
+			ackTimer.start();//calls ackResend() in 500ms			
 		}
 		
 		private function ackResend(e:TimerEvent):void
 		{
 			if (clientConnected) {
-				server.sendToClient(lastClientMessage);
+				server.sendToClient(lastMessage);
 			}
 			waitForClientAck();
-		}
-		
-		/**
-		 * got ack back from the client
-		 * @param	e
-		 */
-		private function clientAckMessage(e:Event):void
-		{
-			var s:String = server.getMessage();
-			if (s == "***ack***") {
-				ackTimer.reset();
-				server.removeEventListener(SocketServer.MESSAGE, clientAckMessage);
-				server.addEventListener(SocketServer.MESSAGE, clientMessage, false, 0, true);
-			}			
-		}
+		}		
+		*/
 		
 		/**
 		 * listener for socket server
@@ -327,9 +338,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private function clientMessage(e:Event):void
 		{			
 			var s:String = server.getMessage();
-			
+			//trace("clientMessage:", s);
 			if (!playingGame) {
-				if (s.indexOf("***start***") != -1) {					
+				if (s.indexOf("start") != -1) {					
 					
 					if(playerClip){
 						if (contains(playerClip)) {
@@ -341,39 +352,50 @@ package com.gmrmarketing.bcbs.findyourbalance
 					switch(avatars.getAvatarNumber()) { //0-7
 						case 0:
 							playerClip = new av1();
+							playerCrossClip = new avc1();
 							break;
 						case 1:
 							playerClip = new av2();
+							playerCrossClip = new avc2();
 							break;
 						case 2:
 							playerClip = new av3();
+							playerCrossClip = new avc3();
 							break;
 						case 3:
 							playerClip = new av4();
+							playerCrossClip = new avc4();
 							break;
 						case 4:
 							playerClip = new av5();
+							playerCrossClip = new avc5();
 							break;
 						case 5:
 							playerClip = new av6();
+							playerCrossClip = new avc6();
 							break;
 						case 6:
 							playerClip = new av7();
+							playerCrossClip = new avc7();
 							break;
 						case 7:
 							playerClip = new av8();
+							playerCrossClip = new avc8();
 							break;
 					}
 					
-					playerCircleBody.userData.graphic = playerClip;					
+					playerCircleBody.userData.graphic = playerClip;	
+					playerCrossBody.userData.graphic = playerCrossClip;
 
 					if(!contains(totterClip)){
 						addChild(totterClip);						
 					}
-					addChild(playerClip);
+					//addChild(playerClip);
 					
 					avatars.hide();					
 					levelIntro.show(1);
+					
+					sounds.playL1Music();
 					
 					//show bodies
 					space.liveBodies.foreach(updateGraphics);
@@ -382,41 +404,48 @@ package com.gmrmarketing.bcbs.findyourbalance
 					t.addEventListener(TimerEvent.TIMER, levelIntroComplete, false, 0, true);
 					t.start();
 				
-				}else if (s.indexOf("***userData***") != -1) {					
+				}else if (s.indexOf("userData") != -1) {					
 					//userData is sent once sweeps entry and thank you are shown
-					var user:String = s.substr(s.indexOf("***userData***") + 14);
+					var user:String = s.substr(s.indexOf("userData") + 8);
 					var userData:Array = user.split(",");				
 					//array is: fname,lname,email,phone,state,entry,optin,moreInfo,q1a,q2a,event
 					//now add score
 					userData.push(timeDisplay.getScore());
-					webService.addUser(userData);
-					
+					webService.addUser(userData);					
 					newGame();
 					
-				}else if (s.indexOf("***instructions***") != -1) {
+				}else if (s.indexOf("instructions") != -1) {
 					intro.hide();
 					instructions.show();
 					
-				}else if (s.indexOf("***avatar***") != -1) {
+				}else if (s.indexOf("avatar") != -1) {
 				
 					//player is picking their avatar
 					instructions.hide();
 					avatars.show();
 				
-				}else if (s.indexOf("***avpoint***") != -1) {
+				}else if (s.indexOf("avpoint") != -1) {
 					sounds.pickAvatar();
-					var i:int = parseInt(s.substr(s.indexOf("***avpoint***") + 13));//number 1-8 after string
+					var i:int = parseInt(s.substr(s.indexOf("avpoint") + 7));//number 1-8 after string
 					avatars.avatarClicked(i);
 					
-				}else if (s.indexOf("***answered***") != -1) {
+				}else if (s.indexOf("answered") != -1) {
 					
 					//user ansered a question on the controller
 					levelIntro.hide();
 					countdown.addEventListener(Countdown.COMPLETE, countdownComplete, false, 0, true);
 					countdown.show();
 					
-				}else if (s.indexOf("***shutdown***") != -1) {
+				}else if (s.indexOf("shutdown") != -1) {
 					NativeApplication.nativeApplication.exit();
+					
+				}else if(s.indexOf("ack") != -1){
+					//ackTimer.reset();
+					
+				}else if (s.indexOf("refresh") != -1) {
+					if (clientConnected) {
+						server.sendToClient(lastMessage);
+					}
 				}
 					
 			}else {
@@ -429,17 +458,18 @@ package com.gmrmarketing.bcbs.findyourbalance
 				if (angVel > 4.5) {
 					angVel = 4.5;
 				}
-				
+				if (isNaN(angVel)) {
+					angVel = 0;
+				}
 				teeterBody.angularVel = angVel;
-			}		
-			
+			}			
 		}
 
 		
 		private function levelIntroComplete(e:TimerEvent):void
 		{
 			levelIntro.hide();
-			
+			/*
 			teeterBody.allowMovement = true;
 			playerCircleBody.allowMovement = true;
 			playerCircleBody.allowRotation = true;
@@ -452,7 +482,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			
 			teeterBody.angularVel = 0;
 			playerCircleBody.angularVel = 0;
-			
+			*/
 			countdown.addEventListener(Countdown.COMPLETE, countdownComplete, false, 0, true);
 			countdown.show();		
 		}
@@ -467,7 +497,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		
 		private function clientDisconnect(e:Event):void			
-		{
+		{			
+			//server.addEventListener(SocketServer.CONNECT, clientConnect, false, 0, true);//set clientConnected to true
+			//trace("clientDisConnect");
 			clientConnected = false;
 		}
 		
@@ -479,14 +511,20 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 */
 		private function levelEnd():void
 		{
+			Mouse.show();
+			Mouse.hide();//hack to keep mouse cursor from reappearing
+			
 			playingGame = false;
+			TweenMax.killTweensOf(playerCrossClip);
 			
 			disableShield();
 			disableCross();
 			
 			shapeTimer.reset(); //stop calling addShape()
 			sizeTimer.reset();//stop calling makeHarder()
+			
 			timeDisplay.stop();
+			timeDisplay.resetTime();
 			
 			//reset player and teeter position
 			playerCircleBody.position.setxy(960, 727);
@@ -495,9 +533,17 @@ package com.gmrmarketing.bcbs.findyourbalance
 			playerCircleBody.velocity = new Vec2(0, 0);
 			playerCircleBody.allowMovement = false;
 			playerCircleBody.allowRotation = false;
+			if(!playerCircleBody.cbTypes.has(plankBallCollisionType)){
+				playerCircleBody.cbTypes.add(plankBallCollisionType);
+			}
 			
 			teeterBody.rotation = 0;
 			teeterBody.angularVel = 0;
+			
+			playerCircleBody.space = null;
+			if(contains(playerClip)){
+				removeChild(playerClip);
+			}
 			
 			//remove all falling balls
 			space.bodies.filter(function (body) {
@@ -514,16 +560,20 @@ package com.gmrmarketing.bcbs.findyourbalance
 			}else {
 				
 				 if (theLevel == 2) {
+					 sounds.playL2Music();
 					 //level is 2 - show question 1
 					 if (clientConnected) {
 						server.sendToClient("questionOne");
-						lastClientMessage = "questionOne";
+						lastMessage = "questionOne";						
+						//waitForClientAck();
 					}
 				 }else {
+					 sounds.playL3Music();
 					 //level is 3 - show question 2
 					 if (clientConnected) {
 						server.sendToClient("questionTwo");
-						lastClientMessage = "questionTwo";
+						lastMessage = "questionTwo";
+						//waitForClientAck();
 					}
 				 }
 				bg.gotoAndStop(theLevel);//background level graphic on stage
@@ -552,6 +602,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 				return true;
 			});
 		}
+		
 		
 		private function disableCross():void
 		{
@@ -582,11 +633,18 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private function startLevel():void
 		{			
 			playingGame = true;
+			delayChanged = false;
 			stage.addEventListener(Event.ENTER_FRAME, update);
 			
 			teeterBody.allowMovement = true;
 			playerCircleBody.allowMovement = true;
 			playerCircleBody.allowRotation = true;
+			
+			playerCircleBody.space = space;
+			if(!contains(playerClip)){
+				addChild(playerClip);
+			}
+			playerClip.alpha = 1;
 			
 			teeterBody.angularVel = 0;
 			playerCircleBody.angularVel = 0;
@@ -599,8 +657,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			timeDisplay.start();//starts timer at upper right
 			
 			var lev:String = "LEVEL ";
-			switch(theLevel){
-				case 1:
+			switch(theLevel) {
+				case 1:					
 					lev += "ONE";
 					break;
 				case 2:
@@ -609,6 +667,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 					lev += "TWO";
 					break;
 				case 3:
+					bg.light.alpha = 0; //lightning effect oval at top
 					lev += "THREE";
 					break;
 			}
@@ -634,7 +693,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 				var body:Body = new Body(BodyType.DYNAMIC);				
 				
 				body.cbTypes.add(shapeCollisionType);//all falling circles - for collisions with floor				
-				body.position.setxy(540 + Math.random() * 860, 50);
+				body.cbTypes.add(plankBallCollisionType);//all falling circles - for collisions with teeter for sound effect				
+				body.cbTypes.add(circlePlayerCollisionType);//all falling circles - for collisions with player for sound effect
+				
+				body.position.setxy(540 + Math.random() * 860, 50);//random x pos over teeter				
 				
 				if (Math.random() < .1) {
 					
@@ -669,7 +731,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 					randomSize += currentBallSize;
 					ballShape = new Circle(randomSize);
 					graphic = icons.getIcon(theLevel);
-					ballShape.material.density = randomSize * .082;					
+					ballShape.material.density = randomSize * .083;					
 					ballShape.material.elasticity = .666;
 					graphic.width = graphic.height = randomSize * 2;
 				}
@@ -685,10 +747,18 @@ package com.gmrmarketing.bcbs.findyourbalance
 			}
 		}
 
-		
+		private function shapeHitPlank(collision:InteractionCallback):void 
+		{
+			var body:Body = collision.int2 as Body;	
+			
+			//if(!body.userData.player) {
+				body.cbTypes.remove(plankBallCollisionType);
+			//}
+			
+			sounds.plankHit();
+		}
 		private function shapeHitFloor(collision:InteractionCallback):void 
 		{
-			//TODO: store in array so the bodies can react a bit before beign removed
 			var body:Body = collision.int2 as Body;			
 			
 			if (body.userData.player) {
@@ -823,8 +893,14 @@ package com.gmrmarketing.bcbs.findyourbalance
 			timeDisplay.addBonus(50);
 			var impulse:Vec2 = body.position.sub(playerShield.position);						
 			body.applyImpulse(impulse.mul(40));			
-		}		
+		}	
 		
+		private function ballHitPlayer(collision:InteractionCallback):void
+		{
+			sounds.iconHitPlayer();
+			var body:Body = collision.int2 as Body;	
+			body.cbTypes.remove(circlePlayerCollisionType);			
+		}
 		
 		/**
 		 * Game loop
@@ -855,6 +931,14 @@ package com.gmrmarketing.bcbs.findyourbalance
 							bg.plane.x = 2401;
 							bg.plane.y = 823;
 						}
+						bg.clouds1.x += .314;
+						bg.clouds2.x -= .222;
+						if (bg.clouds1.x > 2100) {
+							bg.clouds.x = -200;
+						}
+						if (bg.clouds2.x < -200) {
+							bg.clouds.x = 2100;
+						}
 						break;
 					case 3 :
 						bg.star1.rotation += .22;
@@ -877,6 +961,11 @@ package com.gmrmarketing.bcbs.findyourbalance
 							bg.star5.alpha = 1;
 							bg.star7.alpha = 1;
 							bg.star2.alpha = 1;
+						}
+						if (Math.random() < .003) {
+							bg.light.alpha = 1;
+							TweenMax.to(bg.light, .2, { alpha:0 } );
+							sounds.playThunder();
 						}
 						break;
 				}
@@ -919,7 +1008,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private function makeHarder(e:TimerEvent):void
 		{
 			currentBallSize += 1;
-			currentBallSize = Math.min(currentBallSize, maxBallSize);			
+			currentBallSize = Math.min(currentBallSize, maxBallSize);
+			
+			if (timeDisplay.getElapsed() > 60 && !delayChanged) {
+				shapeTimer.delay = 300 - ((theLevel - 1) * 100);//300,200,100
+				delayChanged = true;
+			}
 		}
 		
 		
@@ -977,8 +1071,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 			playerCrossBody.userData.player = true;
 			playerCrossBody.cbTypes.add(shapeCollisionType);
 			playerCrossBody.cbTypes.add(playerCollisionType);			
+			playerCrossBody.cbTypes.add(playerCircleCollisionType);			
 			playerCrossBody.userData.graphic = playerCrossClip;					
 		}	
+		
 		
 		/**
 		 * callback for listener on countdown 3-2-1 
