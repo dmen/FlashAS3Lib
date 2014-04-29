@@ -1,6 +1,7 @@
 package com.gmrmarketing.puma.startbelieving
 {
 	import flash.display.MovieClip;
+	import flash.display.Sprite;
 	import flash.events.*;
 	import com.greensock.TweenMax;
 	import flash.display.StageDisplayState;
@@ -22,41 +23,48 @@ package com.gmrmarketing.puma.startbelieving
 		private var queue:Queue;
 		private var cq:CornerQuit;
 		private var adminButton:CornerQuit;
-		
+		private var mainContainer:Sprite;
+		private var topContainer:Sprite;
 		
 		public function Main()
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			Mouse.hide();
+			//Mouse.hide();
+			
+			mainContainer = new Sprite();
+			topContainer = new Sprite();
+			
+			addChild(mainContainer);
+			addChild(topContainer);
 
 			intro = new Intro();
-			intro.setContainer(this);
+			intro.setContainer(mainContainer);
 			
 			form = new Form();
-			form.setContainer(this);
+			form.setContainer(mainContainer);
 			
 			privacy = new Privacy();
-			privacy.setContainer(this);
+			privacy.setContainer(mainContainer);
 			
 			video = new Video();
-			video.setContainer(this);
+			video.setContainer(mainContainer);
 			
 			thanks = new Thanks();
-			thanks.setContainer(this);
+			thanks.setContainer(mainContainer);
 			
 			dialog = new Dialog();
-			dialog.setContainer(this);
+			dialog.setContainer(mainContainer);
 			
 			admin = new Admin();
-			admin.setContainer(this);
+			admin.setContainer(topContainer);
 			
 			cq = new CornerQuit();
-			cq.init(this, "ur");
+			cq.init(topContainer, "ur");
 			cq.addEventListener(CornerQuit.CORNER_QUIT, quitApplication, false, 0, true);
 			
 			adminButton = new CornerQuit();
-			adminButton.init(this, "ul");
+			adminButton.init(topContainer, "ul");
 			adminButton.addEventListener(CornerQuit.CORNER_QUIT, showAdmin, false, 0, true);
 			
 			queue = new Queue();
@@ -141,13 +149,19 @@ package com.gmrmarketing.puma.startbelieving
 			video.show(form.getData().guid);
 		}
 		
+		
 		private function vidShowing(e:Event):void
 		{
 			form.hide();
 		}
 		
+		
+		/**
+		 * 
+		 * @param	e Video.DONE_RECORDING
+		 */
 		private function videoDone(e:Event):void
-		{
+		{			
 			video.removeEventListener(Video.VID_SHOWING, vidShowing);
 			video.removeEventListener(Video.VID_RESET, doRestart);
 			video.removeEventListener(Video.DONE_RECORDING, videoDone);
@@ -158,6 +172,7 @@ package com.gmrmarketing.puma.startbelieving
 			//send data and vid to bb
 			queue.addToQueue(form.getData());
 		}
+		
 		
 		private function killVideo(e:Event):void
 		{			

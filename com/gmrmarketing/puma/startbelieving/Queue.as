@@ -1,11 +1,10 @@
 package com.gmrmarketing.puma.startbelieving
 {
-	import flash.display.MovieClip;
-	import flash.events.EventDispatcher;
+	import flash.display.MovieClip;	
 	import flash.filesystem.*;	
 	import flash.net.*;
-	import flash.events.*;
-	import com.greensock.TweenMax; //for delayed call	
+	import flash.events.*;	
+	import flash.utils.Timer;
 	
 	
 	public class Queue extends EventDispatcher  
@@ -18,7 +17,7 @@ package com.gmrmarketing.puma.startbelieving
 		
 		private var videoFolder:File;
 		private var users:Array;
-		private var currentUser:Object; //currently uploading		
+		private var currentUser:Object; //currently uploading - set in uploadNext()	
 		
 		private var debugMessage:String;
 		
@@ -30,9 +29,8 @@ package com.gmrmarketing.puma.startbelieving
 		{	
 			formLoader = new URLLoader();
 			videoFolder = new File("c:\\Program Files\\Adobe\\Flash Media Server 4.5\\applications\\puma\\streams\\_definst_");
-			//videoFolder = new File("c:\\vid"); //FOR DEBUGGING
-			users = readObjects();
-			TweenMax.delayedCall(1, initialDebug);	
+			
+			users = readObjects();			
 			
 			//start uploading immediately if there are records waiting
 			if (users.length > 0) {
@@ -41,14 +39,9 @@ package com.gmrmarketing.puma.startbelieving
 		}
 		
 		
-		private function initialDebug():void
-		{
-			debug("Queue loaded - " + users.length + " videos need uploading");
-		}
-		
-		
 		/**
-		 * Data object contains fname,lname,email,song,guid keys		
+		 * called from Main.videoDone()
+		 * Data object contains fname,lname,email,optin,guid keys	
 		 */
 		public function addToQueue(data:Object):void
 		{
@@ -62,11 +55,11 @@ package com.gmrmarketing.puma.startbelieving
 		}
 		
 		/**
-		 * uploads the form data to the service
+		 * uploads the current user form data to the service
 		 */
-		private function uploadNext():void
+		private function uploadNext(e:TimerEvent = null):void
 		{
-			debug("uploadNext " + users.length);
+			debug("uploadNext() " + users.length + " videos in the queue");
 			
 			var request:URLRequest = new URLRequest(FORM_URL);
 			
@@ -99,23 +92,33 @@ package com.gmrmarketing.puma.startbelieving
 		}
 		
 		
-		//wait 30 seconds before restarting the queue
+		/**
+		 * Delayed queue restart
+		 * Calls uploadNext() after 20 seconds
+		 */
 		private function delayedRestart():void
 		{
-			debug("restarting queue - waiting 10 seconds");
-			TweenMax.delayedCall(10, uploadNext);
+			debug("restarting queue - waiting 20 seconds");
+			
+			var dc:Timer = new Timer(20000, 1);
+			dc.addEventListener(TimerEvent.TIMER, uploadNext, false, 0, true);
+			dc.start();
 		}
 		
 		
-		//called when the form data has posted
+		/**
+		 * Called when the form data for currentUser has posted
+		 * uploads the video
+		 * @param	e Event.COMPLETE
+		 */
 		private function dataPosted(e:Event):void
 		{
-			if(e.target.data == "success=true"){
+			debug("dataPosted() e.target.data: " + e.target.data);
 			
-				debug("form data posted - starting video upload");
-				//form posted now send the video
+			if(e.target.data == "success=true"){
+				
 				videoLoader = videoFolder.resolvePath(currentUser.guid + ".flv");
-				debug("VIDEO:" + videoLoader.nativePath);
+				debug("Uploading video: " + videoLoader.nativePath);
 				
 				videoLoader.addEventListener(IOErrorEvent.IO_ERROR, ioError, false, 0, true);
 				videoLoader.addEventListener(Event.COMPLETE, doneUploading, false, 0, true);
@@ -163,7 +166,7 @@ package com.gmrmarketing.puma.startbelieving
 		
 		private function ioError(e:IOErrorEvent):void
 		{
-			debug("video upload i/o error:" + e.toString());
+			debug("video upload i/o error: " + e.toString());
 			
 			if (users.length > 0) {
 				var badUser:Object = users.shift();
@@ -176,6 +179,7 @@ package com.gmrmarketing.puma.startbelieving
 		private function debug(m:String):void
 		{
 			debugMessage = m;
+			//trace(m);
 			dispatchEvent(new Event(DEBUG_MESSAGE));
 		}
 		
@@ -186,13 +190,19 @@ package com.gmrmarketing.puma.startbelieving
 		}
 		
 		
-		//called once video has uploaded
-		//form and vid are now complete
+		/**
+		 * Called once video is done uploading
+		 * @param	e Event.COMPLETE
+		 */
 		private function doneUploading(e:Event):void
 		{
 			debug("video upload complete");
 			users.shift();//remove user from queue
-			rewriteQueue();
+			debug("removing user from queue - new length: " + users.length);
+			
+			rewriteQueue();//empties the users array
+			users = readObjects();//repopulate array
+			
 			if (users.length > 0) {
 				delayedRestart();
 			}
@@ -205,7 +215,14 @@ package com.gmrmarketing.puma.startbelieving
 		 */
 		private function rewriteQueue():void
 		{
-			deleteDataFile();
+			try{
+				var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
+				file.deleteFile();
+				
+			}catch (e:Error) {
+				debug("could not delete data file: " + e.message);
+			}	
+			
 			while (users.length) {
 				var aUser:Object = users.shift();
 				writeObject(aUser);
@@ -214,7 +231,7 @@ package com.gmrmarketing.puma.startbelieving
 		
 		
 		/**
-		 * Writes a single object to the data file
+		 * Appends a single user object to the data file
 		 * @param	obj
 		 */
 		private function writeObject(obj:Object):void
@@ -228,11 +245,16 @@ package com.gmrmarketing.puma.startbelieving
 				file = null;
 				stream = null;
 			}catch (e:Error) {
-				
+				debug("writeObject() catch error: " + e.message);
 			}			
 		}
 		
 		
+		/**
+		 * called from constructor
+		 * returns an array of user objects 
+		 * @return
+		 */
 		private function readObjects():Array
 		{
 			var obs:Array = new Array();
@@ -249,7 +271,7 @@ package com.gmrmarketing.puma.startbelieving
 					a = stream.readObject();
 				}				
 			}catch (e:Error) {
-				
+				debug("readObjects() catch error: " + e.message);
 			}	
 			
 			stream.close();
@@ -257,22 +279,11 @@ package com.gmrmarketing.puma.startbelieving
 			stream = null;
 			
 			//FOR DEBUGGING
-			//obs = [ { fname:"Dave", lname:"Mennenoh", email:"dmennenoh@gmrmarketing.com", song:"taco hunter", guid:"abcdefg-jkl" } ];
+			//obs = [ { fname:"Dave", lname:"Mennenoh", email:"dmennenoh@gmrmarketing.com", optin:"true", guid:"abcdefg-jkl" } ];
 			
 			return obs;
 		}
 		
-		
-		private function deleteDataFile():void
-		{
-			try{
-				var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
-				file.deleteFile();
-				
-			}catch (e:Error) {
-				debug("could not delete data file: " + e.message);
-			}	
-		}
 	}
 	
 }

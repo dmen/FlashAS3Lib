@@ -299,7 +299,8 @@ package com.dmennenoh.keyboard
 		 * @param	e Key.KEYPRESS Event
 		 */
 		private function keypress(e:Event):void
-		{			
+		{	
+			var i:int;
 			if (enabled) {
 				
 				//hack for android
@@ -329,8 +330,13 @@ package com.dmennenoh.keyboard
 				}else if (lastChar == "Shift") {
 					keyboardShifted = !keyboardShifted;
 					num = keyContainer.numChildren;
-					for (var i:int = 0; i < num; i++) {
+					for (i = 0; i < num; i++) {
 						Key(keyContainer.getChildAt(i)).toggleShift(keyboardShifted);
+					}
+				}else if (lastChar == "Caps") {
+					num = keyContainer.numChildren;
+					for (i = 0; i < num; i++) {
+						Key(keyContainer.getChildAt(i)).toggleCaps();
 					}
 				}else if (lastChar == "Enter" && targetField) {
 					if(targetField.multiline){

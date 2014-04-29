@@ -116,6 +116,9 @@ package com.gmrmarketing.puma.startbelieving
 		
 		private function beginRecording(e:MouseEvent):void
 		{	
+			TweenMax.killTweensOf(clip.vid);
+			clip.vid.alpha = 1;
+			
 			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, beginRecording);	
 			clip.mcStart.gotoAndStop(2); //show stop recording
 			curTime = getTimer();
@@ -137,6 +140,10 @@ package com.gmrmarketing.puma.startbelieving
 		}
 		
 		
+		/**
+		 * called by recTimer every 1 sec
+		 * @param	e
+		 */
 		private function updateTime(e:TimerEvent):void
 		{
 			var timeRemaining:int = 15 - (Math.round((getTimer() - curTime) / 1000));
@@ -144,7 +151,7 @@ package com.gmrmarketing.puma.startbelieving
 			if (timeRemaining <= 0) {
 				clip.mcStart.theTime.text = 0;
 				stopRecording();
-				dispatchEvent(new Event(DONE_RECORDING));
+				//dispatchEvent(new Event(DONE_RECORDING));
 			}
 		}
 		
@@ -162,16 +169,17 @@ package com.gmrmarketing.puma.startbelieving
 		
 		
 		/**
-		 * Called by clicking the Finished button
-		 * Called from decrementCount() when the 30 seconds is up
+		 * Called by clicking the stop recording button
+		 * Called from updateTime() when the 15 seconds is up
 		 * @param	e
 		 */
 		private function stopRecording(e:MouseEvent = null):void
 		{			
-			recTimer.reset();
+			recTimer.reset();//stop calling updateTime()
 			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, stopRecording);
 			TweenMax.killTweensOf(clip.blink);
 			clip.blink.alpha = 0;
+			
 			clip.vid.attachCamera(null);
 			vidStream.attachCamera(null);
 			vidStream.attachAudio(null);			
@@ -182,9 +190,9 @@ package com.gmrmarketing.puma.startbelieving
 			
 			isRecording = false;
 			
-			if(e != null){
-				dispatchEvent(new Event(DONE_RECORDING));
-			}
+			//if(e != null){
+				dispatchEvent(new Event(DONE_RECORDING));//calls videoDone() in main
+			//}
 		}		
 		
 		
@@ -196,6 +204,10 @@ package com.gmrmarketing.puma.startbelieving
 		{}
 		
 		
+		/**
+		 * Called if restart button is pressed
+		 * @param	e
+		 */
 		private function doReset(e:MouseEvent):void
 		{
 			if(isRecording){

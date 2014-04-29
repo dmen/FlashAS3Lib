@@ -53,10 +53,10 @@ package com.gmrmarketing.bcbs.findyourbalance
 		public function addUser(user:Array):void
 		{
 			allUsers.push(user);
-			updateAllData();//updates sharedObject with allUsers array
+			updateAllData();//updates allData sharedObject with allUsers array
 			
 			currQueue.push(user);
-			updateQueue();//updates sharedObject with array
+			updateQueue();//updates sendQueue sharedObject with array
 			
 			if (!isPosting) {
 				postNextUser();

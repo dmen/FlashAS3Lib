@@ -19,6 +19,7 @@ package com.dmennenoh.keyboard
 		private var val:String; //keys normal value
 		private var shiftVal:String;//keys shifted value
 		private var shifted:Boolean;//true if shift has been pressed
+		private var capsLocked:Boolean; //true if caps lock is on
 		private var field:TextField;//text field to display keys normal value
 		private var shiftedField:TextField;//text field to display keys shifted value
 		private var showShifted:Boolean;//if true the keys shifted value is shown at upper left, with the normal value under it
@@ -133,6 +134,8 @@ package com.dmennenoh.keyboard
 			addChild(highlight);
 			highlight.alpha = 0;
 			
+			capsLocked = false;
+			
 			addEventListener(MouseEvent.MOUSE_DOWN, keyPressed, false, 0, true);
 		}		
 		
@@ -143,7 +146,7 @@ package com.dmennenoh.keyboard
 		 */
 		public function get value():String
 		{			
-			if (shifted) {
+			if (shifted || capsLocked) {
 				return shiftVal;
 			}else{
 				return val;
@@ -189,7 +192,7 @@ package com.dmennenoh.keyboard
 		{
 			shifted = shift;
 			field.defaultTextFormat = fieldFormat;	
-			if (shifted && !showShifted) {
+			if ((shifted && !showShifted) || capsLocked) {
 				field.text = shiftVal;				
 			}else {
 				field.text = val;
@@ -207,6 +210,36 @@ package com.dmennenoh.keyboard
 			highlight.alpha = highlightAlpha;
 			TweenLite.to(highlight, .5, { alpha:0 } );
 			dispatchEvent(new Event(KEYPRESS));
+		}
+		
+		
+		/**
+		 * Toggles the capsLocked flag for any alpha keys (a - z)
+		 */
+		public function toggleCaps():void
+		{
+			if (isAlpha()) {
+				capsLocked = !capsLocked;
+				if(capsLocked){
+					field.text = shiftVal;
+				}else {
+					field.text = val;
+				}
+			}
+		}
+		
+		
+		/**
+		 * returns true if the keys value is an alpha value (a - z)
+		 * @return
+		 */
+		private function isAlpha():Boolean
+		{
+			var cc:int = val.charCodeAt(0);
+			if (cc >= 97 && cc <= 122 && val.length == 1) {
+				return true;
+			}
+			return false;
 		}
 
 	}

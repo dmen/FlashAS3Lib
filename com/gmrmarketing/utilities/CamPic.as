@@ -148,7 +148,7 @@ package com.gmrmarketing.utilities
 			
 			camTimer = new Timer(1000 / fps);			
 			
-			if (camAvailable) {				
+			if (isAvailable()) {				
 				theVideo.attachCamera(cam);
 			}
 		}		
