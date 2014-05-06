@@ -64,7 +64,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			socket.addEventListener(ProgressEvent.SOCKET_DATA, onServerData );
 			
 			accel = new Accelerometer();			
-			accel.setRequestedUpdateInterval(120);//ms - can be changed through ip dialog
+			accel.setRequestedUpdateInterval(120);//ms
 			accel.addEventListener(AccelerometerEvent.UPDATE, updateHandler);				
 			
 			mainContainer = new Sprite();
@@ -224,7 +224,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 			webService.retrieveEvents();//refresh the event list
 			ipDialog.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, closeIPDialog, false, 0, true);
 			ipDialog.btnShutdown.addEventListener(MouseEvent.MOUSE_DOWN, shutdown, false, 0, true);
-			ipDialog.btnRefresh.addEventListener(MouseEvent.MOUSE_DOWN, refreshConnection, false, 0, true);
+			//ipDialog.btnRefresh.addEventListener(MouseEvent.MOUSE_DOWN, refreshConnection, false, 0, true);
 		}
 		
 		
@@ -250,11 +250,11 @@ package com.gmrmarketing.bcbs.findyourbalance
 			ipStore.data.ip = ipDialog.theIP.text;
 			ipStore.flush();
 			
-			accel.setRequestedUpdateInterval(parseInt(ipDialog.theInterval.text));
+			//accel.setRequestedUpdateInterval(parseInt(ipDialog.theInterval.text));
 			
 			ipDialog.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, closeIPDialog);
 			ipDialog.btnShutdown.removeEventListener(MouseEvent.MOUSE_DOWN, shutdown);
-			ipDialog.btnRefresh.removeEventListener(MouseEvent.MOUSE_DOWN, refreshConnection);
+			//ipDialog.btnRefresh.removeEventListener(MouseEvent.MOUSE_DOWN, refreshConnection);
 		}
 		
 		
@@ -518,9 +518,9 @@ package com.gmrmarketing.bcbs.findyourbalance
 			userData.push(q1.getAnswer());
 			userData.push(q2.getAnswer());
 			
-			//event - send date if no event is selected
+			//event - send empty string if no event is selected
 			if (eventDropdown.getSelection() == "" || eventDropdown.getSelection() == eventDropdown.getResetMessage()) {
-				userData.push(new Date().toString());
+				userData.push("-");
 			}else {
 				userData.push(eventDropdown.getSelection()); //this is program id:program description     aka: 45:Trenton Super
 			}			

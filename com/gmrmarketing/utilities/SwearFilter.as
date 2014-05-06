@@ -13,6 +13,7 @@ package com.gmrmarketing.utilities
 {
 	public class  SwearFilter
 	{
+		private static var unique:Array;
 		private static var swears:Array;
 		private static var threeCharSwears:Array;
 		private static var punctuation:Array;
@@ -31,21 +32,36 @@ package com.gmrmarketing.utilities
 		{	
 			//need to init each time so any exceptions aren't removed for the next check
 			init();
+			var i:int;
 			
 			var t:String = text.toLowerCase();
 			
-			//make a compacted string with no spaces, or punctuation to catch things like "f-u=c*k and pu55y"
-			var ar:Array = t.split(/[\W'_]+/gi);
-			var compacted:String = ar.join("");
+			var compacted:String;
+			//regExps to remove all punctuation from the string
+			var regs:Array = new Array(/\!/g,/\./g,/\,/g,/\</g,/\>/g,/\|/g,/\@/g,/\#/g,/\$/g,/\%/g,/\^/g,/\&/g,/\*/g,/\,/g,/\(/g,/\)/g,/\-/g,/\_/g,/\+/g,/\=/g,/\:/g,/\;/g,/\~/g,/\`/g);
 			
-			//remove the exception if it exists
+			compacted = t.replace(regs[0], "");
+			for(i = 1; i < regs.length; i++){
+				compacted = compacted.replace(regs[i],  "");
+			}			
+			
+			compacted += " "; //add a space to the end
+			
+			//remove the exception from the swears list, if it exists
 			if (exception != null) {
 				swears.splice(swears.indexOf(exception), 1);
+			}			
+			
+			//test for swears - spaces around the word
+			for (i = 0; i < swears.length; i++) {
+				if (compacted.indexOf(" " + swears[i] + " ") != -1) {
+					return true;
+				}
 			}
 			
-			var i:int;
-			for (i = 0; i < swears.length; i++) {
-				if (compacted.indexOf(swears[i]) != -1) {
+			//test for uniques - can exist inside a word - such as 'mefuckyou'
+			for (i = 0; i < unique.length; i++) {
+				if (compacted.indexOf(unique[i]) != -1) {
 					return true;
 				}
 			}
@@ -70,26 +86,36 @@ package com.gmrmarketing.utilities
 		
 		private static function init():void
 		{
+			//uniques can exist inside a word and still provide a positive
+			unique = new Array();
+			unique.push("assmuncher", "asseater", "assbeater", "asslicker", "asshole", "a55", "bullshit", "buttplug", "blowjob");
+			unique.push("cameltoe", "cunt", "cunny");
+			unique.push("fellatio", "fuck", "fvck")
+			unique.push("nigger", "nigg3r", "niglet", "nutsack", "motherfucker");
+			unique.push("jigaboo", "junglebunny", "handjob", "p3nis", "sh1t", "retard");
+			unique.push("testicle", "titsucker", "titlicker", "titfeeler", "titmilker", "titpuller", "tittoucher", "titty", "titties");
+			unique.push("vagina", "vjayjay", "vajayjay", "pu55", "pu55y", "pussy", "wetback", "rimjob");
+			
+			//swears must be individual - aka a space around them to be a swear
 			swears = new Array();
-			swears.push("anus", "anal", "assmuncher", "asseater", "assbeater", "asslicker", "asshole", "a55");
-			swears.push("beaner", "bitch", "b1t", "blowjob", "boner", "bullshit", "buttplug");
-			swears.push("cameltoe", "chinc", "clit", "cock", "cooch", "cum", "cunt", "cunny");
+			swears.push("anus", "anal",  "ass");
+			swears.push("bitch", "boner");
+			swears.push("chinc", "clit", "cock", "cooch", "cum");
 			swears.push("dago", "dick", "dildo", "douche", "dyke");			
-			swears.push("fag", "fellatio", "fuck", "flamer");
-			swears.push("gay", "gook", "guido");
-			swears.push("homo", "honkey", "handjob");
-			swears.push("jap", "jigaboo", "junglebunny");
+			swears.push("fag", "flamer");
+			swears.push("gook", "guido");
+			swears.push("homo", "honkey");
+			swears.push("jap");
 			swears.push("kike", "kooch", "kraut", "kyke");
-			swears.push("lesbo", "lesbian", "lezzie", "lez");
-			swears.push("motherfucker", "muff");
-			swears.push("nigga", "nigger", "nigg3r", "niglet", "nutsack");
-			swears.push("pecker", "penis", "p3nis", "piss", "pi55", "poon", "prick", "pussy", "pu55");
-			swears.push("queef", "queer", "qu33");
-			swears.push("retard", "rimjob");
-			swears.push("shit", "sh1t", "skank", "slut", "snatch", "spic", "spick", "splooge");
-			swears.push("tard", "testicle", "titsucker", "titlicker", "titfeeler", "titmilker", "titpuller", "tittoucher", "titty", "titties", "twat");
-			swears.push("vag", "vagina", "vjayjay", "vajayjay");
-			swears.push("wank", "wetback", "whore", "wop");
+			swears.push("lesbo", "lezzie", "lez");
+			swears.push("muff");
+			swears.push("nigga");
+			swears.push("pecker", "penis", "piss", "pi55", "poon", "prick");
+			swears.push("queef", "queer");			
+			swears.push("shit", "skank", "slut", "snatch", "spic", "spick", "splooge");
+			swears.push("tard", "twat");
+			swears.push("vag");
+			swears.push("wank", "whore", "wop");
 			
 			threeCharSwears = new Array();
 			threeCharSwears.push("god", "ass", "azz", "anl", "aho", "fuk", "fkr", "fuc", "fck", "fux");

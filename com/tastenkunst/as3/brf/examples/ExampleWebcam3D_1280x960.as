@@ -268,7 +268,8 @@ package com.tastenkunst.as3.brf.examples
 			_container3D.init(new Rectangle(356, 63, 1280, 960)); //316
 			_container3D.initVideo(_videoManager.videoData);//1280x960 bmd
 			_container3D.initOcclusion("brf_fp11_occlusion_head.zf3d");
-			_container3D.model = "helm_cut2.zf3d";			
+			//_container3D.model = "helm_cut2.zf3d";			
+			_container3D.model = "sap.zf3d";			
 			
 			//load helmet and jersey from user data...
 			Flare3D_v2_5(_container3D).setTeam(currentTeam);

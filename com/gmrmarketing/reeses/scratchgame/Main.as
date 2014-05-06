@@ -37,7 +37,7 @@ package com.gmrmarketing.reeses.scratchgame
 			
 			cq = new CornerQuit();
 			cq.init(this, "ul");
-			cq.addEventListener(CornerQuit.CORNER_QUIT, showAdmin, false, 0, true);
+			//cq.addEventListener(CornerQuit.CORNER_QUIT, showAdmin, false, 0, true);
 			
 			admin = new Admin();
 			scratch = new Scratch();
@@ -130,7 +130,8 @@ package com.gmrmarketing.reeses.scratchgame
 			dialog.y = 753;
 			dialog.gotoAndStop(2);
 			
-			dialog.addEventListener(MouseEvent.MOUSE_DOWN, spin, false, 0, true);
+			//dialog.addEventListener(MouseEvent.MOUSE_DOWN, spin, false, 0, true);
+			dialog.addEventListener(MouseEvent.MOUSE_DOWN, playAgain, false, 0, true);
 			
 			TweenLite.to(dialog, .5, { y:0 } );
 			

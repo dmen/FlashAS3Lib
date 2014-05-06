@@ -14,11 +14,14 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		private static const EVENT_URL:String = "http://bluecrosshorizon.thesocialtab.net/home/getprograms";
 		private var events:Object; //array of objects - objects have pid and descr properties
-		
+		private var eventStore:SharedObject;//local cached event list if get from service fails
+		private var localEvents:Object;
 		
 		public function ControllerWeb()
 		{
 			events = new Object();
+			eventStore = SharedObject.getLocal("events");
+			localEvents = eventStore.data.events;
 		}
 		
 		
@@ -42,13 +45,21 @@ package com.gmrmarketing.bcbs.findyourbalance
 		private function gotEvents(e:Event):void
 		{			
 			events = JSON.parse(e.currentTarget.data);
+			
+			eventStore.data.events = events;
+			eventStore.flush();
+			
 			dispatchEvent(new Event(CONTROLLER_EVENTS));
 		}
 		
 		
 		private function eventsError(e:IOErrorEvent):void
 		{
-			events = new Object();
+			if(eventStore.data.events == null){
+				events = new Object();
+			}else {
+				events = eventStore.data.events;
+			}
 			dispatchEvent(new Event(CONTROLLER_EVENTS));			
 		}		
 		

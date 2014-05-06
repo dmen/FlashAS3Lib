@@ -4,47 +4,42 @@ package com.gmrmarketing.bcbs.livefearless
 	import flash.events.*;
 	import com.greensock.TweenMax;
 	
-	
-	public class Intro extends EventDispatcher
-	{		
-		public static const BEGIN:String = "startPressed";
+	public class WhiteFlash extends EventDispatcher
+	{
+		public static const FLASH_COMPLETE:String = "flashComplete";
 		
 		private var clip:MovieClip;
 		private var container:DisplayObjectContainer;
 		
 		
-		public function Intro()
+		public function WhiteFlash()
 		{
-			clip = new mcIntro();			
+			clip = new mcFlash();
 		}
+		
 		
 		public function setContainer($container:DisplayObjectContainer):void
 		{
 			container = $container;
 		}
 		
+		
 		public function show():void
 		{
 			if (!container.contains(clip)) {
 				container.addChild(clip);
 			}
-			clip.alpha = 0;
-			clip.btnStart.addEventListener(MouseEvent.MOUSE_DOWN, doBegin, false, 0, true);
-			TweenMax.to(clip, 1, { alpha:1 } );
+			clip.alpha = 1;
+			TweenMax.to(clip, .3, { alpha:0, onComplete:done } );
 		}
 		
-		public function hide():void
+		
+		private function done():void
 		{
 			if (container.contains(clip)) {
 				container.removeChild(clip);
 			}
-		}
-		
-		
-		private function doBegin(e:MouseEvent):void
-		{
-			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, doBegin);
-			dispatchEvent(new Event(BEGIN));
+			dispatchEvent(new Event(FLASH_COMPLETE));
 		}
 	}
 	

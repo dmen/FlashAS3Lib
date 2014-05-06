@@ -24,8 +24,8 @@ package com.gmrmarketing.bcbs.findyourbalance
 			combo = new ComboBox("More Information:");
 			combo.populate(["Medical", "Pharmacy", "Journey to Health (Total Care Management)", "No Thanks"]);
 			clip.addChild(combo);
-			combo.x = 430;
-			combo.y = 455;
+			combo.x = 432;
+			combo.y = 494;
 		}
 		
 		

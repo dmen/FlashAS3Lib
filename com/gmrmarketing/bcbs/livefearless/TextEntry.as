@@ -1,3 +1,8 @@
+/**
+ * Initial page after intro that contains
+ * name fields and message field
+ */
+
 package com.gmrmarketing.bcbs.livefearless
 {
 	import flash.display.*;
@@ -5,11 +10,17 @@ package com.gmrmarketing.bcbs.livefearless
 	import com.greensock.TweenMax;
 	import com.dmennenoh.keyboard.KeyBoard;
 	import flash.utils.Timer;
+	import com.gmrmarketing.utilities.SwearFilter;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	public class TextEntry extends EventDispatcher
 	{
 		public static const SHOWING:String = "clipShowing";
 		public static const NEXT:String = "nextPressed";
+		public static const REQUIRED:String = "messageRequired";
+		public static const NAME:String = "nameRequired";
+		public static const SWEAR:String = "inappropriate";
+		
 		private const MAX_CHARS:int = 160;
 		
 		private var clip:MovieClip;
@@ -17,19 +28,23 @@ package com.gmrmarketing.bcbs.livefearless
 		private var kbd:KeyBoard;		
 		private var charCountTimer:Timer;
 		
+		private var timeoutHelper:TimeoutHelper;
+		
 		
 		public function TextEntry()
 		{
 			clip = new mcTextEntry();
 			kbd = new KeyBoard();			 
-			//kbd.addEventListener(KeyBoard.KEYFILE_LOADED, init, false, 0, true);
+			kbd.addEventListener(KeyBoard.KBD, resetTimeout, false, 0, true);
 			kbd.loadKeyFile("bcbs_photobooth.xml");
 			
 			clip.theText.text = "";
 			clip.theCount.text = String(MAX_CHARS);
 			
 			charCountTimer = new Timer(200);
-			charCountTimer.addEventListener(TimerEvent.TIMER, updateCharCount, false, 0, true);
+			charCountTimer.addEventListener(TimerEvent.TIMER, updateCharCount, false, 0, true);			
+			
+			timeoutHelper = TimeoutHelper.getInstance();
 		}
 		
 		
@@ -45,16 +60,23 @@ package com.gmrmarketing.bcbs.livefearless
 				container.addChild(clip);
 			}
 			
-			kbd.x = 485;
-			kbd.y = 700;
+			kbd.x = 525;
+			kbd.y = 720;
 			if(!clip.contains(kbd)){
 				clip.addChild(kbd);
 			}
-			kbd.setFocusFields([clip.theText]);
+			kbd.setFocusFields([clip.fname, clip.lname, clip.theText]);
+			
+			clip.fname.maxChars = 30;
+			clip.lname.maxChars = 30;
 			
 			if (clearText) {
+				clip.fname.text = "";
+				clip.lname.text = "";
 				clip.theText.text = "";
 				clip.theCount.text = String(MAX_CHARS);			
+			}else {
+				clip.stage.focus = clip.theText;
 			}
 			
 			clip.alpha = 0;
@@ -74,11 +96,14 @@ package com.gmrmarketing.bcbs.livefearless
 		public function hide():void
 		{
 			charCountTimer.stop();
+			kbd.removeEventListener(KeyBoard.KBD, resetTimeout);
 			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, doNext);
 			if (container.contains(clip)) {
 				container.removeChild(clip);
 			}
-			clip.removeChild(kbd);
+			if(clip.contains(kbd)){
+				clip.removeChild(kbd);
+			}
 		}
 		
 		
@@ -88,13 +113,46 @@ package com.gmrmarketing.bcbs.livefearless
 		}
 		
 		
+		public function getName():String
+		{
+			var fn:String = clip.fname.text;
+			var ln:String = String(clip.lname.text).substr(0, 1);
+			fn = fn.substr(0, 1).toUpperCase() + fn.substr(1);
+			ln = ln.toUpperCase();
+			return "- " + fn + " " + ln;
+		}
+		
+		public function getData():Array
+		{
+			return new Array(clip.fname.text, clip.lname.text, clip.theText.text);
+		}
 		/**
 		 * Called when the Next button is pressed
 		 * @param	e
 		 */
 		private function doNext(e:MouseEvent):void
 		{
-			dispatchEvent(new Event(NEXT));
+			timeoutHelper.buttonClicked();
+			
+			if (clip.fname.text == "" || clip.lname.text == "") {
+				dispatchEvent(new Event(NAME));
+			}else if (clip.theText.length < 2) {
+				dispatchEvent(new Event(REQUIRED));
+			}else if (SwearFilter.isSwear(clip.theText.text)) {
+				dispatchEvent(new Event(SWEAR));
+			}else{
+				dispatchEvent(new Event(NEXT));
+			}
+		}
+		
+		
+		/**
+		 * called whenever a keyboard key is pressed
+		 * @param	e
+		 */
+		private function resetTimeout(e:Event):void
+		{
+			timeoutHelper.buttonClicked();
 		}
 		
 		

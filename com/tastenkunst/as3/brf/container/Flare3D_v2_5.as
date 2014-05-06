@@ -338,9 +338,9 @@ package com.tastenkunst.as3.brf.container {
 					setMask(0x111c24);
 					break;
 				case "packers":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetGreenBayPackers.jpg" );
+					//helmetShader.filters[0].texture = new Texture3D( path + "HelmetGreenBayPackers.jpg" );
 					//stripeShader.filters[0].texture = new Texture3D( path + "StripeGreenBayPackers.jpg" );
-					setMask(0x2c5e4f);
+					//setMask(0x2c5e4f);
 					break;
 				case "texans":
 					helmetShader.filters[0].texture = new Texture3D( path + "HelmetHoustonTexans.jpg" );
@@ -443,9 +443,9 @@ package com.tastenkunst.as3.brf.container {
 					setMask(0xffb612);
 					break;
 			}			
-			_scene.freeMemory();
-			
+			_scene.freeMemory();			
 		}
+		
 		
 		private function setMask(color:uint):void
 		{

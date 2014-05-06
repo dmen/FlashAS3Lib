@@ -252,10 +252,14 @@ package com.gmrmarketing.utilities
 		 * Turns off the camera
 		 */
 		public function dispose():void
-		{						
-			camTimer.stop();
-			camTimer.removeEventListener(TimerEvent.TIMER, update);
-			theVideo.attachCamera(null);			
+		{		
+			if(camTimer){
+				camTimer.stop();
+				camTimer.removeEventListener(TimerEvent.TIMER, update);
+			}
+			if(theVideo){
+				theVideo.attachCamera(null);			
+			}
 		}
 		
 		

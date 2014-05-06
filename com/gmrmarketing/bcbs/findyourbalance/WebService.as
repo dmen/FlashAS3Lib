@@ -15,13 +15,12 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		private var isPosting:Boolean; //true while posting
 		
-		private var allData:SharedObject;//local storage for all user data
-		private var allUsers:Array; //all the users in allData - used for high scores
-		private var currUser:Array; //currently posting userData
+		private var allData:SharedObject;//local storage for top ten scoring users
+		private var allUsers:Array; //all the users in allData - used for high scores		
 		
 		private var sendQueue:SharedObject;//local store for all users not yet sent to server
 		private var currQueue:Array; //users waiting to send
-		
+		private var currUser:Array; //currently posting userData
 		
 		
 		public function WebService()
@@ -46,13 +45,24 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		
 		/**
-		 * adds a user to allUsers/allData 
-		 * also adds to the send queue
+		 * inserts a user to allUsers/allData in score sorted order
+		 * also adds user to the send queue
 		 * @param	user Array fname,lname,email,phone,state,sweeps entry,optin,moreInfo,q1a,q2a,event,score
 		 */
 		public function addUser(user:Array):void
 		{
-			allUsers.push(user);
+			var inserted:Boolean = false;
+			for (var i:int = 0; i < allUsers.length; i++) {
+				if (user[11] > allUsers[i][11]) {
+					allUsers.splice(i, 0, user);
+					inserted = true;
+					break;
+				}
+			}
+			if (!inserted) {
+				allUsers.push(user);
+			}
+			
 			updateAllData();//updates allData sharedObject with allUsers array
 			
 			currQueue.push(user);
@@ -70,18 +80,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		 */
 		public function getLeaderboard():Array
 		{
-			//array of arrays. Sub arrays contain: fname,lname,email,phone,state,sweeps entry,optin,moreInfo,q1a,q2a,event,score
-			
-			var ad:Array = allUsers.concat();//duplicate array for sorting
-			
-			ad.sortOn('11', Array.DESCENDING | Array.NUMERIC);//index 11 is score field
-			
-			var ret:Array = new Array();
-			while (ad.length > 0 && ret.length < 10) {
-				ret.push(ad.shift());
-			}
-			
-			return ret;
+			return allUsers
 		}
 		
 		
@@ -101,9 +100,14 @@ package com.gmrmarketing.bcbs.findyourbalance
 				vars.state = currUser[4];
 				
 				//get event pid from event string: pid:desc
+				//if no event selected the string is "-" - in that case send empty string to service
 				var ev:String = currUser[10];
-				var a:Array = ev.split(":");				
-				vars.programId = a[0];
+				if (ev == "-") {
+					vars.programId = "";
+				}else{
+					var a:Array = ev.split(":");				
+					vars.programId = a[0];
+				}
 				
 				vars.interestedIn = currUser[9]; //answer to question 2
 				vars.currentHealthIns = currUser[8];//answer to question 1
@@ -143,8 +147,15 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		
 		private function updateAllData():void
-		{
-			allData.data.users = allUsers;
+		{			
+			var topTen:Array = new Array();
+			var user:Object;
+			while (topTen.length < 10 && allUsers.length > 0) {
+				user = allUsers.shift();				
+				topTen.push(user);				
+			}
+			allUsers = topTen;
+			allData.data.users = topTen;
 			allData.flush();
 		}
 		

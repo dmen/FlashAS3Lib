@@ -60,8 +60,13 @@ package com.gmrmarketing.bcbs.findyourbalance
 		public function show(leaders:Array):void
 		{
 			//populate leaderboard with names/scores
+			var fn:String;
+			var ln:String;
 			for (var i:int = 0; i < leaders.length; i++) {
-				clip2["n" + i].text = leaders[i][0] + " " + String(leaders[i][1]).substr(0, 1) + ".";
+				fn = leaders[i][0];
+				fn = fn.substr(0, 1).toUpperCase() + fn.substr(1);				
+				ln = String(leaders[i][1]).substr(0, 1).toUpperCase();
+				clip2["n" + i].text = fn + " " + ln + ".";
 				clip2["s" + i].text = String(leaders[i][11]);				
 			}
 			
@@ -239,61 +244,61 @@ package com.gmrmarketing.bcbs.findyourbalance
 				clip.ic1.y = -50;
 				clip.ic1.scaleX = clip.ic1.scaleY = .5 + Math.random() * .5;
 				clip.ic1.x = 50 + Math.random() * 1820;
-				clip.ic1.alpha = .4 * Math.random() * .5;
+				clip.ic1.alpha = .2 + Math.random() * .4;
 			}
 			if (clip.ic2.y > 850) {
 				clip.ic2.y = -50;
 				clip.ic2.scaleX = clip.ic2.scaleY = .5 + Math.random() * .5;
 				clip.ic2.x = 50 + Math.random() * 1820;
-				clip.ic2.alpha = .4 * Math.random() * .5;
+				clip.ic2.alpha = .2 + Math.random() * .4;
 			}
 			if (clip.ic3.y > 850) {
 				clip.ic3.y = -50;
 				clip.ic3.scaleX = clip.ic3.scaleY = .5 + Math.random() * .5;
 				clip.ic3.x = 50 + Math.random() * 1820;
-				clip.ic3.alpha = .4 * Math.random() * .5;
+				clip.ic3.alpha = .2 + Math.random() * .4;
 			}
 			if (clip.ic4.y > 850) {
 				clip.ic4.y = -50;
 				clip.ic4.scaleX = clip.ic4.scaleY = .5 + Math.random() * .5;
 				clip.ic4.x = 50 + Math.random() * 1820;
-				clip.ic4.alpha = .4 * Math.random() * .5;
+				clip.ic4.alpha = .2 + Math.random() * .4;
 			}
 			if (clip.ic5.y > 850) {
 				clip.ic5.y = -50;
 				clip.ic5.scaleX = clip.ic5.scaleY = .5 + Math.random() * .5;
 				clip.ic5.x = 50 + Math.random() * 1820;
-				clip.ic5.alpha = .4 * Math.random() * .5;
+				clip.ic5.alpha = .2 + Math.random() * .4;
 			}
 			if (clip.ic6.y > 850) {
 				clip.ic6.y = -50;
 				clip.ic6.scaleX = clip.ic6.scaleY = .5 + Math.random() * .5;
 				clip.ic6.x = 50 + Math.random() * 1820;
-				clip.ic6.alpha = .4 * Math.random() * .5;
+				clip.ic6.alpha = .2 + Math.random() * .4;
 			}
 			if (clip.ic7.y > 850) {
 				clip.ic7.y = -50;
 				clip.ic7.scaleX = clip.ic7.scaleY = .5 + Math.random() * .5;
 				clip.ic7.x = 50 + Math.random() * 1820;
-				clip.ic7.alpha = .4 * Math.random() * .5;
+				clip.ic7.alpha = .2 + Math.random() * .4;
 			}
 			if (clip.ic8.y > 850) {
 				clip.ic8.y = -50;
 				clip.ic8.scaleX = clip.ic8.scaleY = .5 + Math.random() * .5;
 				clip.ic8.x = 50 + Math.random() * 1820;
-				clip.ic8.alpha = .4 * Math.random() * .5;
+				clip.ic8.alpha = .2 + Math.random() * .4;
 			}
 			if (clip.ic9.y > 850) {
 				clip.ic9.y = -50;
 				clip.ic9.scaleX = clip.ic9.scaleY = .5 + Math.random() * .5;
 				clip.ic9.x = 50 + Math.random() * 1820;
-				clip.ic9.alpha = .4 * Math.random() * .5;
+				clip.ic9.alpha = .2 + Math.random() * .4;
 			}
 			if (clip.ic10.y > 850) {
 				clip.ic10.y = -50;
 				clip.ic10.scaleX = clip.ic10.scaleY = .5 + Math.random() * .5;
 				clip.ic10.x = 50 + Math.random() * 1820;
-				clip.ic10.alpha = .4 * Math.random() * .5;
+				clip.ic10.alpha = .2 + Math.random() * .4;
 			}
 		}
 		
