@@ -209,11 +209,9 @@ package com.gmrmarketing.puma.startbelieving
 		
 		
 		private function newDebugMessage(e:Event):void
-		{
-			var mess:String = queue.getDebugMessage();
-			
+		{			
 			if(admin.isShowing()){
-				admin.displayDebug(mess);
+				admin.displayDebug(queue.getDebugMessage());
 			}
 		}
 		

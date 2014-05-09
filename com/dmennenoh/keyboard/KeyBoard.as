@@ -37,7 +37,7 @@ package com.dmennenoh.keyboard
 		public static const SUBMIT:String = "SUBMIT_PRESSED"; //Special - dispatched only when a key with the value Submit or Send is pressed
 		public static const KEYFILE_LOADED:String = "keyFileLoaded"; //Dispatched when keyFileLoaded() is called, ie when loadKeyFile() is used
 		
-		private const IS_ANDROID:Boolean = true; //if true hacks are employed to deselect the text fields...
+		private const IS_ANDROID:Boolean = false; //if true hacks are employed to deselect the text fields...
 		
 		private var keyContainer:Sprite;//container for all the Key objects
 		private var bgContainer:Sprite; //container for the background shape

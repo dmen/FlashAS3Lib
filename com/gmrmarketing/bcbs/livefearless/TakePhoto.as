@@ -26,9 +26,11 @@ package com.gmrmarketing.bcbs.livefearless
 		private var displayPhoto:Bitmap;
 		private var imageString:String;
 		
+		private var tookPhoto:Boolean; //true in takePic()
 		
 		public function TakePhoto()
 		{
+			tookPhoto = false;
 			clip = new mcTakePhoto();
 			cam = new CamPic();
 		}
@@ -46,30 +48,34 @@ package com.gmrmarketing.bcbs.livefearless
 				container.addChild(clip);
 			}
 			
+			clip.btnTake.gotoAndStop(1); //shows take photo - frame 2 is retake			
+			clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, takePic, false, 0, true);
+			clip.btnContinue.visible = false;
+				
 			if(!wasEditing){
 				if(displayPhoto){
 					if (clip.contains(displayPhoto)) {
 						clip.removeChild(displayPhoto);
 					}
 				}
-				clip.btnTake.gotoAndStop(1); //shows take photo
-				clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, retake);
-				clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, takePic, false, 0, true);
-				clip.btnContinue.visible = false;
+				
 			}else {
 				//was editing
-				clip.btnTake.gotoAndStop(2); //show retake photo
-				clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, retake, false, 0, true);
-				clip.btnContinue.visible = true;
-				clip.btnContinue.addEventListener(MouseEvent.MOUSE_DOWN, finished, false, 0, true);
+				if(tookPhoto){
+					clip.btnTake.gotoAndStop(2); //show retake photo					
+					clip.btnContinue.visible = true;
+					clip.btnContinue.addEventListener(MouseEvent.MOUSE_DOWN, finished, false, 0, true);
+				}
 			}
 			
 			clip.theText.text = message;//side bar on left
-			clip.theText2.text = message;//main text over photo
-			clip.theName.text = name;
+			clip.theText.y = 716 + ((166 - clip.theText.textHeight) * .5);
 			
-			clip.theText2.y = 587 + ((190 - clip.theText2.textHeight) * .5);
-			clip.theName.y = clip.theText2.y + clip.theText2.textHeight + 15;
+			clip.theText2.text = message;//main text over photo
+			clip.theText2.y = 588 + ((190 - clip.theText2.textHeight) * .5);
+			
+			clip.theName.text = name;
+			clip.theName.y = clip.theText2.y + clip.theText2.textHeight + 8;
 			
 			cam.init(1920, 1080, 0, 0, 1717, 964, 30); //set camera and capture res to 1920x1080 and display at 1717x964 (24 fps)	
 			cam.show(clip.camImage);//black box behind bg image
@@ -92,6 +98,10 @@ package com.gmrmarketing.bcbs.livefearless
 		}
 		
 		
+		/**
+		 * called from main - snapshots the current camPic image
+		 * and displays it
+		 */
 		public function showPhoto():void
 		{	
 			var camIm:BitmapData = new BitmapData(1717, 964);
@@ -106,7 +116,7 @@ package com.gmrmarketing.bcbs.livefearless
 			clip.addChildAt(displayPhoto, 1); //put right in front of camPic
 			
 			clip.btnTake.gotoAndStop(2); //show retake photo
-			clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, retake, false, 0, true);
+			clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, takePic, false, 0, true);
 			clip.btnContinue.visible = true;
 			clip.btnContinue.addEventListener(MouseEvent.MOUSE_DOWN, finished, false, 0, true);
 			clip.btnEdit.addEventListener(MouseEvent.MOUSE_DOWN, editText, false, 0, true);
@@ -125,18 +135,7 @@ package com.gmrmarketing.bcbs.livefearless
 			var jpeg:ByteArray = getJpeg(pho);
 			imageString = getBase64(jpeg);
 			return imageString;
-		}
-		
-		
-		private function retake(e:MouseEvent):void
-		{
-			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, retake);
-			clip.btnTake.gotoAndStop(1);
-			clip.removeChild(displayPhoto);
-			clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, takePic, false, 0, true);
-			clip.btnContinue.addEventListener(MouseEvent.MOUSE_DOWN, finished, false, 0, true);
-			clip.btnContinue.visible = false;
-		}
+		}		
 		
 		
 		private function editText(e:MouseEvent):void
@@ -151,9 +150,15 @@ package com.gmrmarketing.bcbs.livefearless
 		 */
 		private function takePic(e:MouseEvent):void
 		{
-			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, takePic);
+			tookPhoto = true;
+			if(displayPhoto){
+				if (clip.contains(displayPhoto)) {
+					clip.removeChild(displayPhoto);
+				}
+			}
+			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, takePic);//aded back in showPhoto()
 			clip.btnEdit.removeEventListener(MouseEvent.MOUSE_DOWN, editText);
-			dispatchEvent(new Event(TAKE_PHOTO));
+			dispatchEvent(new Event(TAKE_PHOTO));//main will now call showPhoto() after countdown
 		}
 		
 		

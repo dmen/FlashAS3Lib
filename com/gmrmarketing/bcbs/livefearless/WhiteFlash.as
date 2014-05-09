@@ -30,7 +30,7 @@ package com.gmrmarketing.bcbs.livefearless
 				container.addChild(clip);
 			}
 			clip.alpha = 1;
-			TweenMax.to(clip, .3, { alpha:0, onComplete:done } );
+			TweenMax.to(clip, .5, { alpha:0, onComplete:done } );
 		}
 		
 		

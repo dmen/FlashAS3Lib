@@ -14,6 +14,7 @@ package com.gmrmarketing.puma.startbelieving
 		private const FORM_URL:String = "https://pumaworldcupvideo.thesocialtab.net/Home/Register?";
 		private const VIDEO_URL:String = "https://pumaworldcupvideo.thesocialtab.net/Home/SubmitVideo";
 		private const DATA_FILE_NAME:String = "pumaData.csv";
+		private const SAVED_FILE_NAME:String = "pumaSaved.csv"; //users successfully uploaded
 		
 		private var videoFolder:File;
 		private var users:Array;
@@ -22,7 +23,7 @@ package com.gmrmarketing.puma.startbelieving
 		private var debugMessage:String;
 		
 		private var formLoader:URLLoader;
-		private var videoLoader:File;
+		private var videoLoader:File;		
 		
 		
 		public function Queue()
@@ -30,7 +31,7 @@ package com.gmrmarketing.puma.startbelieving
 			formLoader = new URLLoader();
 			videoFolder = new File("c:\\Program Files\\Adobe\\Flash Media Server 4.5\\applications\\puma\\streams\\_definst_");
 			
-			users = readObjects();			
+			users = readObjects();
 			
 			//start uploading immediately if there are records waiting
 			if (users.length > 0) {
@@ -44,7 +45,7 @@ package com.gmrmarketing.puma.startbelieving
 		 * Data object contains fname,lname,email,optin,guid keys	
 		 */
 		public function addToQueue(data:Object):void
-		{
+		{			
 			users.push(data);
 			writeObject(data);
 			
@@ -53,6 +54,7 @@ package com.gmrmarketing.puma.startbelieving
 				uploadNext();
 			}
 		}
+		
 		
 		/**
 		 * uploads the current user form data to the service
@@ -84,26 +86,12 @@ package com.gmrmarketing.puma.startbelieving
 		
 		private function dataError(e:IOErrorEvent):void
 		{
-			debug("data error from form post");
+			debug("IO error from form post:",e.toString());
 			
 			if (users.length > 0) {
 				delayedRestart();
 			}			
-		}
-		
-		
-		/**
-		 * Delayed queue restart
-		 * Calls uploadNext() after 20 seconds
-		 */
-		private function delayedRestart():void
-		{
-			debug("restarting queue - waiting 20 seconds");
-			
-			var dc:Timer = new Timer(20000, 1);
-			dc.addEventListener(TimerEvent.TIMER, uploadNext, false, 0, true);
-			dc.start();
-		}
+		}		
 		
 		
 		/**
@@ -131,7 +119,10 @@ package com.gmrmarketing.puma.startbelieving
 				
 			}else {
 				debug("form data error - success!=true");
-				delayedRestart();
+				if (users.length > 0) {				
+					users.push(users.shift()); //stick error prone form onto end of queue
+					delayedRestart();
+				}	
 			}
 		}
 		
@@ -142,16 +133,15 @@ package com.gmrmarketing.puma.startbelieving
 		
 		
 		private function openHandler(e:Event):void {
-            debug("video opened: " + e.toString());
+            debug("video file opened: " + e.toString());
         }
 		
 		
 		private function securityErrorHandler(e:SecurityErrorEvent):void {
             debug("video securityErrorHandler: " + e.toString());
 			
-			if (users.length > 0) {
-				var badUser:Object = users.shift();
-				users.push(badUser); //stick error prone video onto end of queue
+			if (users.length > 0) {				
+				users.push(users.shift()); //stick error prone video onto end of queue
 				delayedRestart();
 			}	
         }
@@ -169,8 +159,7 @@ package com.gmrmarketing.puma.startbelieving
 			debug("video upload i/o error: " + e.toString());
 			
 			if (users.length > 0) {
-				var badUser:Object = users.shift();
-				users.push(badUser); //stick error prone video onto end of queue
+				users.push(users.shift()); //stick error prone video onto end of queue
 				delayedRestart();
 			}	
 		}
@@ -179,7 +168,6 @@ package com.gmrmarketing.puma.startbelieving
 		private function debug(m:String):void
 		{
 			debugMessage = m;
-			//trace(m);
 			dispatchEvent(new Event(DEBUG_MESSAGE));
 		}
 		
@@ -191,17 +179,18 @@ package com.gmrmarketing.puma.startbelieving
 		
 		
 		/**
-		 * Called once video is done uploading
+		 * Called once uaser and video are done uploading
 		 * @param	e Event.COMPLETE
 		 */
 		private function doneUploading(e:Event):void
 		{
-			debug("video upload complete");
-			users.shift();//remove user from queue
-			debug("removing user from queue - new length: " + users.length);
+			debug("doneUploading() - adding saved user to save file");			
 			
-			rewriteQueue();//empties the users array
-			users = readObjects();//repopulate array
+			var savedUser:Object = users.shift();//remove now uploaded user from the queue
+			writeSavedUser(savedUser); //keep saved users in sep file
+			
+			rewriteQueue();//delete current users file and write users array back to it
+			users = readObjects();//repopulate users from the new file
 			
 			if (users.length > 0) {
 				delayedRestart();
@@ -215,6 +204,7 @@ package com.gmrmarketing.puma.startbelieving
 		 */
 		private function rewriteQueue():void
 		{
+			debug("rewriteQueue()");
 			try{
 				var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
 				file.deleteFile();
@@ -235,17 +225,38 @@ package com.gmrmarketing.puma.startbelieving
 		 * @param	obj
 		 */
 		private function writeObject(obj:Object):void
-		{			
+		{		
+			debug("writeObject()");
 			try{
 				var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
 				var stream:FileStream = new FileStream();
-				stream.open( file, FileMode.APPEND );
-				stream.writeObject(obj );
+				stream.open( file, FileMode.APPEND );//synchronous
+				stream.writeObject(obj);
 				stream.close();
 				file = null;
 				stream = null;
 			}catch (e:Error) {
 				debug("writeObject() catch error: " + e.message);
+			}			
+		}
+		
+		/**
+		 * Appends a single user object to the saved data file
+		 * @param	obj
+		 */
+		private function writeSavedUser(obj:Object):void
+		{			
+			debug("writeSavedUser() - user: ",+obj.fname+" "+obj.lname);
+			try{
+				var file:File = File.applicationStorageDirectory.resolvePath( SAVED_FILE_NAME );
+				var stream:FileStream = new FileStream();
+				stream.open( file, FileMode.APPEND );
+				stream.writeObject(obj);
+				stream.close();
+				file = null;
+				stream = null;
+			}catch (e:Error) {
+				debug("writeSavedUser() error: " + e.message);
 			}			
 		}
 		
@@ -257,13 +268,14 @@ package com.gmrmarketing.puma.startbelieving
 		 */
 		private function readObjects():Array
 		{
+			debug("readObjects()");
 			var obs:Array = new Array();
 			var a:Object = { };
 		
 			try{
 				var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
 				var stream:FileStream = new FileStream();
-				stream.open( file, FileMode.READ );
+				stream.open( file, FileMode.READ );//synchronus
 				
 				a = stream.readObject();
 				while (a.fname != undefined) {
@@ -284,6 +296,19 @@ package com.gmrmarketing.puma.startbelieving
 			return obs;
 		}
 		
+		
+		/**
+		 * Delayed queue restart
+		 * Calls uploadNext() after 20 seconds
+		 */
+		private function delayedRestart():void
+		{
+			debug("delayedRestart() - restarting queue in 20 seconds");
+			
+			var dc:Timer = new Timer(20000, 1);
+			dc.addEventListener(TimerEvent.TIMER, uploadNext, false, 0, true);
+			dc.start();
+		}		
 	}
 	
 }

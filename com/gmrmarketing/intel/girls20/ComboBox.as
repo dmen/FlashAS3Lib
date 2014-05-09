@@ -42,7 +42,7 @@ package com.gmrmarketing.intel.girls20
 			opened = false;
 			
 			btn.addEventListener(MouseEvent.MOUSE_DOWN, toggleDrop, false, 0, true);
-			listContainer.drag.addEventListener(MouseEvent.MOUSE_DOWN, beginDrag, false, 0, true);
+			
 			
 			addEventListener(Event.ADDED_TO_STAGE, calcRect, false, 0, true);	
 		}
@@ -71,6 +71,7 @@ package com.gmrmarketing.intel.girls20
 			opened = false;
 			TweenMax.to(listContainer, 0, { y: -listContainer.height } );
 			stage.removeEventListener(MouseEvent.MOUSE_DOWN, checkForClose);
+			listContainer.drag.removeEventListener(MouseEvent.MOUSE_DOWN, beginDrag);
 		}
 		
 		
@@ -80,6 +81,11 @@ package com.gmrmarketing.intel.girls20
 			listContainer.drag.y = 0;
 			itemContainer.y = 0;			
 			TweenMax.to(listContainer, 0, { y:whiteBox.height } );
+			
+			if (dragRatio > 0) {
+				listContainer.drag.addEventListener(MouseEvent.MOUSE_DOWN, beginDrag, false, 0, true);
+			}
+			
 			stage.addEventListener(MouseEvent.MOUSE_DOWN, checkForClose, false, 0, true);
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, keyPressed, false, 0, true);
 		}

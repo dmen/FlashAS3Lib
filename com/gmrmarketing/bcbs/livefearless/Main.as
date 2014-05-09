@@ -20,6 +20,7 @@ package com.gmrmarketing.bcbs.livefearless
 		private var thanks:Thanks;
 		private var dialog:Dialog;
 		private var queue:Queue;
+		private var admin:Admin;
 		
 		private var rules:MovieClip;//lib clip - lower left button
 		private var rulesClip:MovieClip; //actual clip containing the rules
@@ -30,6 +31,7 @@ package com.gmrmarketing.bcbs.livefearless
 		private var timeoutHelper:TimeoutHelper;
 		private var cq:CornerQuit; //quit - upper right
 		private var cb:CornerQuit; //back to intro - upper left
+		private var ca:CornerQuit; //show admin screen - lower left
 		
 		private var editingText:Boolean;
 		
@@ -39,7 +41,7 @@ package com.gmrmarketing.bcbs.livefearless
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			//Mouse.hide();
+			Mouse.hide();
 			
 			mainContainer = new Sprite();
 			topContainer = new Sprite();
@@ -83,11 +85,19 @@ package com.gmrmarketing.bcbs.livefearless
 			cb.init(topContainer, "ul");
 			cb.addEventListener(CornerQuit.CORNER_QUIT, doReset, false, 0, true);
 			
+			ca = new CornerQuit();
+			ca.init(topContainer, "lr");
+			ca.addEventListener(CornerQuit.CORNER_QUIT, showAdmin, false, 0, true);
+			
 			timeoutHelper = TimeoutHelper.getInstance();
 			timeoutHelper.addEventListener(TimeoutHelper.TIMED_OUT, doReset, false, 0, true);
 			timeoutHelper.init(120000);//2 min		
 			
+			admin = new Admin();
+			admin.setContainer(topContainer);
+			
 			queue = new Queue();
+			queue.addEventListener(Queue.DEBUG_MESSAGE, queueDebug, false, 0, true);
 			
 			intro = new Intro();
 			intro.setContainer(mainContainer);
@@ -96,7 +106,7 @@ package com.gmrmarketing.bcbs.livefearless
 		}
 		
 		
-		private function showRules(e:MouseEvent):void
+		private function showRules(e:Event):void
 		{
 			rulesClip.alpha = 0;
 			if(!topContainer.contains(rulesClip)){
@@ -107,7 +117,7 @@ package com.gmrmarketing.bcbs.livefearless
 		}
 		
 		
-		private function closeRules(e:MouseEvent = null):void
+		private function closeRules(e:Event = null):void
 		{
 			rulesClip.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, closeRules);
 			if(topContainer.contains(rulesClip)){
@@ -245,6 +255,7 @@ package com.gmrmarketing.bcbs.livefearless
 			form.addEventListener(Form.EMAIL, badEmail, false, 0, true);
 			form.addEventListener(Form.RULES, noRules, false, 0, true);			
 			form.addEventListener(Form.SAVE, formComplete, false, 0, true);			
+			form.addEventListener(Form.TERMS, showRules, false, 0, true);			
 			form.show();			
 		}
 		
@@ -286,6 +297,7 @@ package com.gmrmarketing.bcbs.livefearless
 			form.removeEventListener(Form.SAVE, formComplete);
 			form.removeEventListener(Form.EMAIL, badEmail);
 			form.removeEventListener(Form.RULES, noRules);
+			form.removeEventListener(Form.TERMS, showRules);
 			
 			thanks.addEventListener(Thanks.DONE, restart, false, 0, true );
 			thanks.addEventListener(Thanks.SHOWING, removeForm, false, 0, true);
@@ -359,6 +371,22 @@ package com.gmrmarketing.bcbs.livefearless
 		private function quitApplication(e:Event):void
 		{
 			NativeApplication.nativeApplication.exit();
+		}
+		
+		
+		private function queueDebug(e:Event):void
+		{
+			admin.displayDebug(queue.getDebug());		
+		}
+		
+		
+		/**
+		 * Called by pressing four times at lower left
+		 * @param	e
+		 */
+		private function showAdmin(e:Event):void
+		{
+			admin.show();
 		}
 	}	
 }

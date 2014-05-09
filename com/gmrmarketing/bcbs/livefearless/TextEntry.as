@@ -35,7 +35,7 @@ package com.gmrmarketing.bcbs.livefearless
 		{
 			clip = new mcTextEntry();
 			kbd = new KeyBoard();			 
-			kbd.addEventListener(KeyBoard.KBD, resetTimeout, false, 0, true);
+			
 			kbd.loadKeyFile("bcbs_photobooth.xml");
 			
 			clip.theText.text = "";
@@ -65,7 +65,10 @@ package com.gmrmarketing.bcbs.livefearless
 			if(!clip.contains(kbd)){
 				clip.addChild(kbd);
 			}
+			kbd.addEventListener(KeyBoard.KBD, resetTimeout, false, 0, true);
 			kbd.setFocusFields([clip.fname, clip.lname, clip.theText]);
+			
+			container.addEventListener(KeyboardEvent.KEY_DOWN, hardKeyDown, false, 0, true);
 			
 			clip.fname.maxChars = 30;
 			clip.lname.maxChars = 30;
@@ -97,6 +100,7 @@ package com.gmrmarketing.bcbs.livefearless
 		{
 			charCountTimer.stop();
 			kbd.removeEventListener(KeyBoard.KBD, resetTimeout);
+			container.removeEventListener(KeyboardEvent.KEY_DOWN, hardKeyDown);
 			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, doNext);
 			if (container.contains(clip)) {
 				container.removeChild(clip);
@@ -147,10 +151,20 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		
 		/**
-		 * called whenever a keyboard key is pressed
+		 * called whenever a software keyboard key is pressed
 		 * @param	e
 		 */
 		private function resetTimeout(e:Event):void
+		{
+			timeoutHelper.buttonClicked();
+		}
+		
+		
+		/**
+		 * called whenever a hardware keyboard key is pressed
+		 * @param	e
+		 */
+		private function hardKeyDown(e:KeyboardEvent):void
 		{
 			timeoutHelper.buttonClicked();
 		}

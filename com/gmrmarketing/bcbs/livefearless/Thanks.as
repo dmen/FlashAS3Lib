@@ -28,8 +28,7 @@ package com.gmrmarketing.bcbs.livefearless
 		{
 			if (!container.contains(clip)) {
 				container.addChild(clip);
-			}
-			clip.btnDone.addEventListener(MouseEvent.MOUSE_DOWN, done, false, 0, true);
+			}			
 			clip.alpha = 0;
 			TweenMax.to(clip, 1, { alpha:1, onComplete:showing } );
 		}
@@ -44,6 +43,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		private function showing():void
 		{
+			clip.btnDone.addEventListener(MouseEvent.MOUSE_DOWN, done, false, 0, true);
 			dispatchEvent(new Event(SHOWING));
 		}
 		

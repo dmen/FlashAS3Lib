@@ -15,6 +15,7 @@ package com.gmrmarketing.bcbs.livefearless
 		public static const SAVE:String = "doSave";
 		public static const EMAIL:String = "badEmail";		
 		public static const RULES:String = "noRulesChecked";
+		public static const TERMS:String = "termsClicked";
 		
 		private var clip:MovieClip;
 		private var container:DisplayObjectContainer;
@@ -28,8 +29,7 @@ package com.gmrmarketing.bcbs.livefearless
 		{
 			clip = new mcForm();
 			
-			kbd = new KeyBoard();
-			kbd.addEventListener(KeyBoard.KBD, resetTimeout, false, 0, true);
+			kbd = new KeyBoard();			
 			kbd.loadKeyFile("bcbs_photobooth.xml");
 			
 			combo = new ComboBox("Please select");			
@@ -58,7 +58,10 @@ package com.gmrmarketing.bcbs.livefearless
 			if(!container.contains(kbd)){
 				container.addChild(kbd);
 			}
-			kbd.setFocusFields([clip.email]);			
+			kbd.addEventListener(KeyBoard.KBD, resetTimeout, false, 0, true);
+			kbd.setFocusFields([clip.email]);
+			
+			container.addEventListener(KeyboardEvent.KEY_DOWN, hardKeyDown, false, 0, true);
 			
 			clip.email.text = "";			
 			clip.email.maxChars = 35;
@@ -73,6 +76,7 @@ package com.gmrmarketing.bcbs.livefearless
 			clip.alpha = 0;
 			clip.btnSave.addEventListener(MouseEvent.MOUSE_DOWN, doSave, false, 0, true);
 			clip.btnRules.addEventListener(MouseEvent.MOUSE_DOWN, rulesClicked, false, 0, true);
+			clip.btnTerms.addEventListener(MouseEvent.MOUSE_DOWN, termsClicked, false, 0, true);
 			clip.btnPhoto.addEventListener(MouseEvent.MOUSE_DOWN, photoClicked, false, 0, true);
 			clip.btnOptin.addEventListener(MouseEvent.MOUSE_DOWN, optinClicked, false, 0, true);			
 			
@@ -88,6 +92,8 @@ package com.gmrmarketing.bcbs.livefearless
 			if (container.contains(kbd)) {
 				container.removeChild(kbd);
 			}
+			kbd.removeEventListener(KeyBoard.KBD, resetTimeout);
+			container.removeEventListener(KeyboardEvent.KEY_DOWN, hardKeyDown);
 			clip.btnSave.removeEventListener(MouseEvent.MOUSE_DOWN, doSave);
 		}
 		
@@ -124,6 +130,10 @@ package com.gmrmarketing.bcbs.livefearless
 			}
 		}
 		
+		private function termsClicked(e:MouseEvent):void
+		{
+			dispatchEvent(new Event(TERMS));
+		}
 		
 		private function rulesClicked(e:MouseEvent):void
 		{
@@ -164,6 +174,16 @@ package com.gmrmarketing.bcbs.livefearless
 		 * @param	e
 		 */
 		private function resetTimeout(e:Event):void
+		{
+			timeoutHelper.buttonClicked();
+		}
+		
+		
+		/**
+		 * called whenever a hardware keyboard key is pressed
+		 * @param	e
+		 */
+		private function hardKeyDown(e:KeyboardEvent):void
 		{
 			timeoutHelper.buttonClicked();
 		}
