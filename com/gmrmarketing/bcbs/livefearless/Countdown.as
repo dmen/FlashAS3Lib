@@ -36,8 +36,8 @@ package com.gmrmarketing.bcbs.livefearless
 				container.addChild(clip);
 			}
 			clip.alpha = 0;
-			clip.numb.theText.text = "3";
-			currCount = 3;
+			clip.numb.theText.text = "5";
+			currCount = 5;
 			clip.x = 1143;
 			clip.y = 303;
 			clip.scaleX = clip.scaleY = .3;

@@ -100,7 +100,7 @@
 		public function show($container:DisplayObjectContainer, wp:Number):void
 		{	
 			container = $container;
-			winPercent = wp / 100;
+			winPercent = wp / 100;			
 			
 			intro = new scratchIntro(); //lib clip
 			intro.x = 0;
@@ -110,6 +110,12 @@
 			TweenLite.to(intro, .5, { y:0 } );
 			
 			intro.btnPlay.addEventListener(MouseEvent.MOUSE_DOWN, begin, false, 0, true);
+		}
+		
+		
+		public function updateWinPercent(n:int):void
+		{
+			winPercent = n / 100;
 		}
 		
 		

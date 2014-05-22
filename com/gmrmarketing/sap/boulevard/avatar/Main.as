@@ -1,5 +1,6 @@
 package com.gmrmarketing.sap.boulevard.avatar
 {
+	import com.gmrmarketing.nascar.Queue;
 	import flash.display.*;
 	import flash.events.*;
 	import flash.ui.Mouse;
@@ -9,6 +10,10 @@ package com.gmrmarketing.sap.boulevard.avatar
 	import com.gmrmarketing.utilities.TimeoutHelper;
 	import com.greensock.TweenMax;
 	import flash.utils.Timer;
+	
+	import com.dynamicflash.util.Base64;//nascar
+	import flash.utils.ByteArray;
+	import com.adobe.images.JPEGEncoder;
 	
 	import com.dmennenoh.keyboard.KeyBoard;//OMNICOM
 	import com.gmrmarketing.utilities.Validator; //OMNICOM for email
@@ -21,7 +26,7 @@ package com.gmrmarketing.sap.boulevard.avatar
 		private var countdown:Countdown; //3-2-1 counter with white flash
 		private var review:Review; //screen to review the pic that was taken
 		private var modal:Modal;//dialog
-		private var comm:Comm; //server communication
+		//private var comm:Comm; //server communication
 		private var avatarImage:BitmapData;
 		
 		private var cq:CornerQuit;
@@ -34,6 +39,9 @@ package com.gmrmarketing.sap.boulevard.avatar
 		private var kbd:KeyBoard;//OMNICOM
 		private var email:MovieClip;//OMNICOM - mcEmail in the lib
 		private var rfid2:Rfid_touch; //OMNICOM / intro screen
+		
+		private var queue:Queue;
+		
 		
 		public function Main()
 		{
@@ -52,7 +60,7 @@ package com.gmrmarketing.sap.boulevard.avatar
 			addChild(mainContainer);
 			addChild(cornerContainer);
 			
-			comm = new Comm();
+			//comm = new Comm();
 
 			//COMMENTED FOR OMNICOM MEETING
 			/*
@@ -87,7 +95,9 @@ package com.gmrmarketing.sap.boulevard.avatar
 			//OMNICOM
 			kbd = new KeyBoard();
 			//kbd.addEventListener(KeyBoard.KEYFILE_LOADED, init, false, 0, true);
-			kbd.loadKeyFile("omnicom.xml");
+			kbd.loadKeyFile("ardemo.xml");
+			
+			queue = new Queue();//for sending users/image to NowPik
 			
 			rfid2 = new Rfid_touch();
 			rfid2.setContainer(mainContainer);
@@ -204,7 +214,7 @@ package com.gmrmarketing.sap.boulevard.avatar
 			//rfidTimer.reset();
 			preview.addEventListener(ExampleWebcam3D_1280x960.TAKE_PHOTO, startCountdown, false, 0, true);			
 			preview.addEventListener(ExampleWebcam3D_1280x960.CLOSE_PREVIEW, reset, false, 0, true);	
-			preview.setTeam("packers", "Guest");
+			//preview.setTeam("packers", "Guest");
 			//preview.setTeam(comm.getUserData().FavoriteTeam, comm.getUserData().FirstName);
 			preview.show();
 			if(!mainContainer.contains(preview)){
@@ -255,7 +265,7 @@ package com.gmrmarketing.sap.boulevard.avatar
 			
 			countdown.removeEventListener(Countdown.FLASH_COMPLETE, showReview);
 			
-			review.show(avatarImage, preview.getTeam(), comm.getUserData());
+			review.show(avatarImage, preview.getAlphaShot());// , preview.getTeam(), comm.getUserData());
 			review.addEventListener(Review.RETAKE, retake, false, 0, true);
 			review.addEventListener(Review.SAVE, save, false, 0, true);
 		}
@@ -290,15 +300,16 @@ package com.gmrmarketing.sap.boulevard.avatar
 			//OMNICOM
 			//Need to show the email field and keyboard here
 			email = new mcEmail();
-			email.x = 334; email.y = 530;
+			email.x = 286; email.y = 500;
 			email.theEmail.text = "";
 			addChild(email);
-			kbd.x = 395; kbd.y = 708;
+			
+			kbd.x = 319; kbd.y = 682;
 			addChild(kbd);
 			email.alpha = 0;
 			kbd.alpha = 0;
-			TweenMax.to(email, .5, { alpha:1, y:430 } );
-			TweenMax.to(kbd, .5, { alpha:1, y:608 } );
+			TweenMax.to(email, .5, { alpha:.8, y:440 } );
+			TweenMax.to(kbd, .5, { alpha:1, y:622 } );
 			kbd.setFocusFields([email.theEmail]);
 			kbd.addEventListener(KeyBoard.SUBMIT, validateEmail, false, 0, true);
 			//OMNICOM
@@ -316,7 +327,7 @@ package com.gmrmarketing.sap.boulevard.avatar
 				TweenMax.to(email, .5, { alpha:0, y:530 } );
 				TweenMax.to(kbd, .5, { alpha:0, y:708 } );
 				modal.addEventListener(Modal.HIDING, reset, false, 0, true);
-				modal.show("Thank you for showing your team spirit.\nFeel free to create as many NFL players as you want.\nShare with your friends and compare to see\nwho makes the best NFL player.", "THANK YOU", true, true, 7, true);
+				modal.show("Feel free to create as many\nrace avatars as you want.\nShare with your friends and compare\nto see who makes the best racer.", "THANK YOU", true, true, 7, true);
 				TweenMax.delayedCall(.5, saveImage);
 			}
 		}
@@ -339,7 +350,17 @@ package com.gmrmarketing.sap.boulevard.avatar
 			removeChild(email);
 			removeChild(kbd);
 			
-			comm.saveImage2(review.getCard(), email.theEmail.text);
+			//comm.saveImage2(review.getCard(), email.theEmail.text);
+			var im:String = getJpegString(review.getCard());
+			queue.add( { email:email.theEmail.text, image:im } );
+		}
+		
+		
+		private function getJpegString(bmpd:BitmapData, q:int = 80):String
+		{			
+			var encoder:JPEGEncoder = new JPEGEncoder(q);
+			var ba:ByteArray = encoder.encode(bmpd);
+			return Base64.encodeByteArray(ba);
 		}
 		
 		

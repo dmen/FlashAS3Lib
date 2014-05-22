@@ -15,7 +15,7 @@ package com.gmrmarketing.bcbs.livefearless
 		public static const SAVE:String = "doSave";
 		public static const EMAIL:String = "badEmail";		
 		public static const RULES:String = "noRulesChecked";
-		public static const TERMS:String = "termsClicked";
+		public static const READ_RULES:String = "readRules";
 		
 		private var clip:MovieClip;
 		private var container:DisplayObjectContainer;
@@ -32,11 +32,13 @@ package com.gmrmarketing.bcbs.livefearless
 			kbd = new KeyBoard();			
 			kbd.loadKeyFile("bcbs_photobooth.xml");
 			
+			/*
 			combo = new ComboBox("Please select");			
 			combo.populate(["Healthy Eating", "Healthy Lifestyle", "Healthcare", "Other"])
 			clip.addChild(combo);
 			combo.x = 977;
 			combo.y = 352;
+			*/
 			
 			timeoutHelper = TimeoutHelper.getInstance();
 		}
@@ -54,7 +56,7 @@ package com.gmrmarketing.bcbs.livefearless
 				container.addChild(clip);
 			}
 			kbd.x = 485;
-			kbd.y = 720;
+			kbd.y = 700;
 			if(!container.contains(kbd)){
 				container.addChild(kbd);
 			}
@@ -70,13 +72,14 @@ package com.gmrmarketing.bcbs.livefearless
 			clip.checkPhoto.gotoAndStop(1);			
 			clip.checkOptin.gotoAndStop(1);			
 			
-			combo.setSelection("");
-			combo.reset();	
+			//combo.setSelection("");
+			//combo.reset();	
 			
 			clip.alpha = 0;
 			clip.btnSave.addEventListener(MouseEvent.MOUSE_DOWN, doSave, false, 0, true);
-			clip.btnRules.addEventListener(MouseEvent.MOUSE_DOWN, rulesClicked, false, 0, true);
-			clip.btnTerms.addEventListener(MouseEvent.MOUSE_DOWN, termsClicked, false, 0, true);
+			clip.btnRules.addEventListener(MouseEvent.MOUSE_DOWN, rulesClicked, false, 0, true);			
+			clip.btnReadRules.addEventListener(MouseEvent.MOUSE_DOWN, readRulesClicked, false, 0, true);			
+			clip.btnReadRules2.addEventListener(MouseEvent.MOUSE_DOWN, readRulesClicked, false, 0, true);			
 			clip.btnPhoto.addEventListener(MouseEvent.MOUSE_DOWN, photoClicked, false, 0, true);
 			clip.btnOptin.addEventListener(MouseEvent.MOUSE_DOWN, optinClicked, false, 0, true);			
 			
@@ -95,6 +98,11 @@ package com.gmrmarketing.bcbs.livefearless
 			kbd.removeEventListener(KeyBoard.KBD, resetTimeout);
 			container.removeEventListener(KeyboardEvent.KEY_DOWN, hardKeyDown);
 			clip.btnSave.removeEventListener(MouseEvent.MOUSE_DOWN, doSave);
+			clip.btnRules.removeEventListener(MouseEvent.MOUSE_DOWN, rulesClicked);			
+			clip.btnReadRules.removeEventListener(MouseEvent.MOUSE_DOWN, readRulesClicked);			
+			clip.btnReadRules2.removeEventListener(MouseEvent.MOUSE_DOWN, readRulesClicked);			
+			clip.btnPhoto.removeEventListener(MouseEvent.MOUSE_DOWN, photoClicked);
+			clip.btnOptin.removeEventListener(MouseEvent.MOUSE_DOWN, optinClicked);		
 		}
 		
 		
@@ -102,7 +110,8 @@ package com.gmrmarketing.bcbs.livefearless
 		{			
 			var pho:String = clip.checkPhoto.currentFrame == 1 ? "false" : "true";
 			var opt:String = clip.checkOptin.currentFrame == 1 ? "false" : "true";
-			return new Array(clip.email.text, combo.getSelection(), pho, opt);			
+			//return new Array(clip.email.text, combo.getSelection(), pho, opt);			
+			return new Array(clip.email.text, pho, opt);			
 		}
 		
 		
@@ -130,9 +139,9 @@ package com.gmrmarketing.bcbs.livefearless
 			}
 		}
 		
-		private function termsClicked(e:MouseEvent):void
+		private function readRulesClicked(e:MouseEvent):void
 		{
-			dispatchEvent(new Event(TERMS));
+			dispatchEvent(new Event(READ_RULES));
 		}
 		
 		private function rulesClicked(e:MouseEvent):void

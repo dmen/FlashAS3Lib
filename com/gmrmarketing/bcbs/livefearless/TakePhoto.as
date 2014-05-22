@@ -10,7 +10,8 @@ package com.gmrmarketing.bcbs.livefearless
 	import flash.utils.ByteArray;
 	import com.adobe.images.JPEGEncoder;
 	import com.gmrmarketing.utilities.TimeoutHelper;
-	
+	import flash.text.TextFieldAutoSize;
+	import flash.text.TextFormat;
 	
 	public class TakePhoto extends EventDispatcher
 	{
@@ -71,11 +72,21 @@ package com.gmrmarketing.bcbs.livefearless
 			clip.theText.text = message;//side bar on left
 			clip.theText.y = 716 + ((166 - clip.theText.textHeight) * .5);
 			
+			clip.theText2.autoSize = TextFieldAutoSize.LEFT;
 			clip.theText2.text = message;//main text over photo
-			clip.theText2.y = 588 + ((190 - clip.theText2.textHeight) * .5);
+			
+			var f:TextFormat = new TextFormat();
+			if (clip.theText2.numLines > 1) {				
+				f.leading = -24;
+				clip.theText2.setTextFormat(f);
+			}else {
+				f.leading = 0;
+				clip.theText2.setTextFormat(f);
+			}
+			clip.theText2.y = 655 + ((140 - clip.theText2.textHeight) * .5);
 			
 			clip.theName.text = name;
-			clip.theName.y = clip.theText2.y + clip.theText2.textHeight + 8;
+			clip.theName.y = clip.theText2.y + clip.theText2.textHeight - 4;
 			
 			cam.init(1920, 1080, 0, 0, 1717, 964, 30); //set camera and capture res to 1920x1080 and display at 1717x964 (24 fps)	
 			cam.show(clip.camImage);//black box behind bg image

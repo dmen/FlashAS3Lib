@@ -78,7 +78,7 @@ package com.tastenkunst.as3.brf.examples
 		public function ExampleWebcam3D_1280x960() 
 		{			
 			super();			
-			setFace((new IMAGE() as Bitmap).bitmapData, Vector.<Number>((new UVDATA()).toString().split(",")));	
+			//setFace((new IMAGE() as Bitmap).bitmapData, Vector.<Number>((new UVDATA()).toString().split(",")));	
 			
 			tim = TimeoutHelper.getInstance();
 			messages = new Array("calibrating", "pupil detection", "delta", "update", "calculating", "variance", "accuracy");
@@ -114,7 +114,7 @@ package com.tastenkunst.as3.brf.examples
 					addChild(clip);
 				}
 				
-				clip.fname.text = "Welcome " + firstName;
+				//clip.fname.text = "Welcome " + firstName;
 			}
 			if(_videoManager){
 				super.startVid();
@@ -152,24 +152,23 @@ package com.tastenkunst.as3.brf.examples
 			_containerAll.addChild(_containerDrawMask);
 			
 			clip = new mcPreview();//graphic in the lib
-			clip.fname.text = "Welcome " + firstName;
+			//clip.fname.text = "Welcome " + firstName;
 			addChild(clip);		
 			
 			jerseyBMD = new BitmapData(1,1);
 			jerseyMatrix = new Matrix();
-			jerseyMatrix.scale(.82, .82);
-			jerseyMatrix.translate(-83, 500);//-43
+			jerseyMatrix.scale(1.2, 1.2);
+			jerseyMatrix.translate(150, 0);//-43
 			
 			//small camera preview at upper left
 			previewBMD = new BitmapData(486, 364, false, 0xff000000);//onscreen preview window is 486 x 344
 			var pre:Bitmap = new Bitmap(previewBMD);
 			pre.x = 41;
-			pre.y = 225;//window top at 235 - move it up 10 to compensate for 364 size vs 344window size
+			pre.y = 165;//window top at 235 - move it up 10 to compensate for 364 size vs 344window size
 			clip.addChildAt(pre, 0);//add behind main background so it gets shadow cast on it
 			
 			prevMatrix = new Matrix();//for scaling 1280x960 image to 448x336
-			prevMatrix.scale(.3796875, .3796875);
-			
+			prevMatrix.scale(.3796875, .3796875);			
 			
 			clip.rvline.visible = true;
 			clip.rhline.visible = true;
@@ -188,6 +187,7 @@ package com.tastenkunst.as3.brf.examples
 			
 			//Don't add the new _containerAll to the stage. It's just used to draw into the VideoData
 			addListeners();
+			jerseyLoaded();//nascar - load suit from lib
 		}
 		
 		
@@ -265,15 +265,15 @@ package com.tastenkunst.as3.brf.examples
 			//var planeDist : Number = (1 / _scene.camera.zoom * _scene.viewPort.width) * _planeFactor * 0.25; //instead of 0.5;
 			
 			//onscreen window is 717x780
-			_container3D.init(new Rectangle(356, 63, 1280, 960)); //316
+			_container3D.init(new Rectangle(356, 3, 1280, 960)); //316
 			_container3D.initVideo(_videoManager.videoData);//1280x960 bmd
 			_container3D.initOcclusion("brf_fp11_occlusion_head.zf3d");
 			//_container3D.model = "helm_cut2.zf3d";			
 			_container3D.model = "sap.zf3d";			
 			
 			//load helmet and jersey from user data...
-			Flare3D_v2_5(_container3D).setTeam(currentTeam);
-			loadJersey(currentTeam);			
+			//Flare3D_v2_5(_container3D).setTeam(currentTeam);
+			//loadJersey(currentTeam);			
 			
 			_contentContainer = _container3D;			
 		}
@@ -283,6 +283,7 @@ package com.tastenkunst.as3.brf.examples
 		{
 			//trace("addListeners");
 			//NFL icon buttons and take photo
+			/*
 			clip.btnCardinals.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
 			clip.btnFalcons.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
 			clip.btnRavens.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
@@ -322,7 +323,7 @@ package com.tastenkunst.as3.brf.examples
 			clip.btnBuccaneers.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
 			clip.btnTitans.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
 			clip.btnRedskins.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);			
-			
+			*/
 			clip.btnTakePhoto.addEventListener(MouseEvent.MOUSE_DOWN, takePhoto, false, 0, true);
 			clip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, doClose, false, 0, true);
 		}
@@ -378,18 +379,20 @@ package com.tastenkunst.as3.brf.examples
 			//trace("loadJersey");
 			team = team.charAt(0).toUpperCase() + team.substr(1);
 			
-			var l:Loader = new Loader();
-			l.contentLoaderInfo.addEventListener(Event.COMPLETE, jerseyLoaded, false, 0, true);
-			l.load(new URLRequest(jerseyPath + "Jersey_" + team + ".png"));			
+			//var l:Loader = new Loader();
+			//l.contentLoaderInfo.addEventListener(Event.COMPLETE, jerseyLoaded, false, 0, true);
+			//l.load(new URLRequest(jerseyPath + "Jersey_" + team + ".png"));			
 		}
 		
 		
-		private function jerseyLoaded(e:Event):void
+		private function jerseyLoaded(e:Event = null):void
 		{
 			//trace("jerseyLoaded");
-			var b:Bitmap = Bitmap(e.target.content);
-			b.smoothing = true;
-			jerseyBMD = b.bitmapData;
+			//var b:Bitmap = Bitmap(e.target.content);
+			//b.smoothing = true;
+			//jerseyBMD = b.bitmapData;
+			
+			jerseyBMD = new suit();//nascar
 		}
 		
 		
@@ -427,7 +430,10 @@ package com.tastenkunst.as3.brf.examples
 		{
 			return Flare3D_v2_5(_container3D).getScreenshot();
 		}
-		
+		public function getAlphaShot():BitmapData
+		{
+			return Flare3D_v2_5(_container3D).getAlphaShot();
+		}
 		
 		/** Draws the analysis results. */
 		override public function showResult(showAll : Boolean = false) : void 
@@ -536,18 +542,18 @@ package com.tastenkunst.as3.brf.examples
 				clip.rvline.alpha = meshAlpha;
 				clip.rhline.alpha = meshAlpha;
 				clip.rpupil.alpha = meshAlpha;
-				clip.rvline.x = 317 + (_pointsToShow[28].x * 2) + animInc;
-				clip.rhline.y = 80 + (_pointsToShow[28].y * 2) + animInc;
-				clip.rpupil.x = 310 + (_pointsToShow[28].x * 2) + animInc;
-				clip.rpupil.y = 80 + (_pointsToShow[28].y * 2) + animInc;
+				clip.rvline.x = 337 + (_pointsToShow[28].x * 2) + animInc;
+				clip.rhline.y = 20 + (_pointsToShow[28].y * 2) + animInc;
+				clip.rpupil.x = 330 + (_pointsToShow[28].x * 2) + animInc;
+				clip.rpupil.y = 20 + (_pointsToShow[28].y * 2) + animInc;
 				
 				clip.lvline.alpha = meshAlpha;
 				clip.lhline.alpha = meshAlpha;
 				clip.lpupil.alpha = meshAlpha;
-				clip.lvline.x = 317 + (_pointsToShow[33].x * 2) + animInc;
-				clip.lhline.y = 80 + (_pointsToShow[33].y * 2) + animInc;
-				clip.lpupil.x = 310 + (_pointsToShow[33].x * 2) + animInc;
-				clip.lpupil.y = 80 + (_pointsToShow[33].y * 2) + animInc;
+				clip.lvline.x = 337 + (_pointsToShow[33].x * 2) + animInc;
+				clip.lhline.y = 20 + (_pointsToShow[33].y * 2) + animInc;
+				clip.lpupil.x = 330 + (_pointsToShow[33].x * 2) + animInc;
+				clip.lpupil.y = 20 + (_pointsToShow[33].y * 2) + animInc;
 				
 				animInc -= 12;
 				if (animInc <= 0) {

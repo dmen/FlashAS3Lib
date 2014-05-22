@@ -2,25 +2,24 @@
  * Stores and manages user objects in two csv files
  * 
  * Each user object:
-	All key types are strings - sharephoto and emailoptin are string booleans "true" or "false"
 	image is a base64 encoded jpeg
-	Object keys: {fname, lname, email, combo, sharephoto, emailoptin, message, image}	
+	Object keys: {email, image}	
  */
 	
-package com.gmrmarketing.bcbs.livefearless
+package com.gmrmarketing.nascar
 {
 	import flash.display.MovieClip;	
 	import flash.filesystem.*;	
 	import flash.events.*;	
 	import flash.utils.Timer;
-	import com.gmrmarketing.bcbs.livefearless.Hubble;
+	import com.gmrmarketing.nascar.Hubble;
 	
 	
 	public class Queue extends EventDispatcher  
 	{
 		public static const DEBUG_MESSAGE:String = "newMessageReady";//generated whenever a new debug message is
-		private const DATA_FILE_NAME:String = "bcbsData.csv"; //current users / not yet uploaded
-		private const SAVED_FILE_NAME:String = "bcbsSaved.csv"; //users successfully uploaded
+		private const DATA_FILE_NAME:String = "nascarData.csv"; //current users / not yet uploaded
+		private const SAVED_FILE_NAME:String = "nascarSaved.csv"; //users successfully uploaded
 		
 		private var fileFolder:File;
 		private var users:Array;
@@ -64,11 +63,11 @@ package com.gmrmarketing.bcbs.livefearless
 		/**
 		 * Adds a user data object to the csv file
 		 * Called from Main.removeForm() - once form is complete and Thanks is showing
-		 * Data object contains these keys { fname, lname, email, combo, sharephoto, emailoptin, message, image }
+		 * Data object contains these keys { email, image }
 		 */
 		public function add(data:Object):void
 		{
-			debug("add() - new user: " + data.fname + " " + data.lname);
+			debug("add() - new user: " + data.email);
 			users.push(data);
 			writeUser(data);//add to file
 			
@@ -88,9 +87,8 @@ package com.gmrmarketing.bcbs.livefearless
 			debug("uploadNext()");
 			if (token && users.length > 0) {
 				var cur:Object = users[0];
-				debug("submitting user form data: "+cur.fname+" "+cur.lname);
-				//hubble.submitForm(new Array(cur.fname, cur.lname, cur.email, cur.combo, cur.sharephoto, cur.emailoptin, cur.message));
-				hubble.submitForm(new Array(cur.fname, cur.lname, cur.email, cur.sharephoto, cur.emailoptin, cur.message));
+				debug("submitting user form data: " + cur.email);
+				hubble.submitForm(cur.email);
 			}
 		}
 		
@@ -170,7 +168,7 @@ package com.gmrmarketing.bcbs.livefearless
 		 */
 		private function writeUser(obj:Object):void
 		{			
-			debug("writeUser() - user: "+obj.fname+" "+obj.lname);
+			debug("writeUser() - user: "+obj.email);
 			try{
 				var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
 				var stream:FileStream = new FileStream();
@@ -191,7 +189,7 @@ package com.gmrmarketing.bcbs.livefearless
 		 */
 		private function writeSavedUser(obj:Object):void
 		{			
-			debug("writeSavedUser() - user: "+obj.fname+" "+obj.lname);
+			debug("writeSavedUser() - user: "+obj.email);
 			try{
 				var file:File = File.applicationStorageDirectory.resolvePath( SAVED_FILE_NAME );
 				var stream:FileStream = new FileStream();
@@ -212,7 +210,7 @@ package com.gmrmarketing.bcbs.livefearless
 		 * 
 		 * All key types are strings - sharephoto and emailoptin are string booleans "true" or "false"
 		 * uploaded is string boolean - special key added by add()
-		 * Object keys: {fname, lname, email, combo, sharephoto, emailoptin, message, image}
+		 * Object keys: {email, image}
 		 * @return
 		 */
 		private function getAllUsers():Array

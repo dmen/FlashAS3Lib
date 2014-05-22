@@ -1,4 +1,4 @@
-package com.gmrmarketing.bcbs.livefearless
+package com.gmrmarketing.nascar
 {
 	import flash.events.*;
 	import flash.net.*;
@@ -30,9 +30,10 @@ package com.gmrmarketing.bcbs.livefearless
 			getToken();			
 		}
 
+		
 		public function getToken(e:TimerEvent = null):void
 		{			
-			var js:String = JSON.stringify({"userName":"BCBS", "password":"fearless!"});
+			var js:String = JSON.stringify({"userName":"gmr1", "password":"demo"});
 			var req:URLRequest = new URLRequest(BASE_URL + "authorize/validateuser");
 			
 			req.method = URLRequestMethod.POST;
@@ -45,6 +46,7 @@ package com.gmrmarketing.bcbs.livefearless
 			lo.addEventListener(IOErrorEvent.IO_ERROR, ioError, false, 0, true);
 			lo.load(req);
 		}
+		
 		
 		private function gotToken(e:Event):void
 		{
@@ -64,35 +66,10 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		/**
 		 * 
-		 * @param	formData Array fname,lname,email,combo choice,photo optin,email optin,message
-		 * @param	formData Array fname,lname,email,photo optin,email optin,message
+		 * @param	formData Array email
 		 */
-		public function submitForm(formData:Array):void
-		{
-			/*
-			var cId:int;
-			switch(formData[3]) {
-				case "Healthy Eating":
-					cId = 2068;
-					break;
-				case "Healthy Lifestyle":
-					cId = 2069;
-					break;
-				case "Healthcare":
-					cId = 2071;
-					break;
-				case "Other":
-					cId = 2072;
-					break;
-				default:
-					cId = 2072;
-					break;
-			}
-			*/
-			
-			var phoOpt:Boolean = formData[3] == "true" ? true : false;
-			var	emOpt:Boolean = formData[4] == "true" ? true : false;			
-				
+		public function submitForm(email:String):void
+		{				
 			var a:Date = new Date();//now
 			var m:String = String(a.month + 1);
 			if (m.length < 2) {
@@ -120,9 +97,7 @@ package com.gmrmarketing.bcbs.livefearless
 			}
 			var now:String = a.fullYear + "-" +m + "-" +d + "T" + hor + ":" + min + ":" + sec + "." + ms + "Z";
 			
-			//var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":679, "OptionId":cId }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[6] } ], "Latitude":"0", "Longitude":"0" }};			
-			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[5] } ], "Latitude":"0", "Longitude":"0" }};
-			
+			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":94, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":586, "Response":email } ], "Latitude":"0", "Longitude":"0" }};			
 			
 			var js:String = JSON.stringify(resp);
 			var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionresponse");
@@ -152,7 +127,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		public function submitPhoto(photo:String):void
 		{
-			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":responseId, "FieldId":668, "Response":photo }};			
+			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":responseId, "FieldId":582, "Response":photo }};			
 			var js:String = JSON.stringify(resp);
 			
 			var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionfieldresponse");

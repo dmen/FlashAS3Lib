@@ -3,9 +3,8 @@ package com.gmrmarketing.reeses.scratchgame
 	import flash.display.*;
 	import flash.events.*;
 	import com.gmrmarketing.reeses.scratchgame.Scratch;
-	import com.gmrmarketing.reeses.scratchgame.Admin;
+	import com.gmrmarketing.reeses.scratchgame.Admin_NewAdmin;
 	import com.gmrmarketing.reeses.scratchgame.Dialog;
-	//import com.gmrmarketing.reeses.scratchgame.AdminFile;
 	import com.gmrmarketing.utilities.CornerQuit;
 	import com.greensock.TweenLite;
 	import flash.media.Sound;
@@ -17,7 +16,7 @@ package com.gmrmarketing.reeses.scratchgame
 		private var scratch:Scratch;
 		private var dialog:MovieClip;
 		private var cq:CornerQuit;
-		private var admin:Admin;
+		private var admin:Admin_NewAdmin;
 		private var spinner:PrizeWheel;
 		
 		private var scratchContainer:Sprite;
@@ -37,12 +36,11 @@ package com.gmrmarketing.reeses.scratchgame
 			
 			cq = new CornerQuit();
 			cq.init(this, "ul");
-			//cq.addEventListener(CornerQuit.CORNER_QUIT, showAdmin, false, 0, true);
+			cq.addEventListener(CornerQuit.CORNER_QUIT, showAdmin, false, 0, true);
 			
-			admin = new Admin();
+			admin = new Admin_NewAdmin();
 			scratch = new Scratch();
 			dialog = new winLose();//lib clip
-			//report = new AdminFile();
 			
 			scratch.addEventListener(Scratch.STARTED, incStarted, false, 0, true);
 			scratch.addEventListener(Scratch.LOSER, playerLost, false, 0, true);
@@ -60,7 +58,7 @@ package com.gmrmarketing.reeses.scratchgame
 			addChild(scratchContainer);
 			addChild(spinContainer);			
 			
-			scratch.show(scratchContainer, 50);// admin.getData().winPercent);
+			scratch.show(scratchContainer, admin.getPercent());
 			cq.moveToTop();
 		}
 		
@@ -106,7 +104,7 @@ package com.gmrmarketing.reeses.scratchgame
 		private function removeDialog():void
 		{
 			removeChild(dialog);			
-			scratch.show(scratchContainer, 50);// admin.getData().winPercent);
+			scratch.show(scratchContainer, admin.getPercent());// admin.getData().winPercent);
 		}
 		
 		
@@ -202,38 +200,45 @@ package com.gmrmarketing.reeses.scratchgame
 			prizeSound.play();
 			TweenLite.to(dialog, .5, { y:0 } );
 		}
+		
+		
 		private function killSkinBG():void
 		{
 			if (contains(spinBG)) {
 				removeChild(spinBG);
 			}
 		}
+		
+		
 		private function gameOver(e:MouseEvent):void
 		{
 			dialog.removeEventListener(MouseEvent.MOUSE_DOWN, gameOver);
 			TweenLite.to(dialog, .5, { y:753, onComplete:removeDialog } );
 		}
 		
+		
 		private function showAdmin(e:Event):void
 		{
 			admin.show(this);
 			admin.addEventListener(Admin.ADMIN_CLOSED, closeAdmin, false, 0, true);
-			admin.addEventListener(Admin.RESET, adminReset, false, 0, true);
+			//admin.addEventListener(Admin.RESET, adminReset, false, 0, true);
 		}
 		
 		
 		private function closeAdmin(e:Event):void
-		{
+		{			
+			scratch.updateWinPercent(admin.getPercent());
 			admin.removeEventListener(Admin.ADMIN_CLOSED, closeAdmin);
-			admin.removeEventListener(Admin.RESET, adminReset);
-			admin.hide();
+			//admin.removeEventListener(Admin.RESET, adminReset);
+			admin.hide();			
 		}
 		
 		
 		private function adminReset(e:Event):void
 		{
-			admin.doReset();
+			//admin.doReset();
 		}
+		
 		
 		private function handleDeactivate(event:Event):void 
 		{

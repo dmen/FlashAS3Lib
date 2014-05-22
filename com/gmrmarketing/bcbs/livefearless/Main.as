@@ -22,8 +22,9 @@ package com.gmrmarketing.bcbs.livefearless
 		private var queue:Queue;
 		private var admin:Admin;
 		
-		private var rules:MovieClip;//lib clip - lower left button
+		private var rules:MovieClip;//lib clip - lower left button rules/terms
 		private var rulesClip:MovieClip; //actual clip containing the rules
+		private var termsClip:MovieClip; //actual clip containing the terms
 		
 		private var mainContainer:Sprite;
 		private var topContainer:Sprite;
@@ -70,11 +71,13 @@ package com.gmrmarketing.bcbs.livefearless
 			dialog = new Dialog();
 			dialog.setContainer(topContainer);
 			
-			rules = new btnRules();
+			rules = new mcTermsRules();
 			topContainer.addChild(rules);
 			rules.y = 1014;
-			rules.addEventListener(MouseEvent.MOUSE_DOWN, showRules, false, 0, true);
+			rules.btnTerms.addEventListener(MouseEvent.MOUSE_DOWN, showTerms, false, 0, true);
+			rules.btnRules.addEventListener(MouseEvent.MOUSE_DOWN, showRules, false, 0, true);
 			
+			termsClip = new mcTerms();
 			rulesClip = new mcRules();
 			
 			cq = new CornerQuit();
@@ -106,20 +109,57 @@ package com.gmrmarketing.bcbs.livefearless
 		}
 		
 		
-		private function showRules(e:Event):void
+		private function showTerms(e:Event):void
 		{
-			rulesClip.alpha = 0;
-			if(!topContainer.contains(rulesClip)){
-				topContainer.addChild(rulesClip);
+			termsClip.alpha = 0;
+			if(!topContainer.contains(termsClip)){
+				topContainer.addChild(termsClip);
 			}
-			rulesClip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, closeRules, false, 0, true);
-			TweenMax.to(rulesClip, 1, { alpha:1 } );
+			termsClip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, closeTerms, false, 0, true);
+			TweenMax.to(termsClip, 1, { alpha:1 } );
+		}
+		
+		
+		private function showRules(e:Event = null):void
+		{	
+			if(!topContainer.contains(rulesClip)){
+				topContainer.addChild(rulesClip);			
+			}
+			if (rulesClip.currentFrame == 2){
+				rulesClip.gotoAndStop(1);				
+			}else {
+				rulesClip.alpha = 0;
+				TweenMax.to(rulesClip, 1, { alpha:1} );
+			}
+			rulesClip.btnPage2.addEventListener(MouseEvent.MOUSE_DOWN, showRulesPage2, false, 0, true);
+			rulesClip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, closeRules, false, 0, true);			
+		}
+		
+		
+		private function showRulesPage2(e:MouseEvent):void
+		{
+			rulesClip.btnPage2.removeEventListener(MouseEvent.MOUSE_DOWN, showRulesPage2);
+			rulesClip.gotoAndStop(2);
+			rulesClip.btnPage1.addEventListener(MouseEvent.MOUSE_DOWN, showRules, false, 0, true);
+		}
+		
+		
+		private function closeTerms(e:Event = null):void
+		{
+			termsClip.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, closeTerms);
+			if(topContainer.contains(termsClip)){
+				topContainer.removeChild(termsClip);
+			}
 		}
 		
 		
 		private function closeRules(e:Event = null):void
 		{
 			rulesClip.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, closeRules);
+			if (rulesClip.currentFrame == 2) {				
+				rulesClip.btnPage1.removeEventListener(MouseEvent.MOUSE_DOWN, showRules);				
+			}
+			rulesClip.gotoAndStop(1);
 			if(topContainer.contains(rulesClip)){
 				topContainer.removeChild(rulesClip);
 			}
@@ -179,6 +219,7 @@ package com.gmrmarketing.bcbs.livefearless
 			takePhoto.addEventListener(TakePhoto.EDIT, editText, false, 0, true);
 			takePhoto.addEventListener(TakePhoto.TAKE_PHOTO, beginCount, false, 0, true);
 			takePhoto.addEventListener(TakePhoto.FINISHED, showForm, false, 0, true);
+			
 			takePhoto.show(textEntry.getMessage(), textEntry.getName(), editingText);
 		}
 		
@@ -205,12 +246,12 @@ package com.gmrmarketing.bcbs.livefearless
 			editingText = true;
 			textEntry.addEventListener(TextEntry.NEXT, showTakePhoto, false, 0, true);
 			textEntry.addEventListener(TextEntry.SHOWING, removePhoto, false, 0, true);
+			textEntry.addEventListener(TextEntry.NAME, nameRequired, false, 0, true);
+			textEntry.addEventListener(TextEntry.REQUIRED, messageRequired, false, 0, true);
+			textEntry.addEventListener(TextEntry.SWEAR, inappropriateMessage, false, 0, true);
+			
 			textEntry.show(false);//don't clear old text
-		}
-		
-		
-		
-		
+		}		
 		
 		
 		private function beginCount(e:Event):void
@@ -255,7 +296,7 @@ package com.gmrmarketing.bcbs.livefearless
 			form.addEventListener(Form.EMAIL, badEmail, false, 0, true);
 			form.addEventListener(Form.RULES, noRules, false, 0, true);			
 			form.addEventListener(Form.SAVE, formComplete, false, 0, true);			
-			form.addEventListener(Form.TERMS, showRules, false, 0, true);			
+			form.addEventListener(Form.READ_RULES, showRules, false, 0, true);			
 			form.show();			
 		}
 		
@@ -297,7 +338,7 @@ package com.gmrmarketing.bcbs.livefearless
 			form.removeEventListener(Form.SAVE, formComplete);
 			form.removeEventListener(Form.EMAIL, badEmail);
 			form.removeEventListener(Form.RULES, noRules);
-			form.removeEventListener(Form.TERMS, showRules);
+			form.removeEventListener(Form.READ_RULES, showRules);
 			
 			thanks.addEventListener(Thanks.DONE, restart, false, 0, true );
 			thanks.addEventListener(Thanks.SHOWING, removeForm, false, 0, true);
@@ -309,10 +350,11 @@ package com.gmrmarketing.bcbs.livefearless
 		{
 			thanks.removeEventListener(Thanks.SHOWING, removeForm);
 			form.hide();
-			var formData:Array = form.getData();//email,combo,pho,opt
+			var formData:Array = form.getData();//email,pho,opt
 			var textData:Array = textEntry.getData(); //fname,lname,message
 			var im:String = takePhoto.getPhotoString();
-			var ob:Object = { fname:textData[0], lname:textData[1], email:formData[0], combo:formData[1], sharephoto:formData[2], emailoptin:formData[3], message:textData[2], image:im };
+			//removed combo
+			var ob:Object = { fname:textData[0], lname:textData[1], email:formData[0], sharephoto:formData[1], emailoptin:formData[2], message:textData[2], image:im };
 			queue.add(ob);
 		}
 		

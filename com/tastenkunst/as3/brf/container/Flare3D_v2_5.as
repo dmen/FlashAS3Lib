@@ -6,6 +6,9 @@ package com.tastenkunst.as3.brf.container {
 	import flare.materials.Shader3D;
 	import flare.materials.filters.TextureMapFilter;
 	import flare.primitives.Plane;
+	import flash.filters.BlurFilter;
+	import flash.geom.Matrix;
+	import flash.geom.Point;
 
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
@@ -213,8 +216,10 @@ package com.tastenkunst.as3.brf.container {
 			_scene.removeEventListener(Scene3D.COMPLETE_EVENT, onCompleteLoading);
 			_scene.camera = _camera;
 			_scene.resume();
-			
-			changeHelmet(currentTeam);
+			_scene.lights.defaultLight = null;
+			_scene.lights.maxPointLights = 3;
+			//trace(_scene.lights.list[0].x,_scene.lights.list[0].scaleX);
+			//changeHelmet(currentTeam);
 			
 //			traceChildren(_scene, ">");
 //			trace("-------");
@@ -269,6 +274,36 @@ package com.tastenkunst.as3.brf.container {
 			//all objects, that where not drawn here, will be drawn by Flare3D automatically			
 		}
 		
+		public function getAlphaShot():BitmapData
+		{
+			var maskBottom:BitmapData = new suit2();// whiteBottom();/// - suit2 has neck alpha
+			var mm:Matrix = new Matrix();
+			mm.scale(1.2, 1.2);//matches scale done in jerseyBMD in exampleWebcam3D
+			var maskScaled:BitmapData = new BitmapData(854, 934, true, 0x00000000);
+			maskScaled.draw(maskBottom, mm, null, null, null, true);
+			
+			var bmd:BitmapData = new BitmapData(_scene.viewPort.width, _scene.viewPort.height);
+			//var bmd2:BitmapData = new BitmapData(_scene.viewPort.width, _scene.viewPort.height, true, 0x00000000);
+			_videoPlane.visible = false;
+			_scene.context.clear();
+			// we draw into the texture without any color, just to store depth buffer values.
+			//_scene.context.setColorMask( false, false, false, false );
+			_scene.render();
+			_scene.context.drawToBitmapData(bmd);			
+			
+			var out:BitmapData = new BitmapData(_scene.viewPort.width, _scene.viewPort.height, true);			
+
+			bmd.copyPixels(maskScaled, new Rectangle(0, 0, maskScaled.width, maskScaled.height), new Point(150,1), maskScaled, null, true);
+			
+			//out.threshold(bmd, new Rectangle(0, 0, bmd.width, bmd.height), new Point(0, 0), "==", 0xff000000, 0x00000000, 0xffFFFFFF, true);			
+			out.threshold(bmd, new Rectangle(0, 0, bmd.width, bmd.height), new Point(0, 0), "!=", 0xFF000000, 0x00000000, 0xFFFFFFFF, true);			
+			
+			var filter:BlurFilter = new BlurFilter(5, 5, 2);
+			out.applyFilter(out, new Rectangle(0,0,out.width,out.height), new Point(0, 0), filter);
+			 
+			_videoPlane.visible = true;
+			return out;
+		}
 		
 		//cardinals, falcons, ravens, bills, panthers, bears, bengals, browns, cowboys, broncos, lions, packers, texans, colts, jaguars, chiefs, dolphins, vikings, patriots, saints, giants, jets, raiders, eagles, steelers, chargers, seahawks, 49ers, rams, buccaneers, titans, redskins
 		public function changeHelmet(team:String):void

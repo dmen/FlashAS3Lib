@@ -38,14 +38,15 @@ package com.gmrmarketing.utilities
 			
 			var compacted:String;
 			//regExps to remove all punctuation from the string
-			var regs:Array = new Array(/\!/g,/\./g,/\,/g,/\</g,/\>/g,/\|/g,/\@/g,/\#/g,/\$/g,/\%/g,/\^/g,/\&/g,/\*/g,/\,/g,/\(/g,/\)/g,/\-/g,/\_/g,/\+/g,/\=/g,/\:/g,/\;/g,/\~/g,/\`/g);
+			var regs:Array = new Array(/\!/g,/\./g,/\,/g,/\</g,/\>/g,/\|/g,/\@/g,/\#/g,/\$/g,/\%/g,/\^/g,/\&/g,/\*/g,/\,/g,/\(/g,/\)/g,/\-/g,/\_/g,/\+/g,/\=/g,/\:/g,/\;/g,/\~/g,/\`/g,/\//g,/\\/g);
 			
 			compacted = t.replace(regs[0], "");
 			for(i = 1; i < regs.length; i++){
 				compacted = compacted.replace(regs[i],  "");
 			}			
 			
-			compacted += " "; //add a space to the end
+			compacted = " " + compacted; //add a space to the start and end
+			compacted += " ";
 			
 			//remove the exception from the swears list, if it exists
 			if (exception != null) {
@@ -88,31 +89,30 @@ package com.gmrmarketing.utilities
 		{
 			//uniques can exist inside a word and still provide a positive
 			unique = new Array();
-			unique.push("assmuncher", "asseater", "assbeater", "asslicker", "asshole", "a55", "bullshit", "buttplug", "blowjob");
-			unique.push("cameltoe", "cunt", "cunny");
-			unique.push("fellatio", "fuck", "fvck")
+			unique.push("assmuncher", "asseater", "assbeater", "asslick", "asshole", "asshat", "assface", "a55", "bullshit", "buttplug", "blowjob");		unique.push("cameltoe", "cunt", "cunny", "prostitute");
+			unique.push("fellatio", "fuck", "fvck", "faggot")
 			unique.push("nigger", "nigg3r", "niglet", "nutsack", "motherfucker");
-			unique.push("jigaboo", "junglebunny", "handjob", "p3nis", "sh1t", "retard");
+			unique.push("jigaboo", "junglebunny", "handjob", "p3nis", "sh1t", "shithead", "retard", "queer");
 			unique.push("testicle", "titsucker", "titlicker", "titfeeler", "titmilker", "titpuller", "tittoucher", "titty", "titties");
 			unique.push("vagina", "vjayjay", "vajayjay", "pu55", "pu55y", "pussy", "wetback", "rimjob");
 			
 			//swears must be individual - aka a space around them to be a swear
 			swears = new Array();
-			swears.push("anus", "anal",  "ass");
+			swears.push("anus", "anal", "ass","airhead");
 			swears.push("bitch", "boner");
 			swears.push("chinc", "clit", "cock", "cooch", "cum");
-			swears.push("dago", "dick", "dildo", "douche", "dyke");			
-			swears.push("fag", "flamer");
+			swears.push("damn", "dammit", "dago", "dick", "dildo", "douche", "dyke");			
+			swears.push("fag", "fart", "flamer");
 			swears.push("gook", "guido");
-			swears.push("homo", "honkey");
+			swears.push("homo", "honkey", "hooker");
 			swears.push("jap");
 			swears.push("kike", "kooch", "kraut", "kyke");
 			swears.push("lesbo", "lezzie", "lez");
 			swears.push("muff");
 			swears.push("nigga");
-			swears.push("pecker", "penis", "piss", "pi55", "poon", "prick");
+			swears.push("pecker", "penis", "piss", "pi55", "poon", "prick" );
 			swears.push("queef", "queer");			
-			swears.push("shit", "skank", "slut", "snatch", "spic", "spick", "splooge");
+			swears.push("schmuck", "shit", "skank", "slut", "snatch", "spic", "spick", "splooge");
 			swears.push("tard", "twat");
 			swears.push("vag");
 			swears.push("wank", "whore", "wop");

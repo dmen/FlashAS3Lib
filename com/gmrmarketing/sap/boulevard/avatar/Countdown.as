@@ -54,6 +54,7 @@ package com.gmrmarketing.sap.boulevard.avatar
 			if (!container.contains(clip)) {
 				container.addChild(clip);
 			}
+			clip.x = -12; //NASCAR demo
 		}
 		
 		
