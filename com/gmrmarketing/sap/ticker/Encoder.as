@@ -7,7 +7,9 @@ package com.gmrmarketing.sap.ticker
 	
 	
 	public class Encoder extends EventDispatcher
-	{
+	{		
+		private const VNAME:String = "video.flv";
+		
 		private var myFile:File;
 		private var fsFlvEncoder:FileStreamFlvEncoder;
 		private var width:int;
@@ -16,18 +18,29 @@ package com.gmrmarketing.sap.ticker
 		public function Encoder(w:int, h:int )
 		{
 			width = w; height = h;
-		}		
+		}	
+		
+		
+		public function getFLVName():String
+		{
+			return VNAME;
+		}
+		
 		
 		/**
-		 * Starts recording to the flv in fileName
-		 * @param	fileName
+		 * Starts recording to the flv
 		 */
-		public function record(fileName:String = "video.flv"):void
+		public function record():void
 		{
-			myFile = File.documentsDirectory.resolvePath(fileName);
+			myFile = File.documentsDirectory.resolvePath(VNAME);
+			
+			if (myFile.exists) {
+				myFile.deleteFile();
+			}
+			
 			fsFlvEncoder = new FileStreamFlvEncoder(myFile, 30); //30 is framerate
 			fsFlvEncoder.fileStream.openAsync(myFile, FileMode.UPDATE);
-			fsFlvEncoder.setVideoProperties(height, width);//final flv resolution
+			fsFlvEncoder.setVideoProperties(width, height,  VideoPayloadMakerAlchemy);//final flv resolution
 			//fsFlvEncoder.setAudioProperties(BaseFlvEncoder.SAMPLERATE_44KHZ, true, false, true);
 			fsFlvEncoder.start();
 		}		

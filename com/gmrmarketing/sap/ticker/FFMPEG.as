@@ -1,3 +1,8 @@
+/**
+ * Uses AIR NativeProcess to run FFMPEG
+ * Assumes path of: c:/ffmpeg/bin/ffmpeg.exe
+ * Converts FLV to MOV for SAP 
+ */
 package com.gmrmarketing.sap.ticker
 {
 	import flash.events.*;
@@ -7,6 +12,7 @@ package com.gmrmarketing.sap.ticker
 	public class FFMPEG extends EventDispatcher
 	{
 		public static const COMPLETE:String = "conversionComplete";
+		public static const DELETED:String = "deletedOldMOV";
 		
 		private var _process:NativeProcess;
 		private var _processArgs:Vector.<String>;
@@ -21,7 +27,13 @@ package com.gmrmarketing.sap.ticker
 		public function convert(inf:String, outf:String):void
 		{
 			var inPath:String = File.documentsDirectory.resolvePath(inf).nativePath;
-			var outPath:String = File.documentsDirectory.resolvePath(outf).nativePath;
+			var outFile:File = File.documentsDirectory.resolvePath(outf);
+			var outPath:String = outFile.nativePath;
+			
+			if (outFile.exists) {
+				outFile.deleteFile();
+				dispatchEvent(new Event(DELETED));
+			}
 			
 			_nativeProcessStartupInfo = new NativeProcessStartupInfo();
 			
@@ -40,7 +52,7 @@ package com.gmrmarketing.sap.ticker
 			_processArgs.push('-r'); // frame rate
 			_processArgs.push('30');
 			_processArgs.push('-s'); // video size flag
-			_processArgs.push('512x16'); 
+			_processArgs.push('1280x1024'); 
 			_processArgs.push('-g');
 			_processArgs.push('15');
 			_processArgs.push('-b:v'); // bitrate:video flag
