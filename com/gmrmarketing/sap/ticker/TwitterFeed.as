@@ -14,6 +14,9 @@ package com.gmrmarketing.sap.ticker
 		private var feedIndex:int;
 		private var totalTweets:int;
 		
+		private var tweets:Array;
+		
+		
 		public function TwitterFeed()
 		{			
 		}
@@ -21,7 +24,7 @@ package com.gmrmarketing.sap.ticker
 		
 		public function getFeeds():void
 		{
-			var req:URLRequest = new URLRequest("http://wall.thesocialtab.net/SocialPosts/GetPosts?ProgramID=14");
+			var req:URLRequest = new URLRequest("http://wall.thesocialtab.net/SocialPosts/GetPosts?ProgramID=46&ShowImages=False");
 			
 			var hdr:URLRequestHeader = new URLRequestHeader("Content-type", "application/json");
 			var hdr2:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
@@ -42,6 +45,24 @@ package com.gmrmarketing.sap.ticker
 			json = JSON.parse(e.currentTarget.data);
 			totalTweets = json.SocialPosts.length;
 			feedIndex = -1;
+			
+			tweets = new Array();			
+			
+			var cleaned:String;
+			for (var i:int = 0; i < totalTweets; i++) {
+				
+				cleaned = json.SocialPosts[i].Text;			
+				//cleaned = cleaned.replace(/\&lt;/g, "<");
+				//cleaned = cleaned.replace(/\&gt;/g, ">");
+				//cleaned = cleaned.replace(/\&amp;/g, "&");
+				cleaned = cleaned.replace(/[\r\n]+/g, "");				
+				cleaned = cleaned.replace('⚽', "☺");//soccer ball
+				
+				tweets.push("<b>"+cleaned+"</b>");
+				//tweets.push(cleaned);
+			}	
+			
+			
 			dispatchEvent(new Event(GOT_FEED));
 		}
 		
@@ -55,11 +76,11 @@ package com.gmrmarketing.sap.ticker
 		public function getNextFeed():String
 		{			
 			feedIndex++;
-			if (feedIndex >= json.SocialPosts.length) {
+			if (feedIndex >= tweets.length) {
 				dispatchEvent(new Event(FEED_END));
 				feedIndex = 0;
 			}
-			return json.SocialPosts[feedIndex].Text
+			return tweets[feedIndex];
 		}
 		
 		

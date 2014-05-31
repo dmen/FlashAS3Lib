@@ -43,7 +43,7 @@ package com.gmrmarketing.sap.ticker
 		private const grabPoint:Point = new Point(0, 0);
 		
 		private var moveContainer:Sprite; //holds all text chunks - instances of lib item 'mover'
-		private var gap:int = 300; //pixels between text chunks
+		private var gap:int = 250; //pixels between text chunks
 		
 		
 		public function Main()
@@ -53,15 +53,18 @@ package com.gmrmarketing.sap.ticker
 			ffmpeg = new FFMPEG();
 			soccerFacts = new SoccerFacts();
 			
-			//divide into the number of seconds in the video length to get the number of chars in the video - speeds are 1 - 7
-			speedRatios = new Array(.5848670756646217, .3, .1942740286298569, .1403508771929825, .0811138014527845, .0678708264915161, .0581180811808118);
+			//divide into the number of seconds in the video length to get the number of chars in the video - speeds are 3 - 7
+			speedRatios = new Array(.1433962264150943, .1036349574632637, .072957623416339, .0678708264915161, .0581180811808118);
 			
-			col1.selectedColor = 0x00AEEF;//blue
-			col2.selectedColor = 0xFFFFFF;//white
+			col1.selectedColor = 0x008FCC;//bright blue twitter text
+			col1t.selectedColor = 0x9C277B;//bright purple title
+			
+			col2.selectedColor = 0xB4CA48;//bright green soccer facts
+			col2t.selectedColor = 0xDE8A2E;//bright orange title
 			
 			moveContainer = new Sprite();
 			moveContainer.x = STARTX;
-			moveContainer.y = -4;
+			moveContainer.y = -6;
 			
 			//scroll speed buttons
 			btnD.addEventListener(MouseEvent.CLICK, lessSpeed, false, 0, true);
@@ -92,8 +95,8 @@ package com.gmrmarketing.sap.ticker
 		private function lessSpeed(e:MouseEvent):void
 		{
 			speed--;
-			if (speed < 1) {
-				speed = 1;
+			if (speed < 3) {
+				speed = 3;
 			}
 			scSpeed.text = String(speed);
 		}
@@ -115,21 +118,82 @@ package com.gmrmarketing.sap.ticker
 			btnStart.addEventListener(MouseEvent.CLICK, startEncoding, false, 0, true);
 		}
 		
-		
 		private function startEncoding(e:MouseEvent):void
 		{			
 			btnStart.removeEventListener(MouseEvent.CLICK, startEncoding);
 			btnStop.addEventListener(MouseEvent.CLICK, animComplete, false, 0, true);
 			logMessage("Recording begin: " + new Date().toString());
 			startTime = getTimer();
-			currTweet = 0;
-			charCount = 0;
+			currTweet = 0;			
 			
-			maxChars = parseFloat(vidTime.text) / speedRatios[speed - 1];
+			maxChars = parseFloat(vidTime.text) / speedRatios[speed - 3];
 			
 			var currTweet:int = 0;
 			var curX:int = 0;
+
+			charCount = 0;
+
+			//NEW METHOD - Tweets then Facts
+			var halfMax:int = Math.round(maxChars * .5);
 			
+			//Tweets first - TITLE
+			var mes:MovieClip = new mover2(); //lib clip
+			mes.theText.autoSize = TextFieldAutoSize.LEFT;
+			mes.theText.htmlText = "<b>** Soccer Social Feed **</b>";
+			mes.theText.textColor = col1t.selectedColor;
+			moveContainer.addChild(mes);
+			mes.x = curX;
+			curX += mes.theText.textWidth + 20;			
+			
+			while (charCount < halfMax) {
+				mes = new mover2(); //lib clip
+				mes.theText.autoSize = TextFieldAutoSize.LEFT;
+				
+				mes.theText.htmlText = twitter.getNextFeed();
+				//mes.theText.text = twitter.getNextFeed();
+				mes.theText.textColor = col1.selectedColor;
+				
+				charCount += mes.theText.length;
+				
+				logMessage("Adding tweet - length: " + mes.theText.length);		
+				
+				moveContainer.addChild(mes);
+				mes.x = curX;
+				curX += mes.theText.textWidth + gap;
+			}
+			
+			var temp:int = charCount; //total chars in tweets
+			
+			//Soccer Facts
+			charCount = 0;
+			
+			
+			mes = new mover2(); //lib clip
+			mes.theText.autoSize = TextFieldAutoSize.LEFT;
+			mes.theText.htmlText = "<b>** Soccer Insights **</b>";
+			mes.theText.textColor = col2t.selectedColor;
+			moveContainer.addChild(mes);		
+			mes.x = curX;
+			curX += mes.theText.textWidth + 20;
+			
+			while (charCount < halfMax) {
+				mes = new mover2(); //lib clip
+				mes.theText.autoSize = TextFieldAutoSize.LEFT;
+				
+				mes.theText.htmlText = soccerFacts.getFact();
+				mes.theText.textColor = col2.selectedColor;
+				
+				charCount += mes.theText.length;
+				
+				logMessage("Adding insight - length: " + mes.theText.length);
+				
+				moveContainer.addChild(mes);
+				mes.x = curX;
+				curX += mes.theText.textWidth + gap;
+			}			
+			
+			//OLD METHOD - Mixed Tweets and Facts
+			/*
 			while (charCount < maxChars) {
 				
 				var mes:MovieClip = new mover(); //lib clip
@@ -152,10 +216,11 @@ package com.gmrmarketing.sap.ticker
 				mes.x = curX;
 				curX += mes.theText.textWidth + mes.theText.x + gap;
 			}
+			*/
 			
-			addChild(moveContainer);			
+			charCount += temp; //add tweets to soccer total
 			
-			logMessage("Encoding " + maxChars + " max characters at speed: " + String(speed));			
+			addChild(moveContainer);				
 			
 			toX = 0 - moveContainer.width;
 			

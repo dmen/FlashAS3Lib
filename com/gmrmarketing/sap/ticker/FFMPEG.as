@@ -49,23 +49,30 @@ package com.gmrmarketing.sap.ticker
 			_processArgs.push(inPath);
 			_processArgs.push('-vcodec'); //video codec
 			_processArgs.push('libx264'); 
+			//_processArgs.push('-preset'); 
+			//_processArgs.push('lossless_max'); 
+			//_processArgs.push('libxvid'); 
+			//_processArgs.push('libx264'); 
 			_processArgs.push('-r'); // frame rate
 			_processArgs.push('30');
 			_processArgs.push('-s'); // video size flag
 			_processArgs.push('1280x1024'); 
-			_processArgs.push('-g');
+			_processArgs.push('-g'); //GOP size
 			_processArgs.push('15');
 			_processArgs.push('-b:v'); // bitrate:video flag
-			_processArgs.push('1500K');
-			_processArgs.push('-bt'); 
-			_processArgs.push('300K'); // bitrate
+			_processArgs.push('3000K');
+			//_processArgs.push('-bt'); 
+			//_processArgs.push('300K'); // bitrate
 			_processArgs.push('-acodec');//audio codec 
 			_processArgs.push('copy');
 			_processArgs.push('-y'); // always overwrite existing file
 			_processArgs.push('-pix_fmt');
 			_processArgs.push('yuv420p');
-			_processArgs.push('-me_method');
-			_processArgs.push('epzs');
+			_processArgs.push('-me_method');//motion estimation
+			_processArgs.push('umh');
+			_processArgs.push('-vf');
+			_processArgs.push('mp=eq=0:3');
+			//_processArgs.push('epzs');
 			_processArgs.push('-strict');
 			_processArgs.push('-2');			
 			_processArgs.push(outPath); // output path
@@ -92,7 +99,7 @@ package com.gmrmarketing.sap.ticker
 		{
 			// read the data from the error channel bytearray to string
 			var s:String = _process.standardError.readUTFBytes(_process.standardError.bytesAvailable);
-			//trace(s);
+			trace(s);
 		}
 		
 		private function onExit(e:NativeProcessExitEvent):void 
