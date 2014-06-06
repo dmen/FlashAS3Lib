@@ -216,8 +216,7 @@ package com.gmrmarketing.comcast.vodipad
 			
 			buildMenu("ondemand", 0);
 			
-			addChild(barkerContainer);
-			
+			addChild(barkerContainer);			
 			
 			//loops the barker if it ends
 			barker.addEventListener(VPlayer.STATUS_RECEIVED, barkerStatus, false, 0, true);

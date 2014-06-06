@@ -45,7 +45,8 @@ package com.gmrmarketing.sap.ticker
 			if (currFact >= facts.length) {
 				currFact = 0;
 			}
-			return "<b>" + f + "</b>";
+			//return "<b>" + f + "</b>";
+			return f;
 		}
 	}
 	

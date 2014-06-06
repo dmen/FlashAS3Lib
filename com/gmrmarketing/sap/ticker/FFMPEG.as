@@ -55,14 +55,14 @@ package com.gmrmarketing.sap.ticker
 			//_processArgs.push('libx264'); 
 			_processArgs.push('-r'); // frame rate
 			_processArgs.push('30');
-			_processArgs.push('-s'); // video size flag
+			_processArgs.push('-s'); // video size
 			_processArgs.push('1280x1024'); 
-			_processArgs.push('-g'); //GOP size
+			_processArgs.push('-g'); //GOP size - keyframe interval
 			_processArgs.push('15');
-			_processArgs.push('-b:v'); // bitrate:video flag
+			_processArgs.push('-b:v'); // bitrate:video
 			_processArgs.push('3000K');
-			//_processArgs.push('-bt'); 
-			//_processArgs.push('300K'); // bitrate
+			_processArgs.push('-minrate'); //min bit rate - used with libx264 instead of -bt
+			_processArgs.push('1500K'); 
 			_processArgs.push('-acodec');//audio codec 
 			_processArgs.push('copy');
 			_processArgs.push('-y'); // always overwrite existing file
@@ -70,10 +70,10 @@ package com.gmrmarketing.sap.ticker
 			_processArgs.push('yuv420p');
 			_processArgs.push('-me_method');//motion estimation
 			_processArgs.push('umh');
-			_processArgs.push('-vf');
+			_processArgs.push('-vf');//filter - ups the contrast some
 			_processArgs.push('mp=eq=0:3');
 			//_processArgs.push('epzs');
-			_processArgs.push('-strict');
+			_processArgs.push('-strict');//sets how closely standards are followed
 			_processArgs.push('-2');			
 			_processArgs.push(outPath); // output path
 			

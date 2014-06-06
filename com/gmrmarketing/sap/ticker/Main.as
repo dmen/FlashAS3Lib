@@ -25,7 +25,7 @@ package com.gmrmarketing.sap.ticker
 		private var soccerFacts:SoccerFacts;
 		
 		private var frameGrab:BitmapData;
-		private var speed:int = 4;
+		private var speed:int = 2;
 		private var toX:int;		
 		private var currTweet:int;
 		
@@ -53,8 +53,8 @@ package com.gmrmarketing.sap.ticker
 			ffmpeg = new FFMPEG();
 			soccerFacts = new SoccerFacts();
 			
-			//divide into the number of seconds in the video length to get the number of chars in the video - speeds are 3 - 7
-			speedRatios = new Array(.1433962264150943, .1036349574632637, .072957623416339, .0678708264915161, .0581180811808118);
+			//divide into the number of seconds in the video length to get the number of chars in the video - speeds are 1 - 7
+			speedRatios = new Array(.22260378, .1830, .1433962264150943, .1036349574632637, .072957623416339, .0678708264915161, .0581180811808118);
 			
 			col1.selectedColor = 0x008FCC;//bright blue twitter text
 			col1t.selectedColor = 0x9C277B;//bright purple title
@@ -67,6 +67,7 @@ package com.gmrmarketing.sap.ticker
 			moveContainer.y = -6;
 			
 			//scroll speed buttons
+			scSpeed.text = String(speed);//default of 2
 			btnD.addEventListener(MouseEvent.CLICK, lessSpeed, false, 0, true);
 			btnU.addEventListener(MouseEvent.CLICK, moreSpeed, false, 0, true);
 			
@@ -95,8 +96,8 @@ package com.gmrmarketing.sap.ticker
 		private function lessSpeed(e:MouseEvent):void
 		{
 			speed--;
-			if (speed < 3) {
-				speed = 3;
+			if (speed < 1) {
+				speed = 1;
 			}
 			scSpeed.text = String(speed);
 		}
@@ -126,7 +127,7 @@ package com.gmrmarketing.sap.ticker
 			startTime = getTimer();
 			currTweet = 0;			
 			
-			maxChars = parseFloat(vidTime.text) / speedRatios[speed - 3];
+			maxChars = parseFloat(vidTime.text) / speedRatios[speed - 1];
 			
 			var currTweet:int = 0;
 			var curX:int = 0;
@@ -139,7 +140,7 @@ package com.gmrmarketing.sap.ticker
 			//Tweets first - TITLE
 			var mes:MovieClip = new mover2(); //lib clip
 			mes.theText.autoSize = TextFieldAutoSize.LEFT;
-			mes.theText.htmlText = "<b>** Soccer Social Feed **</b>";
+			mes.theText.htmlText = "** Soccer Social Feed **";
 			mes.theText.textColor = col1t.selectedColor;
 			moveContainer.addChild(mes);
 			mes.x = curX;
@@ -165,12 +166,11 @@ package com.gmrmarketing.sap.ticker
 			var temp:int = charCount; //total chars in tweets
 			
 			//Soccer Facts
-			charCount = 0;
-			
+			charCount = 0;			
 			
 			mes = new mover2(); //lib clip
 			mes.theText.autoSize = TextFieldAutoSize.LEFT;
-			mes.theText.htmlText = "<b>** Soccer Insights **</b>";
+			mes.theText.htmlText = "** Soccer Insights **";
 			mes.theText.textColor = col2t.selectedColor;
 			moveContainer.addChild(mes);		
 			mes.x = curX;
@@ -190,7 +190,8 @@ package com.gmrmarketing.sap.ticker
 				moveContainer.addChild(mes);
 				mes.x = curX;
 				curX += mes.theText.textWidth + gap;
-			}			
+			}
+			
 			
 			//OLD METHOD - Mixed Tweets and Facts
 			/*

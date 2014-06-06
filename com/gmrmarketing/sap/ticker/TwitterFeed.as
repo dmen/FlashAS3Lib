@@ -58,8 +58,8 @@ package com.gmrmarketing.sap.ticker
 				cleaned = cleaned.replace(/[\r\n]+/g, "");				
 				cleaned = cleaned.replace('⚽', "☺");//soccer ball
 				
-				tweets.push("<b>"+cleaned+"</b>");
-				//tweets.push(cleaned);
+				//tweets.push("<b>"+cleaned+"</b>");
+				tweets.push(cleaned);
 			}	
 			
 			
