@@ -148,17 +148,15 @@ package com.gmrmarketing.testing
 								if (h1 >= sw && v1 >= sh) {
 									if (isValidRect(r, c, sw, sh)) {
 										drawText(r, c, sw, sh);
-										//remove center of rect - edges are shared
-										removeRectFromArray(r + 1, c + 1, sw - 2, sh - 2);
+										removeRectFromArray(r, c, sw - 1, sh - 1);
 										swap = !swap;
 									}
 								}
 							}else {
 								if (h1 >= sh && v1 >= sw) {
 									if (isValidRect(r, c, sh, sw)) {
-										drawText(r, c, sh, sw);
-										//remove center of rect - edges are shared
-										removeRectFromArray(r + 1, c + 1, sh - 2, sw - 2);
+										drawText(r, c, sh, sw);										
+										removeRectFromArray(r, c, sh - 1, sw - 1);
 										swap = !swap;
 									}
 								}								

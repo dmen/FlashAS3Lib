@@ -1,4 +1,5 @@
-package com.tastenkunst.as3.brf.examples {
+package com.gmrmarketing.sap.levisstadium.avatar 
+{
 	import flash.events.Event;
 	
 	/**

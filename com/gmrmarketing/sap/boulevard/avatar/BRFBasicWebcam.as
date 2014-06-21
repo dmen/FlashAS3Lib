@@ -1,4 +1,4 @@
-package com.tastenkunst.as3.brf.examples {
+package com.gmrmarketing.sap.boulevard.avatar {
 	import flash.events.Event;
 	
 	/**

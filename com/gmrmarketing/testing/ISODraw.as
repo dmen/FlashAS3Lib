@@ -1,6 +1,5 @@
 package com.gmrmarketing.testing
-{	
-	import com.adobe.protocols.dict.events.DisconnectedEvent;
+{		
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
 

@@ -45,8 +45,7 @@ package com.gmrmarketing.utilities
 				compacted = compacted.replace(regs[i],  "");
 			}			
 			
-			compacted = " " + compacted; //add a space to the start and end
-			compacted += " ";
+			compacted = " " + compacted + " "; //add a space to the start and end			
 			
 			//remove the exception from the swears list, if it exists
 			if (exception != null) {

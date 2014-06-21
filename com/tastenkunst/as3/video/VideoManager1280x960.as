@@ -10,8 +10,8 @@ package com.tastenkunst.as3.video {
 	import flash.net.NetStream;
 	
 	/**
-	 * The VideoManager uses the Camera reference to
-	 * draw into a BitmapData. BRF works only with 640x480 BitmapData size.
+	 * The VideoManager uses the Camera reference to draw into a BitmapData. 
+	 * BRF works only with 640x480 BitmapData size.
 	 * 
 	 * @author Marcel Klammer
 	 */
@@ -25,7 +25,7 @@ package com.tastenkunst.as3.video {
 		public const VIDEO_FRAMERATE : int = 30;
 		
 	 	private const _video : Video = new Video(VIDEO_WIDTH, VIDEO_HEIGHT);
-		private const _videoData : BitmapData = new BitmapData(VIDEO_WIDTH, VIDEO_HEIGHT, false, 0x000000);
+		private const _videoData : BitmapData = new BitmapData(VIDEO_WIDTH, VIDEO_HEIGHT, false, 0x000000);		
 		private const _videoMatrix : Matrix = new Matrix(-1, 0, 0, 1, VIDEO_WIDTH);
 		private const _videoBitmap : Bitmap = new Bitmap(_videoData, PixelSnapping.AUTO, true);
 		private const _videoContainer : Sprite = new Sprite();
@@ -94,7 +94,7 @@ package com.tastenkunst.as3.video {
 		/** Draws the video into the videoData and calls onVideoUpdate. */
 		public function render(event : Event = null) : void {
 			_videoData.lock();
-			_videoData.draw(_videoContainer, _videoMatrix);
+			_videoData.draw(_videoContainer, _videoMatrix);			
 			_videoData.unlock();
 			
 			if(_handler) _handler.onVideoUpdate();
@@ -126,7 +126,7 @@ package com.tastenkunst.as3.video {
 		/** The BitmapData object the video gets drawn to. */
 		public function get videoData() : BitmapData {
 			return _videoData;
-		}
+		}		
 		/** The current Camera object, if there is one, null otherwise. */
 		public function get camera() : Camera {
 			return _camera;

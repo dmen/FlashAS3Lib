@@ -33,7 +33,7 @@ package com.gmrmarketing.testing
 		private var slider:Slider;
 		private var currentThreshold:int;
 		private var swatches:Swatches;
-		
+		private var controlsOpen:Boolean;
 		
 		public function CamRects()
 		{
@@ -65,6 +65,9 @@ package com.gmrmarketing.testing
 			
 			rectsShowing = false;
 			
+			controlsOpen = false;
+			arrow.addEventListener(MouseEvent.CLICK, toggleSideControls, false, 0, true);
+			
 			sideControls.btnGetRects.addEventListener(MouseEvent.CLICK, getRects, false, 0, true);
 			sideControls.checkGrid.addEventListener(MouseEvent.CLICK, toggleGrid, false, 0, true);
 			sideControls.checkRects.addEventListener(MouseEvent.CLICK, toggleRects, false, 0, true);
@@ -74,6 +77,19 @@ package com.gmrmarketing.testing
 			sideControls.sampSize.restrict = "0-9";
 			
 			addEventListener(Event.ENTER_FRAME, update, false, 0, true);
+		}
+		
+		
+		private function toggleSideControls(e:MouseEvent):void
+		{
+			controlsOpen = !controlsOpen;
+			if (controlsOpen) {
+				TweenMax.to(vid, 0, {colorMatrixFilter:{threshold:currentThreshold}});
+				TweenMax.to(sideControls, .5, { x:1770 } );				
+			}else {
+				TweenMax.to(vid, 0, { colorMatrixFilter: { threshold:0, remove:true }} );
+				TweenMax.to(sideControls, .5, { x:1930 } );
+			}
 		}
 		
 		
@@ -91,7 +107,9 @@ package com.gmrmarketing.testing
 				
 			}else {
 				
-				TweenMax.to(vid, 0, {colorMatrixFilter:{threshold:0, remove:true}}); 
+				if(!controlsOpen){
+					TweenMax.to(vid, 0, { colorMatrixFilter: { threshold:0, remove:true }} ); 
+				}
 				removeChild(textDisplay);
 				rectsShowing = false;
 				
@@ -139,6 +157,7 @@ package com.gmrmarketing.testing
 		{
 			currentThreshold = Math.round(slider.getPosition() * 250);
 			sideControls.thresh.text = String(currentThreshold);
+			TweenMax.to(vid, 0, {colorMatrixFilter:{threshold:currentThreshold}});
 		}
 		
 		/**

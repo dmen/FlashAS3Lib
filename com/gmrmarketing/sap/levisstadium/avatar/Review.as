@@ -1,7 +1,7 @@
 /**
  * Controls mcReview dialog clip
  */
-package com.gmrmarketing.sap.boulevard.avatar
+package com.gmrmarketing.sap.levisstadium.avatar
 {
 	import flash.events.*;
 	import flash.display.*;
@@ -55,7 +55,7 @@ package com.gmrmarketing.sap.boulevard.avatar
 		 * extract 717x780 chunk at 281,97
 		 * @param	image 1280x960 image from Flare
 		 */
-		public function show(image:BitmapData){//, team:String, user:Object):void
+		public function show(image:BitmapData, team:String, user:Object):void
 		{
 			if(container){
 				if (!container.contains(clip)) {
@@ -64,7 +64,6 @@ package com.gmrmarketing.sap.boulevard.avatar
 			}			
 			
 			//need to get the two card colors depending on team:
-			/*
 			switch(team) {
 				case "cardinals":
 					color1 = 0x97233f; //red
@@ -194,13 +193,12 @@ package com.gmrmarketing.sap.boulevard.avatar
 					color1 = 0x822433; //burgundy
 					color2 = 0xffb612; //gold
 					break;
-			}
-			*/
+			}			
 			//cardinals, falcons, ravens, bills, panthers, bears, bengals, browns, cowboys, broncos, lions, packers, texans, colts, jaguars, chiefs, dolphins, vikings, patriots, saints, giants, jets, raiders, eagles, steelers, chargers, seahawks, 49ers, rams, buccaneers, titans, redskins
 			
 			
 			//{"FirstName":"antonio","LastName":"zugno","City":"Rochester","State":"NY","FavoriteTeam":"packers"}
-			//userData = user;
+			userData = user;
 			
 			//first extract user preview image from 1280x960 camera image
 			//we take wider than we need, then move it left 81 pixels... this to compensate for the right card
@@ -221,10 +219,10 @@ package com.gmrmarketing.sap.boulevard.avatar
 			var snowB:BitmapData = new snow();//lib clip
 			userImage.copyPixels(snowB, new Rectangle(0, 0, 719, 780), new Point(0, 0),null,null,true);
 			
-			//var l:Loader = new Loader();
-			//l.contentLoaderInfo.addEventListener(Event.COMPLETE, logoLoaded, false, 0, true);
-			//l.load(new URLRequest(logoPath + team + "_160.png"));
-			logoLoaded();
+			var l:Loader = new Loader();
+			l.contentLoaderInfo.addEventListener(Event.COMPLETE, logoLoaded, false, 0, true);
+			l.load(new URLRequest(logoPath + team + "_160.png"));
+			//logoLoaded();
 		}
 		
 		
@@ -236,12 +234,12 @@ package com.gmrmarketing.sap.boulevard.avatar
 				}
 			}
 			
-			//logo = Bitmap(e.target.content);
-			//logo.smoothing = true;
+			logo = Bitmap(e.target.content);
+			logo.smoothing = true;
 			
-			//sidebar.addChild(logo);
-			//logo.x = 55 + Math.floor((250 - logo.width) * .5);
-			//logo.y = 550 + Math.floor((230 - logo.height) * .5);
+			sidebar.addChild(logo);
+			logo.x = 55 + Math.floor((250 - logo.width) * .5);
+			logo.y = 550 + Math.floor((230 - logo.height) * .5);
 			
 			card = new BitmapData(935, 780);
 			card.copyPixels(userImage, new Rectangle(0, 0, userImage.width, userImage.height), new Point(0, 0));
@@ -251,14 +249,14 @@ package com.gmrmarketing.sap.boulevard.avatar
 			sidebar.city.text = "";
 			*/
 			//set fname,lname,city text in sidebar
-			//sidebar.fname.text = String(userData.FirstName).charAt(0).toUpperCase() + String(userData.FirstName).substr(1);
-			//sidebar.lname.text = String(userData.LastName).charAt(0).toUpperCase() + String(userData.LastName).substr(1);
-			//sidebar.city.text = String(userData.City).toUpperCase() + ", " + String(userData.State).toUpperCase();
+			sidebar.fname.text = String(userData.FirstName).charAt(0).toUpperCase() + String(userData.FirstName).substr(1);
+			sidebar.lname.text = String(userData.LastName).charAt(0).toUpperCase() + String(userData.LastName).substr(1);
+			sidebar.city.text = String(userData.City).toUpperCase() + ", " + String(userData.State).toUpperCase();
 			
 			//Fit text
-			//var nameFormat:TextFormat = sidebar.lname.getTextFormat();
-			//var cityFormat:TextFormat = sidebar.city.getTextFormat();
-/*
+			var nameFormat:TextFormat = sidebar.lname.getTextFormat();
+			var cityFormat:TextFormat = sidebar.city.getTextFormat();
+
 			while(sidebar.lname.textWidth > 198){	
 				nameFormat.size = int(nameFormat.size) - 1;
 				sidebar.lname.setTextFormat(nameFormat);
@@ -278,8 +276,8 @@ package com.gmrmarketing.sap.boulevard.avatar
 			
 			var sidebarBMD:BitmapData = new BitmapData(sidebar.width, 782, true, 0x00000000);
 			sidebarBMD.draw(sidebar, null, null, null, null, true);
-			*/
-			//card.copyPixels(sidebarBMD, new Rectangle(0, 0, sidebar.width, sidebar.height), new Point(card.width - sidebar.width, -1),null,null,true);
+			
+			card.copyPixels(sidebarBMD, new Rectangle(0, 0, sidebar.width, sidebar.height), new Point(card.width - sidebar.width, -1),null,null,true);
 			
 			var n:BitmapData = new BitmapData(794, 662);
 			var m:Matrix = new Matrix();
