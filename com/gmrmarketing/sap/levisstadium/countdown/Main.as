@@ -1,5 +1,6 @@
 package com.gmrmarketing.sap.levisstadium.countdown
 {
+	import com.gmrmarketing.sap.levisstadium.ISchedulerMethods;
 	import flash.display.*;
 	import flash.events.*;
 	import flash.utils.*;
@@ -7,8 +8,10 @@ package com.gmrmarketing.sap.levisstadium.countdown
 	import com.greensock.easing.*;
 	
 	
-	public class Main extends MovieClip
+	public class Main extends MovieClip implements ISchedulerMethods
 	{
+		public static const READY:String = "ready";
+		
 		private var degToRad:Number = 0.0174532925; //PI / 180
 		private var endDate:Date;
 		private var updateTimer:Timer;
@@ -125,6 +128,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		public function setConfig(config:String):void
 		{
 			endTime = config;
+			dispatchEvent(new Event(READY));
 		}
 		
 		
@@ -197,6 +201,11 @@ package com.gmrmarketing.sap.levisstadium.countdown
 				
 				step = 0;
 			}			
+		}
+		
+		public function doStop():void
+		{
+			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
 		

@@ -92,7 +92,8 @@ package com.tastenkunst.as3.video {
 			_video.clear();
         }
 		/** Draws the video into the videoData and calls onVideoUpdate. */
-		public function render(event : Event = null) : void {
+		public function render(e:Event = null) : void 
+		{
 			_videoData.lock();
 			_videoData.draw(_videoContainer, _videoMatrix);			
 			_videoData.unlock();

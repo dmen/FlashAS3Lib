@@ -1,4 +1,4 @@
-package com.tastenkunst.as3.brf.examples {
+package com.gmrmarketing.sap.levisstadium.avatar.testing {
 	import flash.geom.Matrix;
 	import net.hires.debug.Stats;
 
@@ -31,7 +31,7 @@ package com.tastenkunst.as3.brf.examples {
 		public var _brfManager : BeyondRealityFaceManager;
 		/** Holds the content that might be overlayed on top of the face, like 3D content. */
 		public var _contentContainer : BRFContainer;
-		/** Set to true, when BRF dispatched "ready". */
+		/** Set to true, when BRF(_brfManager) dispatched "ready". */
 		public var _brfReady : Boolean = false;
 		
 		//GUI
@@ -67,30 +67,36 @@ package com.tastenkunst.as3.brf.examples {
 	
 		private var _brfBmd:BitmapData;
 		private var _brfMatrix:Matrix;
-		
+		private var frameCount:int = 0;
 				
 		public function BRFBasicView() 
 		{
-			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
-			if(stage == null) {
-			} else {
-				stage.align = StageAlign.TOP_LEFT;
-				stage.scaleMode = StageScaleMode.NO_SCALE;
-				stage.quality = StageQuality.HIGH;
-				stage.frameRate = 36;
+			if (stage == null) {
+				addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+			} else {				
 				onAddedToStage();
 			}
 		}
 		/** Init all components, when the stage is available. */
-		public function onAddedToStage(event : Event = null) : void {
+		public function onAddedToStage(event : Event = null) : void 
+		{
 			removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+			
+			stage.align = StageAlign.TOP_LEFT;
+			stage.scaleMode = StageScaleMode.NO_SCALE;
+			stage.quality = StageQuality.HIGH;
+			stage.frameRate = 36;
+				
 			initGUI();
 			initVideoHandling();
 			initContentContainer();
 			initBRF();
 		}
+		
+		
 		/** Init the video and camera handling. */
-		public function initVideoHandling() : void {
+		public function initVideoHandling() : void 
+		{
 			_cameraManager = new CameraManager(this);
 			_videoManager = new VideoManager1280x960();			
 			
@@ -103,17 +109,20 @@ package com.tastenkunst.as3.brf.examples {
 			_brfMatrix.scale(640 / _videoManager.VIDEO_WIDTH, 480 / _videoManager.VIDEO_HEIGHT);
 		}
 		
+		
 		/** Called, when the Camera is available. */
 		public function onCameraActive(camera : Camera) : void {
 			_videoManager.handler = this;
 			_videoManager.attachInput(camera);
 		}
 		
+		
 		/** Called, when the Camera isn't available. */
 		public function onCameraInactive() : void {
 			_videoManager.handler = null;
 			_videoManager.detachInput();
 		}
+		
 		
 		/** Init GUI elements. */
 		public function initGUI() : void {			
@@ -133,17 +142,22 @@ package com.tastenkunst.as3.brf.examples {
 			addChild(_stats);
 		}		
 		
+		
 		/** Override this method in order to use another IBRFContentContainer implementation. */
 		public function initContentContainer() : void {
 			_contentContainer = new BRFContainer(new Sprite());
 		}
+		
+		
 		/** Instantiates the Library and sets a listener to wait for the lib to be ready. */
 		public function initBRF() : void {
 			_brfManager = new BeyondRealityFaceManager(stage);
 			_brfManager.addEventListener(Event.INIT, onInitBRF);
 			_leftEyePoint = new Point();
 			_rightEyePoint = new Point();
-		}		
+		}	
+		
+		
 		/** Initialzes the lib. Must again be waiting for the lib to be ready. */
 		public function onInitBRF(event : Event = null) : void {
 			_brfManager.removeEventListener(Event.INIT, onInitBRF);
@@ -151,6 +165,8 @@ package com.tastenkunst.as3.brf.examples {
 			//override the face detection regions of interest, if needed.
 			_brfManager.init(_brfBmd, _contentContainer);
 		}
+		
+		
 		/** BRF is now ready and the tracking is available. */
 		public function onReadyBRF(event : Event = null) : void {
 			_brfManager.removeEventListener(BeyondRealityFaceManager.READY, onReadyBRF);
@@ -167,16 +183,21 @@ package com.tastenkunst.as3.brf.examples {
 			_brfReady = true;
 		}
 		
+		
 		/** This method is called to track faces. */
 		public function onVideoUpdate() : void {			
-			if(_brfReady) {
-				var start : int = getTimer();
+			if (_brfReady) {
+				frameCount++;
+				//var start : int = getTimer();
 				_brfBmd.draw(_videoManager.videoData, _brfMatrix, null, null, null, true);
-				_brfManager.update();
+				if(frameCount % 2 == 0){
+					_brfManager.update();
+				}
 				//_stats.input = getTimer() - start;
 				showResult();
 			}
 		}
+		
 		
 		/** Draws what BRF analysed: LastDetectedFace/s, ROIs, FaceShape. */
 		public function showResult(showAll : Boolean = false) : void 
@@ -204,6 +225,7 @@ package com.tastenkunst.as3.brf.examples {
 			_draw.endFill();
 		}		
 		
+		
 		/** Draw the last detected face. */
 		public function drawLastDetectedFace(lineColor : Number = 0xff0000, 
 				lineThickness : Number = 0.5, lineAlpha : Number = 0.5) : void {
@@ -227,6 +249,7 @@ package com.tastenkunst.as3.brf.examples {
 			_draw.endFill();
 		}
 		
+
 		/** Draw all last detected face references. */
 		public function drawLastDetectedFaces(lineColor : Number = 0xff0000, 
 				lineThickness : Number = 0.5, lineAlpha : Number = 0.5) : void {
@@ -246,6 +269,7 @@ package com.tastenkunst.as3.brf.examples {
 				_draw.endFill();
 			}			
 		}
+		
 		
 		/** Draw the regions of interest. */
 		public function drawROIs(lineThickness : Number = 0.5, lineAlpha : Number = 0.5) : void {

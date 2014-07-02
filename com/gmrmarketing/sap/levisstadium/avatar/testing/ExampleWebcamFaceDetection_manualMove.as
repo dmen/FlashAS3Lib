@@ -1,9 +1,9 @@
-package com.tastenkunst.as3.brf.examples {
+package com.gmrmarketing.sap.levisstadium.avatar.testing {
 	import flash.events.Event;
 	import flash.display.*;
+	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.geom.Rectangle;
-	import com.tastenkunst.as3.brf.BRFStatus;
 	import com.tastenkunst.as3.brf.BRFUtils;
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
@@ -16,48 +16,40 @@ package com.tastenkunst.as3.brf.examples {
 	 * 
 	 * @author Marcel Klammer, 2011
 	 */
-	public class ExampleWebcamFaceDetection extends BRFBasicWebcam 
+	public class ExampleWebcamFaceDetection_manualMove extends BRFBasicWebcam 
 	{
 		private var sp:SerProxy_Connector
 		private var ba:ByteArray;			
 		
 		private var midFaceY:int = 0;
 		private var errorWindow:int = 30;
-		private var midScreenY:int = 480;
 		
 		//min max servo angles - 90 is straight up
-		private var minAngle:int = 50;
-		private var maxAngle:int = 110;
+		private var minAngle:int = 40;
+		private var maxAngle:int = 120;
 		private var curAngle:int = 90;
 		private const INIT_ANGLE:int = 90;
-		private var angleStep:int = 2;
-		private var servoFinishedMoving:Boolean;
-		private var servoDelayTimer:Timer;//delays successive servo writes
+		private var angleStep:int;
+		private var servoDelayTimer:Timer;//delays successive servo writes		
 		
-		private var resetTimer:Timer; //started if the face is lost - resets cam if lost for too long
-		private const SERVO_ENABLED:Boolean = true;
-		private var faceLostTimer:Timer;
+		private var frame:MovieClip;//mcFrame lib clip
 		
 		
-		public function ExampleWebcamFaceDetection() 
+		public function ExampleWebcamFaceDetection_manualMove() 
 		{
 			super();
 			
-			if(SERVO_ENABLED){
-				sp = new SerProxy_Connector();
-				sp.connect();
-			}
+			sp = new SerProxy_Connector();
+			sp.connect();
 			
-			servoDelayTimer = new Timer(200, 1);
-			servoDelayTimer.addEventListener(TimerEvent.TIMER, servoComplete, false, 0, true);
+			frame = new mcFrame();
 			
-			resetTimer = new Timer(6000, 1);
-			resetTimer.addEventListener(TimerEvent.TIMER, resetCam, false, 0, true);			
+			servoDelayTimer = new Timer(50);
+			servoDelayTimer.addEventListener(TimerEvent.TIMER, servoMove, false, 0, true);
 			
-			faceLostTimer = new Timer(4000, 1);
-			faceLostTimer.addEventListener(TimerEvent.TIMER, faceLost, false, 0, true);
-			
-			setServoAngle(INIT_ANGLE);			
+			ba = new ByteArray();
+			ba.writeByte(INIT_ANGLE);
+			sp.send(ba);			
 		}	
 		
 		
@@ -71,11 +63,12 @@ package com.tastenkunst.as3.brf.examples {
 		}
 		
 		
+		
 		/** When you disable face estimation, the pose estimation is disabled, too.*/
 		override public function onReadyBRF(event : Event = null) : void 
 		{			
-			//disables face estimation and pose estimation
-			_brfManager.isEstimatingFace = false;
+			//when isEstimatingFace is false face estimation and pose estimation are disabled
+			_brfManager.isEstimatingFace = true;
 			_brfManager.deleteLastDetectedFace = true;
 			
 			//base scale is the starting depth. Change it to 2 to find small faces in
@@ -88,7 +81,7 @@ package com.tastenkunst.as3.brf.examples {
 			_brfManager.vars.faceDetectionVars.baseScale = 2.0;
 			//step size of the depth
 			//so: starting with 4, 4.5, 5, 5.5, 6.0 face size are searched for
-			_brfManager.vars.faceDetectionVars.scaleIncrement = 0.5;
+			_brfManager.vars.faceDetectionVars.scaleIncrement = 0.1;
 			//end scale for depth search
 			_brfManager.vars.faceDetectionVars.maxScale = 5.0;
 			
@@ -99,98 +92,79 @@ package com.tastenkunst.as3.brf.examples {
 			//which is really few space between the rects
 			_brfManager.vars.faceDetectionVars.rectIncrement = 0.05;			
 			
-			super.onReadyBRF(event);
-			
+			super.onReadyBRF(event);			
 		}
 		
 		
-		override public function showResult(showAll : Boolean = false) : void {
+		override public function showResult(showAll : Boolean = false) : void 
+		{
 			_draw.clear();
 			ba = new ByteArray();
 			//drawROIs();
 			
 			var rect : Rectangle = _brfManager.lastDetectedFace;
 			if (rect != null) {
-				faceLostTimer.reset();
-				resetTimer.reset();
-				
 				_draw.lineStyle(1, 0xffff00, 1);
 				_draw.drawRect(rect.x*2, rect.y*2, rect.width*2, rect.height*2);
 				_draw.lineStyle();
-				
-				midFaceY = rect.y*2 + ((rect.height*2) * .5);
-				
-				if(servoFinishedMoving){
-					if (midFaceY < (midScreenY - errorWindow)) {
-						curAngle -= angleStep;
-						if (curAngle < minAngle) {
-							curAngle = minAngle;							
-						}
-						setServoAngle(curAngle);
-						
-					}else if (midFaceY > (midScreenY + errorWindow)) {
-						curAngle += angleStep;
-						if (curAngle > maxAngle) {
-							curAngle = maxAngle;							
-						}
-						setServoAngle(curAngle);
-					}
-				}
 			}else {
-				//rect is null - face is lost
-				faceLostTimer.start();
-				_brfManager.reset(); //reset to start detecting again				
-				resetTimer.start();//calls resetCam() if it times out				
+				//rect is null - face is lost				
+				//_brfManager.reset(); //reset to start detecting again			
 			}
-		}			
+		}		
 		
-		private function faceLost(e:TimerEvent):void
-		{
-			setServoAngle(INIT_ANGLE);		
-		}
 		
 		//just to remove stats
-		override public function initGUI() : void {			
-			
+		override public function initGUI() : void
+		{	
 			_containerVideo = new Sprite();
 			_containerDraw = new Sprite();
 			_containerContent = new Sprite();
-			//_stats = new Stats();
 			
-			_draw = _containerDraw.graphics;
-			//_stats.x = 640 - 70;
-			//_stats.y = 380;
-						
+			_draw = _containerDraw.graphics;		
+			
 			addChild(_containerVideo);
 			addChild(_containerDraw);
 			addChild(_containerContent);
-			//addChild(_stats);
+			
+			addChild(frame);
+			frame.btnUp.addEventListener(MouseEvent.MOUSE_DOWN, servoUp, false, 0, true);			
+			frame.btnDown.addEventListener(MouseEvent.MOUSE_DOWN, servoDown, false, 0, true);
+			frame.stage.addEventListener(MouseEvent.MOUSE_UP, servoStop, false, 0, true);
 		}
 		
 		
-		private function setServoAngle(ang:int):void
+		private function servoUp(e:MouseEvent):void
+		{
+			angleStep = -2;
+			servoMove();
+			servoDelayTimer.start();
+		}
+		
+		private function servoDown(e:MouseEvent):void
+		{
+			angleStep = 2;
+			servoMove();
+			servoDelayTimer.start();
+		}
+		
+		private function servoStop(e:MouseEvent):void
+		{
+			servoDelayTimer.stop();
+		}
+		
+		private function servoMove(e:TimerEvent = null):void
 		{			
-			if(SERVO_ENABLED){
-				ba = new ByteArray();
-				ba.writeByte(ang);
-				sp.send(ba);
-				
-				servoFinishedMoving = false;
-				servoDelayTimer.start();
+			curAngle += angleStep;
+			if (curAngle < minAngle) {
+				curAngle = minAngle;							
 			}
+			if (curAngle > maxAngle) {
+				curAngle = maxAngle;
+			}
+			ba = new ByteArray();
+			ba.writeByte(curAngle);
+			sp.send(ba);
 		}
-		
-		
-		private function servoComplete(e:TimerEvent):void
-		{
-			servoFinishedMoving = true;
-		}
-		
-		
-		private function resetCam(e:TimerEvent):void
-		{
-			setServoAngle(INIT_ANGLE);//reset to straight on
-		}
-		
 	}
 }

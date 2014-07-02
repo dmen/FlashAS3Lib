@@ -16,7 +16,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		
 		private var hText:MovieClip;//lib clips used for drawing text into
 		private var vText:MovieClip;
-		private var sampleSize:int;
+		private var sampleSize:int;//used by measure() to return the size in grid units of each word image
 		
 		private var tagColors:Array;
 		private var colorDec:int;
@@ -25,16 +25,21 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		
 		private var loopCount:int;//used to force successive calls to getNextTag() further down the tag list
 		//so that smaller fonts are used
+		private var maxFont:int;
+		private var minFont:int;
 		
-		
-		public function TagCloud(ss:int)
+		public function TagCloud(ss:int, maxFontSize:int, minFontSize:int, colors:Array)
 		{
 			sampleSize = ss;
-			tagColors = [0xffffff, 0xdddddd, 0xcccccc, 0xaaaaaa, 0x999999, 0x888888];			
+			maxFont = maxFontSize;
+			minFont = minFontSize;
+			
+			tagColors = colors;			
+			//tagColors = [0x000000];			
 			hText = new mcHText();//lib
 			vText = new mcVText();//lib	
 			tags = new Array();		
-			loopCount = 0;
+			loopCount = 0;			
 		}
 		
 		
@@ -48,9 +53,9 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			var tag:Object = tags[tagIndex];
 			tagIndex++;
 			if (tagIndex >= tags.length) {
-				tagIndex = 5 * loopCount;
-				tagIndex = Math.min(tagIndex, tags.length - 10);
 				loopCount++;
+				tagIndex = 6 * loopCount;//move tagIndex further down the array on each iteration - forces smaller fonts
+				tagIndex = Math.min(tagIndex, tags.length - 4);				
 			}			
 			return tag;
 		}
@@ -88,12 +93,12 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 				totalTagCount += tags[i].value;
 			}
 			
-			var maxFontSize:int = 100;			
+						
 			//font size by tag weight - possible because of mormalizing the counts
 			//var fontRatio:Number = maxFontSize / ((tags[0].value / totalTagCount) * 100);
 			
 			//even distribution of font size along the list
-			var fontRatio:Number = maxFontSize / tags.length;
+			var fontRatio:Number = maxFont / tags.length;
 			
 			colorDec = Math.ceil(tags.length / tagColors.length);			
 			colorIndex = 0;
@@ -101,10 +106,9 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			
 			for (i = 0; i < tags.length; i++) {				
 				//tags[i].fontSize = Math.max(12, Math.round(((tags[i].value / totalTagCount) * 100) * fontRatio));
-				tags[i].fontSize = Math.max(8, Math.round(maxFontSize - fontRatio * i));				
-				measure(tags[i]);//pass by reference so tag in array is modified by measure()
+				tags[i].fontSize = Math.max(minFont, Math.round(maxFont - fontRatio * i));				
+				measure(tags[i]);//passed by reference so tag in array is modified by measure()
 			}
-			
 			dispatchEvent(new Event(TAGS_READY));
 		}
 		
@@ -150,11 +154,11 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			
 			//want to return the grid units the text will need based on the
 			//current sampleSize setting			
-			var wh:int = Math.max(1, Math.round(nh.width / sampleSize));
-			var hh:int = Math.max(1, Math.round(nh.height / sampleSize));
+			var wh:int = Math.max(1, Math.ceil(nh.width / sampleSize));
+			var hh:int = Math.max(1, Math.ceil(nh.height / sampleSize));
 			
-			var wv:int = Math.max(1, Math.round(nv.width / sampleSize));
-			var hv:int = Math.max(1, Math.round(nv.height / sampleSize));
+			var wv:int = Math.max(1, Math.ceil(nv.width / sampleSize));
+			var hv:int = Math.max(1, Math.ceil(nv.height / sampleSize));
 			
 			tag.imageh = nh;
 			tag.imagev = nv;

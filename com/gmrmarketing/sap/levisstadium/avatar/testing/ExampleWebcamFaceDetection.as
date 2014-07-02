@@ -1,9 +1,8 @@
-package com.tastenkunst.as3.brf.examples {
+package com.gmrmarketing.sap.levisstadium.avatar.testing {
 	import flash.events.Event;
 	import flash.display.*;
 	import flash.events.TimerEvent;
 	import flash.geom.Rectangle;
-	import com.tastenkunst.as3.brf.BRFStatus;
 	import com.tastenkunst.as3.brf.BRFUtils;
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
@@ -36,7 +35,7 @@ package com.tastenkunst.as3.brf.examples {
 		
 		private var resetTimer:Timer; //started if the face is lost - resets cam if lost for too long
 		private const SERVO_ENABLED:Boolean = true;
-		private var faceLostTimer:Timer;
+		private var faceLostTimer:Timer;		
 		
 		
 		public function ExampleWebcamFaceDetection() 
@@ -46,7 +45,7 @@ package com.tastenkunst.as3.brf.examples {
 			if(SERVO_ENABLED){
 				sp = new SerProxy_Connector();
 				sp.connect();
-			}
+			}			
 			
 			servoDelayTimer = new Timer(200, 1);
 			servoDelayTimer.addEventListener(TimerEvent.TIMER, servoComplete, false, 0, true);

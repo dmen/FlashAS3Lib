@@ -1,4 +1,4 @@
-package com.gmrmarketing.sap.levisstadium.avatar 
+package com.gmrmarketing.sap.levisstadium.avatar.testing
 {	
 	import com.tastenkunst.as3.brf.BRFStatus;
 	import com.tastenkunst.as3.brf.BRFUtils;
@@ -6,7 +6,6 @@ package com.gmrmarketing.sap.levisstadium.avatar
 	import com.tastenkunst.as3.brf.container.*;
 	import com.tastenkunst.as3.video.CameraManager;
 	import com.tastenkunst.as3.video.VideoManager1280x960;
-	import com.gmrmarketing.sap.levisstadium.avatar.BRFBasicWebcam;
 	import flash.display.Loader;
 	import flash.display.MovieClip;
 	import flash.events.MouseEvent;

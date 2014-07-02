@@ -1,43 +1,43 @@
 package com.gmrmarketing.sap.levisstadium.tagcloud
 {
-	import flash.display.Bitmap;
-	import flash.display.BitmapData;
-	import flash.display.MovieClip;
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.geom.Matrix;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	import flash.text.TextFormat;
-	import flash.utils.getTimer;
-	import flash.text.TextFieldAutoSize;	
+	import flash.display.*;
+	import flash.events.*;
+	import flash.geom.*;
+	import flash.text.*;
+	import flash.utils.*;
 	
 	public class RectFinder extends EventDispatcher
 	{
-		public static const DICT_READY:String = "dictionaryReady"; 
-		
+		public static const DICT_READY:String = "dictionaryReady"; 		
 		private var image:BitmapData; //passed in image data
 		private var newImage:BitmapData;//returned image with text		
-		private var sampleSize:int = 5;//sample size		
-		private var grid:Array; //2d array of 1's and 0's created from image		
+		private var sampleSize:int;//sample size		
+		private var grid:Array;//2d array of 1's and 0's created from image		
 		private var hText:MovieClip;//lib clips used for drawing text into
 		private var vText:MovieClip;		
 		private var dict:TagCloud;//tags from the service		
 		private var textColors:Array; //for coloring the words
 		private var startScale:Number = 4;
-		private var scaleDec:Number; //startScale / number of tags
+		private var scaleDec:Number; //startScale / number of tags		
+		private var tagAddedCount:Number; //incremented in spiral
+		private var tagCount:Number; //current tag count
+		private var zeroCount:int;
+		private var tagTimer:Timer;
+		private var totalTags:int; //number of tags retrieved
+		private var forceStop:Boolean = false;
 		
-		
-		public function RectFinder()
-		{			
+		public function RectFinder(ss:int, maxFontSize:int, minFontSize:int, tagColors:Array)
+		{	
+			sampleSize = ss;
+			
 			hText = new mcHText();//lib
 			vText = new mcVText();//lib	
 			
-			dict = new TagCloud(sampleSize);
+			dict = new TagCloud(sampleSize, maxFontSize, minFontSize, tagColors);
 			dict.addEventListener(TagCloud.TAGS_READY, tagsReady, false, 0, true);
 			dict.refreshTags();
 		}
-				
+		
 		
 		private function tagsReady(e:Event):void
 		{
@@ -45,22 +45,51 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		}
 		
 		
-		public function createRects($image:BitmapData, bgCol:int):BitmapData
+		public function create($newImage:BitmapData, $image:BitmapData):void
 		{			
-			image = $image;			
+			newImage = $newImage;
+			image = $image;		
 			
-			//Base image for drawing into
-			newImage = new BitmapData(image.width, image.height, false, bgCol);			
-			createGridArray();	//creates 2D array from image bitmapData			
-				
-			for (var i:int = 0; i < dict.getNumTags()*20; i++) {
-				var t:Object = dict.getNextTag();
-				//addTagToImage(t);
-				ad2(t);
-			}			
-			return newImage;
+			forceStop = false;
+			
+			createGridArray();
+			
+			tagAddedCount = 0;
+			tagCount = 0;
+			zeroCount = 0;
+			totalTags = dict.getNumTags();
+			
+			tagTimer = new Timer(10);
+			tagTimer.addEventListener(TimerEvent.TIMER, addTag, false, 0, true);
+			tagTimer.start();			
 		}
 		
+		/**
+		 * stops the while loop from executing in spiral
+		 */
+		public function stop():void
+		{
+			trace("rectFinder.stop()");
+			forceStop = true;
+		}
+		
+		private function addTag(e:TimerEvent):void
+		{
+			var t:Object = dict.getNextTag();
+			spiral(t);
+			tagCount++;
+			if (tagCount >= totalTags) {
+				tagCount = 0;
+				var tagPercent:Number = (tagAddedCount / totalTags) * 100;				
+				tagAddedCount = 0;
+				if (tagPercent == 0) {
+					zeroCount++;
+					if (zeroCount == 5) {
+						tagTimer.removeEventListener(TimerEvent.TIMER, addTag);
+					}
+				}
+			}
+		}
 		
 		/**
 		 * Creates the grid array variable
@@ -73,8 +102,8 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		 */
 		private function createGridArray():void
 		{
-			grid = new Array();
-			var row:Array = [];			
+			grid = [];
+			var row:Array = [];		
 			var curX:int = 0;
 			var curY:int = 0;
 			
@@ -107,143 +136,144 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		
 		
 		/**
+		 * Tries to insert the tag into the image
+		 * Starts at image center and hunts in an outward spiral for
+		 * unfilled spaces - When a rect is found the algorithm tries to move
+		 * it up to 2 units up or left to tighten it against any other rects
 		 * 
-		 * @param	tag Object from tagCloud.getNextTag() - each tag contains these properties:
-		 *          name,value,fontSize,imageh,imagev,widthh,heighth,widthv,heightv
+		 * @param	tag Tag object containing name,value,fontSize,imageh,imagev,widthh,heighth,widthv,heightv properties
 		 */
-		private function addTagToImage(tag:Object ):void
+		private function spiral(tag:Object):void
 		{
-			var rows:int = grid.length;
-			var cols:int = grid[0].length;	
+			var w:int = grid[0].length;
+			var h:int = grid.length;			
+			var cx:int = Math.floor(w * .5);
+			var cy:int = Math.floor(h * .5);
+			var x:int = 0;
+			var y:int = 0;
+			var dx:int = 0;
+			var dy:int = -1;
+			var i:int;
+			var j:int;
 			
-			for (var r:int = 0; r < rows; r++) {//y
-				for (var c:int = 0; c < cols; c++) {//x	
-					if (grid[r][c] == 1) {
+			var curRow:int;
+			var curCol:int;
+			var len:int;
+			
+			var h1:int;
+			var v1:int;
+			var tightenCount:int;
+			var temp:int;
+			
+			var iterations:int = Math.max(w*w, h*h);
+			var n:int = 0;
+			while (n < iterations && !forceStop) {
+				
+			//for(var n:int = 0; n <iterations; n++){
+				if ((x > -w/2 && x <= w/2) && (y > -h/2 && y <= h/2)){			
+					
+					i = cx + x;
+					j = cy - y;
+					
+					if (grid[j][i] == 1) {							
 						
-						//ray cast
-						var h1:int = getHLength([r, c]);//array length - multiply by sampleSize to get pixels
-						var v1:int = getVLength([r, c]);
+						//ray cast - horizontal - getHLength is inlined here						
+						curCol = i;
+						len = 0;
+						while (grid[j][curCol] == 1) {
+							curCol++;
+							if (curCol >= w) {
+								break;
+							}
+							len++;
+						}
+						h1 = len;
+						
+						//ray cast - vertical - getVLength is inlined here						
+						curRow = j;
+						len = 0;
+						while (grid[curRow][i] == 1) {
+							curRow++;
+							if (curRow >= h) {
+								break;
+							}
+							len++;
+						}
+						v1 = len;
+						
+						tightenCount = 0;
 						
 						if(Math.random() < .5){
 							if (h1 >= tag.widthh && v1 >= tag.heighth) {
-								if (isValidRect(r, c, tag.widthh, tag.heighth)) {
-									drawText(r, c, tag, "h");										
-									removeRectFromArray(r, c, tag.widthh - 1, tag.heighth - 1);									
+								
+								if (isValidRect(j, i, tag.widthh, tag.heighth)) {
+									
+									//try and move rect up to tighten it against any others in the area
+									//limit the tightening to 2 units
+									tightenCount = 0;
+									while (isValidRect(j, i, tag.widthh, tag.heighth)) {
+										j--;
+										tightenCount++;
+										if (tightenCount > 2) {
+											break;
+										}
+									}
+									j++;
+									
+									newImage.copyPixels(tag.imageh, new Rectangle(0, 0, tag.widthh * sampleSize, tag.heighth * sampleSize), new Point(i * sampleSize, j * sampleSize), null, null, true);
+									removeRectFromArray(j, i, tag.widthh - 1, tag.heighth - 1);
+									tagAddedCount++;
 									return;
 								}
 							}
 						}else {
 							if (h1 >= tag.widthv && v1 >= tag.heightv) {
-								if (isValidRect(r, c, tag.widthv, tag.heightv)) {
-									drawText(r, c, tag, "v");
-									removeRectFromArray(r, c, tag.widthv - 1, tag.heightv - 1);									
+								if (isValidRect(j, i, tag.widthv, tag.heightv)) {
+									
+									//try and move rect left to tighten it against any others in the area
+									//limit the tightening to 2 units
+									tightenCount = 0;
+									while (isValidRect(j, i, tag.widthh, tag.heighth)) {
+										i--;
+										tightenCount++;
+										if (tightenCount > 2) {
+											break;
+										}
+									}
+									i++;									
+									
+									newImage.copyPixels(tag.imagev, new Rectangle(0, 0, tag.widthv * sampleSize, tag.heightv * sampleSize), new Point(i * sampleSize, j * sampleSize), null, null, true);
+									removeRectFromArray(j, i, tag.widthv - 1, tag.heightv - 1);
+									tagAddedCount++;									
 									return;
 								}
 							}					
 						}	
-					}
-				}
-			}						
-		}
-		
-		
-		private function ad2(tag:Object):void
-		{
-			var rows:int = grid.length;
-			var cols:int = grid[0].length;	
-			
-			// (di, dj) is a vector - direction in which we move right now
-			var di:int = 1;
-			var dj:int = 0;
-
-			// length of current segment
-			var segment_length:int = 1;
-
-			// current position (i, j) and how much of current segment we passed
-			var i:int = Math.floor(cols * .5);//x pos
-			var j:int = Math.floor(rows * .5); //y pos
-			var segment_passed:int = 0;
-
-			for (var n:int = 0; n < 40000; n++){	
-				// make a step, add 'direction' vector (di, dj) to current position (i, j)
-				i += di;
-				j += dj;
-				if (grid[j][i] == 1) {
-						
-					//ray cast
-					var h1:int = getHLength([j, i]);//array length - multiply by sampleSize to get pixels
-					var v1:int = getVLength([j, i]);
-					
-					if(Math.random() < .5){
-						if (h1 >= tag.widthh && v1 >= tag.heighth) {
-							if (isValidRect(j, i, tag.widthh, tag.heighth)) {
-								drawText(j, i, tag, "h");										
-								removeRectFromArray(j, i, tag.widthh - 1, tag.heighth - 1);									
-								return;
-							}
-						}
-					}else {
-						if (h1 >= tag.widthv && v1 >= tag.heightv) {
-							if (isValidRect(j, i, tag.widthv, tag.heightv)) {
-								drawText(j, i, tag, "v");
-								removeRectFromArray(j, i, tag.widthv - 1, tag.heightv - 1);									
-								return;
-							}
-						}					
-					}	
+					}					
 				}
 				
-				
-				segment_passed++;	
-
-				if (segment_passed == segment_length) {
-					// done with current segment
-					segment_passed = 0;
-
-					// 'rotate' directions
-					var buffer:int = di;
-					di = -dj;
-					dj = buffer;
-
-					// increase segment length if necessary
-					if (dj == 0) {
-						segment_length++;
-					}
-				}	
-			}
+				if(x == y || (x < 0 && x == -y) || (x > 0 && x == 1-y)){
+					temp = dx;
+					dx = -dy;
+					dy = temp;
+				}
+				x += dx;
+				y += dy;
+				n++;
+			}//for/while
 		}
+	
 		
 	
-		/**
-		 * Draws the image in b into the newImage bitmapData object
-		 * units are in grid units
-		 * 
-		 * @param	r row
-		 * @param	c column
-		 * @param	b Object - contains width,height,image properties - width,height are grid units - returned from measure()
-		 */
-		private function drawText(r:int, c:int, b:Object, hv:String):void
-		{		
-			var bmd2:BitmapData;
-			
-			if(hv == "h"){
-				newImage.copyPixels(b.imageh, new Rectangle(0, 0, b.widthh * sampleSize, b.heighth * sampleSize), new Point(c * sampleSize, r * sampleSize), null, null, true);
-				//bmd2 = new BitmapData( b.widthh * sampleSize, b.heighth * sampleSize, true, 0x66ff0000 * Math.random());
-			}else {
-				newImage.copyPixels(b.imagev, new Rectangle(0, 0, b.widthv * sampleSize, b.heightv * sampleSize), new Point(c * sampleSize, r * sampleSize), null, null, true);
-				//bmd2 = new BitmapData( b.widthv * sampleSize, b.heightv * sampleSize, true, 0x66ff0000*Math.random());
-			}
-			
-			//newImage.copyPixels(bmd2, new Rectangle(0, 0, bmd2.width, bmd2.height), new Point(c * sampleSize, r * sampleSize), null, null, true);
-		}
-		
-		
 		/**
 		 * Tests the array rect found in findRects - false is returned if any 0's
 		 * are found in the search rectangle
 		 */
 		private function isValidRect(row:int,col:int,width:int,height:int):Boolean
 		{	
+			if (row < 0 || col < 0) {
+				return false;
+			}
 			for (var r:int = row; r <= row + height; r++) {
 				for (var c:int = col; c <= col + width; c++) {					
 					if (grid[r][c] == 0) {
@@ -256,7 +286,8 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		
 		
 		/**
-		 * Removes all 1's from the grid array within the specified rect
+		 * Sets all grid units within the specified rectangle to 0
+		 * This removes the rect from the array so that further hunting will ignore this area
 		 */
 		private function removeRectFromArray(row:int,col:int,width:int,height:int):void
 		{	
@@ -265,43 +296,6 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 					grid[r][c] = 0;
 				}
 			}
-		}
-	
-		
-		/**
-		 * Returns the array length of the horizontal from x,y to x+n,y
-		 * @param	point Array with row,col
-		 * @return length in array items
-		 */
-		private function getHLength(point:Array):int
-		{			
-			var curCol:int = point[1];
-			var len:int = 0;
-			while (grid[point[0]][curCol] == 1) {
-				curCol++;
-				len++;
-			}
-			return len;
-		}
-		
-		
-		/**
-		 * Returns the length of the vertical from x,y to x,y+n
-		 * @param	point Array with row,col
-		 * @return length in array items
-		 */
-		private function getVLength(point:Array):int
-		{
-			var curRow:int = point[0];
-			var len:int = 0;			
-			while (grid[curRow][point[1]] == 1) {
-				curRow++;
-				if (curRow >= grid.length) {
-					break;
-				}
-				len++;
-			}
-			return len;
 		}		
 		
 	}	

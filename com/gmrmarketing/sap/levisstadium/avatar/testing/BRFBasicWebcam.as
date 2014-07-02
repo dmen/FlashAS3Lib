@@ -1,4 +1,5 @@
-package com.tastenkunst.as3.brf.examples {
+package com.gmrmarketing.sap.levisstadium.avatar.testing
+{
 	import flash.events.Event;
 	
 	/**
@@ -10,14 +11,17 @@ package com.tastenkunst.as3.brf.examples {
 	 * 
 	 * @author Marcel Klammer, 2012
 	 */
-	public class BRFBasicWebcam extends BRFBasicView {
+	public class BRFBasicWebcam extends BRFBasicView 
+	{
 		
-		public function BRFBasicWebcam() {
+		public function BRFBasicWebcam() 
+		{
 			super();
 		}
 		
-		override public function onReadyBRF(event : Event = null) : void {
-			super.onReadyBRF(event);
+		override public function onReadyBRF(e:Event = null) : void 
+		{
+			super.onReadyBRF(e);
 			//init the webcam
 			_cameraManager.initCamera();
 			//webcam apps should stabilize slow movements, so the objects don't jitter too much.

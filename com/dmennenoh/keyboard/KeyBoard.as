@@ -18,6 +18,11 @@
   NOTES: Use Input text fields, instead of dynamic, to be able to display the text cursor.
   If publishing to AIR - use FULL_SCREEN_INTERACTIVE instead of just FULL_SCREEN or the 
   text cursor will be inconsistent
+  
+  Updates:
+	  6/26/14
+	  Made the Shift key stay highlighted, after being pressed, until a second key
+	  is pressed.
  */
 
 package com.dmennenoh.keyboard
@@ -59,7 +64,7 @@ package com.dmennenoh.keyboard
 		private var keyIndex:int; //index in the key list of the last key pressed - set in keypress()
 		private var enabled:Boolean; //true if the kbd is enabled - true by default - checked in keypress()
 		
-		
+		private var lastKey:Key; //reference to the last Key object pressed
 		/**
 		 * Constructor
 		 */
@@ -301,7 +306,26 @@ package com.dmennenoh.keyboard
 		private function keypress(e:Event):void
 		{	
 			var i:int;
+			
 			if (enabled) {
+				
+				if (lastKey) {
+					if (lastKey.value == "Shift") {
+						lastKey.unHighlight();
+						if (Key(e.currentTarget).value == "Shift") {
+							//user pressed Shift, then Shift again
+							Key(e.currentTarget).unHighlight();
+							lastKey = null;
+							keyboardShifted = false;
+							num = keyContainer.numChildren;
+							for (i = 0; i < num; i++) {
+								Key(keyContainer.getChildAt(i)).toggleShift(keyboardShifted);
+							}
+							return;
+						}
+					}
+				}
+				lastKey = Key(e.currentTarget);
 				
 				//hack for android
 				if(stage && IS_ANDROID){

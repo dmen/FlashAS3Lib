@@ -119,7 +119,8 @@ package com.dmennenoh.keyboard
 			field.text = val;
 			shiftedField.text = sv;
 			
-			addChild(bg);			
+			addChild(bg);	
+			addChild(highlight);
 			addChild(field);
 			
 			if (showShifted) {
@@ -129,9 +130,8 @@ package com.dmennenoh.keyboard
 				field.y += nudgeShiftY;
 				//shiftedField.x = 3 + nudgeShiftX;
 				//shiftedField.y = nudgeShiftY;
-			}
+			}			
 			
-			addChild(highlight);
 			highlight.alpha = 0;
 			
 			capsLocked = false;
@@ -208,10 +208,15 @@ package com.dmennenoh.keyboard
 		private function keyPressed(e:MouseEvent):void
 		{			
 			highlight.alpha = highlightAlpha;
-			TweenLite.to(highlight, .5, { alpha:0 } );
+			if(val != "Shift"){
+				TweenLite.to(highlight, .5, { alpha:0 } );
+			}
 			dispatchEvent(new Event(KEYPRESS));
 		}
-		
+		public function unHighlight():void
+		{
+			TweenLite.to(highlight, .5, { alpha:0 } );
+		}
 		
 		/**
 		 * Toggles the capsLocked flag for any alpha keys (a - z)

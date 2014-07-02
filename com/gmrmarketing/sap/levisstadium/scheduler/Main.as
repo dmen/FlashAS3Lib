@@ -19,7 +19,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private var currentTask:int;
 		private var taskLoader:Loader;
 		private var thisTask:MovieClip; //the loaded swf
-		
+		private var lastTask:MovieClip;
 		
 		public function Main()
 		{
@@ -47,26 +47,38 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private function loadNextTask():void
 		{
 			if (thisTask) {
-				thisTask.hide();
+				trace("calling task stop");
+				thisTask.stop();
+				lastTask = thisTask;
+				//thisTask.hide();
 			}
 			var r:URLRequest = new URLRequest(tasks[currentTask].@file);		
-			taskLoader.load(r);
+			taskLoader.load(r);//calls taskLoaded() when complete
 		}
 		
 		
 		private function taskLoaded(e:Event):void
 		{
 			thisTask = MovieClip(taskLoader.contentLoaderInfo.content);
+			thisTask.addEventListener("ready", taskReadyToShow, false, 0, true);
+			thisTask.x = -1920;
 			addChild(thisTask);
 			
 			//if there is a config attribute on the task then setConfig will be called with that data
 			if (tasks[currentTask].@config != "") {
 				thisTask.setConfig(tasks[currentTask].@config);
 			}
+		}
+		
+		private function taskReadyToShow(e:Event):void
+		{
+						
 			
-			thisTask.show();
-			thisTask.x = -1500;
-			TweenMax.to(thisTask, 2, { x:0, ease:Back.easeOut } );
+			if(lastTask){
+				TweenMax.to(lastTask, 1, { x:1920, ease:Back.easeIn, onComplete:hideLastTask } );
+			}else {
+				TweenMax.to(thisTask, 1, { x:0, ease:Back.easeOut, onComplete:showTask } );
+			}
 			
 			var taskTimer:Timer = new Timer(parseFloat(tasks[currentTask].@time) * 60 * 1000, 1);
 			taskTimer.addEventListener(TimerEvent.TIMER, taskComplete, false, 0, true);
@@ -80,7 +92,19 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			if (currentTask >= tasks.length()) {
 				currentTask = 0;
 			}
-			TweenMax.to(thisTask, 2, { x:1950, ease:Back.easeIn, onComplete:loadNextTask } );
+			//TweenMax.to(thisTask, 1, { x:1920, ease:Back.easeIn, onComplete:loadNextTask } );
+			loadNextTask();
+		}
+		
+		private function hideLastTask():void
+		{
+			TweenMax.to(thisTask, 1, { x:0, ease:Back.easeOut, onComplete:showTask } );
+			lastTask.hide();
+		}
+		
+		private function showTask():void
+		{
+			thisTask.show();
 		}
 		
 	}
