@@ -17,7 +17,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 	 */
 	public class ExampleWebcamFaceDetection extends BRFBasicWebcam 
 	{
-		private var sp:SerProxy_Connector
+		private var sp:SerProxy_Connector;
 		private var ba:ByteArray;			
 		
 		private var midFaceY:int = 0;
@@ -56,7 +56,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 			faceLostTimer = new Timer(4000, 1);
 			faceLostTimer.addEventListener(TimerEvent.TIMER, faceLost, false, 0, true);
 			
-			setServoAngle(INIT_ANGLE);			
+			setServoAngle(60);			
 		}	
 		
 		

@@ -38,15 +38,16 @@ package com.tastenkunst.as3.video {
 
 		private var _handler : IVideoHandler;
 
-		public function VideoManager1280x960(handler : IVideoHandler = null, mirrored : Boolean = true) {
-			this.handler = handler;
-			this.mirrored = mirrored;
+		public function VideoManager1280x960($handler : IVideoHandler = null, $mirrored : Boolean = true) 
+		{
+			handler = $handler;
+			mirrored = $mirrored;
 			_videoContainer.addChild(_video);
 			_videoContainer.addChild(_imageBitmap);
 		}
 		/** Starts the drawing of the video. */
 		public function start() : void {
-			stop();
+			//stop();
 			_video.addEventListener(Event.ENTER_FRAME, render);
 		}
 		/** Stops the drawing of the video. */

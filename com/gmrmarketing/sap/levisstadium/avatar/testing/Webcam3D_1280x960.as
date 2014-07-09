@@ -6,23 +6,16 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	import com.tastenkunst.as3.brf.container.*;
 	import com.tastenkunst.as3.video.CameraManager;
 	import com.tastenkunst.as3.video.VideoManager1280x960;
-	import flash.display.Loader;
-	import flash.display.MovieClip;
-	import flash.events.MouseEvent;
+	import com.gmrmarketing.sap.levisstadium.avatar.testing.BRFBasicView;	
 	import flash.net.URLRequest;
-	import flash.display.Bitmap;
-	import flash.display.BitmapData;
-	import flash.display.Graphics;
-	import flash.display.Sprite;
-	import flash.events.Event;
-	import flash.filters.BitmapFilterQuality;
-	import flash.filters.BlurFilter;
-	import flash.geom.Matrix;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
+	import flash.display.*;
+	import flash.events.*;
+	import flash.filters.*;
+	import flash.geom.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import com.gmrmarketing.utilities.TimeoutHelper;
+	import flash.utils.Timer;
 	
 	
 	/**
@@ -31,10 +24,14 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	 * 
 	 * @author Marcel Klammer, 2011
 	 */
-	public class Webcam3D_1280x960 extends BRFBasicWebcam 
+	public class Webcam3D_1280x960 extends BRFBasicView 
 	{
 		public static const TAKE_PHOTO:String = "btnTakePhotoPressed";
 		public static const CLOSE_PREVIEW:String = "closeButtonPressed";
+		public static const CAM_UP:String = "camUpButton";
+		public static const CAM_DOWN:String = "camDownButton";
+		public static const CAM_STOP:String = "camUpDownReleased";
+		public static const FACE_FOUND:String = "faceFoundStartApp";
 		
 		public var _container3D : BRFContainerFP11;
 		private var _brfBmd : BitmapData;
@@ -56,8 +53,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private var _containerAll : Sprite;
 		private var clip:MovieClip;
-		private var previewBMD:BitmapData;
-		private var prevMatrix:Matrix;		
+		//private var previewBMD:BitmapData;
+		//private var prevMatrix:Matrix;		
 			
 		private const jerseyPath:String = "jerseys/";
 		private var jerseyBMD:BitmapData;
@@ -70,20 +67,39 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var introAlpha:Number;
 		private var meshAlpha:Number;
 		
-		private var messages:Array;
-		private var messageCounter:int;
 		private var animInc:int;
 		private var tim:TimeoutHelper;
 		private var firstName:String;
-
+		private var faceFoundTimer:Timer;
+		
+		private var shapePoints : Vector.<Point>;
+		private var center : Point;
+		private var tmpPointShape : Point;
+		private	var tmpPointOutline : Point;
+		private	var fac : Number = 0.08;
+		
+		private var brfReady:Boolean = false;
+		private var okToRotate:Boolean = true;
+		private var eraArray:Array;
+		private var eraIndex:int; //index in eraArray
+		
 		public function Webcam3D_1280x960() 
-		{			
+		{	
 			super();			
-			setFace((new IMAGE() as Bitmap).bitmapData, Vector.<Number>((new UVDATA()).toString().split(",")));	
+			
+			setFace((new IMAGE() as Bitmap).bitmapData, Vector.<Number>((new UVDATA()).toString().split(",")));				
 			
 			tim = TimeoutHelper.getInstance();
-			messages = new Array("calibrating", "pupil detection", "delta", "update", "calculating", "variance", "accuracy");
+			
+			faceFoundTimer = new Timer(1000, 1);
+			faceFoundTimer.addEventListener(TimerEvent.TIMER, faceFound, false, 0, true);
+			
+			clip = new mcPreview();
+			
+			eraArray = new Array(clip.eraSelector.b14, clip.eraSelector.b05, clip.eraSelector.b96, clip.eraSelector.b94, clip.eraSelector.b84, clip.eraSelector.b63, clip.eraSelector.b59, clip.eraSelector.b46);
+			eraIndex = 0; //starts on 2014
 		}
+		
 		
 		public function setTeam(favTeam:String, fName:String):void
 		{
@@ -91,18 +107,30 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			doSwap(favTeam);
 		}
 		
+		
 		public function hide():void
 		{
-			super.stopVid();//call in BRFBasicView2
+			super.stopVid();//call in BRFBasicView
 			if (contains(clip)) {
 				removeChild(clip);
 			}
 			//Flare3D_v2_5(_container3D).clear();
 		}
 		
+		public function isBrfReady():Boolean
+		{
+			return brfReady;			
+		}
+		
 		public function show():void
 		{
-			introAnimStarted = false;
+			//enable face estimation and pose estimation
+			_brfManager.isEstimatingFace = true;
+			_brfManager.deleteLastDetectedFace = false;
+			
+			introAnimStarted = true;
+			introAnimFinished = true;
+			
 			if(clip){
 				clip.rvline.visible = true;
 				clip.rhline.visible = true;
@@ -113,20 +141,30 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				
 				if (!contains(clip)) {
 					addChild(clip);
-				}
+				}			
 				
 				//clip.fname.text = "Welcome " + firstName;
+				clip.instructions.x = -clip.instructions.width;
+				clip.camControl.x = -clip.camControl.width;
+				clip.eraSelector.x = 2455;
+				clip.eraSelector.rotation = 90;
+				okToRotate = true;
+				
+				addControls();
 			}
 			if(_videoManager){
 				super.startVid();
-			}			
+			}
+			
+			//
 		}
 
 		/** 
 		 * If you don't use Stage3D (there you have to draw the videoData on a 3D plane), you
 		 * have to add the videoBitmap into _containerVideo.
 		 */
-		override public function initVideoHandling() : void {
+		override public function initVideoHandling() : void 
+		{
 			_cameraManager = new CameraManager(this);
 			
 			//changed _videoManager to be of type * in BRFBasicView
@@ -153,9 +191,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			_containerAll.addChild(_containerDraw);
 			_containerAll.addChild(_containerDrawMask);
 			
-			clip = new mcPreview();//graphic in the lib
-			clip.fname.text = "Welcome " + firstName;
-			addChild(clip);		
+			//graphic in the lib
+			//clip.fname.text = "Welcome " + firstName;
+			//addChild(clip);		
 			
 			jerseyBMD = new BitmapData(1,1);
 			jerseyMatrix = new Matrix();
@@ -165,22 +203,16 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			jerseyMatrix.translate(-120, 500);//AVATR
 			
 			//small camera preview at upper left
-			previewBMD = new BitmapData(486, 364, false, 0xff000000);//onscreen preview window is 486 x 344
+			//previewBMD = new BitmapData(486, 364, false, 0xff000000);//onscreen preview window is 486 x 344
 			//NASCARpreviewBMD = new BitmapData(486, 364, false, 0xff000000);//onscreen preview window is 486 x 344
-			var pre:Bitmap = new Bitmap(previewBMD);
-			pre.x = 41;
-			pre.y = 225;//window top at 235 - move it up 10 to compensate for 364 size vs 344window size
-			clip.addChildAt(pre, 0);//add behind main background so it gets shadow cast on it
+			//var pre:Bitmap = new Bitmap(previewBMD);
+			//pre.x = 41;
+			//pre.y = 225;//window top at 235 - move it up 10 to compensate for 364 size vs 344window size
+			//clip.addChildAt(pre, 0);//add behind main background so it gets shadow cast on it
 			
-			prevMatrix = new Matrix();//for scaling 1280x960 image to 486x364
-			prevMatrix.scale(.3796875, .3796875);			
+			//prevMatrix = new Matrix();//for scaling 1280x960 image to 486x364
+			//prevMatrix.scale(.3796875, .3796875);				
 			
-			clip.rvline.visible = true;
-			clip.rhline.visible = true;
-			clip.rpupil.visible = true;
-			clip.lvline.visible = true;
-			clip.lhline.visible = true;
-			clip.lpupil.visible = true;
 			clip.rvline.alpha = 0;
 			clip.rhline.alpha = 0;
 			clip.rpupil.alpha = 0;
@@ -188,10 +220,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			clip.lhline.alpha = 0;
 			clip.lpupil.alpha = 0;
 			clip.textHolder.previewText.text = "";
-			messageCounter = 0;
 			
 			//Don't add the new _containerAll to the stage. It's just used to draw into the VideoData
-			addListeners();
+			//addListeners(); //moved to show()
 			//jerseyLoaded();//nascar - load suit from lib
 		}
 		
@@ -217,7 +248,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		}
 
 		
-		override public function onReadyBRF(event : Event = null) : void {
+		override public function onReadyBRF(event : Event = null) : void 
+		{			
+			brfReady = true;
+			
 			//trace("onReadyBRF");
 			_mouthHolePoints[0] = _brfManager.faceShape.pointsUpperLip[0];
 			_mouthHolePoints[1] = _brfManager.faceShape.pointsLowerLip[5];
@@ -234,6 +268,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			for (var i : int = 0; i < _outlinePoints.length; i++) {
 				_outlinePoints[i] = new Point();
 			}			
+			
+			//disables face estimation and pose estimation
+			//tracking only
+			_brfManager.isEstimatingFace = false;
+			_brfManager.deleteLastDetectedFace = true;
 			
 			//base scale is the starting depth. Change it to 2 to find small faces in
 			//the image (eg. when people are standing far away from the camera)
@@ -257,12 +296,15 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			_brfManager.vars.faceDetectionVars.rectIncrement = 0.05;			
 			
 			super.onReadyBRF(event);
+			
+			_cameraManager.initCamera();//moved here from basicWebCam class
 		}
 		
 		
 		/** Init the 3D content overlay. */
-		override public function initContentContainer() : void {
-			//trace("initContentContainer");
+		override public function initContentContainer() : void 
+		{			
+			trace("initContentContainer");
 			//you can use either Flare3D v2.5
 			_container3D = new Avatar_Flare3D_v2_5(_containerContent);
 			//just tell the Flare3D scene to be as big as the video size and
@@ -276,10 +318,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			_container3D.init(new Rectangle(356, 3, 1280, 960)); //316
 			_container3D.initVideo(_videoManager.videoData);//1280x960 bmd
 			_container3D.initOcclusion("brf_fp11_occlusion_head.zf3d");
-			_container3D.model = "helm_cut2.zf3d";			
-			//_container3D.model = "sap.zf3d";			
+			_container3D.model = "helm2014.zf3d";	
 			
 			//load helmet and jersey from user data...
+			currentTeam = "packers";
 			Avatar_Flare3D_v2_5(_container3D).setTeam(currentTeam);
 			loadJersey(currentTeam);			
 			
@@ -287,59 +329,114 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		}
 		
 		
+		private function addControls():void
+		{
+			TweenMax.to(clip.instructions, 1, { x:0, delay:.5, ease:Back.easeOut } );
+			TweenMax.to(clip.camControl, 1, { x:0, delay:.75, ease:Back.easeOut } );
+			TweenMax.to(clip.eraSelector, 1, { x:2115, rotation:0, delay:1, ease:Back.easeOut, onComplete:introAnim } );
+			
+			addListeners();
+		}
+		
+		
 		public function addListeners():void
 		{
-			//trace("addListeners");
-			//NFL icon buttons and take photo
-			
-			clip.btnCardinals.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnFalcons.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnRavens.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnBills.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			
-			clip.btnPanthers.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnBears.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnBengals.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnBrowns.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			
-			clip.btnCowboys.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnBroncos.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnLions.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnPackers.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			
-			clip.btnTexans.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnColts.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnJaguars.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);			
-			clip.btnChiefs.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			
-			clip.btnDolphins.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnVikings.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnPatriots.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnSaints.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			
-			clip.btnGiants.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnJets.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnRaiders.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnEagles.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			
-			clip.btnSteelers.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnChargers.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnSeahawks.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btn49ers.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			
-			clip.btnRams.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnBuccaneers.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnTitans.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);
-			clip.btnRedskins.addEventListener(MouseEvent.MOUSE_DOWN, helmetSwap, false, 0, true);			
-			
 			clip.btnTakePhoto.addEventListener(MouseEvent.MOUSE_DOWN, takePhoto, false, 0, true);
 			clip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, doClose, false, 0, true);
+			
+			clip.btnUp.addEventListener(MouseEvent.MOUSE_DOWN, camUp, false, 0, true);
+			clip.btnDown.addEventListener(MouseEvent.MOUSE_DOWN, camDown, false, 0, true);
+			
+			clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, nextEra, false, 0, true);
+			clip.btnPrev.addEventListener(MouseEvent.MOUSE_DOWN, prevEra, false, 0, true);
+		}
+		
+		
+		private function introAnim():void
+		{
+			introAnimStarted = false;
+			introAnimFinished = false;
 		}
 		
 		
 		private function doClose(e:MouseEvent):void
 		{
 			dispatchEvent(new Event(CLOSE_PREVIEW));
+		}
+		
+		
+		private function camUp(e:MouseEvent):void
+		{			
+			clip.stage.addEventListener(MouseEvent.MOUSE_UP, camStop, false, 0, true);
+			dispatchEvent(new Event(CAM_UP));
+		}
+		
+		
+		private function camDown(e:MouseEvent):void
+		{
+			clip.stage.addEventListener(MouseEvent.MOUSE_UP, camStop, false, 0, true);
+			dispatchEvent(new Event(CAM_DOWN));
+		}
+		
+		
+		private function camStop(e:Event):void
+		{
+			clip.stage.removeEventListener(MouseEvent.MOUSE_UP, camStop);
+			dispatchEvent(new Event(CAM_STOP));
+		}
+		
+		
+		private function nextEra(e:MouseEvent):void
+		{
+			if (okToRotate) {
+				okToRotate = false;
+				var rTime:Number = 1;
+				var ow:int = 0;
+				TweenMax.to(clip.eraSelector, rTime, { rotation:"+45", ease:Back.easeOut, overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b14, rTime, { rotation:"-45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b05, rTime, { rotation:"-45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b96, rTime, { rotation:"-45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b94, rTime, { rotation:"-45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b84, rTime, { rotation:"-45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b63, rTime, { rotation:"-45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b59, rTime, { rotation:"-45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b46, rTime, { rotation:"-45", overwrite:ow, onComplete:eraRotationComplete } );
+				
+				eraIndex--;
+				if (eraIndex < 0) {
+					eraIndex = eraArray.length - 1;
+				}				
+			}
+		}
+		
+		
+		private function prevEra(e:MouseEvent):void
+		{
+			if (okToRotate) {
+				okToRotate = false;
+				var rTime:Number = 1;
+				var ow:int = 0;
+				TweenMax.to(clip.eraSelector, rTime, { rotation:"-45", ease:Back.easeOut, overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b14, rTime, { rotation:"+45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b05, rTime, { rotation:"+45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b96, rTime, { rotation:"+45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b94, rTime, { rotation:"+45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b84, rTime, { rotation:"+45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b63, rTime, { rotation:"+45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b59, rTime, { rotation:"+45", overwrite:ow } );
+				TweenMax.to(clip.eraSelector.b46, rTime, { rotation:"+45", overwrite:ow, onComplete:eraRotationComplete } );
+				
+				eraIndex++;
+				if (eraIndex >= eraArray.length) {
+					eraIndex = 0;
+				}
+			}
+		}
+		
+		private function eraRotationComplete():void
+		{
+			okToRotate = true;
+			MovieClip(eraArray[eraIndex]).gotoAndPlay(2); //open the image...
 		}
 		
 		/**
@@ -361,6 +458,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			TweenMax.to(btn, 1, { alpha:0 } );
 		}
 		
+		
 		/**
 		 * called from setTeam()
 		 * @param	team
@@ -369,11 +467,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{
 			currentTeam = team;
 			loadJersey(team);
-			if (_container3D) {
+			//if (_container3D) {
 				
-				Avatar_Flare3D_v2_5(_container3D).changeHelmet(team);
+				//Avatar_Flare3D_v2_5(_container3D).changeHelmet(team);
 				//_container3D.model = "helm_cut2.zf3d";	
-			}
+			//}
 		}
 		
 		
@@ -412,9 +510,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		//update the 3d webcam video plane, when there is a new image from the webcam
 		override public function onVideoUpdate() : void {
+			
 			//draw the video half the size to the BRF BitmapData - 640x480
-			_brfBmd.draw(_videoManager.videoData, _brfMatrix, null, null, null, true);
-			previewBMD.draw(_videoManager.videoData, prevMatrix, null, null, null, true);
+			_brfBmd.draw(_videoManager.videoData, _brfMatrix);
+			//previewBMD.draw(_videoManager.videoData, prevMatrix, null, null, null, true);
 			
 			//update BRF
 			super.onVideoUpdate();
@@ -444,6 +543,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{
 			return Avatar_Flare3D_v2_5(_container3D).getScreenshot();
 		}
+		
 		/*
 		public function getAlphaShot():BitmapData
 		{
@@ -454,14 +554,20 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		override public function showResult(showAll : Boolean = false) : void 
 		{			
 			//Draw the mask
-			var shapePoints : Vector.<Point> = _brfManager.faceShape.shapePoints;
-			var center : Point = shapePoints[67];
+			shapePoints = _brfManager.faceShape.shapePoints;
+			center = shapePoints[67];
 			//trace("showResult: center x",center.x);
-			var tmpPointShape : Point;
-			var tmpPointOutline : Point;
-			var fac : Number = 0.08;
+			
 			var i : int;
 			var l : int;
+			
+			var rect : Rectangle = _brfManager.lastDetectedFace;
+			if (rect != null) {
+				faceFoundTimer.start();
+			}else {
+				faceFoundTimer.reset();
+			}
+			
 			// no super.showResult() - we draw a mouth hole here
 			//a custom drawing to get rid of the mouth
 			if(_texture && _brfManager.task == BRFStatus.FACE_ESTIMATION) {
@@ -524,7 +630,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				clip.lhline.alpha = .8;
 				clip.lpupil.alpha = .9;
 				meshAlpha = .8;
-				introAlpha = .975; //decrement multiplier
+				introAlpha = .98; //decrement multiplier
 				animInc = 250;
 			}
 			
@@ -533,7 +639,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				BRFUtils.getFaceShapeVertices(_brfManager.faceShape);
 				meshAlpha *= introAlpha;
 				
-				if (meshAlpha < .03) {
+				if (meshAlpha < .05) {
 					//done
 					introAnimFinished = true;
 					clip.rvline.visible = false;
@@ -543,15 +649,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 					clip.lhline.visible = false;
 					clip.lpupil.visible = false;
 				}
-				/*
-				//no mesh per Nick
-				//draw face mesh
-				_draw.lineStyle(0.5, 0x000000, meshAlpha);
-				_draw.beginFill(0x00ff66, meshAlpha * .6);
-				_draw.drawTriangles(_faceShapeVertices, _faceShapeTriangles);
-				_draw.lineStyle();
-				_draw.endFill();
-				*/
+				
 				//track eyes with crosshairs			
 				_pointsToShow = _brfManager.faceShape.shapePoints;				
 				
@@ -560,7 +658,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				clip.rpupil.alpha = meshAlpha;
 				clip.rvline.x = 337 + (_pointsToShow[28].x * 2) + animInc;
 				clip.rhline.y = 20 + (_pointsToShow[28].y * 2) + animInc;
-				clip.rpupil.x = 330 + (_pointsToShow[28].x * 2) + animInc;
+				clip.rpupil.x = 335 + (_pointsToShow[28].x * 2) + animInc;
 				clip.rpupil.y = 20 + (_pointsToShow[28].y * 2) + animInc;
 				
 				clip.lvline.alpha = meshAlpha;
@@ -568,37 +666,20 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				clip.lpupil.alpha = meshAlpha;
 				clip.lvline.x = 337 + (_pointsToShow[33].x * 2) + animInc;
 				clip.lhline.y = 20 + (_pointsToShow[33].y * 2) + animInc;
-				clip.lpupil.x = 330 + (_pointsToShow[33].x * 2) + animInc;
+				clip.lpupil.x = 335 + (_pointsToShow[33].x * 2) + animInc;
 				clip.lpupil.y = 20 + (_pointsToShow[33].y * 2) + animInc;
 				
-				animInc -= 12;
+				animInc -= 15;
 				if (animInc <= 0) {
 					animInc = 0;
 				}
-			}
-			/*
-			messageCounter++;
-			if (messageCounter == 3) {
-				messageCounter = 0;
-				message();
-			}
-			*/
+			}			
 		}
-
 		
-		private function message(mess:String = null):void
+		private function faceFound(e:TimerEvent):void
 		{
-			if (mess == null) {
-				var ind:int = Math.floor(messages.length * Math.random());
-				mess = messages[ind];
-				if (Math.random() < .5) {
-					mess += ": " + String(Math.random());
-				}
-			}
-			
-			clip.textHolder.previewText.text = mess;			
+			dispatchEvent(new Event(FACE_FOUND));
 		}
-
 		
 		public function setFace(texture : BitmapData, uvData : Vector.<Number>) : void {
 			_texture = texture;

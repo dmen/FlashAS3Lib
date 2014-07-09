@@ -34,7 +34,7 @@ package com.gmrmarketing.utilities
 		public static const SER_ERROR:String = "Error:Check that SerProxy is running";
 		
 		private var socket:Socket;
-		private var socketStatus:Boolean;//true if connected to serproxy
+		private var socketConnected:Boolean;//true if connected to serproxy
 		
 
 		public function SerProxy_Connector()
@@ -45,7 +45,7 @@ package com.gmrmarketing.utilities
 			socket.addEventListener(IOErrorEvent.IO_ERROR, onError);
 			socket.addEventListener(Event.CLOSE, closed);			
 			
-			socketStatus = false;
+			socketConnected = false;
 		}
 
 		
@@ -58,10 +58,18 @@ package com.gmrmarketing.utilities
 		 */
 		public function connect(localHost:String = "127.0.0.1", port:int = 5331):void
 		{
-			if(socketStatus){
-				socket.close();							
-			}else{
-				socket.connect(localHost, port);				
+			if (socketConnected) {
+				try{
+					socket.close();
+				}catch (e:Error) {
+					
+				}
+			}else {
+				try{
+					socket.connect(localHost, port);
+				}catch (e:Error) {
+					
+				}
 			}
 		}
 		
@@ -76,14 +84,18 @@ package com.gmrmarketing.utilities
 		 */
 		public function send(ba:ByteArray):void
 		{		
-			socket.writeBytes(ba);
-			socket.flush();  
+			try{
+				socket.writeBytes(ba);
+				socket.flush();  
+			}catch (e:Error) {
+				
+			}
 		}
 		
 		
 		private function connected(e:Event):void 
 		{
-			socketStatus = true;
+			socketConnected = true;
 			dispatchEvent(new Event(CONNECTED));
 		}
 
@@ -102,7 +114,7 @@ package com.gmrmarketing.utilities
 		
 		private function closed(e:Event):void 
 		{
-			socketStatus = false;
+			socketConnected = false;
 			dispatchEvent(new Event(CLOSED));
 		}
 

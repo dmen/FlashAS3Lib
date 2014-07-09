@@ -297,7 +297,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		private function draw_arc(g:Graphics, center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineColor:Number, lineAlpha:Number = 1):void
 		{
 			g.clear();
-			g.lineStyle(LINE_THICKNESS, lineColor, lineAlpha, false, LineScaleMode.NORMAL,CapsStyle.NONE);
+			g.lineStyle(LINE_THICKNESS, lineColor, lineAlpha, false, LineScaleMode.NORMAL, CapsStyle.NONE);
 			
 			var angle_diff:int = (angle_to) - (angle_from);
 			var steps:int = angle_diff * 1;//1 is precision... use higher numbers for more.

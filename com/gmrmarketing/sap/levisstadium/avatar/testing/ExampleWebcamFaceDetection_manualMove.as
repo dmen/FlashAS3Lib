@@ -33,6 +33,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 		private var servoDelayTimer:Timer;//delays successive servo writes		
 		
 		private var frame:MovieClip;//mcFrame lib clip
+		private var startTimer:Timer; //starts the app if a face is found for more than .5 sec
 		
 		
 		public function ExampleWebcamFaceDetection_manualMove() 
@@ -42,7 +43,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 			sp = new SerProxy_Connector();
 			sp.connect();
 			
-			frame = new mcFrame();
+			frame = new mcFrame(); 
+			
+			startTimer = new Timer(500, 1);
+			startTimer.addEventListener(TimerEvent.TIMER, startApp, false, 0, true);
 			
 			servoDelayTimer = new Timer(50);
 			servoDelayTimer.addEventListener(TimerEvent.TIMER, servoMove, false, 0, true);
@@ -69,7 +73,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 		{			
 			//when isEstimatingFace is false face estimation and pose estimation are disabled
 			_brfManager.isEstimatingFace = true;
-			_brfManager.deleteLastDetectedFace = true;
+			//if this is true then _brfManager.lastDetectedFace will be null when no face is detected (it's lost)
+			_brfManager.deleteLastDetectedFace = true; 
 			
 			//base scale is the starting depth. Change it to 2 to find small faces in
 			//the image (eg. when people are standing far away from the camera)
@@ -104,10 +109,13 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 			
 			var rect : Rectangle = _brfManager.lastDetectedFace;
 			if (rect != null) {
+				startTimer.start();//calls startApp in .5 sec
 				_draw.lineStyle(1, 0xffff00, 1);
 				_draw.drawRect(rect.x*2, rect.y*2, rect.width*2, rect.height*2);
 				_draw.lineStyle();
 			}else {
+				trace("rn");
+				startTimer.reset();
 				//rect is null - face is lost				
 				//_brfManager.reset(); //reset to start detecting again			
 			}
@@ -134,12 +142,20 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 		}
 		
 		
+		private function startApp(e:TimerEvent):void
+		{
+			removeChild(frame);
+			
+		}
+		
+		
 		private function servoUp(e:MouseEvent):void
 		{
 			angleStep = -2;
 			servoMove();
 			servoDelayTimer.start();
 		}
+		
 		
 		private function servoDown(e:MouseEvent):void
 		{
@@ -148,10 +164,12 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 			servoDelayTimer.start();
 		}
 		
+		
 		private function servoStop(e:MouseEvent):void
 		{
 			servoDelayTimer.stop();
 		}
+		
 		
 		private function servoMove(e:TimerEvent = null):void
 		{			
@@ -166,5 +184,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 			ba.writeByte(curAngle);
 			sp.send(ba);
 		}
+		
 	}
 }
