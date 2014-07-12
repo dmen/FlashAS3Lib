@@ -208,8 +208,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			preview.addEventListener(Webcam3D_1280x960.CAM_DOWN, moveCamDown, false, 0, true);
 			preview.addEventListener(Webcam3D_1280x960.CAM_STOP, stopCam, false, 0, true);
 			
-			preview.setTeam("packers", "Guest");
-			//preview.setTeam(comm.getUserData().FavoriteTeam, comm.getUserData().FirstName);
 			preview.show();
 			if(!mainContainer.contains(preview)){
 				mainContainer.addChild(preview);
@@ -258,8 +256,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			countdown.hide();
 			
 			countdown.removeEventListener(Countdown.FLASH_COMPLETE, showReview);
-			
-			review.show(avatarImage, preview.getTeam(), comm.getUserData());//preview.getAlphaShot());// , 
+			//mainContainer.addChild(new Bitmap(avatarImage));
+			review.show(avatarImage, comm.getUserData());//preview.getAlphaShot());// , 
 			review.addEventListener(Review.RETAKE, retake, false, 0, true);
 			review.addEventListener(Review.SAVE, save, false, 0, true);
 		}
@@ -290,42 +288,12 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function save(e:Event):void
 		{
 			tim.buttonClicked();//timeout helper
-			/*
-			//OMNICOM
-			//Need to show the email field and keyboard here
-			email = new mcEmail();
-			email.x = 286; email.y = 500;
-			email.theEmail.text = "";
-			addChild(email);
 			
-			kbd.x = 319; kbd.y = 682;
-			addChild(kbd);
-			email.alpha = 0;
-			kbd.alpha = 0;
-			TweenMax.to(email, .5, { alpha:.8, y:440 } );
-			TweenMax.to(kbd, .5, { alpha:1, y:622 } );
-			kbd.setFocusFields([email.theEmail]);
-			kbd.addEventListener(KeyBoard.SUBMIT, validateEmail, false, 0, true);
-			//OMNICOM
-			*/
-			//FOR OMNICOM - these moved down to validateEmail()
 			modal.addEventListener(Modal.HIDING, reset, false, 0, true);
-			modal.show("Thank you for showing your team spirit.\nFeel free to create as many NFL players as you want.\nShare with your friends and compare to see\nwho makes the best NFL player.", "THANK YOU", true, true, 7, true);
+			modal.show("Thank you for showing your team spirit.\nFeel free to create as many players as you want.\nShare with your friends and compare to see\nwho makes the best 49ers player.", "THANK YOU", true, true, 7, false);
 			TweenMax.delayedCall(.5, saveImage);			
-		}
+		}		
 		
-		/*
-		private function validateEmail(e:Event):void
-		{
-			if (Validator.isValidEmail(email.theEmail.text)) {
-				TweenMax.to(email, .5, { alpha:0, y:530 } );
-				TweenMax.to(kbd, .5, { alpha:0, y:708 } );
-				modal.addEventListener(Modal.HIDING, reset, false, 0, true);
-				modal.show("Feel free to create as many\nrace avatars as you want.\nShare with your friends and compare\nto see who makes the best racer.", "THANK YOU", true, true, 7, true);
-				TweenMax.delayedCall(.5, saveImage);
-			}
-		}
-		*/
 		
 		/**
 		 * called after the thanks dialog is showing
@@ -337,7 +305,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function saveImage():void
 		{			
 			//ORIGINAL
-			//comm.saveImage(review.getCard(), rfid.getVisitorID());
+			comm.saveImage(review.getCard(), "8675309");
 			
 			//OMNICOM - added saveImage2() method which takes email isntead of rfid
 			//comm.saveImage(review.getCard(), "8675309");//RASCH MEETING
@@ -383,6 +351,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			//OMNICOM
 			intro.show();
 			intro.addEventListener(Intro.SHOWING, killModal, false, 0, true);
+			intro.addEventListener(Intro.MANUAL_START, gotRFID, false, 0, true);
+			
+			//turn off estimation and re-enable tracking only
+			preview.track();
+			preview.addEventListener(Webcam3D_1280x960.FACE_FOUND, gotRFID, false, 0, true);
 		}
 		
 		

@@ -150,7 +150,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		/** Instantiates the Library and sets a listener to wait for the lib to be ready. */
 		public function initBRF() : void 
 		{
-			trace("initBRF");
 			_brfManager = new BeyondRealityFaceManager(stage);
 			_brfManager.addEventListener(Event.INIT, onInitBRF);
 			_leftEyePoint = new Point();
@@ -160,7 +159,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		/** Initialzes the lib. Must again be waiting for the lib to be ready. */
 		public function onInitBRF(event : Event = null) : void 
 		{
-			trace("onInitBRF");
 			_brfManager.removeEventListener(Event.INIT, onInitBRF);
 			_brfManager.addEventListener(BeyondRealityFaceManager.READY, onReadyBRF);
 			
@@ -171,7 +169,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		/** BRF is now ready and the tracking is available. */
 		public function onReadyBRF(event : Event = null) : void 
 		{
-			trace("onReadyBRF");
 			_brfManager.removeEventListener(BeyondRealityFaceManager.READY, onReadyBRF);
 			
 			_faceShapeVertices = BRFUtils.getFaceShapeVertices(_brfManager.faceShape);

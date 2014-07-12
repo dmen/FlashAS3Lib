@@ -25,11 +25,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	import com.dynamicflash.util.Base64;
 	import flash.utils.ByteArray;
 	import com.adobe.images.JPEGEncoder;
-	import flash.net.URLVariables;
-	import flash.net.URLLoader;
-	import flash.net.URLRequestMethod;
-	import flash.net.URLRequest;
-	import flash.net.URLRequestDefaults;
+	import flash.net.*;
 	import flash.utils.Timer;
 	import flash.filesystem.*; //for saving images to the local filesystem
 	

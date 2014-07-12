@@ -44,7 +44,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 		
 		private var _planeFactor : int = 16;
 		private var bmd : BitmapData;//for screenshot
-		private var currentTeam:String;
 		
 		
 		public function Avatar_Flare3D_v2_5(container : Sprite) {
@@ -83,16 +82,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 			_scene.addChild(_baseNode);
 			
 			super.init(rect);
-		}
-		
-		public function setTeam(team:String):void
-		{
-			currentTeam = team;
-		}
+		}		
 		
 		//Stage3D is not transparent. We need to create a video plane and map the video bitmapdata to it.
-		override public function initVideo(bitmapData : BitmapData) : void {
-			trace("flare_initVideo");
+		override public function initVideo(bitmapData : BitmapData) : void
+		{			
 			_videoPlaneTexture = new Texture3D(bitmapData, true);
 			_videoPlaneTexture.mipMode = Texture3D.MIP_NONE;
 			
@@ -115,16 +109,22 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 				pos.z + dir.z * planeDist);
 			_videoPlane.setRotation(rot.x, rot.y, rot.z);
 		}
+		
+		
 		//And then update it, whenever the video was updated
 		override public function updateVideo() : void {
 			_videoPlaneTexture.uploadTexture();
 		}
+		
+		
 		//more GPU power? Then let's hide the glasses bows behind a invisible head! 
 		//(or any other object behind any other invisible object)
 		override public function initOcclusion(url : String) : void {
 			_scene.addEventListener(Scene3D.COMPLETE_EVENT, onCompleteOcclusion);
 			_scene.addChildFromFile(url, _occlusionNode);
 		}
+		
+		
 		//We extract the occlusion object and remove it from the scene
 		//the _scene gets a render event and handles drawing semi-automatically
 		override protected function onCompleteOcclusion(event : Event) : void {
@@ -148,6 +148,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 			_scene.addEventListener(Scene3D.RENDER_EVENT, onRender);
 			_scene.resume();
 		}
+		
+		
 		//Setting the 2 holder of the models and the occlusion
 		override protected function onUpdateMatrix(vec : Vector.<Number>) : void {
 			if(_initialized) {
@@ -162,6 +164,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 				}
 			}
 		}
+		
+		
 		/** here you can set bound the 3d objects may not exceed. Might be usefull is some cases. */
 		override public function isValidPose() : Boolean {
 			var validPose : Boolean = true;
@@ -177,6 +181,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 		
 			return validPose;
 		}
+		
+		
 		/** Sets the model, which will be cached and reused. */
 		override public function set model(model : String) : void {
 			_scene.pause();
@@ -207,18 +213,20 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 			_model = model;
 		}
 		
+		
 		override public function get model() : String 
 		{
 			return _model;
 		}
+		
 		
 		//loading is complete
 		override protected function onCompleteLoading(e : Event) : void {
 			_scene.removeEventListener(Scene3D.COMPLETE_EVENT, onCompleteLoading);
 			_scene.camera = _camera;
 			_scene.resume();
-			//changeHelmet(currentTeam);
 		}
+		
 		
 		/** utility function to trace all children of the scene. */
 		public function traceChildren(base : Pivot3D, prefix : String = null) : void {
@@ -269,188 +277,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 			}
 			//all objects, that where not drawn here, will be drawn by Flare3D automatically			
 		}
-		
-		//cardinals, falcons, ravens, bills, panthers, bears, bengals, browns, cowboys, broncos, lions, packers, texans, colts, jaguars, chiefs, dolphins, vikings, patriots, saints, giants, jets, raiders, eagles, steelers, chargers, seahawks, 49ers, rams, buccaneers, titans, redskins
-		/*public function changeHelmet(team:String):void
-		{
-			helmetShader = _scene.getMaterialByName( "ID38" ) as Shader3D;					
-			
-			switch(team) {
-				case "cardinals":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetArizonaCardinals.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeArizonaCardinals.jpg" );
-					setMask(0xa5acaf);					
-					break;
-				case "falcons":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetAtlantaFalcons.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeAtlantaFalcons.jpg" );
-					setMask(0x111c24);
-					break;
-				case "ravens":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetBaltimoreRavens.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeBaltimoreRavens.jpg" );
-					setMask(0x111c24);
-					break;
-				case "bills":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetBuffaloBills.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeBuffaloBills.jpg" );
-					setMask(0xffffff);
-					break;
-				case "panthers":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetCarolinaPanthers.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeCarolinaPanthers.jpg" );
-					setMask(0x111c24);
-					break;
-				case "bears":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetChicagoBears.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeChicagoBears.jpg" );
-					setMask(0x031e2f);
-					break;
-				case "bengals":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetCincinnatiBengals.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeCincinnatiBengals.jpg" );
-					//stripe.visible = false;
-					setMask(0x111c24);
-					break;
-				case "browns":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetClevelandBrowns.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeClevelandBrowns.jpg" );
-					setMask(0xffffff);
-					break;
-				case "cowboys":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetDallasCowboys.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeDallasCowboys.jpg" );
-					setMask(0xffffff);
-					break;
-				case "broncos":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetDenverBroncos.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeDenverBroncos.jpg" );
-					setMask(0x002147);
-					break;
-				case "lions":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetDetroitLions.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeDetroitLions.jpg" );
-					setMask(0x111c24);
-					break;
-				case "packers":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetGreenBayPackers.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeGreenBayPackers.jpg" );
-					setMask(0x2c5e4f);
-					break;
-				case "texans":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetHoustonTexans.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeHoustonTexans.jpg" );
-					setMask(0x031e2f);
-					break;
-				case "colts":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetIndianapolisColts.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeIndianapolisColts.jpg" );
-					setMask(0xffffff);
-					break;
-				case "jaguars":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetJacksonvilleJaguars.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeJacksonvilleJaguars.jpg" );
-					setMask(0x111c24);
-					break;
-				case "chiefs":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetKansasCityChiefs.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeKansasCityChiefs.jpg" );
-					setMask(0xffffff);
-					break;
-				case "dolphins":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetMiamiDolphins.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeMiamiDolphins.jpg" );
-					setMask(0x006265);
-					break;
-				case "vikings":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetMinnesotaVikings.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeMinnesotaVikings.jpg" );
-					setMask(0x4b306a);
-					break;
-				case "patriots":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetNewEnglandPatriots.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeNewEnglandPatriots.jpg" );
-					setMask(0xc60c30);
-					break;
-				case "saints":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetNewOrleansSaints.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeNewOrleansSaints.jpg" );
-					setMask(0x111c24);
-					break;
-				case "giants":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetNewYorkGiants.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeNewYorkGiants.jpg" );
-					setMask(0xffffff);
-					break;
-				case "jets":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetNewYorkJets.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeNewYorkJets.jpg" );
-					setMask(0x2c5e4f);
-					break;
-				case "raiders":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetOaklandRaiders.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeOaklandRaiders.jpg" );
-					setMask(0xffffff);
-					break;
-				case "eagles":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetPhiladelphiaEagles.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripePhiladelphiaEagles.jpg" );
-					setMask(0x111c24);
-					break;
-				case "steelers":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetPittsburghSteelers.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripePittsburghSteelers.jpg" );
-					setMask(0x111c24);
-					break;
-				case "chargers":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetSanDiegoChargers.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeSanDiegoChargers.jpg" );
-					setMask(0x002244);
-					break;
-				case "seahawks":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetSeattleSeahawks.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeSeattleSeahawks.jpg" );
-					setMask(0x011831);
-					break;
-				case "49ers":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetSanFrancisco49ers.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeSanFrancisco49ers.jpg" );
-					setMask(0xffffff);
-					break;
-				case "rams":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetStLouisRams.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeStLouisRams.jpg" );
-					setMask(0x002147);
-					break;
-				case "buccaneers":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetTampaBayBuccaneers.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeTampaBayBuccaneers.jpg" );
-					setMask(0x111c24);
-					break;
-				case "titans":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetTennesseeTitans.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeTennesseeTitans.jpg" );
-					setMask(0x002147);
-					break;
-				case "redskins":
-					helmetShader.filters[0].texture = new Texture3D( path + "HelmetWashingtonRedskins.jpg" );
-					//stripeShader.filters[0].texture = new Texture3D( path + "StripeWashingtonRedskins.jpg" );
-					setMask(0xffb612);
-					break;
-			}			
-			_scene.freeMemory();			
-		}
-		
-		
-		//sets the helmet's face mask color
-		private function setMask(color:uint):void
-		{
-			maskShader = _scene.getMaterialByName( "ID28" ) as Shader3D;//ID28 is 2014 helmet...
-			var b:BitmapData = new BitmapData(64, 64, false, color);
-			var t:Texture3D = new Texture3D();
-			t.bitmapData = b;
-			maskShader.filters[0].texture = t;
-		}*/
 		
 	}
 }

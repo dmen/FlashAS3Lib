@@ -24,23 +24,21 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var btnRetake:MovieClip;
 		private var container:DisplayObjectContainer;
 		
-		private var previewImage:Bitmap;
-		private const logoPath:String = "nfl_logos/";
-		private var sidebar:MovieClip;
 		private var userImage:BitmapData;
-		private var card:BitmapData;
-		private var logo:Bitmap;
+		private var logo:BitmapData;//lockup lib clip
 		
 		private var userData:Object;
 		
 		private var color1:int; //top and bottom bar colors for the sidebar
 		private var color2:int;
 		
+		private var card:Bitmap; //the final image resized to 589x689
+		
+		
 		
 		public function Review()
 		{
 			clip = new mcReview();
-			sidebar = new mcSidebar();//300x780 clip
 		}
 		
 		
@@ -49,273 +47,79 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			container = $container;
 		}
 		
+		
 		/**
-		 * From flare - image is displayed at 316,63 and is 1280x960
-		 * with a 717 x 780 chunk for display to the user
-		 * extract 717x780 chunk at 281,97
+		 * From flare - 1280x960
+		 * image is displayed in preview at 336,3
+		 * with a 761 x 891 chunk for display to the user
+		 * display window in preview is at 573,40 - so we need to extract a 761x891 chunk
+		 * at 573-336 = 236
+		 * 40-3 = 37
+		 * preview image size is 589x689 and sits at 314,198
+		 * 
 		 * @param	image 1280x960 image from Flare
 		 */
-		public function show(image:BitmapData, team:String, user:Object):void
+		public function show(image:BitmapData, user:Object):void
 		{
 			if(container){
 				if (!container.contains(clip)) {
 					container.addChild(clip);
 				}
-			}			
-			
-			//need to get the two card colors depending on team:
-			switch(team) {
-				case "cardinals":
-					color1 = 0x97233f; //red
-					color2 = 0x002776; //dark blue
-					break;
-				case "falcons":
-					color1 = 0xc60c30; //red
-					color2 = 0x111c24; //black
-					break;
-				case "ravens":
-					color1 = 0x241773; //blue
-					color2 = 0x111c24; //black
-					break;
-				case "bills":
-					color1 = 0x00338d; //blue
-					color2 = 0xc60c30; //red
-					break;
-				case "panthers":
-					color1 = 0x0088ce; //blue
-					color2 = 0x111c24; //black
-					break;
-				case "bears":
-					color1 = 0xdd4814; //orange
-					color2 = 0x031e2f; //navy
-					break;
-				case "bengals":
-					color1 = 0xf9461c; //orange
-					color2 = 0x111c24; //black 17,28,36
-					break;
-				case "browns":
-					color1 = 0xf9461c; //orange
-					color2 = 0x332b2a; //brown
-					break;
-				case "cowboys":
-					color1 = 0x003591; //blue
-					color2 = 0x7a8f8a; //silver green
-					break;
-				case "broncos":
-					color1 = 0xff6319; //orange
-					color2 = 0x002147; //navy
-					break;
-				case "lions":
-					color1 = 0x2a6ebb; //honolulu blue
-					color2 = 0x85888b; //silver
-					break;
-				case "packers":
-					color1 = 0x2c5e4f; //green
-					color2 = 0xffb612; //gold
-					break;
-				case "texans":
-					color1 = 0xb6061d; //red
-					color2 = 0x00133e; //navy
-					break;
-				case "colts":
-					color1 = 0x002395; //navy
-					color2 = 0xffffff; //white
-					break;
-				case "jaguars":
-					color1 = 0x006983; //teal
-					color2 = 0xb88b00; //gold
-					break;
-				case "chiefs":
-					color1 = 0xc60c30; //red
-					color2 = 0xffb612; //gold
-					break;
-				case "dolphins":
-					color1 = 0x006265; //aqua
-					color2 = 0xf9461c; //coral
-					break;
-				case "vikings":
-					color1 = 0x4b306a; //purple
-					color2 = 0xffb612; //gold
-					break;
-				case "patriots":
-					color1 = 0x002244; //navy
-					color2 = 0xc60c30; //red
-					break;
-				case "saints":
-					color1 = 0x968252; //gold
-					color2 = 0x111c24; //black
-					break;
-				case "giants":
-					color1 = 0x0b2265; //dark blue
-					color2 = 0xa71930; //red
-					break;
-				case "jets":
-					color1 = 0x2c5e4f; //hunter green
-					color2 = 0xffffff; //white
-					break;
-				case "raiders":
-					color1 = 0x85888b; //silver
-					color2 = 0x111c24; //black 17,28,36
-					break;
-				case "eagles":
-					color1 = 0x004953; //midnight green
-					color2 = 0x111c24; //black 17,28,36
-					break;
-				case "steelers":
-					color1 = 0xffb612; //gold
-					color2 = 0x111c24; //black 17,28,36
-					break;
-				case "chargers":
-					color1 = 0x002244; //navy
-					color2 = 0xffb612; //gold
-					break;
-				case "seahawks":
-					color1 = 0x00338d; //blue
-					color2 = 0x0085424; //green
-					break;
-				case "49ers":
-					color1 = 0x97233f; //cardinal red
-					color2 = 0x8e6e4d; //metallic gold
-					break;
-				case "rams":
-					color1 = 0x002147; //millenium blue
-					color2 = 0x95774d; //new century gold
-					break;
-				case "buccaneers":
-					color1 = 0xa71930; //buccaneer red
-					color2 = 0x665c4f; //pewter
-					break;
-				case "titans":
-					color1 = 0x4b92db; //blue
-					color2 = 0x002147; //navy
-					break;
-				case "redskins":
-					color1 = 0x822433; //burgundy
-					color2 = 0xffb612; //gold
-					break;
-			}			
-			//cardinals, falcons, ravens, bills, panthers, bears, bengals, browns, cowboys, broncos, lions, packers, texans, colts, jaguars, chiefs, dolphins, vikings, patriots, saints, giants, jets, raiders, eagles, steelers, chargers, seahawks, 49ers, rams, buccaneers, titans, redskins
-			
+			}
 			
 			//{"FirstName":"antonio","LastName":"zugno","City":"Rochester","State":"NY","FavoriteTeam":"packers"}
-			userData = user;
+			userData = user;			
 			
-			//first extract user preview image from 1280x960 camera image
-			//we take wider than we need, then move it left 81 pixels... this to compensate for the right card
-			//edge being overlayed ontop of the photo
-			userImage = new BitmapData(800, 780);
-			userImage.copyPixels(image, new Rectangle(240, 95, 800, 780), new Point( -35, 0));
-			//end up with a 719 x 780 image
+			userImage = new BitmapData(761, 891);
+			userImage.copyPixels(image, new Rectangle(236, 37, 761, 891), new Point(0, 0));
 			
-			var blur:BitmapData = new blurMask();//lib image
+			//SAP & 49ers logo at upper left
+			logo = new lockup();			
+			userImage.copyPixels(logo, new Rectangle(0, 0, logo.width, logo.height), new Point(0, 0), null, null, true);
 			
-			var blurImage:BitmapData = new BitmapData(719, 780);
-			blurImage.copyPixels(userImage, new Rectangle(0, 0, 719, 780), new Point(0, 0));
-			var blurFilter:BlurFilter = new BlurFilter(22, 22, 2);
-			blurImage.applyFilter(blurImage, new Rectangle(0, 0, 719, 780), new Point(0, 0), blurFilter);
+			var cardData:BitmapData = new BitmapData(589, 689);
+			var cardMatrix:Matrix = new Matrix();
+			cardMatrix.scale(.773981, .773981); //for scaling 761x891 to 589x689
+			cardData.draw(userImage, cardMatrix, null, null, null, true);
 			
-			userImage.copyPixels(blurImage, new Rectangle(0, 0, 719, 780), new Point(0, 0), blur, new Point(0, 0), true);
+			card = new Bitmap(cardData);
+			clip.addChild(card);
 			
-			var snowB:BitmapData = new snow();//lib clip
-			userImage.copyPixels(snowB, new Rectangle(0, 0, 719, 780), new Point(0, 0),null,null,true);
+			card.x = 314;
+			card.y = 198;
 			
-			var l:Loader = new Loader();
-			l.contentLoaderInfo.addEventListener(Event.COMPLETE, logoLoaded, false, 0, true);
-			l.load(new URLRequest(logoPath + team + "_160.png"));
-			//logoLoaded();
-		}
-		
-		
-		private function logoLoaded(e:Event = null):void
-		{
-			if(logo){
-				if (sidebar.contains(logo)) {
-					sidebar.removeChild(logo);
-				}
-			}
-			
-			logo = Bitmap(e.target.content);
-			logo.smoothing = true;
-			
-			sidebar.addChild(logo);
-			logo.x = 55 + Math.floor((250 - logo.width) * .5);
-			logo.y = 550 + Math.floor((230 - logo.height) * .5);
-			
-			card = new BitmapData(935, 780);
-			card.copyPixels(userImage, new Rectangle(0, 0, userImage.width, userImage.height), new Point(0, 0));
-			/*
-			sidebar.fname.text = "";
-			sidebar.lname.text = "";
-			sidebar.city.text = "";
-			*/
-			//set fname,lname,city text in sidebar
-			sidebar.fname.text = String(userData.FirstName).charAt(0).toUpperCase() + String(userData.FirstName).substr(1);
-			sidebar.lname.text = String(userData.LastName).charAt(0).toUpperCase() + String(userData.LastName).substr(1);
-			sidebar.city.text = String(userData.City).toUpperCase() + ", " + String(userData.State).toUpperCase();
-			
-			//Fit text
-			var nameFormat:TextFormat = sidebar.lname.getTextFormat();
-			var cityFormat:TextFormat = sidebar.city.getTextFormat();
-
-			while(sidebar.lname.textWidth > 198){	
-				nameFormat.size = int(nameFormat.size) - 1;
-				sidebar.lname.setTextFormat(nameFormat);
-			}
-			sidebar.fname.setTextFormat(nameFormat);
-
-			//be sure city is a little smaller
-			cityFormat.size = Math.max(int(nameFormat.size) - 12, 12);
-			sidebar.city.setTextFormat(cityFormat);
-
-			sidebar.lname.y = sidebar.fname.y + sidebar.fname.textHeight - 6;
-			sidebar.city.y = sidebar.lname.y + sidebar.lname.textHeight - 3;
-			//Fit Text
-			
-			TweenMax.to(sidebar.barTop, 0, { colorTransform: { tint:color1, tintAmount:1 }} );
-			TweenMax.to(sidebar.barBottom, 0, { colorTransform: { tint:color2, tintAmount:1 }} );
-			
-			var sidebarBMD:BitmapData = new BitmapData(sidebar.width, 782, true, 0x00000000);
-			sidebarBMD.draw(sidebar, null, null, null, null, true);
-			
-			card.copyPixels(sidebarBMD, new Rectangle(0, 0, sidebar.width, sidebar.height), new Point(card.width - sidebar.width, -1),null,null,true);
-			
-			var n:BitmapData = new BitmapData(794, 662);
-			var m:Matrix = new Matrix();
-			m.scale(.8491978, .8491978);
-			n.draw(card, m, null, null, null, true);
-			
-			previewImage = new Bitmap(n);
-			
-			if (container) {
-				container.addChild(previewImage);
-			}
-			previewImage.x = 268;
-			previewImage.y = 218;
+			clip.alpha = 0;	
+			clip.theText.alpha = 0;
+			clip.theText.y -= 75;
+			clip.theButtons.alpha = 0;
+			clip.theButtons.y += 75;
 			
 			clip.btnRetake.addEventListener(MouseEvent.MOUSE_DOWN, retake, false, 0, true);
 			clip.btnSave.addEventListener(MouseEvent.MOUSE_DOWN, save, false, 0, true);
 			
-			clip.alpha = 0;			
 			TweenMax.to(clip, 1, { alpha:1 } );
+			TweenMax.to(clip.theText, .5, { alpha:1, y:"75", delay:1 } );
+			TweenMax.to(clip.theButtons, .5, { alpha:1, y:"-75", delay:1 } );
 		}
 		
+		
 		/**
-		 * gets the full size - 935 x 780 card image
+		 * returns the full size 761x891 image
 		 * @return
 		 */
 		public function getCard():BitmapData
 		{
-			return card;
+			return userImage;
 		}
 		
+		/**
+		 * called from main if retake
+		 */
 		public function hide():void		
 		{			
 			clip.btnRetake.removeEventListener(MouseEvent.MOUSE_DOWN, retake);
 			clip.btnSave.removeEventListener(MouseEvent.MOUSE_DOWN, save);
-			TweenMax.to(clip, .5, { alpha:0, y:0, eaase:Back.easeIn, onComplete:killRetake } );
-			if(previewImage){
-				TweenMax.to(previewImage, .5, { alpha:0 } );
-			}
+			TweenMax.to(clip, .5, { alpha:0, y:0, eaase:Back.easeIn, onComplete:killRetake } );			
 		}
 		
 		
@@ -324,11 +128,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			if (container) {
 				if (container.contains(clip)) {
 					container.removeChild(clip);
-				}
-				if(previewImage){
-					if (container.contains(previewImage)) {
-						container.removeChild(previewImage);
-					}
 				}
 			}		
 		}

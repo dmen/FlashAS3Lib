@@ -35,14 +35,14 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		public var _container3D : BRFContainerFP11;
 		private var _brfBmd : BitmapData;
-		private var _brfMatrix : Matrix;
+		private var _brfMatrix : Matrix;//for scaling video data to 640x480 for BRF
 		
 		//Overlay image and face vertex data
 		[Embed(source="c:/users/dmennenoh/desktop/sap/assets/plain_guy_texture3_old.png")]
-		public var IMAGE : Class;
+		public var IMAGE:Class;
 		
 		[Embed(source="c:/users/dmennenoh/desktop/sap/assets/uv_plain_guy.txt", mimeType="application/octet-stream")]
-		public var UVDATA : Class;
+		public var UVDATA:Class;
 		
 		private const _outlinePoints : Vector.<Point> = new Vector.<Point>(21, true);
 		private const _mouthHolePoints : Vector.<Point> = new Vector.<Point>(11, true);
@@ -52,14 +52,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var _drawMask : Graphics;
 		
 		private var _containerAll : Sprite;
-		private var clip:MovieClip;
-		//private var previewBMD:BitmapData;
-		//private var prevMatrix:Matrix;		
+		private var clip:MovieClip;	
 			
 		private const jerseyPath:String = "jerseys/";
 		private var jerseyBMD:BitmapData;
 		private var jerseyMatrix:Matrix;
-		private var currentTeam:String;
 		
 		private var _pointsToShow : Vector.<Point>;
 		private var introAnimStarted:Boolean;
@@ -96,25 +93,21 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			clip = new mcPreview();
 			
-			eraArray = new Array(clip.eraSelector.b14, clip.eraSelector.b05, clip.eraSelector.b96, clip.eraSelector.b94, clip.eraSelector.b84, clip.eraSelector.b63, clip.eraSelector.b59, clip.eraSelector.b46);
+			eraArray = new Array([clip.eraSelector.b14, "helm2014.zf3d"], [clip.eraSelector.b05, "helm2005.zf3d"], [clip.eraSelector.b96, "helm1996.zf3d"], [clip.eraSelector.b94, "helm1994.zf3d"], [clip.eraSelector.b84, "helm1984.zf3d"], [clip.eraSelector.b63, "helm1963.zf3d"], [clip.eraSelector.b59, "helm1959.zf3d"], [clip.eraSelector.b46, "helm1946.zf3d"]);
 			eraIndex = 0; //starts on 2014
-		}
+		}		
 		
 		
-		public function setTeam(favTeam:String, fName:String):void
-		{
-			firstName = fName;
-			doSwap(favTeam);
-		}
-		
-		
+		//called from Main.reset()
 		public function hide():void
 		{
-			super.stopVid();//call in BRFBasicView
+			MovieClip(eraArray[eraIndex][0]).gotoAndPlay(10);//close current
+			eraIndex = 0;
+			
+			//super.stopVid();//call in BRFBasicView
 			if (contains(clip)) {
 				removeChild(clip);
 			}
-			//Flare3D_v2_5(_container3D).clear();
 		}
 		
 		public function isBrfReady():Boolean
@@ -141,23 +134,33 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				
 				if (!contains(clip)) {
 					addChild(clip);
-				}			
+				}				
 				
-				//clip.fname.text = "Welcome " + firstName;
 				clip.instructions.x = -clip.instructions.width;
 				clip.camControl.x = -clip.camControl.width;
 				clip.eraSelector.x = 2455;
 				clip.eraSelector.rotation = 90;
+				
+				clip.eraSelector.b14.rotation = 0;
+				clip.eraSelector.b05.rotation = 0;
+				clip.eraSelector.b96.rotation = 0;
+				clip.eraSelector.b94.rotation = 0;
+				clip.eraSelector.b84.rotation = 0;
+				clip.eraSelector.b63.rotation = 0;
+				clip.eraSelector.b59.rotation = 0;
+				clip.eraSelector.b46.rotation = 0;			
+				
+				clip.btnTakePhoto.y = 1128;
 				okToRotate = true;
 				
+				eraIndex = 0; //starts on 2014
 				addControls();
 			}
 			if(_videoManager){
 				super.startVid();
 			}
-			
-			//
 		}
+		
 
 		/** 
 		 * If you don't use Stage3D (there you have to draw the videoData on a 3D plane), you
@@ -166,8 +169,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		override public function initVideoHandling() : void 
 		{
 			_cameraManager = new CameraManager(this);
-			
-			//changed _videoManager to be of type * in BRFBasicView
 			_videoManager = new VideoManager1280x960();
 		}
 
@@ -175,7 +176,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		override public function initGUI() : void 
 		{
 			super.initGUI();
-//trace("BRFinitGUI");
 			_containerDrawMask = new Sprite();
 			_containerDrawMask.scaleX = 2.0;
 			_containerDrawMask.scaleY = 2.0;
@@ -189,29 +189,12 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			_containerAll = new Sprite();
 			_containerAll.addChild(_containerDraw);
-			_containerAll.addChild(_containerDrawMask);
-			
-			//graphic in the lib
-			//clip.fname.text = "Welcome " + firstName;
-			//addChild(clip);		
+			_containerAll.addChild(_containerDrawMask);			
 			
 			jerseyBMD = new BitmapData(1,1);
 			jerseyMatrix = new Matrix();
-			//jerseyMatrix.scale(1.2, 1.2);//NASCAR
-			jerseyMatrix.scale(.86,.86);//AVATAR
-			//jerseyMatrix.translate(150, 0);//-43//NASCAR
-			jerseyMatrix.translate(-120, 500);//AVATR
-			
-			//small camera preview at upper left
-			//previewBMD = new BitmapData(486, 364, false, 0xff000000);//onscreen preview window is 486 x 344
-			//NASCARpreviewBMD = new BitmapData(486, 364, false, 0xff000000);//onscreen preview window is 486 x 344
-			//var pre:Bitmap = new Bitmap(previewBMD);
-			//pre.x = 41;
-			//pre.y = 225;//window top at 235 - move it up 10 to compensate for 364 size vs 344window size
-			//clip.addChildAt(pre, 0);//add behind main background so it gets shadow cast on it
-			
-			//prevMatrix = new Matrix();//for scaling 1280x960 image to 486x364
-			//prevMatrix.scale(.3796875, .3796875);				
+			jerseyMatrix.scale(.98, .98);
+			jerseyMatrix.translate( -160, 250);
 			
 			clip.rvline.alpha = 0;
 			clip.rhline.alpha = 0;
@@ -220,17 +203,12 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			clip.lhline.alpha = 0;
 			clip.lpupil.alpha = 0;
 			clip.textHolder.previewText.text = "";
-			
-			//Don't add the new _containerAll to the stage. It's just used to draw into the VideoData
-			//addListeners(); //moved to show()
-			//jerseyLoaded();//nascar - load suit from lib
 		}
 		
 		
 		/** Initialzes the lib. Must again be waiting for the lib to be ready. */
 		override public function onInitBRF(event : Event = null) : void 
 		{
-			//trace("onInitBRF");
 			_brfManager.removeEventListener(Event.INIT, onInitBRF);
 			_brfManager.addEventListener(BeyondRealityFaceManager.READY, onReadyBRF);
 			//override the face detection regions of interest, if needed.
@@ -243,16 +221,15 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			_brfMatrix.scale(.5, .5);
 			
 			//we don't use the videoData directly, but the _brfBmd
-//			_brfManager.init(_videoManager.videoData, _contentContainer);
+			//_brfManager.init(_videoManager.videoData, _contentContainer);
 			_brfManager.init(_brfBmd, _contentContainer);
 		}
 
-		
+	
 		override public function onReadyBRF(event : Event = null) : void 
 		{			
 			brfReady = true;
 			
-			//trace("onReadyBRF");
 			_mouthHolePoints[0] = _brfManager.faceShape.pointsUpperLip[0];
 			_mouthHolePoints[1] = _brfManager.faceShape.pointsLowerLip[5];
 			_mouthHolePoints[2] = _brfManager.faceShape.pointsLowerLip[4];
@@ -303,8 +280,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		/** Init the 3D content overlay. */
 		override public function initContentContainer() : void 
-		{			
-			trace("initContentContainer");
+		{
 			//you can use either Flare3D v2.5
 			_container3D = new Avatar_Flare3D_v2_5(_containerContent);
 			//just tell the Flare3D scene to be as big as the video size and
@@ -315,16 +291,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			//var planeDist : Number = (1 / _scene.camera.zoom * _scene.viewPort.width) * _planeFactor * 0.25; //instead of 0.5;
 			
 			//onscreen window is 717x780
-			_container3D.init(new Rectangle(356, 3, 1280, 960)); //316
+			_container3D.init(new Rectangle(336, 3, 1280, 960)); //316
 			_container3D.initVideo(_videoManager.videoData);//1280x960 bmd
 			_container3D.initOcclusion("brf_fp11_occlusion_head.zf3d");
-			_container3D.model = "helm2014.zf3d";	
-			
-			//load helmet and jersey from user data...
-			currentTeam = "packers";
-			Avatar_Flare3D_v2_5(_container3D).setTeam(currentTeam);
-			loadJersey(currentTeam);			
-			
+			//_container3D.model = eraArray[eraIndex][1];			
 			_contentContainer = _container3D;			
 		}
 		
@@ -333,11 +303,20 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{
 			TweenMax.to(clip.instructions, 1, { x:0, delay:.5, ease:Back.easeOut } );
 			TweenMax.to(clip.camControl, 1, { x:0, delay:.75, ease:Back.easeOut } );
-			TweenMax.to(clip.eraSelector, 1, { x:2115, rotation:0, delay:1, ease:Back.easeOut, onComplete:introAnim } );
+			TweenMax.to(clip.btnTakePhoto, 1, { y:1008, delay:1, ease:Back.easeOut } );
+			TweenMax.to(clip.eraSelector, 1, { x:2115, rotation:0, delay:1.2, ease:Back.easeOut, onComplete:introAnim } );
 			
 			addListeners();
 		}
 		
+		//called by Main.reset()
+		public function track():void
+		{
+			//disables face estimation and pose estimation
+			//tracking only
+			_brfManager.isEstimatingFace = false;
+			_brfManager.deleteLastDetectedFace = true;
+		}
 		
 		public function addListeners():void
 		{
@@ -354,6 +333,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function introAnim():void
 		{
+			MovieClip(eraArray[eraIndex][0]).gotoAndPlay(2);//open the default 2014
+			_container3D.model = eraArray[eraIndex][1];
+			loadJersey();
 			introAnimStarted = false;
 			introAnimFinished = false;
 		}
@@ -402,10 +384,13 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				TweenMax.to(clip.eraSelector.b59, rTime, { rotation:"-45", overwrite:ow } );
 				TweenMax.to(clip.eraSelector.b46, rTime, { rotation:"-45", overwrite:ow, onComplete:eraRotationComplete } );
 				
+				MovieClip(eraArray[eraIndex][0]).gotoAndPlay(10);//close current
+				
 				eraIndex--;
 				if (eraIndex < 0) {
 					eraIndex = eraArray.length - 1;
-				}				
+				}
+				MovieClip(eraArray[eraIndex][0]).gotoAndPlay(2); //open the image for this era
 			}
 		}
 		
@@ -426,70 +411,30 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				TweenMax.to(clip.eraSelector.b59, rTime, { rotation:"+45", overwrite:ow } );
 				TweenMax.to(clip.eraSelector.b46, rTime, { rotation:"+45", overwrite:ow, onComplete:eraRotationComplete } );
 				
+				MovieClip(eraArray[eraIndex][0]).gotoAndPlay(10); //close current
+				
 				eraIndex++;
 				if (eraIndex >= eraArray.length) {
 					eraIndex = 0;
 				}
+				MovieClip(eraArray[eraIndex][0]).gotoAndPlay(2); //open the image for this era
 			}
 		}
 		
+		//called by TweenMax once era is done rotating
 		private function eraRotationComplete():void
 		{
-			okToRotate = true;
-			MovieClip(eraArray[eraIndex]).gotoAndPlay(2); //open the image...
+			okToRotate = true;			
+			_container3D.model = eraArray[eraIndex][1];
+			loadJersey();
 		}
 		
-		/**
-		 * Called whenever a helmet / team button is clicked
-		 * @param	e
-		 */
-		private function helmetSwap(e:MouseEvent):void
+		
+		private function loadJersey():void
 		{
-			var team:String = MovieClip(e.currentTarget).name.substr(3).toLowerCase();
-			buttonFade(MovieClip(e.currentTarget));
-			tim.buttonClicked();
-			doSwap(team);
-		}
-		
-		
-		private function buttonFade(btn:MovieClip):void
-		{			
-			btn.alpha = 1;
-			TweenMax.to(btn, 1, { alpha:0 } );
-		}
-		
-		
-		/**
-		 * called from setTeam()
-		 * @param	team
-		 */
-		private function doSwap(team:String):void
-		{
-			currentTeam = team;
-			loadJersey(team);
-			//if (_container3D) {
-				
-				//Avatar_Flare3D_v2_5(_container3D).changeHelmet(team);
-				//_container3D.model = "helm_cut2.zf3d";	
-			//}
-		}
-		
-		
-		public function getTeam():String
-		{
-			return currentTeam;
-		}
-		
-		
-		//cardinals, falcons, ravens, bills, panthers, bears, bengals, browns, cowboys, broncos, lions, packers, texans, colts, jaguars, chiefs, dolphins, vikings, patriots, saints, giants, jets, raiders, eagles, steelers, chargers, seahawks, 49ers, rams, buccaneers, titans, redskins
-		private function loadJersey(team:String):void
-		{
-			//trace("loadJersey");
-			team = team.charAt(0).toUpperCase() + team.substr(1);
-			
 			var l:Loader = new Loader();
 			l.contentLoaderInfo.addEventListener(Event.COMPLETE, jerseyLoaded, false, 0, true);
-			l.load(new URLRequest(jerseyPath + "Jersey_" + team + ".png"));			
+			l.load(new URLRequest(jerseyPath + "jersey" + String(eraArray[eraIndex][1]).substr(4,4) + ".png"));			
 		}
 		
 		
@@ -499,21 +444,17 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 */
 		private function jerseyLoaded(e:Event = null):void
 		{
-			//trace("jerseyLoaded");
 			var b:Bitmap = Bitmap(e.target.content);
 			b.smoothing = true;
 			jerseyBMD = b.bitmapData;
-			
-			//jerseyBMD = new suit();//nascar
 		}
 		
 		
 		//update the 3d webcam video plane, when there is a new image from the webcam
-		override public function onVideoUpdate() : void {
-			
+		override public function onVideoUpdate() : void 
+		{			
 			//draw the video half the size to the BRF BitmapData - 640x480
 			_brfBmd.draw(_videoManager.videoData, _brfMatrix);
-			//previewBMD.draw(_videoManager.videoData, prevMatrix, null, null, null, true);
 			
 			//update BRF
 			super.onVideoUpdate();
@@ -544,19 +485,13 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			return Avatar_Flare3D_v2_5(_container3D).getScreenshot();
 		}
 		
-		/*
-		public function getAlphaShot():BitmapData
-		{
-			return Flare3D_v2_5(_container3D).getAlphaShot();
-		}
-		*/
+		
 		/** Draws the analysis results. */
 		override public function showResult(showAll : Boolean = false) : void 
 		{			
 			//Draw the mask
 			shapePoints = _brfManager.faceShape.shapePoints;
 			center = shapePoints[67];
-			//trace("showResult: center x",center.x);
 			
 			var i : int;
 			var l : int;
@@ -630,7 +565,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				clip.lhline.alpha = .8;
 				clip.lpupil.alpha = .9;
 				meshAlpha = .8;
-				introAlpha = .98; //decrement multiplier
+				introAlpha = .95; //decrement multiplier
 				animInc = 250;
 			}
 			
