@@ -32,6 +32,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		public static const CAM_DOWN:String = "camDownButton";
 		public static const CAM_STOP:String = "camUpDownReleased";
 		public static const FACE_FOUND:String = "faceFoundStartApp";
+		public static const BG_CHANGE:String = "changeBackground";
 		
 		public var _container3D : BRFContainerFP11;
 		private var _brfBmd : BitmapData;
@@ -124,14 +125,15 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			introAnimStarted = true;
 			introAnimFinished = true;
 			
-			if(clip){
+			if (clip) {
+				/*
 				clip.rvline.visible = true;
 				clip.rhline.visible = true;
 				clip.rpupil.visible = true;
 				clip.lvline.visible = true;
 				clip.lhline.visible = true;
 				clip.lpupil.visible = true;
-				
+				*/
 				if (!contains(clip)) {
 					addChild(clip);
 				}				
@@ -195,14 +197,15 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			jerseyMatrix = new Matrix();
 			jerseyMatrix.scale(.98, .98);
 			jerseyMatrix.translate( -160, 250);
-			
+			/*
 			clip.rvline.alpha = 0;
 			clip.rhline.alpha = 0;
 			clip.rpupil.alpha = 0;
 			clip.lvline.alpha = 0;
 			clip.lhline.alpha = 0;
 			clip.lpupil.alpha = 0;
-			clip.textHolder.previewText.text = "";
+			*/
+			
 		}
 		
 		
@@ -348,7 +351,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		
 		private function camUp(e:MouseEvent):void
-		{			
+		{		
+			tim.buttonClicked();
 			clip.stage.addEventListener(MouseEvent.MOUSE_UP, camStop, false, 0, true);
 			dispatchEvent(new Event(CAM_UP));
 		}
@@ -356,6 +360,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function camDown(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			clip.stage.addEventListener(MouseEvent.MOUSE_UP, camStop, false, 0, true);
 			dispatchEvent(new Event(CAM_DOWN));
 		}
@@ -370,6 +375,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function nextEra(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			if (okToRotate) {
 				okToRotate = false;
 				var rTime:Number = 1;
@@ -397,6 +403,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function prevEra(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			if (okToRotate) {
 				okToRotate = false;
 				var rTime:Number = 1;
@@ -421,12 +428,23 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			}
 		}
 		
+		
 		//called by TweenMax once era is done rotating
 		private function eraRotationComplete():void
 		{
 			okToRotate = true;			
 			_container3D.model = eraArray[eraIndex][1];
+			dispatchEvent(new Event(BG_CHANGE));
 			loadJersey();
+		}
+		
+		/**
+		 * returns the selected year
+		 * @return
+		 */
+		public function getBackgroundYear():String
+		{
+			return String(eraArray[eraIndex][1]).substr(4, 4);
 		}
 		
 		
@@ -474,6 +492,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 */
 		private function takePhoto(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			dispatchEvent(new Event(TAKE_PHOTO));
 		}
 		
@@ -553,7 +572,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				_drawMask.lineTo(_mouthHolePoints[0].x, _mouthHolePoints[0].y);
 				_drawMask.endFill();
 			}
-			
+			/*
 			//if anim hasn't started and we can estimate then start the anim
 			if (!introAnimStarted && _brfManager.task == BRFStatus.FACE_ESTIMATION) {
 				introAnimStarted = true;
@@ -608,7 +627,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				if (animInc <= 0) {
 					animInc = 0;
 				}
-			}			
+			}			*/
 		}
 		
 		private function faceFound(e:TimerEvent):void

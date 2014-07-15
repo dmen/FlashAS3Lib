@@ -161,7 +161,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			TweenMax.to(hoursColor, 0, { glowFilter: { color:MAIN_COLOR, alpha:1, blurX:30, blurY:30 }} );			
 			
 			var now:Date = new Date();
-			var s:String = String(now.month + 1) + "/" + String(now.date) + "/" + String(now.fullYear) + " " + String(endTime);
+			var s:String = String(now.month + 1) + "/" + String(now.date) + "/" + String(now.fullYear) + " " + endTime;
 			setEndDate(new Date(s));			
 			
 			var delta:Number = endDate.valueOf() - now.valueOf(); //ms

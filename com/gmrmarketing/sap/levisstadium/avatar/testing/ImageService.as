@@ -83,13 +83,13 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		
 		/**
-		 * Adds a new image and email to the queue
+		 * Adds a new image to the queue
 		 * 
 		 * Image is first stored in the desktop folder before being queued
 		 * images are only saved to the desktop if saveFolder has been defined in setSaveFolder()
 		 * 
 		 * @param	img BitmapData
-		 * @param	em String - Email address
+		 * @param	guidID String - guid
 		 */
 		public function addToQueue(img:BitmapData, guidID:String, rfidS:String):void
 		{			
@@ -116,6 +116,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			refreshQueue();	
 			dispatchEvent(new Event(ADDED));//added to the queue
 		}
+		
 		
 		//FOR OMNICOM MEETING
 		public function addToQueue2(img:BitmapData, email:String):void
@@ -208,16 +209,19 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				var success = vars.OK;
 				
 				if (success == "true") {					
+					
 					//success!
 					killFile(); //remove from documents folder		
 					processQueue(); //send next object
+					dispatchEvent(new Event(COMPLETE));
+					
 				}else {
-					//no success				
-					processQueue();//try again
+					//no success	
+					queue.shift();//remove from queue
+					processQueue();
 				}
 				
-				dispatchEvent(new Event(COMPLETE));
-			}catch (e:Error) {
+			}catch (e:Error) {			
 				trace(e.message);
 			}
 		}		

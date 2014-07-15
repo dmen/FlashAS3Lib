@@ -36,6 +36,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var currentAngle:int; //current servo angle - starts at 90
 		private var angleDelta:int;
 		
+		private var bgd:BGDisplay; //for displaying background on 2nd monitor
+		
 		
 		public function Main()
 		{
@@ -84,6 +86,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			cq.init(cornerContainer, "ul");
 			cq.addEventListener(CornerQuit.CORNER_QUIT, quitApp, false, 0, true);
 			
+			//bgd = new BGDisplay();
+			
 			currentAngle = 90;
 			setServoAngle();//reset to straight on camera
 			
@@ -130,6 +134,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			modal.show("please wait a moment while your data is retrieved...", "CARD DETECTED", false, false);			
 		}
 		
+		
 		/**
 		 * Called by listener on the rfid object if the visitor.json file contains an 
 		 * error string for the tag_id - ie if tag_id's value starts with 'A PROBLEM'
@@ -145,6 +150,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			modal.addEventListener(Modal.HIDING, resetVisitor, false, 0, true);
 		}
 		
+		
 		private function resetVisitor(e:Event):void
 		{
 			modal.removeEventListener(Modal.HIDING, resetVisitor);
@@ -153,6 +159,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			//OMNICOM
 			//rfid.resetVisitor();
 		}
+		
 		
 		/**
 		 * Called by listener on comm object if the tag_id passed to the web
@@ -169,6 +176,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			//rfid.resetVisitor();
 		}
 		
+		
 		/**
 		 * Called by listener on comm object if the call to userData takes longer than 45 seconds
 		 * @param	e
@@ -180,6 +188,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			modal.addEventListener(Modal.HIDING, timeoutReset, false, 0, true);
 			
 		}
+		
+		
 		private function timeoutReset(e:Event):void
 		{
 			modal.removeEventListener(Modal.HIDING, timeoutReset);
@@ -187,6 +197,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			//OMNICOM
 			//rfid.resetVisitor();
 		}
+		
+		
 		/**
 		 * Called by listener on the comm object once the tag_id is sent to the server
 		 * and the user data is returned and ready
@@ -207,6 +219,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			preview.addEventListener(Webcam3D_1280x960.CAM_UP, moveCamUp, false, 0, true);
 			preview.addEventListener(Webcam3D_1280x960.CAM_DOWN, moveCamDown, false, 0, true);
 			preview.addEventListener(Webcam3D_1280x960.CAM_STOP, stopCam, false, 0, true);
+			preview.addEventListener(Webcam3D_1280x960.BG_CHANGE, bgChange, false, 0, true);
 			
 			preview.show();
 			if(!mainContainer.contains(preview)){
@@ -216,6 +229,32 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			//OMNICOM
 			intro.hide();
 			tim.startMonitoring();
+		}
+		
+		
+		private function bgChange(e:Event):void
+		{
+			var yr:String = preview.getBackgroundYear();
+			//bgd.showImage(new car1920());
+			
+			switch(yr) {
+				case "2014":
+					break;
+				case "2005":
+					break;
+				case "1996":
+					break;
+				case "1994":
+					break;
+				case "1984":
+					break;
+				case "1963":
+					break;
+				case "1959":
+					break;
+				case "1946":
+					break;
+			}
 		}
 		
 		
@@ -355,6 +394,18 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			//turn off estimation and re-enable tracking only
 			preview.track();
+			
+			//reset cam to 90
+			currentAngle = 90;
+			setServoAngle();//reset to straight on camera
+			
+			var resetTimer:Timer = new Timer(10000, 1);
+			resetTimer.addEventListener(TimerEvent.TIMER, enableTracking, false, 0, true);
+			resetTimer.start();
+		}
+		//re-enable tracking after 10 sec.
+		private function enableTracking(e:TimerEvent):void
+		{
 			preview.addEventListener(Webcam3D_1280x960.FACE_FOUND, gotRFID, false, 0, true);
 		}
 		
@@ -369,14 +420,14 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function moveCamUp(e:Event):void
 		{
-			angleDelta = 3;			
+			angleDelta = -3;			
 			servoTimer.start();
 		}
 		
 		
 		private function moveCamDown(e:Event):void
 		{
-			angleDelta = -3;			
+			angleDelta = 3;			
 			servoTimer.start();
 		}
 		

@@ -7,6 +7,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	import flash.display.*;	
 	import flash.events.*;
 	import com.greensock.TweenMax;
+	import com.greensock.easing.*;
 	import flash.utils.Timer;
 	
 	
@@ -64,6 +65,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			}
 			
 			clip.addChild(base);
+			base.scaleX = base.scaleY = .75;
+			TweenMax.to(base, .5, { scaleX:1, scaleY:1, ease:Back.easeOut } );
 			clip.addChild(countHolder);
 			clip.addEventListener(Event.ENTER_FRAME, onEnterFrame, false, 0, true);
 		}
