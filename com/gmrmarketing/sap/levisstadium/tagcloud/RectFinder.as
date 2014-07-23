@@ -66,12 +66,14 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		
 		/**
 		 * stops the while loop from executing in spiral
+		 * called from Main.doStop()
 		 */
 		public function stop():void
 		{
 			trace("rectFinder.stop()");
 			forceStop = true;
 		}
+		
 		
 		private function addTag(e:TimerEvent):void
 		{
@@ -203,7 +205,8 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 						
 						tightenCount = 0;
 						
-						if(Math.random() < .5){
+						if (Math.random() < .5) {
+							//Do a horizontal
 							if (h1 >= tag.widthh && v1 >= tag.heighth) {
 								
 								if (isValidRect(j, i, tag.widthh, tag.heighth)) {
@@ -227,13 +230,14 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 								}
 							}
 						}else {
+							//do a vertical
 							if (h1 >= tag.widthv && v1 >= tag.heightv) {
 								if (isValidRect(j, i, tag.widthv, tag.heightv)) {
 									
 									//try and move rect left to tighten it against any others in the area
 									//limit the tightening to 2 units
 									tightenCount = 0;
-									while (isValidRect(j, i, tag.widthh, tag.heighth)) {
+									while (isValidRect(j, i, tag.widthv, tag.heightv)) {
 										i--;
 										tightenCount++;
 										if (tightenCount > 2) {

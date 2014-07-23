@@ -11,7 +11,7 @@ package com.gmrmarketing.humana.rockandroll
 	public class MessageQueue extends EventDispatcher
 	{
 		public static const RUNNERS_ADDED:String = "runnersAdded";		
-		private const DEFAULT_START_TIME:String = "07/21/2013 06:30:00 AM";
+		private const DEFAULT_START_TIME:String = "07/20/2014 06:30:00 AM";
 		private var allRunners:Array;
 		private var queue:Array;		
 		private var viewDivisor:int;

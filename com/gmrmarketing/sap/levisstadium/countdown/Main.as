@@ -37,10 +37,6 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		private var analogClock:MovieClip;
 		private var hourRatio:Number = 60 / 360;		
 		
-		private const LINE_THICKNESS:int = 50;
-		private const BASE_COLOR:Number = 0x3A5679;
-		private const MAIN_COLOR:Number = 0xE5b227;
-		
 		private var step:int = 0;
 		
 		private var introSecs:Number = 0;//for animating the intro
@@ -49,7 +45,10 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		
 		private var endTime:String;
 		
-		
+		private const RADIUS:int = 90;
+		private const LINE_THICKNESS:int = 25;
+		private const BASE_COLOR:Number = 0xA5A8C6;
+		private const MAIN_COLOR:Number = 0xE5b227;
 		
 		public function Main()
 		{
@@ -57,20 +56,21 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			updateTimer.addEventListener(TimerEvent.TIMER, update, false, 0, true);
 			
 			analogClock = new analog(); //lib
-			analogClock.x = 1762;
-			analogClock.y = 945;			
+			analogClock.x = 700;
+			analogClock.y = 445;
+			analogClock.scaleX = analogClock.scaleY = .5;	
 			
 			//Containers
 			hoursClip = new Sprite();
 			minutesClip = new Sprite();
 			secondsClip = new Sprite();
 			
-			hoursClip.x = 570;
-			hoursClip.y = 600;
-			minutesClip.x = 1160;
-			minutesClip.y = 600;
-			secondsClip.x = 1750;					
-			secondsClip.y = 600;					
+			hoursClip.x = 355;
+			hoursClip.y = 340;
+			minutesClip.x = 583;
+			minutesClip.y = 340;
+			secondsClip.x = 810;					
+			secondsClip.y = 340;					
 			
 			//Hours
 			hoursBase = new Sprite();
@@ -79,7 +79,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			hoursClip.addChild(hoursBase);
 			hoursClip.addChild(hoursColor);
 			
-			draw_arc(hoursBase.graphics, -100, -100, 200, 0, 360, BASE_COLOR, .6);
+			draw_arc(hoursBase.graphics, -100, -100, RADIUS, 0, 360, LINE_THICKNESS, BASE_COLOR, .6);
 			
 			hoursTextClip = new theText();
 			hoursTextClip.theLabel.text = "hours";
@@ -96,7 +96,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			minutesClip.addChild(minutesBase);
 			minutesClip.addChild(minutesColor);			
 			
-			draw_arc(minutesBase.graphics,  -100, -100, 200, 0, 360, BASE_COLOR, .6);
+			draw_arc(minutesBase.graphics,  -100, -100, RADIUS, 0, 360, LINE_THICKNESS, BASE_COLOR, .6);
 			
 			minsTextClip = new theText();
 			minsTextClip.theLabel.text = "minutes";
@@ -113,7 +113,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			secondsClip.addChild(secondsBase);
 			secondsClip.addChild(secondsColor);
 			
-			draw_arc(secondsBase.graphics,  -100, -100, 200, 0, 360, BASE_COLOR, .6);
+			draw_arc(secondsBase.graphics,  -100, -100, RADIUS, 0, 360, LINE_THICKNESS, BASE_COLOR, .6);
 			
 			secsTextClip = new theText();
 			secsTextClip.theLabel.text = "seconds";
@@ -122,9 +122,19 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			secsTextClip.y = -105;
 			secsTextClip.alpha = 0;
 			secsTextClip.scaleX = secsTextClip.scaleY = .1;
+			
+			//TESTING
+			setConfig("3:45 PM");
+			show();
+			//TESTING
 		}
 		
 		
+		/**
+		 * ISChedulerMethods
+		 * Sets the time to countdown until as a string like:
+		   dispatches ready event to scheduler so it can be shown
+		 */
 		public function setConfig(config:String):void
 		{
 			endTime = config;
@@ -132,6 +142,9 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		}
 		
 		
+		/**
+		 * ISChedulerMethods
+		 */
 		public function show():void
 		{			
 			addChild(hoursClip);
@@ -171,7 +184,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			analogClock.theHour.rotation = ((now.getHours() % 12) * 30) + (now.getMinutes() * .5);
 			
 			if (delta > 0) {       
-				var secs:Number = Math.floor(delta / 1000);
+				var secs:Number = Math.floor(delta / 1000)-2;//subtract 2 seconds to account for animation time
 				var mins:Number = Math.floor(secs / 60);
 				var hours:Number = Math.floor(mins / 60);
 
@@ -203,12 +216,9 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			}			
 		}
 		
-		public function doStop():void
-		{
-			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
-		}
-		
-		
+		/**
+		 * ISChedulerMethods
+		 */
 		public function hide():void
 		{
 			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
@@ -221,7 +231,17 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			TweenMax.killTweensOf(analogClock);
 		}
 		
+		/**
+		 * ISChedulerMethods
+		 */
+		public function doStop():void
+		{
+			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+		}
 		
+		/**
+		 * callback from show - called by TweenMax
+		 */
 		private function addListener():void
 		{
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);
@@ -240,11 +260,11 @@ package com.gmrmarketing.sap.levisstadium.countdown
 				TweenMax.to(minsTextClip, .5, { scaleX:1, scaleY:1, alpha:1, ease:Back.easeOut, delay:.25 } );
 				TweenMax.to(hoursTextClip, .5, { scaleX:1, scaleY:1, alpha:1, ease:Back.easeOut, delay:.5 } );
 				
-				TweenMax.to(analogClock, 2, { alpha:.5} );
+				TweenMax.to(analogClock, 2, { alpha:1} );
 			}else{		
-				draw_arc(secondsColor.graphics, -100, -100, 200, 0, introSecs * step, MAIN_COLOR);
-				draw_arc(minutesColor.graphics, -100, -100, 200, 0, introMins * step, MAIN_COLOR);
-				draw_arc(hoursColor.graphics, -100, -100, 200, 0, introHours * step, MAIN_COLOR);
+				draw_arc(secondsColor.graphics, -100, -100, RADIUS, 0, introSecs * step, LINE_THICKNESS, MAIN_COLOR);
+				draw_arc(minutesColor.graphics, -100, -100, RADIUS, 0, introMins * step, LINE_THICKNESS, MAIN_COLOR);
+				draw_arc(hoursColor.graphics, -100, -100, RADIUS, 0, introHours * step, LINE_THICKNESS, MAIN_COLOR);
 			}
         }
 		
@@ -285,19 +305,19 @@ package com.gmrmarketing.sap.levisstadium.countdown
 				analogClock.theMinute.rotation = now.getMinutes() * 6;
 				analogClock.theHour.rotation = ((now.getHours() % 12) * 30) + (now.getMinutes() * .5);
 				
-				draw_arc(secondsColor.graphics, -100, -100, 200, 0, secs * 6, MAIN_COLOR);				
-				draw_arc(minutesColor.graphics, -100, -100, 200, 0, mins * 6, MAIN_COLOR);		
-				draw_arc(hoursColor.graphics, -100, -100, 200, 0, hours * 15, MAIN_COLOR);
+				draw_arc(secondsColor.graphics, -100, -100, RADIUS, 0, secs * 6, LINE_THICKNESS, MAIN_COLOR);				
+				draw_arc(minutesColor.graphics, -100, -100, RADIUS, 0, mins * 6, LINE_THICKNESS, MAIN_COLOR);		
+				draw_arc(hoursColor.graphics, -100, -100, RADIUS, 0, hours * 15, LINE_THICKNESS, MAIN_COLOR);
 			}else {
 				updateTimer.reset();
 			}
 		}
 		
 		
-		private function draw_arc(g:Graphics, center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineColor:Number, lineAlpha:Number = 1):void
+		private function draw_arc(g:Graphics, center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineThickness:int, lineColor:Number, lineAlpha:Number = 1):void
 		{
 			g.clear();
-			g.lineStyle(LINE_THICKNESS, lineColor, lineAlpha, false, LineScaleMode.NORMAL, CapsStyle.NONE);
+			g.lineStyle(lineThickness, lineColor, lineAlpha, false, LineScaleMode.NORMAL, CapsStyle.NONE);
 			
 			var angle_diff:int = (angle_to) - (angle_from);
 			var steps:int = angle_diff * 1;//1 is precision... use higher numbers for more.

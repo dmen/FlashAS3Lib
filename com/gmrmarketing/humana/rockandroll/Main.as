@@ -13,7 +13,7 @@ package com.gmrmarketing.humana.rockandroll
 	{
 		private var json:JSONReader;
 		private var queue:MessageQueue;
-		private var screenLocs:Array;
+		private var screenLocs:Array;//array ox x,y positions for message boxes
 		
 		private var bgContainer:Sprite;		
 		private var messageContainer:Sprite;		
@@ -50,7 +50,7 @@ package com.gmrmarketing.humana.rockandroll
 		
 		
 		/**
-		 * called once json.getRunners() completes
+		 * callback for json.getRunners()
 		 * @param	e
 		 */
 		private function gotNewRunners(e:Event):void

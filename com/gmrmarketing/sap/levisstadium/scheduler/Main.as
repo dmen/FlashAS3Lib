@@ -43,12 +43,14 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			loadNextTask();
 		}
 		
-		
+		/**
+		 * Called from configReady() and taskComplete()
+		 */
 		private function loadNextTask():void
 		{
 			if (thisTask) {
 				trace("calling task stop");
-				thisTask.stop();
+				//thisTask.doStop();//was plain stop()
 				lastTask = thisTask;
 				//thisTask.hide();
 			}
@@ -62,6 +64,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			thisTask = MovieClip(taskLoader.contentLoaderInfo.content);
 			thisTask.addEventListener("ready", taskReadyToShow, false, 0, true);
 			thisTask.x = -1920;
+			
 			addChild(thisTask);
 			
 			//if there is a config attribute on the task then setConfig will be called with that data
@@ -71,16 +74,17 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		}
 		
 		private function taskReadyToShow(e:Event):void
-		{
-						
+		{			
+			thisTask.removeEventListener("ready", taskReadyToShow);
 			
-			if(lastTask){
+			if (lastTask) {
+				lastTask.doStop();//moved from loadNextTask() - waits for next task to be loaded 
 				TweenMax.to(lastTask, 1, { x:1920, ease:Back.easeIn, onComplete:hideLastTask } );
 			}else {
 				TweenMax.to(thisTask, 1, { x:0, ease:Back.easeOut, onComplete:showTask } );
 			}
 			
-			var taskTimer:Timer = new Timer(parseFloat(tasks[currentTask].@time) * 60 * 1000, 1);
+			var taskTimer:Timer = new Timer(parseFloat(tasks[currentTask].@time) * 1000, 1);
 			taskTimer.addEventListener(TimerEvent.TIMER, taskComplete, false, 0, true);
 			taskTimer.start();
 		}
@@ -92,7 +96,6 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			if (currentTask >= tasks.length()) {
 				currentTask = 0;
 			}
-			//TweenMax.to(thisTask, 1, { x:1920, ease:Back.easeIn, onComplete:loadNextTask } );
 			loadNextTask();
 		}
 		

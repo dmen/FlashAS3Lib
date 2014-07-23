@@ -1,3 +1,7 @@
+/**
+ * Mananges the tags returned from the web service
+ * Gets the tags and then creates the tags array
+ */
 package com.gmrmarketing.sap.levisstadium.tagcloud
 {
 	import flash.display.*;
@@ -28,6 +32,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		private var maxFont:int;
 		private var minFont:int;
 		
+		
 		public function TagCloud(ss:int, maxFontSize:int, minFontSize:int, colors:Array)
 		{
 			sampleSize = ss;
@@ -44,7 +49,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		
 		
 		/**
-		 * Returns the next tag
+		 * Returns the next tag from the tags array
 		 * 
 		 * tags have name,value,fontSize,imageh,imagev,widthh,heighth,widthv,heightv properties
 		 */
@@ -60,13 +65,19 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			return tag;
 		}
 		
-		
+		/**
+		 * Returns the number of tags in the tags array
+		 * @return int
+		 */
 		public function getNumTags():int
 		{
 			return tags.length;
 		}
 		
 		
+		/**
+		 * Refreshes the tags array
+		 */
 		public function refreshTags():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
@@ -78,8 +89,13 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		}
 		
 		
+		/**
+		 * Callback for refreshTags()
+		 * Creates the tags array of tag objects
+		 * @param	e
+		 */
 		private function tagsLoaded(e:Event):void
-		{
+		{			
 			var j:Object = JSON.parse(e.currentTarget.data);
 			tags = j.insights[0].dataset[0].set;
 			tagIndex = 0;
@@ -113,6 +129,13 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		}
 		
 		
+		/**
+		 * Modifies the passed in tag object 
+		 * adds imageh,imagev,widthh,heighth,widthv,heightv
+		 * This is a horizontal and vertical image of the tag
+		 * and size data for both versions
+		 * @param	tag
+		 */
 		private function measure(tag:Object):void
 		{
 			var format:TextFormat = new TextFormat();
@@ -160,8 +183,8 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			var wv:int = Math.max(1, Math.ceil(nv.width / sampleSize));
 			var hv:int = Math.max(1, Math.ceil(nv.height / sampleSize));
 			
-			tag.imageh = nh;
-			tag.imagev = nv;
+			tag.imageh = nh;//horizontal image
+			tag.imagev = nv;//vertical image
 			tag.widthh = wh;
 			tag.heighth = hh;
 			tag.widthv = wv;

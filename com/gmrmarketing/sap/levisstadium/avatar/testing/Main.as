@@ -2,7 +2,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 {	
 	import flash.display.*;
 	import flash.events.*;
-	import flash.ui.Mouse;	
+	import flash.ui.*;	
 	import com.gmrmarketing.utilities.CornerQuit;
 	import flash.desktop.NativeApplication;
 	import com.gmrmarketing.utilities.TimeoutHelper;
@@ -20,6 +20,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var preview:Webcam3D_1280x960; //web cam preview - with facial recognition
 		private var countdown:Countdown; //3-2-1 counter with white flash
 		private var review:Review; //screen to review the pic that was taken
+		private var reg:Registration; //email,name registration dialogs
 		private var modal:Modal;//dialog
 		private var comm:Comm; //server communication
 		private var avatarImage:BitmapData;
@@ -47,6 +48,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			stage.quality = StageQuality.HIGH;
 			stage.frameRate = 36;
 			
+			Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
+			
 			tim = TimeoutHelper.getInstance();
 			tim.addEventListener(TimeoutHelper.TIMED_OUT, reset, false, 0, true);
 			tim.init(120000);//startMonitoring() called in showPreview() / stopped in reset()
@@ -60,7 +63,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			ser = new SerProxy_Connector();
 			ser.connect();
 			
-			servoTimer = new Timer(200);
+			servoTimer = new Timer(100);
 			servoTimer.addEventListener(TimerEvent.TIMER, setServoAngle, false, 0, true);
 			
 			comm = new Comm();
@@ -79,6 +82,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			preview = new Webcam3D_1280x960();
 			preview.addEventListener(Webcam3D_1280x960.FACE_FOUND, gotRFID, false, 0, true);
+			
+			reg = new Registration();
+			reg.setContainer(mainContainer);
 			
 			mainContainer.addChild(preview);//inits BRF with added to stage			
 			
@@ -326,26 +332,27 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 */
 		private function save(e:Event):void
 		{
+			review.removeEventListener(Review.RETAKE, retake);
+			review.removeEventListener(Review.SAVE, save);
+			
 			tim.buttonClicked();//timeout helper
 			
-			modal.addEventListener(Modal.HIDING, reset, false, 0, true);
-			modal.show("Thank you for showing your team spirit.\nFeel free to create as many players as you want.\nShare with your friends and compare to see\nwho makes the best 49ers player.", "THANK YOU", true, true, 7, false);
-			TweenMax.delayedCall(.5, saveImage);			
+			reg.show(review.getCard());//show registration screen - email only to confirm...
+			reg.addEventListener(Registration.REG_COMPLETE, saveImage, false, 0, true);
 		}		
 		
 		
 		/**
-		 * called after the thanks dialog is showing
-		 * calls hide and then makes the call to saveImage 
-		 * since saveImage blocks it will finish before the
-		 * dialog hides...
-		 * @param	e
+		 * Callback from Registration Complete
+		 * @param	e Registration.COMPLETE event
 		 */
-		private function saveImage():void
-		{			
+		private function saveImage(e:Event):void
+		{		
+			reg.removeEventListener(Registration.REG_COMPLETE, saveImage);
+			
 			//ORIGINAL
 			comm.saveImage(review.getCard(), "8675309");
-			
+			reset();
 			//OMNICOM - added saveImage2() method which takes email isntead of rfid
 			//comm.saveImage(review.getCard(), "8675309");//RASCH MEETING
 			//removeChild(email);
@@ -369,7 +376,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 * Done - write session.json and delete visitor.json
 		 * @param	e
 		 */
-		private function reset(e:Event):void
+		private function reset(e:Event = null):void
 		{	
 			modal.removeEventListener(Modal.HIDING, reset);
 			preview.removeEventListener(Webcam3D_1280x960.CLOSE_PREVIEW, reset);
@@ -380,6 +387,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			//rfid.writeSession( { "timestamp":epochSeconds, "session_id":"avatar", "tag_id":rfid.getVisitorID() } );
 			
 			tim.stopMonitoring();
+			reg.hide();
 			preview.hide();
 			review.hide();
 			
@@ -420,14 +428,16 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function moveCamUp(e:Event):void
 		{
-			angleDelta = -3;			
+			angleDelta = -2;	
+			setServoAngle();
 			servoTimer.start();
 		}
 		
 		
 		private function moveCamDown(e:Event):void
 		{
-			angleDelta = 3;			
+			angleDelta = 2;
+			setServoAngle();
 			servoTimer.start();
 		}
 		

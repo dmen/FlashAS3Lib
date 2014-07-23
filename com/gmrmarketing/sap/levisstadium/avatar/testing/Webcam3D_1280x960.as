@@ -81,6 +81,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var eraArray:Array;
 		private var eraIndex:int; //index in eraArray
 		
+		private var camEvent:String;//set to CAM_UP or CAM_DOWN
+		
+		
 		public function Webcam3D_1280x960() 
 		{	
 			super();			
@@ -119,8 +122,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		public function show():void
 		{
 			//enable face estimation and pose estimation
-			_brfManager.isEstimatingFace = true;
-			_brfManager.deleteLastDetectedFace = false;
+			//_brfManager.isEstimatingFace = true;
+			//_brfManager.deleteLastDetectedFace = false;
 			
 			introAnimStarted = true;
 			introAnimFinished = true;
@@ -142,6 +145,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				clip.camControl.x = -clip.camControl.width;
 				clip.eraSelector.x = 2455;
 				clip.eraSelector.rotation = 90;
+				clip.chooseEra.alpha = 0;
 				
 				clip.eraSelector.b14.rotation = 0;
 				clip.eraSelector.b05.rotation = 0;
@@ -261,7 +265,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			//choose one base depth, scaleIncrement 0.1 and only maxScale = baseScale + 1.0
 			//This way the user has to stay in the distance from the screen you want him
 			//to be.
-			_brfManager.vars.faceDetectionVars.baseScale = 1.0;
+			_brfManager.vars.faceDetectionVars.baseScale = 3.5;
 			//step size of the depth
 			//so: starting with 4, 4.5, 5, 5.5, 6.0 face size are searched for
 			_brfManager.vars.faceDetectionVars.scaleIncrement = 0.5;
@@ -305,21 +309,23 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function addControls():void
 		{
 			TweenMax.to(clip.instructions, 1, { x:0, delay:.5, ease:Back.easeOut } );
-			TweenMax.to(clip.camControl, 1, { x:0, delay:.75, ease:Back.easeOut } );
+			TweenMax.to(clip.camControl, 1, { x:36, delay:.75, ease:Back.easeOut } );
 			TweenMax.to(clip.btnTakePhoto, 1, { y:1008, delay:1, ease:Back.easeOut } );
+			TweenMax.to(clip.chooseEra, 1, { alpha:1, delay:2.2 } );
 			TweenMax.to(clip.eraSelector, 1, { x:2115, rotation:0, delay:1.2, ease:Back.easeOut, onComplete:introAnim } );
 			
 			addListeners();
 		}
 		
 		//called by Main.reset()
+		//resets brf to tracking only - not estimation
+		//disables face estimation and pose estimation
 		public function track():void
 		{
-			//disables face estimation and pose estimation
-			//tracking only
 			_brfManager.isEstimatingFace = false;
 			_brfManager.deleteLastDetectedFace = true;
 		}
+		
 		
 		public function addListeners():void
 		{
@@ -349,26 +355,46 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			dispatchEvent(new Event(CLOSE_PREVIEW));
 		}
 		
-		
+		//called on mouseDown on the cam up button		
 		private function camUp(e:MouseEvent):void
-		{		
-			tim.buttonClicked();
+		{
+			camEvent = CAM_UP;
+			tim.buttonClicked();			
 			clip.stage.addEventListener(MouseEvent.MOUSE_UP, camStop, false, 0, true);
-			dispatchEvent(new Event(CAM_UP));
+			clip.stage.addEventListener(Event.ENTER_FRAME, moveCam, false, 0, true);
+			
 		}
 		
 		
 		private function camDown(e:MouseEvent):void
 		{
+			camEvent = CAM_DOWN;
 			tim.buttonClicked();
 			clip.stage.addEventListener(MouseEvent.MOUSE_UP, camStop, false, 0, true);
-			dispatchEvent(new Event(CAM_DOWN));
+			clip.stage.addEventListener(Event.ENTER_FRAME, moveCam, false, 0, true);			
 		}
 		
 		
+		/**
+		 * runs on enter frame once a cam button is depressed
+		 * dispatches the camEvent set in camUp() or camDown()
+		 * @param	e ENTER_FRAME event
+		 */
+		private function moveCam(e:Event):void
+		{
+			dispatchEvent(new Event(camEvent));
+		}
+		
+		
+		/**
+		 * Called by mouseUp on stage
+		 * removes ENTER_FRAME calling moveCam()
+		 * @param	e
+		 */
 		private function camStop(e:Event):void
 		{
 			clip.stage.removeEventListener(MouseEvent.MOUSE_UP, camStop);
+			clip.stage.removeEventListener(Event.ENTER_FRAME, moveCam);
 			dispatchEvent(new Event(CAM_STOP));
 		}
 		
@@ -465,6 +491,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			var b:Bitmap = Bitmap(e.target.content);
 			b.smoothing = true;
 			jerseyBMD = b.bitmapData;
+			
+			_brfManager.isEstimatingFace = true;
+			_brfManager.deleteLastDetectedFace = false;
 		}
 		
 		
