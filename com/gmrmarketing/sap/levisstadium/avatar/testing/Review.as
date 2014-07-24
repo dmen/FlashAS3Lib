@@ -19,6 +19,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	{
 		public static const RETAKE:String = "retakePressed";
 		public static const SAVE:String = "savePressed";
+		public static const RESET:String = "closePressed";
 		
 		private var clip:MovieClip;
 		private var btnRetake:MovieClip;
@@ -26,8 +27,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private var userImage:BitmapData;
 		private var logo:BitmapData;//lockup lib clip
-		
-		private var userData:Object;
 		
 		private var color1:int; //top and bottom bar colors for the sidebar
 		private var color2:int;
@@ -59,16 +58,13 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 * 
 		 * @param	image 1280x960 image from Flare
 		 */
-		public function show(image:BitmapData, user:Object):void
+		public function show(image:BitmapData):void
 		{
 			if(container){
 				if (!container.contains(clip)) {
 					container.addChild(clip);
 				}
 			}
-			
-			//{"FirstName":"antonio","LastName":"zugno","City":"Rochester","State":"NY","FavoriteTeam":"packers"}
-			userData = user;			
 			
 			userImage = new BitmapData(761, 891);
 			userImage.copyPixels(image, new Rectangle(236, 37, 761, 891), new Point(0, 0));
@@ -96,6 +92,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			clip.btnRetake.addEventListener(MouseEvent.MOUSE_DOWN, retake, false, 0, true);
 			clip.btnSave.addEventListener(MouseEvent.MOUSE_DOWN, save, false, 0, true);
+			clip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, doReset, false, 0, true);
 			
 			TweenMax.to(clip, 1, { alpha:1 } );
 			TweenMax.to(clip.theText, .5, { alpha:1, y:"75", delay:1 } );
@@ -112,6 +109,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			return userImage;
 		}
 		
+		
 		/**
 		 * called from main if retake
 		 */
@@ -119,6 +117,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{			
 			clip.btnRetake.removeEventListener(MouseEvent.MOUSE_DOWN, retake);
 			clip.btnSave.removeEventListener(MouseEvent.MOUSE_DOWN, save);
+			clip.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, doReset);
 			TweenMax.to(clip, .5, { alpha:0, y:0, eaase:Back.easeIn, onComplete:killRetake } );			
 		}
 		
@@ -142,6 +141,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function save(e:MouseEvent):void
 		{
 			dispatchEvent(new Event(SAVE));
+		}
+		
+		private function doReset(e:MouseEvent):void
+		{
+			dispatchEvent(new Event(RESET));
 		}
 	}
 	

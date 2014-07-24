@@ -9,16 +9,19 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import com.gmrmarketing.utilities.TimeoutHelper;
+	import com.gmrmarketing.utilities.Validator;
 	
 	public class Registration extends EventDispatcher
 	{
 		public static const REG_COMPLETE:String = "registrationComplete";
+		public static const RESET:String = "registrationReset";
 		
 		private var regEmail:MovieClip;
 		private var regConfirm:MovieClip;
 		private var regFull:MovieClip;
 		private var regThanks:MovieClip;
 		private var container:DisplayObjectContainer;
+		private var fullSize:BitmapData; //full size user image
 		private var prev:Bitmap; //preview that shows in thanks
 		
 		private var kbd:KeyBoard;
@@ -26,6 +29,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private var step:int; //for drawing animated circle loader
 		private var loaderSprite:Sprite;
+		
+		private var ims:ImageService;
+		private var userID:int; //id from web service
+		
 		
 		public function Registration()
 		{
@@ -36,6 +43,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			loaderSprite = new Sprite();
 			
 			tim = TimeoutHelper.getInstance();
+			
+			ims = new ImageService();
+			ims.setServiceURL("http://sap49ersapi.thesocialtab.net/Api/Registrant/SubmitAvatar");
+			ims.setSaveFolder("levis_avatar/"); //folder on the desktop - will be created
 			
 			kbd = new KeyBoard();			
 			kbd.loadKeyFile("keyboard.xml");
@@ -54,6 +65,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		//full size incoming is 716 x 891		
 		public function show(previewImage:BitmapData):void
 		{
+			fullSize = previewImage;
+			
 			var prevBmd:BitmapData = new BitmapData(257, 319);
 			var m:Matrix = new Matrix();
 			m.scale(0.3589385474860335, 0.3589385474860335); 
@@ -82,13 +95,16 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			}
 			regEmail.alpha = 0;
 			regEmail.theEmail.text = "";
+			regEmail.errorText.alpha = 0;
 			regEmail.btnSubmit.addEventListener(MouseEvent.MOUSE_DOWN, emailSubmit, false, 0, true);
+			regEmail.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, regReset, false, 0, true);
 			
 			container.addChild(kbd);
 			kbd.setFocusFields([regEmail.theEmail]);
 			kbd.y = 900;
 			kbd.alpha = 0;
 			kbd.addEventListener(KeyBoard.KBD, keyPressed, false, 0, true);
+			kbd.addEventListener(KeyBoard.SUBMIT, emailSubmit, false, 0, true);			
 			
 			TweenMax.to(regEmail, 1, { alpha:1 } );
 			TweenMax.to(kbd, 1, { alpha:1, y:730, delay:1, ease:Back.easeOut } );
@@ -114,7 +130,15 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			}
 			regEmail.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, emailSubmit);
 			regFull.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, fullRegSubmit);
+			
+			regEmail.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
+			regFull.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
+			regConfirm.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
+			regThanks.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
+			
 			kbd.removeEventListener(KeyBoard.KBD, keyPressed);
+			kbd.removeEventListener(KeyBoard.SUBMIT, emailSubmit);
+			kbd.removeEventListener(KeyBoard.SUBMIT, fullRegSubmit);
 		}
 		
 		
@@ -125,36 +149,48 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		}
 		
 		
+		private function regReset(e:MouseEvent):void
+		{
+			dispatchEvent(new Event(RESET));
+		}
+		
+		
 		/**
 		 * Called when submit is pressed in the initial email dialog
 		 * @param	e
 		 */
-		private function emailSubmit(e:MouseEvent):void
+		private function emailSubmit(e:*):void
 		{
+			var em:String = regEmail.theEmail.text;
 			tim.buttonClicked();
 			
-			regEmail.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, emailSubmit);
+			if(Validator.isValidEmail(em)){
 			
-			var em:String = regEmail.theEmail.text;
-			
-			showLoader();
-			
-			//TODO: VALIDATE EMAIL
-			
-			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var req:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/Api/Registrant/GetRegistrantByEmail");
-			req.method = URLRequestMethod.GET;			
-			req.requestHeaders.push(hdr);			
-			
-			var vars:URLVariables = new URLVariables();
-			vars.email = em;
-			
-			req.data = vars;
-			
-			var lo:URLLoader = new URLLoader();
-			lo.addEventListener(IOErrorEvent.IO_ERROR, emailCheckError, false, 0, true);
-			lo.addEventListener(Event.COMPLETE, emailCheckComplete, false, 0, true);
-			lo.load(req);			
+				regEmail.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, emailSubmit);
+				kbd.removeEventListener(KeyBoard.SUBMIT, emailSubmit);
+				
+				showLoader();
+				
+				var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
+				var req:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/Api/Registrant/GetRegistrantByEmail");
+				req.method = URLRequestMethod.GET;			
+				req.requestHeaders.push(hdr);			
+				
+				var vars:URLVariables = new URLVariables();
+				vars.email = em;
+				
+				req.data = vars;
+				
+				var lo:URLLoader = new URLLoader();
+				lo.addEventListener(IOErrorEvent.IO_ERROR, emailCheckError, false, 0, true);
+				lo.addEventListener(Event.COMPLETE, emailCheckComplete, false, 0, true);
+				lo.load(req);	
+				
+			}else {
+				regEmail.errorText.alpha = 1;
+				regEmail.errorText.theText.text = "Please enter a valid email address";
+				TweenMax.to(regEmail.errorText, 2, { alpha:0, delay:2 } );
+			}
 		}
 		
 		
@@ -170,6 +206,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			var json:Object = JSON.parse(e.currentTarget.data);
 			if (json.Id != undefined) {
 				//user was found in the database
+				userID = json.Id;
 				showConfirmation(json.FirstName + " " + json.LastName, json.Email);
 			}else {
 				//not found
@@ -200,6 +237,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			regConfirm.btnYes.addEventListener(MouseEvent.MOUSE_DOWN, confirmYes, false, 0, true);
 			regConfirm.btnNo.addEventListener(MouseEvent.MOUSE_DOWN, confirmNo, false, 0, true);
+			regConfirm.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, regReset, false, 0, true);
 			
 			TweenMax.to(regConfirm, 1, { alpha:1 } );
 		}
@@ -210,6 +248,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			tim.buttonClicked();
 			regConfirm.btnYes.removeEventListener(MouseEvent.MOUSE_DOWN, confirmYes);
 			regConfirm.btnNo.removeEventListener(MouseEvent.MOUSE_DOWN, confirmNo);
+			regConfirm.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
 			showThanks();
 		}
 		
@@ -219,6 +258,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			tim.buttonClicked();
 			regConfirm.btnYes.removeEventListener(MouseEvent.MOUSE_DOWN, confirmYes);
 			regConfirm.btnNo.removeEventListener(MouseEvent.MOUSE_DOWN, confirmNo);
+			regConfirm.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
 			showFull(true);
 		}
 		
@@ -232,7 +272,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			if (!container.contains(regFull)) {
 				container.addChild(regFull);
 			}
-			
+			regFull.errorText.alpha = 1;
 			regFull.alpha = 0;
 			regFull.theFname.text = "";
 			regFull.theLname.text = "";
@@ -243,6 +283,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			}
 			
 			regFull.btnSubmit.addEventListener(MouseEvent.MOUSE_DOWN, fullRegSubmit, false, 0, true);
+			regFull.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, regReset, false, 0, true);
 			
 			if(!container.contains(kbd)){
 				container.addChild(kbd);				
@@ -256,32 +297,45 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			TweenMax.to(regFull, 1, { alpha:1 } );
 			TweenMax.to(kbd, 1, { alpha:1, y:730, delay:1, ease:Back.easeOut } );
+			
 			kbd.setFocusFields([regFull.theFname, regFull.theLname, regFull.theEmail]);			
+			kbd.addEventListener(KeyBoard.SUBMIT, fullRegSubmit, false, 0, true);
 		}
 		
 		
-		private function fullRegSubmit(e:MouseEvent):void
+		private function fullRegSubmit(e:*):void
 		{
 			tim.buttonClicked();
-			showLoader();
 			
-			//user was not found - submit their data for registration
-			regFull.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, fullRegSubmit);
+			if (regFull.theFname.text == "" || regFull.theLname.text == "") {
+				
+				regFull.errorText.alpha = 1;
+				regFull.errorText.theText.text = "Please enter a first and last name";
+				TweenMax.to(regFull.errorText, 2, { alpha:0, delay:2 } );
+				
+			}else{
 			
-			var js:String = JSON.stringify( { FirstName:regFull.theFname.text, LastName:regFull.theLname.text, Email:regFull.theEmail.text } );
+				showLoader();
 			
-			var hdr:URLRequestHeader = new URLRequestHeader("Content-type", "application/json");
-			var hdr2:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var req:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/Api/Registrant/Register");
-			req.method = URLRequestMethod.POST;
-			req.requestHeaders.push(hdr);
-			req.requestHeaders.push(hdr2);
-			req.data = js;
-			
-			var lo:URLLoader = new URLLoader();
-			lo.addEventListener(Event.COMPLETE, regDataSubmitted, false, 0, true);
-			lo.addEventListener(IOErrorEvent.IO_ERROR, regDataSubmitError, false, 0, true);
-			lo.load(req);
+				//user was not found - submit their data for registration
+				regFull.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, fullRegSubmit);
+				kbd.removeEventListener(KeyBoard.SUBMIT, fullRegSubmit);
+				
+				var js:String = JSON.stringify( { FirstName:regFull.theFname.text, LastName:regFull.theLname.text, Email:regFull.theEmail.text } );
+				
+				var hdr:URLRequestHeader = new URLRequestHeader("Content-type", "application/json");
+				var hdr2:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
+				var req:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/Api/Registrant/Register");
+				req.method = URLRequestMethod.POST;
+				req.requestHeaders.push(hdr);
+				req.requestHeaders.push(hdr2);
+				req.data = js;
+				
+				var lo:URLLoader = new URLLoader();
+				lo.addEventListener(Event.COMPLETE, regDataSubmitted, false, 0, true);
+				lo.addEventListener(IOErrorEvent.IO_ERROR, regDataSubmitError, false, 0, true);
+				lo.load(req);
+			}
 		}
 		
 		
@@ -289,6 +343,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{
 			hideLoader();
 			var json:Object = JSON.parse(e.currentTarget.data);
+			userID = json.Id;
+			
 			showThanks();
 		}
 		
@@ -324,22 +380,28 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			}
 			
 			regThanks.alpha = 0;
-			TweenMax.to(regThanks, 1, { alpha:1 } );
+			TweenMax.to(regThanks, 1, { alpha:1, onComplete:sendToIMS } );			
+		}
+		
+		//*/called once thanks is showing
+		private function sendToIMS():void
+		{
+			regThanks.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, regReset, false, 0, true);
 			
-			var t:Timer = new Timer(6000, 1);
-			t.addEventListener(TimerEvent.TIMER, complete, false, 0, true);
-			t.start();
+			ims.addEventListener(ImageService.ADDED, complete, false, 0, true);
+			ims.addToQueue(fullSize, userID);
+			
 		}
 		
 		
-		private function complete(e:TimerEvent):void
+		private function complete(e:Event):void
 		{
 			dispatchEvent(new Event(REG_COMPLETE));
 		}
 		
 		
 		
-		//LOADER
+		//Spinning loader graphic
 		private function showLoader():void
 		{
 			if (container.contains(loaderSprite)) {

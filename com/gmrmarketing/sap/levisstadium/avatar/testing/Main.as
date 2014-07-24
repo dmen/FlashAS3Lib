@@ -8,9 +8,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	import com.gmrmarketing.utilities.TimeoutHelper;
 	import com.greensock.TweenMax;
 	import flash.utils.Timer;
-	import com.dynamicflash.util.Base64;//nascar
 	import flash.utils.ByteArray;
-	import com.adobe.images.JPEGEncoder;
 	import com.gmrmarketing.utilities.SerProxy_Connector;
 	
 	
@@ -21,8 +19,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var countdown:Countdown; //3-2-1 counter with white flash
 		private var review:Review; //screen to review the pic that was taken
 		private var reg:Registration; //email,name registration dialogs
-		private var modal:Modal;//dialog
-		private var comm:Comm; //server communication
+		
 		private var avatarImage:BitmapData;
 		
 		private var cq:CornerQuit;
@@ -66,8 +63,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			servoTimer = new Timer(100);
 			servoTimer.addEventListener(TimerEvent.TIMER, setServoAngle, false, 0, true);
 			
-			comm = new Comm();
-			
 			intro = new Intro();			
 			intro.setContainer(mainContainer);
 			
@@ -75,10 +70,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			countdown.setContainer(mainContainer);
 			
 			review = new Review();
-			review.setContainer(mainContainer);
-			
-			modal = new Modal();
-			modal.setContainer(mainContainer);
+			review.setContainer(mainContainer);			
 			
 			preview = new Webcam3D_1280x960();
 			preview.addEventListener(Webcam3D_1280x960.FACE_FOUND, gotRFID, false, 0, true);
@@ -111,99 +103,13 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{
 			if(preview.isBrfReady()){
 				preview.removeEventListener(Webcam3D_1280x960.FACE_FOUND, gotRFID);
-				intro.removeEventListener(Intro.MANUAL_START, gotRFID);
+				intro.removeEventListener(Intro.MANUAL_START, gotRFID);				
 				
-				//RASCH MEETING
 				intro.hide();
 				showPreview();
-			}
-			/*
-			//timer calls showRFIDModal() after 2 seconds - so unless the web
-			//service is slow, it doesn't show...
-			rfidTimer.start();
-			
-			comm.addEventListener(Comm.GOT_USER_DATA, showPreview, false, 0, true);
-			//comm.addEventListener(Comm.USER_ERROR, userError, false, 0, true);
-			comm.addEventListener(Comm.USER_ERROR, showPreview, false, 0, true);
-			comm.addEventListener(Comm.TIMEOUT, commTimeout, false, 0, true);
-			//get user data from the web service
-			comm.userData(rfid.getVisitorID());
-			*/
+			}			
 		}
-		
-		private function showRFIDModal(e:TimerEvent):void
-		{
-			//COMMENTED FOR OMNICOM MEETING
-			//rfidTimer.reset();
-			
-			//set autoHide to false - so modal stays until kill() is called in showPreview()
-			modal.show("please wait a moment while your data is retrieved...", "CARD DETECTED", false, false);			
-		}
-		
-		
-		/**
-		 * Called by listener on the rfid object if the visitor.json file contains an 
-		 * error string for the tag_id - ie if tag_id's value starts with 'A PROBLEM'
-		 * visitor.json file deleted by rfid object when error is dispatched
-		 * @param	e
-		 */
-		private function rfidError(e:Event):void
-		{
-			//COMMENTED FOR OMNICOM MEETING
-			//rfidTimer.reset();
-			
-			modal.show("please see an SAP representative.", "RFID ERROR", false, true);	
-			modal.addEventListener(Modal.HIDING, resetVisitor, false, 0, true);
-		}
-		
-		
-		private function resetVisitor(e:Event):void
-		{
-			modal.removeEventListener(Modal.HIDING, resetVisitor);
-			//delete visitor.json and restart folder watching
-			
-			//OMNICOM
-			//rfid.resetVisitor();
-		}
-		
-		
-		/**
-		 * Called by listener on comm object if the tag_id passed to the web
-		 * service returns null data - ie the user didn't go through reg
-		 * @param	e
-		 */
-		private function userError(e:Event):void
-		{		
-			//OMNICOM
-			//rfidTimer.reset();
-			modal.show("please try again or see an SAP representative.", "INVALID CARD", true, false);
-			//delete visitor.json and restart folder watching
-			//OMNICOM
-			//rfid.resetVisitor();
-		}
-		
-		
-		/**
-		 * Called by listener on comm object if the call to userData takes longer than 45 seconds
-		 * @param	e
-		 */
-		private function commTimeout(e:Event):void
-		{
-			modal.show("the call to retrieve user data from the card scan timed out, please try again or see an SAP representative.", "NETWORK TIMEOUT", false, true);
-			modal.removeEventListener(Modal.HIDING, resetVisitor);
-			modal.addEventListener(Modal.HIDING, timeoutReset, false, 0, true);
-			
-		}
-		
-		
-		private function timeoutReset(e:Event):void
-		{
-			modal.removeEventListener(Modal.HIDING, timeoutReset);
-			//delete visitor.json and restart folder watching
-			//OMNICOM
-			//rfid.resetVisitor();
-		}
-		
+	
 		
 		/**
 		 * Called by listener on the comm object once the tag_id is sent to the server
@@ -214,12 +120,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 * @param	e
 		 */
 		private function showPreview(e:Event = null):void
-		{
-			////OMNICOM
-			//rfid2.removeEventListener(Rfid_touch.CLICKED, showPreview);
-			//rfid2.hide();
-			
-			//rfidTimer.reset();			
+		{				
 			preview.addEventListener(Webcam3D_1280x960.TAKE_PHOTO, startCountdown, false, 0, true);			
 			preview.addEventListener(Webcam3D_1280x960.CLOSE_PREVIEW, reset, false, 0, true);
 			preview.addEventListener(Webcam3D_1280x960.CAM_UP, moveCamUp, false, 0, true);
@@ -231,8 +132,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			if(!mainContainer.contains(preview)){
 				mainContainer.addChild(preview);
 			}
-			modal.kill();
-			//OMNICOM
+			
 			intro.hide();
 			tim.startMonitoring();
 		}
@@ -298,13 +198,13 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 */
 		private function showReview(e:Event):void
 		{
-			countdown.hide();
-			
-			countdown.removeEventListener(Countdown.FLASH_COMPLETE, showReview);
-			//mainContainer.addChild(new Bitmap(avatarImage));
-			review.show(avatarImage, comm.getUserData());//preview.getAlphaShot());// , 
+			countdown.hide();			
+			countdown.removeEventListener(Countdown.FLASH_COMPLETE, showReview);	
+			preview.pause();
+			review.show(avatarImage);
 			review.addEventListener(Review.RETAKE, retake, false, 0, true);
 			review.addEventListener(Review.SAVE, save, false, 0, true);
+			review.addEventListener(Review.RESET, reset, false, 0, true);
 		}
 		
 		
@@ -317,8 +217,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			tim.buttonClicked();			
 			review.removeEventListener(Review.RETAKE, retake);
 			review.removeEventListener(Review.SAVE, save);
+			review.removeEventListener(Review.RESET, reset);
 			review.hide();
 			
+			preview.unPause();
 			preview.addEventListener(Webcam3D_1280x960.TAKE_PHOTO, startCountdown, false, 0, true);
 			preview.addListeners();
 		}
@@ -348,27 +250,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 */
 		private function saveImage(e:Event):void
 		{		
-			reg.removeEventListener(Registration.REG_COMPLETE, saveImage);
-			
-			//ORIGINAL
-			comm.saveImage(review.getCard(), "8675309");
+			reg.removeEventListener(Registration.REG_COMPLETE, saveImage);			
 			reset();
-			//OMNICOM - added saveImage2() method which takes email isntead of rfid
-			//comm.saveImage(review.getCard(), "8675309");//RASCH MEETING
-			//removeChild(email);
-			//removeChild(kbd);
-			
-			//comm.saveImage2(review.getCard(), email.theEmail.text);
-			//var im:String = getJpegString(review.getCard());
-			//queue.add( { email:email.theEmail.text, image:im } );//nowpik
-		}
-		
-		
-		private function getJpegString(bmpd:BitmapData, q:int = 80):String
-		{			
-			var encoder:JPEGEncoder = new JPEGEncoder(q);
-			var ba:ByteArray = encoder.encode(bmpd);
-			return Base64.encodeByteArray(ba);
 		}
 		
 		
@@ -378,29 +261,19 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 */
 		private function reset(e:Event = null):void
 		{	
-			modal.removeEventListener(Modal.HIDING, reset);
 			preview.removeEventListener(Webcam3D_1280x960.CLOSE_PREVIEW, reset);
-		
-			//Fish wants epoch time in seconds - not ms
-			var epochSeconds:int = Math.floor(new Date().valueOf() / 60);
-			//RASCH MEETING
-			//rfid.writeSession( { "timestamp":epochSeconds, "session_id":"avatar", "tag_id":rfid.getVisitorID() } );
+			review.removeEventListener(Review.RESET, reset);
 			
 			tim.stopMonitoring();
 			reg.hide();
 			preview.hide();
-			review.hide();
+			review.hide();			
 			
-			//OMNICOM
-			//rfid2.addEventListener(Rfid_touch.CLICKED, showPreview, false, 0, true);
-			//rfid2.show();
-			
-			//OMNICOM
-			intro.show();
-			intro.addEventListener(Intro.SHOWING, killModal, false, 0, true);
+			intro.show();			
 			intro.addEventListener(Intro.MANUAL_START, gotRFID, false, 0, true);
 			
 			//turn off estimation and re-enable tracking only
+			preview.unPause();
 			preview.track();
 			
 			//reset cam to 90
@@ -411,18 +284,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			resetTimer.addEventListener(TimerEvent.TIMER, enableTracking, false, 0, true);
 			resetTimer.start();
 		}
+		
 		//re-enable tracking after 10 sec.
 		private function enableTracking(e:TimerEvent):void
 		{
 			preview.addEventListener(Webcam3D_1280x960.FACE_FOUND, gotRFID, false, 0, true);
-		}
-		
-		
-		private function killModal(e:Event):void
-		{
-			modal.kill();
-			////OMNICOM
-			intro.removeEventListener(Intro.SHOWING, killModal);
 		}
 		
 		

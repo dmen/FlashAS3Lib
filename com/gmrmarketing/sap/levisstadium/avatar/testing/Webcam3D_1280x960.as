@@ -83,6 +83,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private var camEvent:String;//set to CAM_UP or CAM_DOWN
 		
+		private var brfPaused:Boolean = false;
+		
+		
 		
 		public function Webcam3D_1280x960() 
 		{	
@@ -125,18 +128,12 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			//_brfManager.isEstimatingFace = true;
 			//_brfManager.deleteLastDetectedFace = false;
 			
+			brfPaused = false;
 			introAnimStarted = true;
 			introAnimFinished = true;
 			
 			if (clip) {
-				/*
-				clip.rvline.visible = true;
-				clip.rhline.visible = true;
-				clip.rpupil.visible = true;
-				clip.lvline.visible = true;
-				clip.lhline.visible = true;
-				clip.lpupil.visible = true;
-				*/
+				
 				if (!contains(clip)) {
 					addChild(clip);
 				}				
@@ -154,7 +151,16 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				clip.eraSelector.b84.rotation = 0;
 				clip.eraSelector.b63.rotation = 0;
 				clip.eraSelector.b59.rotation = 0;
-				clip.eraSelector.b46.rotation = 0;			
+				clip.eraSelector.b46.rotation = 0;
+				
+				clip.eraSelector.b14.gotoAndStop(1);
+				clip.eraSelector.b05.gotoAndStop(1);
+				clip.eraSelector.b96.gotoAndStop(1);
+				clip.eraSelector.b94.gotoAndStop(1);
+				clip.eraSelector.b84.gotoAndStop(1);
+				clip.eraSelector.b63.gotoAndStop(1);
+				clip.eraSelector.b59.gotoAndStop(1);
+				clip.eraSelector.b46.gotoAndStop(1);
 				
 				clip.btnTakePhoto.y = 1128;
 				okToRotate = true;
@@ -200,16 +206,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			jerseyBMD = new BitmapData(1,1);
 			jerseyMatrix = new Matrix();
 			jerseyMatrix.scale(.98, .98);
-			jerseyMatrix.translate( -160, 250);
-			/*
-			clip.rvline.alpha = 0;
-			clip.rhline.alpha = 0;
-			clip.rpupil.alpha = 0;
-			clip.lvline.alpha = 0;
-			clip.lhline.alpha = 0;
-			clip.lpupil.alpha = 0;
-			*/
-			
+			jerseyMatrix.translate( -160, 250);			
 		}
 		
 		
@@ -406,15 +403,15 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				okToRotate = false;
 				var rTime:Number = 1;
 				var ow:int = 0;
-				TweenMax.to(clip.eraSelector, rTime, { rotation:"+45", ease:Back.easeOut, overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b14, rTime, { rotation:"-45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b05, rTime, { rotation:"-45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b96, rTime, { rotation:"-45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b94, rTime, { rotation:"-45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b84, rTime, { rotation:"-45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b63, rTime, { rotation:"-45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b59, rTime, { rotation:"-45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b46, rTime, { rotation:"-45", overwrite:ow, onComplete:eraRotationComplete } );
+				TweenMax.to(clip.eraSelector, rTime, { rotation:"+45", ease:Back.easeOut} );
+				TweenMax.to(clip.eraSelector.b14, rTime, { rotation:"-45" } );
+				TweenMax.to(clip.eraSelector.b05, rTime, { rotation:"-45" } );
+				TweenMax.to(clip.eraSelector.b96, rTime, { rotation:"-45" } );
+				TweenMax.to(clip.eraSelector.b94, rTime, { rotation:"-45" } );
+				TweenMax.to(clip.eraSelector.b84, rTime, { rotation:"-45" } );
+				TweenMax.to(clip.eraSelector.b63, rTime, { rotation:"-45" } );
+				TweenMax.to(clip.eraSelector.b59, rTime, { rotation:"-45" } );
+				TweenMax.to(clip.eraSelector.b46, rTime, { rotation:"-45", onComplete:eraRotationComplete } );
 				
 				MovieClip(eraArray[eraIndex][0]).gotoAndPlay(10);//close current
 				
@@ -434,15 +431,15 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				okToRotate = false;
 				var rTime:Number = 1;
 				var ow:int = 0;
-				TweenMax.to(clip.eraSelector, rTime, { rotation:"-45", ease:Back.easeOut, overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b14, rTime, { rotation:"+45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b05, rTime, { rotation:"+45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b96, rTime, { rotation:"+45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b94, rTime, { rotation:"+45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b84, rTime, { rotation:"+45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b63, rTime, { rotation:"+45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b59, rTime, { rotation:"+45", overwrite:ow } );
-				TweenMax.to(clip.eraSelector.b46, rTime, { rotation:"+45", overwrite:ow, onComplete:eraRotationComplete } );
+				TweenMax.to(clip.eraSelector, rTime, { rotation:"-45", ease:Back.easeOut } );
+				TweenMax.to(clip.eraSelector.b14, rTime, { rotation:"+45" } );
+				TweenMax.to(clip.eraSelector.b05, rTime, { rotation:"+45" } );
+				TweenMax.to(clip.eraSelector.b96, rTime, { rotation:"+45" } );
+				TweenMax.to(clip.eraSelector.b94, rTime, { rotation:"+45" } );
+				TweenMax.to(clip.eraSelector.b84, rTime, { rotation:"+45" } );
+				TweenMax.to(clip.eraSelector.b63, rTime, { rotation:"+45" } );
+				TweenMax.to(clip.eraSelector.b59, rTime, { rotation:"+45" } );
+				TweenMax.to(clip.eraSelector.b46, rTime, { rotation:"+45", onComplete:eraRotationComplete } );
 				
 				MovieClip(eraArray[eraIndex][0]).gotoAndPlay(10); //close current
 				
@@ -496,22 +493,32 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			_brfManager.deleteLastDetectedFace = false;
 		}
 		
+		public function pause():void
+		{
+			brfPaused = true;
+		}
+		public function unPause():void
+		{
+			brfPaused = false;
+		}
 		
 		//update the 3d webcam video plane, when there is a new image from the webcam
 		override public function onVideoUpdate() : void 
 		{			
-			//draw the video half the size to the BRF BitmapData - 640x480
-			_brfBmd.draw(_videoManager.videoData, _brfMatrix);
-			
-			//update BRF
-			super.onVideoUpdate();
-			
-			//Draw the mask and jersey image to the video data
-			(_videoManager.videoData as BitmapData).draw(_containerAll, null, null, null, null, true);
-			(_videoManager.videoData as BitmapData).draw(jerseyBMD, jerseyMatrix, null, null, null, true);
-			
-			//upload the videoData as Texture to the GPU
-			_container3D.updateVideo();
+			if(!brfPaused){
+				//draw the video half the size to the BRF BitmapData - 640x480
+				_brfBmd.draw(_videoManager.videoData, _brfMatrix);
+				
+				//update BRF
+				super.onVideoUpdate();
+				
+				//Draw the mask and jersey image to the video data
+				(_videoManager.videoData as BitmapData).draw(_containerAll, null, null, null, null, true);
+				(_videoManager.videoData as BitmapData).draw(jerseyBMD, jerseyMatrix, null, null, null, true);
+				
+				//upload the videoData as Texture to the GPU
+				_container3D.updateVideo();
+			}
 		}
 		
 		
@@ -600,63 +607,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				}
 				_drawMask.lineTo(_mouthHolePoints[0].x, _mouthHolePoints[0].y);
 				_drawMask.endFill();
-			}
-			/*
-			//if anim hasn't started and we can estimate then start the anim
-			if (!introAnimStarted && _brfManager.task == BRFStatus.FACE_ESTIMATION) {
-				introAnimStarted = true;
-				introAnimFinished = false;
-				clip.rvline.alpha = .8;
-				clip.rhline.alpha = .8;
-				clip.rpupil.alpha = .9;
-				clip.lvline.alpha = .8;
-				clip.lhline.alpha = .8;
-				clip.lpupil.alpha = .9;
-				meshAlpha = .8;
-				introAlpha = .95; //decrement multiplier
-				animInc = 250;
-			}
-			
-			if(!introAnimFinished && introAnimStarted ){
-				
-				BRFUtils.getFaceShapeVertices(_brfManager.faceShape);
-				meshAlpha *= introAlpha;
-				
-				if (meshAlpha < .05) {
-					//done
-					introAnimFinished = true;
-					clip.rvline.visible = false;
-					clip.rhline.visible = false;
-					clip.rpupil.visible = false;
-					clip.lvline.visible = false;
-					clip.lhline.visible = false;
-					clip.lpupil.visible = false;
-				}
-				
-				//track eyes with crosshairs			
-				_pointsToShow = _brfManager.faceShape.shapePoints;				
-				
-				clip.rvline.alpha = meshAlpha;
-				clip.rhline.alpha = meshAlpha;
-				clip.rpupil.alpha = meshAlpha;
-				clip.rvline.x = 337 + (_pointsToShow[28].x * 2) + animInc;
-				clip.rhline.y = 20 + (_pointsToShow[28].y * 2) + animInc;
-				clip.rpupil.x = 335 + (_pointsToShow[28].x * 2) + animInc;
-				clip.rpupil.y = 20 + (_pointsToShow[28].y * 2) + animInc;
-				
-				clip.lvline.alpha = meshAlpha;
-				clip.lhline.alpha = meshAlpha;
-				clip.lpupil.alpha = meshAlpha;
-				clip.lvline.x = 337 + (_pointsToShow[33].x * 2) + animInc;
-				clip.lhline.y = 20 + (_pointsToShow[33].y * 2) + animInc;
-				clip.lpupil.x = 335 + (_pointsToShow[33].x * 2) + animInc;
-				clip.lpupil.y = 20 + (_pointsToShow[33].y * 2) + animInc;
-				
-				animInc -= 15;
-				if (animInc <= 0) {
-					animInc = 0;
-				}
-			}			*/
+			}			
 		}
 		
 		private function faceFound(e:TimerEvent):void

@@ -56,9 +56,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		
 		/**
-		 * Sets the service url that image and email data is sent
-		 * Service is assumed to take a post request with two variables: base64 and email
-		 * 
+		 * Sets the service url that image and email data is sent 
 		 * Calls refreshQueue() to process any older items still remaining in the queue
 		 * 
 		 * @param	url
@@ -91,7 +89,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 * @param	img BitmapData
 		 * @param	guidID String - guid
 		 */
-		public function addToQueue(img:BitmapData, guidID:String, rfidS:String):void
+		public function addToQueue(img:BitmapData, id:int):void
 		{			
 			var jpeg:ByteArray = getJpeg(img);
 			
@@ -105,41 +103,13 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 					fs.writeBytes(jpeg);				
 					fs.close();
 				}catch(e:Error){
-					trace("addToQueue - catch:",e.message);
+					trace("addToQueue - catch:", e.message);
 				}
 			}
 			
 			imageString = getBase64(jpeg);		
 			
-			writeObject( { image:imageString, guid:guidID, rfid:rfidS  } );//write object to documents folder
-			queueWait.reset();			
-			refreshQueue();	
-			dispatchEvent(new Event(ADDED));//added to the queue
-		}
-		
-		
-		//FOR OMNICOM MEETING
-		public function addToQueue2(img:BitmapData, email:String):void
-		{			
-			var jpeg:ByteArray = getJpeg(img);
-			
-			if(saveFolder != ""){
-				var a:Date = new Date();
-				var fileName:String = "gmr_" + String(a.valueOf()) + ".jpg";
-				var fl:File = File.desktopDirectory.resolvePath(saveFolder + fileName);
-				var fs:FileStream = new FileStream();
-				try{			
-					fs.open(fl, FileMode.WRITE);				
-					fs.writeBytes(jpeg);				
-					fs.close();
-				}catch(e:Error){
-					trace("addToQueue - catch:",e.message);
-				}
-			}
-			
-			imageString = getBase64(jpeg);		
-			
-			writeObject( { image:imageString, em:email  } );//write object to documents folder
+			writeObject( { Image:imageString, RegistrantId:id } );//write object to documents folder
 			queueWait.reset();			
 			refreshQueue();	
 			dispatchEvent(new Event(ADDED));//added to the queue
@@ -156,6 +126,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				
 				queueWait.reset(); //stop timer while processing
 				
+				//read object from the folder
 				var fName:String = queue[0];
 				var file:File = File.documentsDirectory.resolvePath( fName );
 				var stream:FileStream = new FileStream();
@@ -163,19 +134,18 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				var ob:Object = stream.readObject();
 				stream.close();
 				file = null;
-				stream = null;
-					
-				var vars:URLVariables = new URLVariables();
-				vars.base64Image = ob.image;
-				//vars.guid = ob.guid;
-				//vars.rfid = ob.rfid;
-				//OMNICOM
-				vars.type = "Avatar";
-				vars.email = ob.em;
+				stream = null;					
+				
+				var hdr:URLRequestHeader = new URLRequestHeader("Content-type", "application/json");
+				var hdr2:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
+				
+				var js:String = JSON.stringify({ Image:ob.Image, RegistrantId:ob.RegistrantId });
 				
 				var request:URLRequest = new URLRequest(webService);
-				request.data = vars;
+				request.data = js;
 				request.method = URLRequestMethod.POST;
+				request.requestHeaders.push(hdr);
+				request.requestHeaders.push(hdr2);
 				
 				var lo:URLLoader = new URLLoader();
 				lo.addEventListener(Event.COMPLETE, saveDone, false, 0, true);
@@ -205,10 +175,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function saveDone(e:Event):void
 		{			
 			try{
-				var vars:URLVariables = new URLVariables(e.target.data);			
-				var success = vars.OK;
+				var js:Object = JSON.parse(e.currentTarget.data);
 				
-				if (success == "true") {					
+				if (js.CreateDate != undefined) {					
 					
 					//success!
 					killFile(); //remove from documents folder		
@@ -286,7 +255,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function writeObject(im:Object):void
 		{
 			var a:Date = new Date();
-			var fileName:String = "img_" + String(a.valueOf()) + ".img";			
+			var fileName:String = "lva_" + String(a.valueOf()) + ".img";			
 			
 			try{
 				var file:File = File.documentsDirectory.resolvePath( fileName );
@@ -319,7 +288,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				var allFiles:Array = file.getDirectoryListing();//array of file objects				
 				
 				for (var i = 0; i < allFiles.length; i++) {				
-					if (String(allFiles[i].name).substr(0, 4) == "img_") {
+					if (String(allFiles[i].name).substr(0, 4) == "lva_") {
 						queue.push(allFiles[i].name);
 						//trace("adding to queue:", allFiles[i].name);
 					}
