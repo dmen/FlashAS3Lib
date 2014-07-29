@@ -83,6 +83,37 @@ package com.gmrmarketing.utilities
 			return s.split("\n").join("");
 		}
 		
+		
+		/**
+		 * Removes a chunk from a string that starts with a given string.
+		 * Example - removes URL's by calling removeChunk(string, "http://");
+		 * @param	s The original string
+		 * @param	starts
+		 * @return	Modified original string if starts was found
+		 */
+		public static function removeChunk(s:String, starts:String):String
+		{
+			var i:int = s.indexOf(starts);
+			var newString:String;
+			
+			if (i != -1) {
+				var sp:int = s.indexOf(" ", i); //find first space after chunk start
+				
+				var s1:String = s.substr(0, i);
+				var s2:String = s.substr(sp + 1);
+				
+				if (sp != -1) {
+					newString = s1 + s2;
+				}else {
+					newString = s1;
+				}				
+			}else {
+				//starts was not found
+				newString = s;
+			}
+			
+			return newString;
+		}
 	}
 	
 }
