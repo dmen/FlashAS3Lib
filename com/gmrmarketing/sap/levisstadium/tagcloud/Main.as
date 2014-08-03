@@ -7,7 +7,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 	
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
-		public static const READY:String = "ready";
+		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"
 		
 		private var ra:RectFinder;
 		private var bmp:Bitmap;
@@ -22,7 +22,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		
 		private function dictLoaded(e:Event):void
 		{
-			show();//TESTING
+			//show();//TESTING
 			dispatchEvent(new Event(READY));
 		}
 		

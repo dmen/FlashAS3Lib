@@ -22,13 +22,10 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private var lastTask:MovieClip;
 		
 		public function Main()
-		{
-			stage.displayState = StageDisplayState.FULL_SCREEN;
-			stage.scaleMode = StageScaleMode.EXACT_FIT;
+		{			
 			Mouse.hide();			
 			
-			taskLoader = new Loader();
-			taskLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, taskLoaded, false, 0, true);
+			taskLoader = new Loader();			
 			
 			config = new AIRXML(); //reads config.xml in the apps folder
 			config.addEventListener(Event.COMPLETE, configReady, false, 0, true);
@@ -54,16 +51,19 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 				lastTask = thisTask;
 				//thisTask.hide();
 			}
-			var r:URLRequest = new URLRequest(tasks[currentTask].@file);		
+			var r:URLRequest = new URLRequest(tasks[currentTask].@file);
+			taskLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, taskLoaded);
 			taskLoader.load(r);//calls taskLoaded() when complete
 		}
 		
 		
 		private function taskLoaded(e:Event):void
 		{
+			taskLoader.contentLoaderInfo.removeEventListener(Event.COMPLETE, taskLoaded);
+			
 			thisTask = MovieClip(taskLoader.contentLoaderInfo.content);
 			thisTask.addEventListener("ready", taskReadyToShow, false, 0, true);
-			thisTask.x = -1920;
+			thisTask.x = -768;
 			
 			addChild(thisTask);
 			
@@ -102,7 +102,8 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private function hideLastTask():void
 		{
 			TweenMax.to(thisTask, 1, { x:0, ease:Back.easeOut, onComplete:showTask } );
-			lastTask.hide();
+			taskLoader.unloadAndStop();
+			lastTask = null;
 		}
 		
 		private function showTask():void

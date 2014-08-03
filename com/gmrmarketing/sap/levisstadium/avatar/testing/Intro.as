@@ -1,27 +1,38 @@
 package com.gmrmarketing.sap.levisstadium.avatar.testing
 {
-	import flash.display.DisplayObjectContainer;
-	import flash.display.MovieClip;
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
+	import flash.display.*	
+	import flash.events.*;
 	import com.greensock.TweenMax;
-	import com.gmrmarketing.website.VPlayer;
-	import flash.events.MouseEvent;
+	import fl.video.*;
 	
 	public class Intro extends EventDispatcher
 	{
 		public static const SHOWING:String = "introShowing";
 		public static const MANUAL_START:String = "userTouchedScreen";		
-		
 		private var clip:MovieClip;
+		private var vid:FLVPlayback;
 		private var container:DisplayObjectContainer;
-		private var vid:VPlayer;
 		
 		
 		public function Intro()
 		{
 			clip = new mcIntro();
-			vid = new VPlayer();
+			
+			vid = new FLVPlayback();
+			vid.fullScreenTakeOver = false;
+			vid.autoPlay = false;
+			vid.autoRewind = true;
+			vid.isLive = false
+			vid.skin = null;
+			vid.bufferTime = .1;
+			vid.x = 0;
+			vid.y = 0;
+			vid.width = 1920;
+			vid.height = 1080;
+			vid.source = "assets/attract.f4v";
+			vid.addEventListener(MetadataEvent.CUE_POINT, cueListener, false, 0, true);	
+			
+			clip.addChild(vid);
 		}
 		
 		
@@ -33,43 +44,36 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		public function show():void
 		{
-			if (container) {
-				vid.showVideo(container);
-				vid.playVideo("assets/attract_1.f4v");
-				vid.addEventListener(VPlayer.CUE_RECEIVED, checkCue, false, 0, true);
-				
-				if (!container.contains(clip)) {
-					container.addChild(clip);
-				}
-			}
-			
-			clip.alpha = 0;
-			TweenMax.to(clip, 1, { alpha:1, onComplete:showing } );
+			if (!container.contains(clip)) {
+				container.addChild(clip);
+			}	
+			vid.seek(0);
+			vid.play();
+			clip.addEventListener(MouseEvent.MOUSE_DOWN, manualStart, false, 0, true);
 		}
 		
 		
 		public function hide():void
-		{
-			vid.simpleHide();
-			vid.removeEventListener(VPlayer.CUE_RECEIVED, checkCue);
+		{			
 			clip.removeEventListener(MouseEvent.MOUSE_DOWN, manualStart);
 			
 			if (container.contains(clip)) {
 				container.removeChild(clip);
 			}
+			vid.stop();
 		}
 		
 		
-		private function checkCue(e:Event):void
-		{			
-			vid.replay();	
+		private function cueListener(e:MetadataEvent):void 
+		{
+			vid.seek(0);
+			vid.play();
 		}
 		
 		
 		private function showing():void
 		{
 			dispatchEvent(new Event(SHOWING));
-			clip.addEventListener(MouseEvent.MOUSE_DOWN, manualStart, false, 0, true);
 		}
 		
 		

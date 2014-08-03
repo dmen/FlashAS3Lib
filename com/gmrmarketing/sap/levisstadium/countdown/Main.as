@@ -4,13 +4,14 @@ package com.gmrmarketing.sap.levisstadium.countdown
 	import flash.display.*;
 	import flash.events.*;
 	import flash.utils.*;
+	import flash.net.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	
 	
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
-		public static const READY:String = "ready";
+		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"
 		
 		private var degToRad:Number = 0.0174532925; //PI / 180
 		private var endDate:Date;
@@ -121,12 +122,29 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			secsTextClip.x = -95;
 			secsTextClip.y = -105;
 			secsTextClip.alpha = 0;
-			secsTextClip.scaleX = secsTextClip.scaleY = .1;
+			secsTextClip.scaleX = secsTextClip.scaleY = .1;			
 			
+			//var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
+			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GetKickoffTime");
+			//r.requestHeaders.push(hdr);
+			var l:URLLoader = new URLLoader();
+			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
+			l.load(r);
 			//TESTING
-			setConfig("3:45 PM");
-			show();
+			//setConfig("3:45 PM");
+			//show();
 			//TESTING
+		}
+		
+		
+		//callback from web service
+		private function dataLoaded(e:Event):void
+		{
+			var t:String = String(e.currentTarget.data);
+			endTime = t.split("\"")[1]; //because quotes are in the string "1:00 PM"
+			dispatchEvent(new Event(READY));
+			
+			//show();//TESTING
 		}
 		
 		
@@ -137,8 +155,6 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		 */
 		public function setConfig(config:String):void
 		{
-			endTime = config;
-			dispatchEvent(new Event(READY));
 		}
 		
 		

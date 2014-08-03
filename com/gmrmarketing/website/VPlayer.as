@@ -69,6 +69,9 @@ package com.gmrmarketing.website
 		private var useTimeout:Boolean;
 		private var timeoutTimer:Timer;
 		
+		private var isLooping:Boolean = false;
+		
+		
 		/**
 		 * CONSTRUCTOR
 		 * Create theVideo and attach the stream object
@@ -430,6 +433,15 @@ package com.gmrmarketing.website
 		}
 		
 		
+		public function seekZero():void
+		{
+			vidStream.seek(0);
+		}
+		
+		public function setLooping(b:Boolean):void
+		{
+			isLooping = b;
+		}
 		
 		/**
 		 * Resumes playing of a paused video
@@ -535,6 +547,10 @@ package com.gmrmarketing.website
 		private function statusHandler(e:NetStatusEvent):void 
 		{ 			
 			statusCode = e.info.code;	
+			
+			if (isLooping && statusCode == "NetStream.Buffer.Empty") {
+				replay();
+			}
 			//trace(statusCode);
 			dispatchEvent(new Event(STATUS_RECEIVED));
 		}

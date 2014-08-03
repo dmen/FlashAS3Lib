@@ -412,6 +412,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			step = 0;
 			container.addEventListener(Event.ENTER_FRAME, onEnterFrame, false, 0, true);
 		}
+		
+		
 		private function hideLoader():void
 		{
 			step = 0;
@@ -420,14 +422,18 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				container.removeChild(loaderSprite);
 			}
 		}
+		
+		
 		private function onEnterFrame(e:Event):void
 		{           
 			step += 20;	
 			if (step >= 360) {
 				step = 0;
 			}
-			draw_arc(1200, 400, 30, 0, step, 0xE5b227);			
+			draw_arc(1210, 370, 30, 0, step, 0xE5b227);			
         }		
+		
+		
 		private function draw_arc(center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineColor:Number, lineAlpha:Number = 1):void
 		{
 			loaderSprite.graphics.clear();

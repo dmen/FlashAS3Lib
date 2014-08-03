@@ -11,8 +11,10 @@ package com.gmrmarketing.sap.levisstadium.california
 	
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
+		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"
+		
 		private var dots:Sprite;//container for all the dot clips
-		private var textContainer:Sprite;
+		private var textContainer:Sprite;//container for twitter text messages
 		private var tweets:Array; //array of lat/lon/weights from the service
 		private var tweetManager:TweetManager; //manages getting and displaying the text tweets
 		
@@ -20,15 +22,14 @@ package com.gmrmarketing.sap.levisstadium.california
 		{
 			dots = new Sprite();
 			textContainer = new Sprite();
-			tweets = new Array();			
+			tweets = new Array();
 			
-			addChild(dots);
-			addChild(textContainer);
-			
-			tweetManager = new TweetManager();//gets text tweets and starts to display them
-			tweetManager.setContainer(textContainer);
-			
-			refreshData();			
+			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
+			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/calimapsentiment");
+			r.requestHeaders.push(hdr);
+			var l:URLLoader = new URLLoader();
+			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
+			l.load(r);
 		}
 		
 		
@@ -45,8 +46,19 @@ package com.gmrmarketing.sap.levisstadium.california
 		 * ISChedulerMethods
 		 */
 		public function show():void
-		{
-		
+		{			
+			addChild(dots);//container for dot clips
+			addChild(textContainer);
+			
+			//add the tweet dots to the map
+			var del:Number = 0;
+			for (var j:int = 0; j < tweets.length; j++) {
+				addLoc(tweets[j].lat, Math.abs(tweets[j].lon), tweets[j].normalized, del);
+				del += .2;
+			}
+			
+			tweetManager = new TweetManager();//gets text tweets and starts to display them
+			tweetManager.setContainer(textContainer);
 		}
 		
 		
@@ -64,19 +76,16 @@ package com.gmrmarketing.sap.levisstadium.california
 		 */
 		public function doStop():void
 		{
+			if (contains(dots)) {
+				removeChild(dots);//lat/lon dots on map
+			}
+			if (contains(textContainer)) {
+				removeChild(textContainer);//twitter text
+			}
 			
+			tweetManager.stop();
 		}
 		
-		
-		public function refreshData():void
-		{
-			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/calimap");
-			r.requestHeaders.push(hdr);
-			var l:URLLoader = new URLLoader();
-			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
-			l.load(r);
-		}
 		
 		
 		/**
@@ -94,19 +103,8 @@ package com.gmrmarketing.sap.levisstadium.california
 			normalize();
 			tweets.reverse();//draw smaller first
 			
-			var del:Number = 0;
-			for (var j:int = 0; j < tweets.length; j++) {
-				addLoc(tweets[j].lat, Math.abs(tweets[j].lon), tweets[j].normalized, del);
-				del += .1;
-			}
-			/*
-			//now add a tweet text...TESTING
-			var a:Tweet = new Tweet();
-			a.setContainer(this);
-			var p:Point = latLonToXY(tweets[0].lat, tweets[0].lon);
-			a.show("#49ersSAP Kaepernick! You rule bra!", p.x, p.y, 3);
-			*/
-			
+			//show();//TESTING
+			dispatchEvent(new Event(READY));			
 		}
 		
 		
@@ -140,6 +138,13 @@ package com.gmrmarketing.sap.levisstadium.california
 		}
 		
 		
+		/**
+		 * Adds a dot to the map at the specified lat/lon position
+		 * @param	lat latitude
+		 * @param	lon ABS of longitude
+		 * @param	weight Number .1 - .6
+		 * @param	del seconds to delay drawing
+		 */
 		private function addLoc(lat:Number, lon:Number, weight:Number, del:Number = 0):void
 		{
 			var w:Number;//weight

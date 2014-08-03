@@ -86,7 +86,7 @@ package com.gmrmarketing.utilities
 		
 		/**
 		 * Removes a chunk from a string that starts with a given string.
-		 * Example - removes URL's by calling removeChunk(string, "http://");
+		 * Example - remove URL by calling removeChunk(string, "http://");
 		 * @param	s The original string
 		 * @param	starts
 		 * @return	Modified original string if starts was found

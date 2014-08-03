@@ -14,29 +14,41 @@ package com.gmrmarketing.sap.levisstadium.california
 		public static const COMPLETE:String = "tweetComplete";
 		
 		private var clip:MovieClip;//from lib - contains text field at 6,6 - contains rectContainer
-		private var rectContainer:Sprite; //for drawing bg gradient rect - contains lineContainer
-		private var lineContainer:Sprite;//so we can make a shadowed line above the bg rect
+		private var rectContainer:Sprite; //for drawing bg gradient rect - contains outlineContainer
+		private var outlineContainer:Sprite;//so we can make a shadowed outline rect above the gradient bg rect
+		private var lineContainer:Sprite; //for shooting the ray to the lat/lon loc
 		private var container:DisplayObjectContainer;
 		private var tweenOb:Object;
 		private var dot:MovieClip;
-		private var permDot:MovieClip;
-		private var myQuadrant:int;
+		private var myQuadrant:int; // 1 or 2
+		private var vx:Number;
+		private var vy:Number;
+		private var drawToX:int;
+		private var drawToY:int;
+		private var lineColor:Number;
 		
 		
 		//lib clip - 'clip' contains rectContainer on layer 0 - behind text already in the clip
-		//rectContainer contains lineContainer
+		//rectContainer contains outlineContainer
 		public function Tweet()
 		{
-			lineContainer = new Sprite();//foreground outline and line to gps spot on map
+			outlineContainer = new Sprite();//foreground outline and line to gps spot on map
+			outlineContainer.filters = [new DropShadowFilter(0, 0, 0x000000, .8, 7, 7)];
+			
+			lineContainer = new Sprite();
 			lineContainer.filters = [new DropShadowFilter(0, 0, 0x000000, .8, 7, 7)];
 			
 			rectContainer = new Sprite();//for drawing bg shape into
+			rectContainer.filters = [new DropShadowFilter(0, 0, 0x000000, .8, 7, 7)]
 			rectContainer.addChild(lineContainer);
+			rectContainer.addChild(outlineContainer);	
+			
+			vx = 0;
+			vy = 0;
 			
 			tweenOb = new Object();//just a holder of tweening properties
 			
-			dot = new mapDot(); //lib clip	
-			permDot = new mapDotInner();
+			dot = new mapDot(); //lib clip - animated expanding circle at lat/lon
 			
 			clip = new mcTweet();//lib clip - contains text field	
 			clip.addChildAt(rectContainer, 0); //add behind text already in the clip			
@@ -59,91 +71,71 @@ package com.gmrmarketing.sap.levisstadium.california
 		 */
 		public function show(userName:String, message:String, toX:int, toY:int, quadrant:int):void
 		{
-			clip.theUser.text = userName;
-			clip.theText.text = message;		
+			if (!container.contains(clip)) {
+				container.addChild(clip);
+			}			
+			
+			clip.userBG.alpha = 0;
+			clip.theText.alpha = 0; //contains the two text fields
+			clip.theText.theUser.text = userName;			
+			
+			message = message.replace(/&lt;/g, "<");
+			message = message.replace(/&gt;/g, "<");
+			message = message.replace(/&amp;/g, "&");			
+			
+			clip.theText.theText.text = message;	
+			var rectWidth:int = Math.max(200, clip.theText.theText.textWidth + 12);
+			
+			drawToX = toX;
+			drawToY = toY;
+			
+			myQuadrant = quadrant;			
+			
+			//animated dot
+			dot.x = drawToX;
+			dot.y = drawToY;
+			dot.scaleX = dot.scaleY = .1;
+			dot.alpha = 1;
+			container.addChild(dot);
+			var sc:Number = .7 + 2 * Math.random();			
+			TweenMax.to(dot, 1, { alpha:0, scaleX:sc, scaleY:sc, rotation:45 + Math.random() * 90 } );
 			
 			switch(quadrant) {
 				case 1:
-					clip.x = 8 + Math.random() * 10;
-					clip.y = 235 + Math.random() * 10;
+					clip.x = 20 + Math.random() * 10;
+					clip.y = 330 + Math.random() * 10;
 					break;
 				case 2:
-					clip.x = 40 + Math.random() * 10;
-					clip.y = 380 + Math.random() * 10;
+					clip.x = 500 + Math.random() * 10;
+					clip.y = 120 + Math.random() * 10;
 					break;
-				case 3:
-					clip.x = 400 + Math.random() * 50;
-					clip.y = 45 + Math.random() * 10;
-					break;
-				case 4:
-					clip.x = 510 + Math.random() * 10;
-					clip.y = 200 + Math.random() * 10;
-					break;
-			}
-			
-			myQuadrant = quadrant;
-			
-			//outline rect
-			lineContainer.graphics.lineStyle(1, 0xffffff, 1, true);
-			lineContainer.graphics.drawRoundRect(0, 0, clip.theText.textWidth + 12, clip.theText.textHeight + 15, 18, 18);
-			
-			var g:Graphics = rectContainer.graphics;
-			
-			var m:Matrix = new Matrix();
-			m.createGradientBox(clip.theText.textWidth + 12, clip.theText.textHeight + 15, 1.5707963);//the 1.57...PI/2 radians - 90º
-			g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0x555555], [.4, .6], [0, 255], m);
-			g.drawRoundRect(0, 0, clip.theText.textWidth + 12, clip.theText.textHeight + 15, 18, 18);
-			g.endFill()
-			
-			if (!container.contains(clip)) {
-				container.addChild(clip);
-			}
-			
-			clip.scaleX = clip.scaleY = .25;
-			clip.alpha = 0;
-						
-			TweenMax.to(clip, 1, { alpha:1, scaleX:1, scaleY:1, ease:Back.easeOut } );			
-			
-			//animated line			
-			lineContainer.graphics.lineStyle(1, 0xFFFFFF, .7);			
-			
-			if (toX < clip.x) {
-				//point on the left of the tweet
-				if(toY < clip.y){
-					lineContainer.graphics.moveTo(0, 12);					
-					tweenOb.y = 12;
-				}else {
-					lineContainer.graphics.moveTo(0, clip.theText.textHeight);//+ 15 per rect - but remove to come above rounded corner
-					tweenOb.y = clip.theText.textHeight;
-				}
-				tweenOb.x = 0;
-			}else {
-				//point on the right of the tweet
-				trace(toY, clip.y);
-				if (toY < clip.y) {
-					lineContainer.graphics.moveTo(clip.theText.textWidth + 12, 12);
-					tweenOb.y = 12;
-				}else {
-					lineContainer.graphics.moveTo(clip.theText.textWidth + 12, clip.theText.textHeight);
-					tweenOb.y = clip.theText.textHeight;
-				}
-				tweenOb.x = clip.theText.textWidth + 12;
-			}
+			}	
 			
 			var r:Number = Math.random();
 			if (r < .33) {
-				TweenMax.to(clip.userBG, 0, { colorTransform: { tint:0xeeb400, tintAmount:1 }} );
+				lineColor = 0xeeb400;
 			}else if (r < .66 ) {
-				TweenMax.to(clip.userBG, 0, { colorTransform: { tint:0x008fd3, tintAmount:1 }} );
+				lineColor = 0x008fd3;
 			}else {
-				TweenMax.to(clip.userBG, 0, { colorTransform: { tint:0xa19a92, tintAmount:1 }} );
+				lineColor = 0xa19a92;
 			}
-			clip.userBG.width = rectContainer.width;
 			
-			//change toX,toY to screen coords, instead of lineContainer coords
-			toX = toX - clip.x;
-			toY = toY - clip.y;
-			TweenMax.to(tweenOb, .5, { x:toX, y:toY, onUpdate:drawLine, delay:.75, ease:Linear.easeNone, onComplete:drawDone} );
+			//animated line			
+			lineContainer.graphics.lineStyle(2, lineColor, 1);			
+			
+			//change toX,toY to screen coords, instead of outlineContainer coords
+			drawToX = toX - clip.x;
+			drawToY = toY - clip.y;
+			
+			lineContainer.graphics.moveTo(drawToX, drawToY);
+			tweenOb.x = drawToX;
+			tweenOb.y = drawToY;
+			if (myQuadrant == 2) {
+				//point on the left of the tweet	
+				TweenMax.to(tweenOb, .25, { x:0, y:-22, onUpdate:drawLine, delay:.75, ease:Linear.easeNone, onComplete:drawTweetBox} );						
+			}else {			
+				TweenMax.to(tweenOb, .25, { x:rectWidth, y: -22, onUpdate:drawLine, delay:.75, ease:Linear.easeNone, onComplete:drawTweetBox } );			
+			}	
 		}
 		
 		
@@ -153,39 +145,61 @@ package com.gmrmarketing.sap.levisstadium.california
 		}
 		
 		
-		//called when line is done drawing - places a hit circle
-		//at tweenOb.x,y
-		private function drawDone():void
+		private function drawTweetBox():void
 		{
-			dot.x = tweenOb.x + clip.x;
-			dot.y = tweenOb.y + clip.y;
-			dot.scaleX = dot.scaleY = .1;
-			dot.alpha = 1;
-			container.addChild(dot);
-			var sc:Number = .75 + Math.random();
-			TweenMax.to(dot, 1, { alpha:0, scaleX:sc, scaleY:sc, rotation:45 + Math.random() * 90, onComplete:killDot } );
+			TweenMax.to(lineContainer, 1, { alpha:0 } );
+			clip.addEventListener(Event.ENTER_FRAME, drift);
 			
-			permDot.x = dot.x;
-			permDot.y = dot.y;
-			permDot.alpha = 0;
-			container.addChild(permDot);
-			TweenMax.to(permDot, 1, { alpha:.7, delay:.5, onComplete:startEndTimer } );
+			var rectWidth:int = Math.max(200, clip.theText.theText.textWidth + 12);
+			
+			//outline rect
+			outlineContainer.graphics.lineStyle(1, 0xffffff, 1, true);
+			outlineContainer.graphics.drawRoundRect(0, 0, rectWidth, clip.theText.theText.textHeight + 15, 18, 18);
+			
+			var g:Graphics = rectContainer.graphics;
+			
+			var m:Matrix = new Matrix();
+			m.createGradientBox(rectWidth, clip.theText.theText.textHeight + 15, 1.5707963);//the 1.57...PI/2 radians - 90º
+			g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0x555555], [.4, .6], [0, 255], m);
+			g.drawRoundRect(0, 0, rectWidth, clip.theText.theText.textHeight + 15, 18, 18);
+			g.endFill()			
+			
+			TweenMax.to(clip.userBG, 0, { colorTransform: { tint:lineColor, tintAmount:1 }} );			
+			clip.userBG.width = rectWidth;
+			
+			TweenMax.to(clip.theText, 1, { alpha:1 } );
+			TweenMax.to(clip.userBG, 1, { alpha:1, onComplete:startEndTimer } );
 		}
 		
 		
-		private function killDot():void
+		
+		private function drift(e:Event):void
 		{
-			if (container.contains(dot)) {
-				container.removeChild(dot);
+			vx += Math.random() * 0.2 - 0.1;
+			vy += Math.random() * 0.2 - 0.1;
+			
+			clip.x += vx;
+			clip.y += vy;
+			
+			vx *= .95;
+			vy *= .95;
+			
+			if (clip.x < 0) {
+				clip.x = 0;
+			}
+			if (clip.y - 38 < 0) {
+				clip.y = 38;
+			}
+			if (clip.x + outlineContainer.width > 768) {
+				clip.x = 768 - outlineContainer.width;
 			}
 		}
 		
 		
 		private function startEndTimer():void
-		{
-			trace("text len:",clip.theText.text.length);
-			var tLen:int = Math.max(3, String(clip.theText.text).length / 12);
-			trace("timeout in", tLen);
+		{			
+			//trace("text len:",clip.theText.text.length);
+			var tLen:int = Math.max(1, String(clip.theText.text).length / 40);
 			
 			var end:Timer = new Timer(tLen * 1000, 1);
 			end.addEventListener(TimerEvent.TIMER, tweetComplete);
@@ -201,13 +215,15 @@ package com.gmrmarketing.sap.levisstadium.california
 		
 		private function tweetComplete(e:TimerEvent):void
 		{			
-			TweenMax.to(clip, 1, { alpha:0 } );
-			TweenMax.to(permDot, 1, { alpha:0, onComplete:sendComplete } );
+			TweenMax.to(clip, 1, { alpha:0,onComplete:dispose } );
 		}
 		
 		
-		private function sendComplete():void
+		private function dispose():void
 		{
+			if (rectContainer.contains(outlineContainer)) {
+				rectContainer.removeChild(outlineContainer);
+			}
 			if (rectContainer.contains(lineContainer)) {
 				rectContainer.removeChild(lineContainer);
 			}
@@ -216,8 +232,11 @@ package com.gmrmarketing.sap.levisstadium.california
 			}
 			if (container.contains(clip)) {
 				container.removeChild(clip);
+			}			
+			if (container.contains(dot)) {
+				container.removeChild(dot);
 			}
-			killDot();
+			clip.removeEventListener(Event.ENTER_FRAME, drift);
 			
 			dispatchEvent(new Event(COMPLETE));
 		}

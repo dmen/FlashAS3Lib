@@ -352,14 +352,14 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			dispatchEvent(new Event(CLOSE_PREVIEW));
 		}
 		
+		
 		//called on mouseDown on the cam up button		
 		private function camUp(e:MouseEvent):void
 		{
 			camEvent = CAM_UP;
 			tim.buttonClicked();			
 			clip.stage.addEventListener(MouseEvent.MOUSE_UP, camStop, false, 0, true);
-			clip.stage.addEventListener(Event.ENTER_FRAME, moveCam, false, 0, true);
-			
+			clip.stage.addEventListener(Event.ENTER_FRAME, moveCam, false, 0, true);			
 		}
 		
 		

@@ -81,7 +81,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		public function refreshTags():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/Api/Netbase/GetTags");
+			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/Api/Netbase/GetTags49ers");
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, tagsLoaded, false, 0, true);

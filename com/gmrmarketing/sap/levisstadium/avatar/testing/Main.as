@@ -294,7 +294,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function moveCamUp(e:Event):void
 		{
-			angleDelta = -2;	
+			angleDelta = -.5;	
 			setServoAngle();
 			servoTimer.start();
 		}
@@ -302,7 +302,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function moveCamDown(e:Event):void
 		{
-			angleDelta = 2;
+			angleDelta = .5;
 			setServoAngle();
 			servoTimer.start();
 		}
