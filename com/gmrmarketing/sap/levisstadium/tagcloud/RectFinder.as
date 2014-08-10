@@ -7,15 +7,15 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 	import flash.utils.*;
 	
 	public class RectFinder extends EventDispatcher
-	{
-		public static const DICT_READY:String = "dictionaryReady"; 		
+	{			
 		private var image:BitmapData; //passed in image data
 		private var newImage:BitmapData;//returned image with text		
 		private var sampleSize:int;//sample size		
 		private var grid:Array;//2d array of 1's and 0's created from image		
 		private var hText:MovieClip;//lib clips used for drawing text into
 		private var vText:MovieClip;		
-		private var dict:TagCloud;//tags from the service		
+		private var tags:Array; //array of tags	
+		private var tagIndex:int; //current index in tags array
 		private var textColors:Array; //for coloring the words
 		private var startScale:Number = 4;
 		private var scaleDec:Number; //startScale / number of tags		
@@ -23,32 +23,25 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		private var tagCount:Number; //current tag count
 		private var zeroCount:int;
 		private var tagTimer:Timer;
-		private var totalTags:int; //number of tags retrieved
+		private var totalTags:int; //number of tags
 		private var forceStop:Boolean = false;
+		private var stageRef:Stage;
 		
-		public function RectFinder(ss:int, maxFontSize:int, minFontSize:int, tagColors:Array)
+		public function RectFinder(ss:int)
 		{	
-			sampleSize = ss;
+			sampleSize = ss;			
 			
 			hText = new mcHText();//lib
-			vText = new mcVText();//lib	
-			
-			dict = new TagCloud(sampleSize, maxFontSize, minFontSize, tagColors);
-			dict.addEventListener(TagCloud.TAGS_READY, tagsReady, false, 0, true);
-			dict.refreshTags();
-		}
+			vText = new mcVText();//lib				
+		}		
 		
 		
-		private function tagsReady(e:Event):void
-		{
-			dispatchEvent(new Event(DICT_READY));
-		}
-		
-		
-		public function create($newImage:BitmapData, $image:BitmapData):void
+		public function create($newImage:BitmapData, $image:BitmapData, $tags:Array, $stageRef:Stage):void
 		{			
 			newImage = $newImage;
-			image = $image;		
+			image = $image;
+			tags = $tags;
+			stageRef = $stageRef;
 			
 			forceStop = false;
 			
@@ -57,12 +50,15 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			tagAddedCount = 0;
 			tagCount = 0;
 			zeroCount = 0;
-			totalTags = dict.getNumTags();
+			totalTags = tags.length;
+			tagIndex = 0;
 			
-			tagTimer = new Timer(10);
-			tagTimer.addEventListener(TimerEvent.TIMER, addTag, false, 0, true);
-			tagTimer.start();			
+			stageRef.addEventListener(Event.ENTER_FRAME, addTag);
+			//tagTimer = new Timer(10);
+			//tagTimer.addEventListener(TimerEvent.TIMER, addTag, false, 0, true);
+			//tagTimer.start();			
 		}
+		
 		
 		/**
 		 * stops the while loop from executing in spiral
@@ -70,14 +66,18 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		 */
 		public function stop():void
 		{
-			trace("rectFinder.stop()");
 			forceStop = true;
+			stageRef.removeEventListener(Event.ENTER_FRAME, addTag);
 		}
 		
 		
-		private function addTag(e:TimerEvent):void
+		private function addTag(e:Event):void
 		{
-			var t:Object = dict.getNextTag();
+			var t:Object = tags[tagIndex];
+			tagIndex++;
+			if (tagIndex >= tags.length) {
+				tagIndex = 0;
+			}
 			spiral(t);
 			tagCount++;
 			if (tagCount >= totalTags) {
@@ -87,7 +87,9 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 				if (tagPercent == 0) {
 					zeroCount++;
 					if (zeroCount == 5) {
-						tagTimer.removeEventListener(TimerEvent.TIMER, addTag);
+						//trace("rectFinder removing listner");
+						//tagTimer.removeEventListener(TimerEvent.TIMER, addTag);
+						stageRef.removeEventListener(Event.ENTER_FRAME, addTag);
 					}
 				}
 			}

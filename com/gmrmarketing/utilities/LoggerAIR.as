@@ -25,7 +25,7 @@ package com.gmrmarketing.utilities
 			var fs:FileStream = new FileStream();
 			try {
 				fs.open(targetFile, FileMode.APPEND);
-				fs.writeMultiByte(message + "|" + new Date() + "\r\n", "utf-8");
+				fs.writeMultiByte(new Date() + " | " + message + "\r\n", "utf-8");
 				fs.close();
 			}catch (e:Error) {
 				trace(e);

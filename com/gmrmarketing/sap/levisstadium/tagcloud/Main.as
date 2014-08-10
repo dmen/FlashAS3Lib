@@ -8,41 +8,70 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
 		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"
-		
+		private var dict:TagCloud;//tags from the service
 		private var ra:RectFinder;
 		private var bmp:Bitmap;
+		private var tagName:String; //set in setConfig, one of: levis,offense,defense
+		
 		
 		public function Main()
-		{
-			//sample size, max font size, min font size, font colors
-			ra = new RectFinder(2, 60, 4,[0xffffff, 0xd5cda8, 0xd2c598, 0xb81f19, 0xa91511, 0x83161b, 0xc4903c, 0xc26528]);
-			ra.addEventListener(RectFinder.DICT_READY, dictLoaded);
+		{		
+			//TESTING
+			//setConfig("levis,0xFFFFFF,0xCCCCCC,0xEEB500");
 		}
 		
-		
-		private function dictLoaded(e:Event):void
-		{
-			//show();//TESTING
-			dispatchEvent(new Event(READY));
-		}
 		
 		/**
 		 * ISChedulerMethods
+		 * config is tagName, array of colors: levis,0xffffff,0xcccccc,0x678900,etc
 		 */
 		public function setConfig(config:String):void
 		{
+			var i:int = config.indexOf(",");
+			tagName = config.substring(0, i);
+			var cols:String = config.substr(i + 1);
+			var colors:Array = cols.split(",");
 			
+			ra = new RectFinder(2);
+			
+			dict = new TagCloud(2, 36, 4, tagName, colors);
+			dict.addEventListener(TagCloud.TAGS_READY, tagsLoaded, false, 0, true);
+			dict.refreshTags();
 		}
+		
 		
 		/**
 		 * ISChedulerMethods
+		 * show will be called once ready event is received
 		 */
 		public function show():void
-		{
-			var bmd:BitmapData = new BitmapData(768, 512, false, 0x000000);
+		{		
+			
+			var bmd:BitmapData = new BitmapData(768, 512, true, 0x00000000);
 			bmp = new Bitmap(bmd);
-			addChild(bmp);	
-			ra.create(bmd, new helmet());
+			addChildAt(bmp, 0);	
+			
+			var tagImage:BitmapData;
+			switch(tagName) {
+				case "levis":
+					bottomBar.theText.text = "#LevisStadium";
+					tagImage = new sap();
+					break;
+				case "offense":
+					bottomBar.theText.text = "#Offense";
+					tagImage = new helmet();
+					break;
+				case "defense":
+					bottomBar.theText.text = "#Defense";
+					tagImage = new helmet_flip();
+					break;
+				case "49ers":
+					bottomBar.theText.text = "#49ers";
+					tagImage = new helmet();
+					break;
+			}
+			
+			ra.create(bmd, tagImage, dict.getTags(), this.stage);
 		}
 		
 		/**
@@ -61,6 +90,16 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		public function doStop():void
 		{
 			ra.stop();
+		}
+		
+		/**
+		 * callback from setConfig()
+		 * @param	e
+		 */
+		private function tagsLoaded(e:Event):void
+		{
+			//show();//TESTING
+			dispatchEvent(new Event(READY));
 		}
 	}
 	

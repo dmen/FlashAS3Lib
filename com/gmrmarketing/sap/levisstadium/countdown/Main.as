@@ -14,13 +14,17 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"
 		
 		private var degToRad:Number = 0.0174532925; //PI / 180
-		private var endDate:Date;
+		private var endDate:Date; //kick off date/time set in dataLoaded
 		private var updateTimer:Timer;
 		
-		//container
+		//containers
+		private var daysClip:Sprite;
 		private var hoursClip:Sprite;
 		private var minutesClip:Sprite;
 		private var secondsClip:Sprite;		
+		
+		private var daysBase:Sprite;
+		private var daysColor:Sprite;
 		
 		private var hoursBase:Sprite;
 		private var hoursColor:Sprite;
@@ -31,6 +35,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		private var secondsBase:Sprite;
 		private var secondsColor:Sprite;
 		
+		private var daysTextClip:MovieClip;
 		private var hoursTextClip:MovieClip;
 		private var minsTextClip:MovieClip;
 		private var secsTextClip:MovieClip;
@@ -39,15 +44,15 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		private var hourRatio:Number = 60 / 360;		
 		
 		private var step:int = 0;
+		private var radius:int;
+		private var lineThickness:int;
 		
 		private var introSecs:Number = 0;//for animating the intro
 		private var introMins:Number = 0;
 		private var introHours:Number = 0;
+		private var introDays:Number = 0;		
+		private var isDays:Boolean;//true if days clip is being used		
 		
-		private var endTime:String;
-		
-		private const RADIUS:int = 90;
-		private const LINE_THICKNESS:int = 25;
 		private const BASE_COLOR:Number = 0xA5A8C6;
 		private const MAIN_COLOR:Number = 0xE5b227;
 		
@@ -62,28 +67,35 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			analogClock.scaleX = analogClock.scaleY = .5;	
 			
 			//Containers
+			daysClip = new Sprite();
 			hoursClip = new Sprite();
 			minutesClip = new Sprite();
 			secondsClip = new Sprite();
 			
-			hoursClip.x = 355;
-			hoursClip.y = 340;
-			minutesClip.x = 583;
-			minutesClip.y = 340;
-			secondsClip.x = 810;					
-			secondsClip.y = 340;					
+			//Days
+			daysBase = new Sprite();
+			daysColor = new Sprite();
+			
+			daysClip.addChild(daysBase);
+			daysClip.addChild(daysColor);
+			
+			daysTextClip = new theText();
+			daysTextClip.theLabel.text = "days";
+			daysClip.addChildAt(daysTextClip, 0);
+			daysTextClip.x = -95;
+			daysTextClip.y = -105;
+			daysTextClip.alpha = 0;
+			daysTextClip.scaleX = daysTextClip.scaleY = .1;
 			
 			//Hours
 			hoursBase = new Sprite();
 			hoursColor = new Sprite();
 			
 			hoursClip.addChild(hoursBase);
-			hoursClip.addChild(hoursColor);
-			
-			draw_arc(hoursBase.graphics, -100, -100, RADIUS, 0, 360, LINE_THICKNESS, BASE_COLOR, .6);
+			hoursClip.addChild(hoursColor);			
 			
 			hoursTextClip = new theText();
-			hoursTextClip.theLabel.text = "hours";
+			hoursTextClip.theLabel.text = "hr";
 			hoursClip.addChildAt(hoursTextClip, 0);
 			hoursTextClip.x = -95;
 			hoursTextClip.y = -105;
@@ -95,12 +107,10 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			minutesColor = new Sprite();
 			
 			minutesClip.addChild(minutesBase);
-			minutesClip.addChild(minutesColor);			
-			
-			draw_arc(minutesBase.graphics,  -100, -100, RADIUS, 0, 360, LINE_THICKNESS, BASE_COLOR, .6);
+			minutesClip.addChild(minutesColor);		
 			
 			minsTextClip = new theText();
-			minsTextClip.theLabel.text = "minutes";
+			minsTextClip.theLabel.text = "min";
 			minutesClip.addChildAt(minsTextClip, 0);
 			minsTextClip.x = -95;
 			minsTextClip.y = -105;
@@ -114,34 +124,33 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			secondsClip.addChild(secondsBase);
 			secondsClip.addChild(secondsColor);
 			
-			draw_arc(secondsBase.graphics,  -100, -100, RADIUS, 0, 360, LINE_THICKNESS, BASE_COLOR, .6);
-			
 			secsTextClip = new theText();
-			secsTextClip.theLabel.text = "seconds";
+			secsTextClip.theLabel.text = "sec";
 			secondsClip.addChildAt(secsTextClip, 0);
 			secsTextClip.x = -95;
 			secsTextClip.y = -105;
 			secsTextClip.alpha = 0;
 			secsTextClip.scaleX = secsTextClip.scaleY = .1;			
 			
-			//var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
+			//get kickoff time from the web service
 			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GetKickoffTime");
 			//r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
-			l.load(r);
-			//TESTING
-			//setConfig("3:45 PM");
-			//show();
-			//TESTING
+			l.load(r);			
 		}
 		
 		
-		//callback from web service
+		/**
+		 * Callback from webservice call
+		 * Gets the endTime which is a string like: 8/17/2014 1:00 PM
+		 * @param	e
+		 */
 		private function dataLoaded(e:Event):void
 		{
-			var t:String = String(e.currentTarget.data);
-			endTime = t.split("\"")[1]; //because quotes are in the string "1:00 PM"
+			endDate = new Date(String(e.currentTarget.data));
+			//endDate = new Date("8/8/2014 5:00 PM");
+			
 			dispatchEvent(new Event(READY));
 			
 			//show();//TESTING
@@ -149,9 +158,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		
 		
 		/**
-		 * ISChedulerMethods
-		 * Sets the time to countdown until as a string like:
-		   dispatches ready event to scheduler so it can be shown
+		 * ISChedulerMethods		 
 		 */
 		public function setConfig(config:String):void
 		{
@@ -163,6 +170,94 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		 */
 		public function show():void
 		{			
+			//calculate time delta: endDate - now
+			var now:Date = new Date();
+			var delta:Number = endDate.valueOf() - now.valueOf(); //ms
+			
+			if (delta > 0) {       
+				var secs:Number = Math.floor((delta / 1000)) - 2;//subtract 2 seconds to account for animation time
+				var mins:Number = Math.floor(secs / 60);
+				var hours:Number = Math.floor(mins / 60);
+				var days:Number = Math.floor(hours / 24);
+
+				introSecs = secs % 60; //0 - 60
+				introMins = mins % 60;
+				introHours = hours % 24;
+				introDays = days;
+				
+				var secsText:String = introSecs.toString();
+				var minsText:String = introMins.toString();
+				var hoursText:String = introHours.toString();
+				var daysText:String = introDays.toString();
+
+				if (secsText.length < 2) {secsText = "0" + secsText;}
+				if (minsText.length < 2) {minsText = "0" + minsText;}
+				if (hoursText.length < 2) { hoursText = "0" + hoursText; }
+				//if (daysText.length < 2) { daysText = "0" + daysText; }
+				
+				daysTextClip.scaler.theText.text = daysText;
+				hoursTextClip.scaler.theText.text = hoursText;
+				minsTextClip.scaler.theText.text = minsText;
+				secsTextClip.scaler.theText.text = secsText;
+				
+				introSecs *= 6; //starting angle 0-360
+				introMins *= 6;
+				introHours *= 15;
+				introDays *= 11.6; //based on max 31 days in month
+				
+				introSecs /= 20; //steps to get back to original
+				introMins /= 20;
+				introHours /= 20;
+				introDays /= 20;
+				
+				step = 0;
+			}
+			
+			radius = 90; //radius for without days clip
+			lineThickness = 25;
+			
+			if (days > 0) {
+				isDays = true;
+				theTitle.text = "Next Home Game";
+				
+				radius = 50; //smaller - when days circle is on
+				lineThickness = 14;
+				
+				addChild(daysClip);
+				daysClip.alpha = 0;
+				draw_arc(daysBase.graphics, -100, -100, radius * 1.75, 0, 360, 25, BASE_COLOR, .6);
+				
+				daysClip.x = 583;
+				daysClip.y = 320;
+				
+				hoursClip.x = 455;
+				hoursClip.y = 500;
+				
+				minutesClip.x = 583;
+				minutesClip.y = 500;
+				
+				secondsClip.x = 710;					
+				secondsClip.y = 500;
+				
+			}else {
+				//days = 0 	
+				isDays = false;				
+				
+				theTitle.text = "Kick Off Countdown";
+				
+				hoursClip.x = 355;
+				hoursClip.y = 340;
+				
+				minutesClip.x = 583;
+				minutesClip.y = 340;
+				
+				secondsClip.x = 810;					
+				secondsClip.y = 340;	
+				
+				analogClock.alpha = 0;
+				addChild(analogClock);		
+			}
+			
 			addChild(hoursClip);
 			addChild(minutesClip);
 			addChild(secondsClip);
@@ -171,65 +266,35 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			minutesClip.alpha = 0;
 			secondsClip.alpha = 0;
 			
-			analogClock.alpha = 0;
-			addChild(analogClock);			
+					
 			
-			//show the gray bg circles
+			//draw and show the gray bg circles			
+			draw_arc(hoursBase.graphics, -100, -100, radius, 0, 360, lineThickness, BASE_COLOR, .6);
+			draw_arc(minutesBase.graphics,  -100, -100, radius, 0, 360, lineThickness, BASE_COLOR, .6);
+			draw_arc(secondsBase.graphics,  -100, -100, radius, 0, 360, lineThickness, BASE_COLOR, .6);			
+			
+			daysClip.x -= 150;
+			daysClip.scaleX = daysClip.scaleY = .1;
 			hoursClip.x -= 150;
 			hoursClip.scaleX = hoursClip.scaleY = .1;
 			minutesClip.x -= 150;
 			minutesClip.scaleX = minutesClip.scaleY = .1;
 			secondsClip.x -= 150;
 			secondsClip.scaleX = secondsClip.scaleY = .1;
+			
+			TweenMax.to(daysClip, .5, { alpha:1, x:"50", scaleX:1, scaleY:1 } );
 			TweenMax.to(hoursClip, .5, { alpha:1, x:"50", scaleX:1, scaleY:1 } );
 			TweenMax.to(minutesClip, .5, { alpha:1, x:"50", scaleX:1, scaleY:1, delay:.25 } );
 			TweenMax.to(secondsClip, .5, { alpha:1, x:"50", scaleX:1, scaleY:1, delay:.5, onComplete:addListener  } );			
 			
+			TweenMax.to(daysColor, 0, { glowFilter: { color:MAIN_COLOR, alpha:1, blurX:30, blurY:30 }} );
 			TweenMax.to(secondsColor, 0, { glowFilter: { color:MAIN_COLOR, alpha:1, blurX:30, blurY:30 }} );
 			TweenMax.to(minutesColor, 0, { glowFilter: { color:MAIN_COLOR, alpha:1, blurX:30, blurY:30 }} );
 			TweenMax.to(hoursColor, 0, { glowFilter: { color:MAIN_COLOR, alpha:1, blurX:30, blurY:30 }} );			
 			
-			var now:Date = new Date();
-			var s:String = String(now.month + 1) + "/" + String(now.date) + "/" + String(now.fullYear) + " " + endTime;
-			setEndDate(new Date(s));			
-			
-			var delta:Number = endDate.valueOf() - now.valueOf(); //ms
-			
 			analogClock.theSecond.rotation = now.getSeconds() * 6;
 			analogClock.theMinute.rotation = now.getMinutes() * 6;
 			analogClock.theHour.rotation = ((now.getHours() % 12) * 30) + (now.getMinutes() * .5);
-			
-			if (delta > 0) {       
-				var secs:Number = Math.floor(delta / 1000)-2;//subtract 2 seconds to account for animation time
-				var mins:Number = Math.floor(secs / 60);
-				var hours:Number = Math.floor(mins / 60);
-
-				introSecs = secs % 60; //0 - 60
-				introMins = mins % 60;
-				introHours = hours % 24;
-				
-				var secsText:String = introSecs.toString();
-				var minsText:String = introMins.toString();
-				var hoursText:String = introHours.toString();
-
-				if (secsText.length < 2) {secsText = "0" + secsText;}
-				if (minsText.length < 2) {minsText = "0" + minsText;}
-				if (hoursText.length < 2) { hoursText = "0" + hoursText; }
-				
-				hoursTextClip.scaler.theText.text = hoursText;
-				minsTextClip.scaler.theText.text = minsText;
-				secsTextClip.scaler.theText.text = secsText;
-				
-				introSecs *= 6; //angle 0-360
-				introMins *= 6;
-				introHours *= 15;
-				
-				introSecs /= 20; //steps to get back to original
-				introMins /= 20;
-				introHours /= 20;
-				
-				step = 0;
-			}			
 		}
 		
 		/**
@@ -255,8 +320,10 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
+		
 		/**
 		 * callback from show - called by TweenMax
+		 * start the orange animating on to the start times
 		 */
 		private function addListener():void
 		{
@@ -264,6 +331,11 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		}
 		
 		
+		/**
+		 * Animates the orange drawing on in 20 steps
+		 * and then starts the updateTimer when finished
+		 * @param	e
+		 */
 		private function onEnterFrame(e:Event):void
 		{           
 			step++;
@@ -272,23 +344,25 @@ package com.gmrmarketing.sap.levisstadium.countdown
 				removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 				updateTimer.start();
 				
+			if(isDays){
+				TweenMax.to(daysTextClip, .5, { scaleX:1.2, scaleY:1.2, alpha:1, ease:Back.easeOut } );
+				TweenMax.to(secsTextClip, .5, { scaleX:.7, scaleY:.7, alpha:1, ease:Back.easeOut } );
+				TweenMax.to(minsTextClip, .5, { scaleX:.7, scaleY:.7, alpha:1, ease:Back.easeOut, delay:.25 } );
+				TweenMax.to(hoursTextClip, .5, { scaleX:.7, scaleY:.7, alpha:1, ease:Back.easeOut, delay:.5 } );
+			}else {
+				TweenMax.to(daysTextClip, .5, { scaleX:1, scaleY:1, alpha:1, ease:Back.easeOut } );
 				TweenMax.to(secsTextClip, .5, { scaleX:1, scaleY:1, alpha:1, ease:Back.easeOut } );
 				TweenMax.to(minsTextClip, .5, { scaleX:1, scaleY:1, alpha:1, ease:Back.easeOut, delay:.25 } );
 				TweenMax.to(hoursTextClip, .5, { scaleX:1, scaleY:1, alpha:1, ease:Back.easeOut, delay:.5 } );
-				
+			}				
 				TweenMax.to(analogClock, 2, { alpha:1} );
-			}else{		
-				draw_arc(secondsColor.graphics, -100, -100, RADIUS, 0, introSecs * step, LINE_THICKNESS, MAIN_COLOR);
-				draw_arc(minutesColor.graphics, -100, -100, RADIUS, 0, introMins * step, LINE_THICKNESS, MAIN_COLOR);
-				draw_arc(hoursColor.graphics, -100, -100, RADIUS, 0, introHours * step, LINE_THICKNESS, MAIN_COLOR);
+			}else {		
+				draw_arc(daysColor.graphics, -100, -100, radius*1.75, 0, introDays * step, 25, MAIN_COLOR);				
+				draw_arc(secondsColor.graphics, -100, -100, radius, 0, introSecs * step, lineThickness, MAIN_COLOR);
+				draw_arc(minutesColor.graphics, -100, -100, radius, 0, introMins * step, lineThickness, MAIN_COLOR);
+				draw_arc(hoursColor.graphics, -100, -100, radius, 0, introHours * step, lineThickness, MAIN_COLOR);
 			}
         }
-		
-		
-		public function setEndDate(ed:Date):void
-		{
-			endDate = ed;		
-		}		
 		
 		
 		private function update(e:TimerEvent):void
@@ -300,6 +374,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 				var secs:Number = Math.floor(delta / 1000);
 				var mins:Number = Math.floor(secs / 60);
 				var hours:Number = Math.floor(mins / 60);
+				var days:Number = Math.floor(hours / 24);
 
 				secs = secs % 60; //0 - 60
 				mins = mins % 60;
@@ -308,11 +383,14 @@ package com.gmrmarketing.sap.levisstadium.countdown
 				var secsText:String = secs.toString();
 				var minsText:String = mins.toString();
 				var hoursText:String = hours.toString();
+				var daysText:String = days.toString();
 
 				if (secsText.length < 2) {secsText = "0" + secsText;}
 				if (minsText.length < 2) {minsText = "0" + minsText;}
 				if (hoursText.length < 2) {hoursText = "0" + hoursText;}				
+				//if (daysText.length < 2) {daysText = "0" + daysText;}				
 				
+				daysTextClip.scaler.theText.text = daysText;
 				hoursTextClip.scaler.theText.text = hoursText;
 				minsTextClip.scaler.theText.text = minsText;
 				secsTextClip.scaler.theText.text = secsText;
@@ -321,9 +399,10 @@ package com.gmrmarketing.sap.levisstadium.countdown
 				analogClock.theMinute.rotation = now.getMinutes() * 6;
 				analogClock.theHour.rotation = ((now.getHours() % 12) * 30) + (now.getMinutes() * .5);
 				
-				draw_arc(secondsColor.graphics, -100, -100, RADIUS, 0, secs * 6, LINE_THICKNESS, MAIN_COLOR);				
-				draw_arc(minutesColor.graphics, -100, -100, RADIUS, 0, mins * 6, LINE_THICKNESS, MAIN_COLOR);		
-				draw_arc(hoursColor.graphics, -100, -100, RADIUS, 0, hours * 15, LINE_THICKNESS, MAIN_COLOR);
+				draw_arc(daysColor.graphics, -100, -100, radius*1.75, 0, days * 11.6, 25, MAIN_COLOR);				
+				draw_arc(secondsColor.graphics, -100, -100, radius, 0, secs * 6, lineThickness, MAIN_COLOR);				
+				draw_arc(minutesColor.graphics, -100, -100, radius, 0, mins * 6, lineThickness, MAIN_COLOR);		
+				draw_arc(hoursColor.graphics, -100, -100, radius, 0, hours * 15, lineThickness, MAIN_COLOR);
 			}else {
 				updateTimer.reset();
 			}

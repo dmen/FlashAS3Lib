@@ -87,9 +87,14 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 * images are only saved to the desktop if saveFolder has been defined in setSaveFolder()
 		 * 
 		 * @param	img BitmapData
-		 * @param	guidID String - guid
+		 * @param	id Interger id
+		 * 
+		 * These are only used if id is -1 - reg error
+		 * @param 	fName:String First Name
+		 * @param 	lName:String Last Name
+		 * @param 	email:String Email address
 		 */
-		public function addToQueue(img:BitmapData, id:int):void
+		public function addToQueue(img:BitmapData, id:int, fName:String = "", lName:String = "", email:String = ""):void
 		{			
 			var jpeg:ByteArray = getJpeg(img);
 			
@@ -108,8 +113,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			}
 			
 			imageString = getBase64(jpeg);		
-			
-			writeObject( { Image:imageString, RegistrantId:id } );//write object to documents folder
+			if(id != -1){
+				writeObject( { Image:imageString, RegistrantId:id } );//write object to documents folder
+			}else {
+				writeObject( { Image:imageString, RegistrantId:id, fName:fName, lName:lName, email:email } );
+			}
 			queueWait.reset();			
 			refreshQueue();	
 			dispatchEvent(new Event(ADDED));//added to the queue
@@ -139,6 +147,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				var hdr:URLRequestHeader = new URLRequestHeader("Content-type", "application/json");
 				var hdr2:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
 				
+				//TODO - if RegistrantID is -1 send fname,lname,email...
 				var js:String = JSON.stringify({ Image:ob.Image, RegistrantId:ob.RegistrantId });
 				
 				var request:URLRequest = new URLRequest(webService);

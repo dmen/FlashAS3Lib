@@ -1,4 +1,4 @@
-package com.gmrmarketing.sap.levisstadium.california
+package com.gmrmarketing.sap.levisstadium.usmap
 {
 	import flash.display.*;
 	import flash.events.*;

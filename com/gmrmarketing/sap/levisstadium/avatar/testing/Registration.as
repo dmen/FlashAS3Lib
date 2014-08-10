@@ -15,6 +15,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	{
 		public static const REG_COMPLETE:String = "registrationComplete";
 		public static const RESET:String = "registrationReset";
+		public static const REG_LOG:String = "registrationLogEntry";
 		
 		private var regEmail:MovieClip;
 		private var regConfirm:MovieClip;
@@ -32,6 +33,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private var ims:ImageService;
 		private var userID:int; //id from web service
+		private var logMessage:String;
 		
 		
 		public function Registration()
@@ -155,6 +157,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		}
 		
 		
+		public function getLogMessage():String
+		{
+			return logMessage;
+		}
+		
 		/**
 		 * Called when submit is pressed in the initial email dialog
 		 * @param	e
@@ -196,7 +203,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function emailCheckError(e:IOErrorEvent):void
 		{
-			trace("IOError:",e.toString());
+			hideLoader();
+			logMessage = "Registration.emailCheckError - userID set to -1    Error: " + e.toString();
+			dispatchEvent(new Event(REG_LOG));
+			userID = -1;
+			showFull();
 		}
 		
 		
@@ -263,6 +274,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		}
 		
 		
+		/**
+		 * Called if the user was not found in the database
+		 * Or if a network error occured checking email - in that case userID is set to -1
+		 * @param	blankEmail
+		 */
 		private function showFull(blankEmail:Boolean = false):void
 		{
 			if (container.contains(regEmail)) {
@@ -313,6 +329,12 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				regFull.errorText.theText.text = "Please enter a first and last name";
 				TweenMax.to(regFull.errorText, 2, { alpha:0, delay:2 } );
 				
+			}else if (!Validator.isValidEmail(regFull.theEmail.text)) {
+				
+				regFull.errorText.alpha = 1;
+				regFull.errorText.theText.text = "Please enter a valid email address";
+				TweenMax.to(regFull.errorText, 2, { alpha:0, delay:2 } );
+				
 			}else{
 			
 				showLoader();
@@ -342,6 +364,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function regDataSubmitted(e:Event):void
 		{
 			hideLoader();
+			
 			var json:Object = JSON.parse(e.currentTarget.data);
 			userID = json.Id;
 			
@@ -351,10 +374,17 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function regDataSubmitError(e:IOErrorEvent):void
 		{
-			
+			logMessage = "Registration.regDataSubmitError - userID set to -1    Error: " + e.toString();
+			dispatchEvent(new Event(REG_LOG));
+			userID = -1;
+			showThanks();			
 		}
 		
 		
+		/**
+		 * Shows the thanks dialog
+		 * Calls image service
+		 */
 		private function showThanks():void
 		{
 			tim.buttonClicked();
@@ -375,6 +405,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				container.addChild(regThanks);
 			}		
 			
+			//preview card image
 			if (!regThanks.contains(prev)) {
 				regThanks.addChild(prev);
 			}
@@ -389,8 +420,12 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			regThanks.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, regReset, false, 0, true);
 			
 			ims.addEventListener(ImageService.ADDED, complete, false, 0, true);
-			ims.addToQueue(fullSize, userID);
-			
+			if(userID != -1){
+				ims.addToQueue(fullSize, userID);	
+			}else {
+				//userID = -1 - error subimitting data - network down... or something
+				ims.addToQueue(fullSize, userID, regFull.theFname.text, regFull.theLname.text, regFull.theEmail.text);
+			}
 		}
 		
 		

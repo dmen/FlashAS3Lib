@@ -16,7 +16,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	import com.greensock.easing.*;
 	import com.gmrmarketing.utilities.TimeoutHelper;
 	import flash.utils.Timer;
-	
+	import flash.ui.*;
 	
 	/**
 	 * This examples does the whole job. 
@@ -100,8 +100,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			clip = new mcPreview();
 			
-			eraArray = new Array([clip.eraSelector.b14, "helm2014.zf3d"], [clip.eraSelector.b05, "helm2005.zf3d"], [clip.eraSelector.b96, "helm1996.zf3d"], [clip.eraSelector.b94, "helm1994.zf3d"], [clip.eraSelector.b84, "helm1984.zf3d"], [clip.eraSelector.b63, "helm1963.zf3d"], [clip.eraSelector.b59, "helm1959.zf3d"], [clip.eraSelector.b46, "helm1946.zf3d"]);
-			eraIndex = 0; //starts on 2014
+			eraArray = new Array([clip.eraSelector.b14, "helm2014.zf3d"], [clip.eraSelector.b05, "helm2005.zf3d"], [clip.eraSelector.b96, "helm1996.zf3d"], [clip.eraSelector.b94, "helm1994.zf3d"], [clip.eraSelector.b84, "helm1984.zf3d"], [clip.eraSelector.b63, "helm1963.zf3d"], [clip.eraSelector.b52, "helm1952.zf3d"], [clip.eraSelector.b46, "helm1946.zf3d"]);
+			eraIndex = -1; //getBackgroundYear() returns 0 if eraIndex == -1
 		}		
 		
 		
@@ -109,7 +109,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		public function hide():void
 		{
 			MovieClip(eraArray[eraIndex][0]).gotoAndPlay(10);//close current
-			eraIndex = 0;
+			eraIndex = -1;
 			
 			//super.stopVid();//call in BRFBasicView
 			if (contains(clip)) {
@@ -127,6 +127,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			//enable face estimation and pose estimation
 			//_brfManager.isEstimatingFace = true;
 			//_brfManager.deleteLastDetectedFace = false;
+			Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
 			
 			brfPaused = false;
 			introAnimStarted = true;
@@ -150,7 +151,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				clip.eraSelector.b94.rotation = 0;
 				clip.eraSelector.b84.rotation = 0;
 				clip.eraSelector.b63.rotation = 0;
-				clip.eraSelector.b59.rotation = 0;
+				clip.eraSelector.b52.rotation = 0;
 				clip.eraSelector.b46.rotation = 0;
 				
 				clip.eraSelector.b14.gotoAndStop(1);
@@ -159,7 +160,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				clip.eraSelector.b94.gotoAndStop(1);
 				clip.eraSelector.b84.gotoAndStop(1);
 				clip.eraSelector.b63.gotoAndStop(1);
-				clip.eraSelector.b59.gotoAndStop(1);
+				clip.eraSelector.b52.gotoAndStop(1);
 				clip.eraSelector.b46.gotoAndStop(1);
 				
 				clip.btnTakePhoto.y = 1128;
@@ -357,9 +358,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function camUp(e:MouseEvent):void
 		{
 			camEvent = CAM_UP;
-			tim.buttonClicked();			
-			clip.stage.addEventListener(MouseEvent.MOUSE_UP, camStop, false, 0, true);
-			clip.stage.addEventListener(Event.ENTER_FRAME, moveCam, false, 0, true);			
+			tim.buttonClicked();	
+			dispatchEvent(new Event(camEvent));
+			
+			clip.stage.addEventListener(MouseEvent.MOUSE_UP, camStop, false, 0, true);		
 		}
 		
 		
@@ -367,19 +369,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{
 			camEvent = CAM_DOWN;
 			tim.buttonClicked();
-			clip.stage.addEventListener(MouseEvent.MOUSE_UP, camStop, false, 0, true);
-			clip.stage.addEventListener(Event.ENTER_FRAME, moveCam, false, 0, true);			
-		}
-		
-		
-		/**
-		 * runs on enter frame once a cam button is depressed
-		 * dispatches the camEvent set in camUp() or camDown()
-		 * @param	e ENTER_FRAME event
-		 */
-		private function moveCam(e:Event):void
-		{
 			dispatchEvent(new Event(camEvent));
+			
+			clip.stage.addEventListener(MouseEvent.MOUSE_UP, camStop, false, 0, true);		
 		}
 		
 		
@@ -391,7 +383,6 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function camStop(e:Event):void
 		{
 			clip.stage.removeEventListener(MouseEvent.MOUSE_UP, camStop);
-			clip.stage.removeEventListener(Event.ENTER_FRAME, moveCam);
 			dispatchEvent(new Event(CAM_STOP));
 		}
 		
@@ -410,7 +401,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				TweenMax.to(clip.eraSelector.b94, rTime, { rotation:"-45" } );
 				TweenMax.to(clip.eraSelector.b84, rTime, { rotation:"-45" } );
 				TweenMax.to(clip.eraSelector.b63, rTime, { rotation:"-45" } );
-				TweenMax.to(clip.eraSelector.b59, rTime, { rotation:"-45" } );
+				TweenMax.to(clip.eraSelector.b52, rTime, { rotation:"-45" } );
 				TweenMax.to(clip.eraSelector.b46, rTime, { rotation:"-45", onComplete:eraRotationComplete } );
 				
 				MovieClip(eraArray[eraIndex][0]).gotoAndPlay(10);//close current
@@ -438,7 +429,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				TweenMax.to(clip.eraSelector.b94, rTime, { rotation:"+45" } );
 				TweenMax.to(clip.eraSelector.b84, rTime, { rotation:"+45" } );
 				TweenMax.to(clip.eraSelector.b63, rTime, { rotation:"+45" } );
-				TweenMax.to(clip.eraSelector.b59, rTime, { rotation:"+45" } );
+				TweenMax.to(clip.eraSelector.b52, rTime, { rotation:"+45" } );
 				TweenMax.to(clip.eraSelector.b46, rTime, { rotation:"+45", onComplete:eraRotationComplete } );
 				
 				MovieClip(eraArray[eraIndex][0]).gotoAndPlay(10); //close current
@@ -467,7 +458,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 */
 		public function getBackgroundYear():String
 		{
-			return String(eraArray[eraIndex][1]).substr(4, 4);
+			if (eraIndex == -1) {
+				return "0"
+			}else{
+				return String(eraArray[eraIndex][1]).substr(4, 4);
+			}
 		}
 		
 		
@@ -475,6 +470,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{
 			var l:Loader = new Loader();
 			l.contentLoaderInfo.addEventListener(Event.COMPLETE, jerseyLoaded, false, 0, true);
+			trace(jerseyPath + "jersey" + String(eraArray[eraIndex][1]).substr(4, 4) + ".png");
 			l.load(new URLRequest(jerseyPath + "jersey" + String(eraArray[eraIndex][1]).substr(4,4) + ".png"));			
 		}
 		

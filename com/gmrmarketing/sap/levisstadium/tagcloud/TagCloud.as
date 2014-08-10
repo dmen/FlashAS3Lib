@@ -2,6 +2,7 @@
  * Mananges the tags returned from the web service
  * Gets the tags and then creates the tags array
  */
+
 package com.gmrmarketing.sap.levisstadium.tagcloud
 {
 	import flash.display.*;
@@ -13,8 +14,10 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 	
 	public class TagCloud extends EventDispatcher
 	{
-		public static const TAGS_READY:String = "tagsLoaded";
+		public static const TAGS_READY:String = "tagsLoaded";//dispatched from tagsLoaded() after a call to refreshTags()
+		
 		private var tags:Array; //array of objects with name and value properties (fontSize property added in tagsLoaded())
+		
 		private var tagIndex:int = 0; //index of current tag in tags
 		private var totalTagCount:int; //total of all value properties in the tags array
 		
@@ -22,7 +25,8 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		private var vText:MovieClip;
 		private var sampleSize:int;//used by measure() to return the size in grid units of each word image
 		
-		private var tagColors:Array;
+		private var tagName:String; //from config.xml one of: levis,offense,defense,49ers
+		private var tagColors:Array; //from config.xml
 		private var colorDec:int;
 		private var colorIndex:int;
 		private var currColor:int;
@@ -33,14 +37,22 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		private var minFont:int;
 		
 		
-		public function TagCloud(ss:int, maxFontSize:int, minFontSize:int, colors:Array)
+		/**
+		 * Constructor
+		 * @param	ss The sample size - smaller is finer detail but takes longer
+		 * @param	maxFontSize
+		 * @param	minFontSize
+		 * @param	name one of: levis,offense,defense,49ers
+		 * @param	colors
+		 */
+		public function TagCloud(ss:int, maxFontSize:int, minFontSize:int, name:String, colors:Array)
 		{
 			sampleSize = ss;
 			maxFont = maxFontSize;
 			minFont = minFontSize;
 			
+			tagName = name;
 			tagColors = colors;			
-			//tagColors = [0x000000];			
 			hText = new mcHText();//lib
 			vText = new mcVText();//lib	
 			tags = new Array();		
@@ -76,12 +88,42 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		
 		
 		/**
+		 * Returns the tags array
+		 * @return Array all tags
+		 */
+		public function getTags():Array
+		{
+			return tags;
+		}
+		
+		
+		/**
 		 * Refreshes the tags array
+		 * 	GetTags49ers              (general word cloud for #49ers)
+			GetTagsOffense            (…same but for Offense)
+			GetTagsDefense            (…same but for Defense)
+			GetTagsStadium			  (word cloud for Levi’s Stadium)
 		 */
 		public function refreshTags():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/Api/Netbase/GetTags49ers");
+			var r:URLRequest;
+			
+			switch(tagName) {
+				case "49ers":
+					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTags49ers");
+					break;
+				case "levis":
+					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsStadium");
+					break;
+				case "offense":
+					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsOffense");
+					break;
+				case "defense":
+					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsDefense");
+					break;
+			}
+			
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, tagsLoaded, false, 0, true);
@@ -104,8 +146,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			for (var i:int = 0; i < tags.length; i++) {				
 				
 				//normalize value using a logarithm
-				tags[i].value = Math.log(tags[i].value);
-				
+				tags[i].value = Math.log(tags[i].value);				
 				totalTagCount += tags[i].value;
 			}
 			
@@ -122,9 +163,11 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			
 			for (i = 0; i < tags.length; i++) {				
 				//tags[i].fontSize = Math.max(12, Math.round(((tags[i].value / totalTagCount) * 100) * fontRatio));
-				tags[i].fontSize = Math.max(minFont, Math.round(maxFont - fontRatio * i));				
+				tags[i].fontSize = Math.max(minFont, Math.round(maxFont - fontRatio * i));	
+				//trace(tags[i].fontSize );
 				measure(tags[i]);//passed by reference so tag in array is modified by measure()
 			}
+			
 			dispatchEvent(new Event(TAGS_READY));
 		}
 		

@@ -1,13 +1,14 @@
 package com.gmrmarketing.sap.levisstadium.california
 {
 	import flash.display.*;
+	import flash.filters.DropShadowFilter;
 	import flash.geom.Point;
 	import flash.net.*;
 	import flash.events.*;
 	import com.gmrmarketing.sap.levisstadium.ISchedulerMethods;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
-	
+	import com.gmrmarketing.utilities.Utility;
 	
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
@@ -25,7 +26,7 @@ package com.gmrmarketing.sap.levisstadium.california
 			tweets = new Array();
 			
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/calimapsentiment");
+			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=CaliMapSentiment");
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -54,7 +55,7 @@ package com.gmrmarketing.sap.levisstadium.california
 			var del:Number = 0;
 			for (var j:int = 0; j < tweets.length; j++) {
 				addLoc(tweets[j].lat, Math.abs(tweets[j].lon), tweets[j].normalized, del);
-				del += .2;
+				del += .5;
 			}
 			
 			tweetManager = new TweetManager();//gets text tweets and starts to display them
@@ -77,15 +78,23 @@ package com.gmrmarketing.sap.levisstadium.california
 		public function doStop():void
 		{
 			if (contains(dots)) {
-				removeChild(dots);//lat/lon dots on map
+				TweenMax.to(dots, .5, { alpha:0, onComplete:killDots } );//lat/lon dots on map
 			}
 			if (contains(textContainer)) {
-				removeChild(textContainer);//twitter text
+				TweenMax.to(textContainer, .5, { alpha:0, onComplete:killText } );//twitter text
 			}
 			
 			tweetManager.stop();
 		}
 		
+		private function killDots():void
+		{
+			removeChild(dots)
+		}
+		private function killText():void
+		{
+			removeChild(textContainer);
+		}
 		
 		
 		/**
@@ -101,7 +110,8 @@ package com.gmrmarketing.sap.levisstadium.california
 			}
 			
 			normalize();
-			tweets.reverse();//draw smaller first
+			//tweets.reverse();//draw smaller first
+			tweets = Utility.randomizeArray(tweets);
 			
 			//show();//TESTING
 			dispatchEvent(new Event(READY));			
@@ -154,17 +164,18 @@ package com.gmrmarketing.sap.levisstadium.california
 			if(weight < .2){
 				dot = new dotGray();
 				w = 7 * weight;
-				a = .6 + Math.random() * .2; //.6 - .8
+				a = .2 + Math.random() * .6; //.7 - .9
 			}else if (weight < .35) {
 				dot = new dotOrange();
 				w = weight;
-				a = .4 + Math.random() * .2; //.4 - .6
+				a = .5 + Math.random() * .2; //.5 - .7
 			}else {
 				dot = new dotBlue();
 				w = weight;
-				a = .25 + Math.random() * .3; //.25 - .55
+				a = .5 + Math.random() * .2; //.4 - .6
 			}
-			
+			a = .3 + Math.random() * .6; //.7 - .9
+			dot.filters = [new DropShadowFilter(0, 0, 0x000000, .5, 5, 5)];
 			var p:Point = latLonToXY(lat, lon);
 			dot.x = p.x;
 			dot.y = p.y;
@@ -173,24 +184,32 @@ package com.gmrmarketing.sap.levisstadium.california
 			dots.addChild(dot);
 			
 			TweenMax.to(dot, 1, { alpha:a, scaleX:w, scaleY:w, delay:del, ease:Elastic.easeOut } );
-		}		
+		}
 		
 		
+		/**
+		 * latitude is east/west - extents are 124.5º - 114.25º - pixel extents are 279 - 609
+		 * longitude is north/south extents are 32.5º - 42º - pixel extents are 123 - 477
+		 * 
+		 * @param	lat
+		 * @param	lon
+		 * @return
+		 */
 		private function latLonToXY(lat:Number, lon:Number):Point
 		{
-			//latitude: northern extent of cali is 42.0º
-			//longitude: western extent is 124.
+			//latitude: northern extent of cali is 42.0º - 123 pixels - southern is 32.5 - 477 pixels
+			//longitude: western extent is 124.5 - 279 pixels - eastern is 114.25 - 609 pixels
 			
 			var latDelta:Number = 42.0 - lat;
-			var lonDelta:Number = 124.41 - lon;
+			var lonDelta:Number = 124.5 - lon;
 			
-			var latMultiplier:Number = 50.1054; //pixel extents / degree extents
-			var lonMultiplier:Number = 43.0232;
+			var latMultiplier:Number = 37.263157; //pixel extents / degree extents (477 - 123)/(42 - 32.5) = 354 / 9.5
+			var lonMultiplier:Number = 32.195121; // (609-279) / (124.5 - 114.25) = 330 / 10.25
 			
-			var tx:Number = 164 + (lonDelta * lonMultiplier); //left edge of cali at 164 on stage
-			var ty:Number = 16 + (latDelta * latMultiplier); //top of cali at 16 on stage
+			var tx:Number = 279 + (lonDelta * lonMultiplier); //left edge of cali at 279 on stage
+			var ty:Number = 123 + (latDelta * latMultiplier); //top of cali at 123 on stage
 			
-			return new Point(tx, ty);
+			return new Point(tx,ty);
 		}
 				
 	}

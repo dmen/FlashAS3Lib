@@ -18,10 +18,13 @@
 	var b:ByteArray = new ByteArray();	
 	b.writeByte(10);
 	serproxyConnector.send(b);
+	
+	
 */
 
 package com.gmrmarketing.utilities
 {	
+	import adobe.utils.CustomActions;
 	import flash.net.Socket;
 	import flash.utils.*;
 	import flash.events.*;
@@ -32,9 +35,12 @@ package com.gmrmarketing.utilities
 		public static const CONNECTED:String = "Connection with Serproxy established";
 		public static const SENT:String = "Message sent";
 		public static const SER_ERROR:String = "Error:Check that SerProxy is running";
+		public static const SER_LOG:String = "log message";
 		
 		private var socket:Socket;
 		private var socketConnected:Boolean;//true if connected to serproxy
+		
+		private var logMessage:String = "";
 		
 
 		public function SerProxy_Connector()
@@ -46,6 +52,8 @@ package com.gmrmarketing.utilities
 			socket.addEventListener(Event.CLOSE, closed);			
 			
 			socketConnected = false;
+			
+			log("Serproxy Constructor");
 		}
 
 		
@@ -53,7 +61,7 @@ package com.gmrmarketing.utilities
 		 * Connects to SerProxy if the socket is not connected
 		 * Disconnects if the socket is already connected
 		 * 
-		 * @param	localhost IP address of localHost normally 127.0.0.1
+		 * @param	localhost IP address of serproxy server
 		 * @param	port Port SerProxy is configured to use. Set in serproxy.cfg like: net_port1=5331
 		 */
 		public function connect(localHost:String = "127.0.0.1", port:int = 5331):void
@@ -62,14 +70,16 @@ package com.gmrmarketing.utilities
 				try{
 					socket.close();
 				}catch (e:Error) {
-					
+					log("Serproxy.connect - Catch error - socket connected: " + e.message);
 				}
+				log("Serproxy.connect - socket was connected, now closed.");
 			}else {
 				try{
 					socket.connect(localHost, port);
 				}catch (e:Error) {
-					
+					log("Serproxy.connect - Catch error - socket not connected: " + e.message);
 				}
+				log("Serproxy.connect - socket not connected - trying to connect.");
 			}
 		}
 		
@@ -88,8 +98,20 @@ package com.gmrmarketing.utilities
 				socket.writeBytes(ba);
 				socket.flush();  
 			}catch (e:Error) {
-				
+				log("Serproxy.send - Catch error - cannot send: " + e.errorID);
 			}
+		}
+		
+		
+		public function getLogMessage():String
+		{
+			return logMessage;
+		}
+		
+		private function log(m:String):void
+		{
+			logMessage = m;
+			dispatchEvent(new Event(SER_LOG));
 		}
 		
 		
@@ -97,6 +119,7 @@ package com.gmrmarketing.utilities
 		{
 			socketConnected = true;
 			dispatchEvent(new Event(CONNECTED));
+			log("Serproxy.connected - Event - socket is connected");
 		}
 
 		
@@ -108,14 +131,33 @@ package com.gmrmarketing.utilities
 		
 		private function onError(e:IOErrorEvent):void 
 		{ 
+			log("Serproxy.onError - IOErrorEvent - socket error" + e.toString());			
+			recon();
 			dispatchEvent(new Event(SER_ERROR));
 		}
 
 		
 		private function closed(e:Event):void 
 		{
-			socketConnected = false;
+			log("Serproxy.closed - Event - socket has been closed");
+			recon();
 			dispatchEvent(new Event(CLOSED));
+		}
+		
+		
+		private function recon():void
+		{
+			log("Serproxy.recon - reconnecting in 1 sec");
+			var a:Timer = new Timer(1000, 1);
+			a.addEventListener(TimerEvent.TIMER, reconnect, false, 0, true);
+			a.start();
+		}
+		
+		
+		private function reconnect(e:TimerEvent):void
+		{
+			socketConnected = false;			
+			connect();
 		}
 
 	}
