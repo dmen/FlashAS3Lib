@@ -55,7 +55,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			var favorQuadrant1:Boolean;
 			
 			for (var i:int = 0; i < json.length; i++) {
-				if(json[i].latitude <= 42 && json[i].latitude > 32 && Math.abs(json[i].longitude) > 114 && Math.abs(json[i].longitude) < 125){
+				//if(json[i].latitude <= 42 && json[i].latitude > 32 && Math.abs(json[i].longitude) > 114 && Math.abs(json[i].longitude) < 125){
 					p = latLonToXY(json[i].latitude, Math.abs(json[i].longitude));	
 					m = Strings.removeLineBreaks(json[i].text);
 					m = Strings.removeChunk(m, "http://");
@@ -64,7 +64,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 						favorQuadrant1 = true;
 					}
 					tweets.push( { user:"@" + json[i].authorname, message:m, theY:p.y, theX:p.x, favor1:favorQuadrant1, pic:json[i].profilepicURL } );
-				}
+				//}
 			}
 			
 			//show tweets in both quadrants
@@ -119,20 +119,27 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			displayNext();
 		}
 		
-		
+		/**
+		 * Latitude is North/South
+		 * Longitude is East/West
+		 * 
+		 * @param	lat
+		 * @param	lon
+		 * @return
+		 */
 		private function latLonToXY(lat:Number, lon:Number):Point
 		{
-			//latitude: northern extent of cali is 42.0º - 123 pixels - southern is 32.5 - 477 pixels
-			//longitude: western extent is 124.5 - 279 pixels - eastern is 114.25 - 609 pixels
+			//latitude: northern extent of wash is 48.0º - 192 pixels - southern is 25º - 467 pixels
+			//longitude: western extent is 124.5º - 80 pixels - eastern is 66º - 638 pixels
 			
-			var latDelta:Number = 42.0 - lat;
+			var latDelta:Number = 48.0 - lat;
 			var lonDelta:Number = 124.5 - lon;
 			
-			var latMultiplier:Number = 37.263157; //pixel extents / degree extents (477 - 123)/(42 - 32.5) = 354 / 9.5
-			var lonMultiplier:Number = 32.195121; // (609-279) / (124.5 - 114.25) = 330 / 10.25
+			var latMultiplier:Number = 11.956521; //pixel extents / degree extents (467 - 192)/(48 - 25) = 275 / 23
+			var lonMultiplier:Number = 9.5384615; // (638 - 80) / (124.5 - 66) = 558 / 58.5
 			
-			var tx:Number = 279 + (lonDelta * lonMultiplier); //left edge of cali at 279 on stage
-			var ty:Number = 123 + (latDelta * latMultiplier); //top of cali at 123 on stage
+			var tx:Number = 80 + (lonDelta * lonMultiplier); //left edge of cali at 279 on stage
+			var ty:Number = 192 + (latDelta * latMultiplier); //top of cali at 123 on stage
 			
 			return new Point(tx,ty);
 		}

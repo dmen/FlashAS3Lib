@@ -85,6 +85,7 @@ package com.gmrmarketing.sap.levisstadium.california
 			}
 			
 			tweetManager.stop();
+			tweetManager = null;
 		}
 		
 		private function killDots():void

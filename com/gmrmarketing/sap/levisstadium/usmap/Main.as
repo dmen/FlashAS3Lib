@@ -38,6 +38,10 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		private var stateGray:Array;
 		private var stateGrayIndex:int;
 		
+		private var tweetManager:TweetManager; //manages getting and displaying the text tweets
+		private var textContainer:Sprite;
+		
+		
 		
 		public function Main()
 		{
@@ -46,7 +50,10 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			_scene.antialias = 8;
 			//_scene.pause();
 			
-			grays = new Array(0x181818, 0x222222, 0x333333, 0x404040, 0x4a4a4a);
+			//default coloring of all states - before sentiment colors are applied
+			grays = new Array(0x141414, 0x181818, 0x202020, 0x242424, 0x282828, 0x303030, 0x343434, 0x383838, 0x404040, 0x484848, 0x505050, 0x585858, 0x606060, 0x686868);
+			
+			//SAP grays - for the low value states so grays don't match each other
 			stateGray = new Array(0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee);
 			
 			videoData = new BitmapData(768, 512, false, 0x000000);
@@ -57,6 +64,8 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			_videoPlaneMaterial = new Shader3D("_videoPlaneMaterial", [new TextureMapFilter(_videoPlaneTexture)], false);
 			_videoPlaneMaterial.twoSided = false;
 			_videoPlaneMaterial.build();
+			
+			textContainer = new Sprite();
 			
 			map = _scene.addChildFromFile("usmap4.zf3d");
 			_scene.addEventListener( Scene3D.COMPLETE_EVENT, mapLoaded );
@@ -76,6 +85,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
+			l.addEventListener(IOErrorEvent.IO_ERROR, dataError, false, 0, true);
 			try{
 				l.load(r);
 			}catch (e:Error) {
@@ -107,6 +117,17 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		}
 		
 		
+		private function dataError(e:IOErrorEvent):void
+		{
+			
+		}
+		
+		
+		
+		/**
+		 * Called once the call to USMapSentiment has processed
+		 * @param	e
+		 */
 		private function dataLoaded(e:Event):void
 		{
 			stateGrayIndex = 0;
@@ -125,46 +146,25 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			
 			normalize();
 			sentiment.reverse();
-			
-			for (i = 0; i < sentiment.length; i++) {
-				var t:Pivot3D = _scene.getChildByName(sentiment[i].name);
-				TweenMax.to(t, 1, { scaleZ:sentiment[i].normalized, delay:.5 * i, ease:Bounce.easeOut } );
-				
-				materialRef = _scene.getMaterialByName( String(sentiment[i].name).toLowerCase() ) as Shader3D;
-				if (materialRef) {
-					if(sentiment[i].normalized < 6){
-						materialRef.filters[0].color = stateGray[stateGrayIndex];//gray
-						stateGrayIndex++;
-						if (stateGrayIndex >= stateGray.length) {
-							stateGrayIndex = 0;
-						}
-					}else if (sentiment[i].normalized < 13) {
-						materialRef.filters[0].color = 0xeeb400;//orange
-					}else {
-						materialRef.filters[0].color = 0x008fd3;//blue
-					}
-				}
-			}
-			
-			
-			addEventListener(Event.ENTER_FRAME, videoUpdate, false, 0, true);
-			
-			//slowly rotate map up and left - toward Cali
-			TweenMax.to(rotOb, 15, { mapRotX: -115, mapRotY:-10, onUpdate:setMapRotation, onComplete:toFlorida} );
-			//TweenMax.to(_scene.camera, 22, { fieldOfView:70} );			
+			show();//TESTING
+			dispatchEvent(new Event(READY));//will call show() 
 		}
+		
 		
 		private function toFlorida():void
 		{
 			//slowly rotate map up and left - toward Cali
-			TweenMax.to(rotOb, 20, {mapRotX:-100, mapRotY:5, onUpdate:setMapRotation} );
+			TweenMax.to(rotOb, 20, {mapRotX:-105, onUpdate:setMapRotation} );
 			//TweenMax.to(_scene.camera, 25, { fieldOfView:65} );	
 		}
+		
 		
 		private function setMapRotation():void
 		{
 			usa.setRotation(rotOb.mapRotX, rotOb.mapRotY,  rotOb.mapRotZ);
 		}
+		
+		
 		/*
 		private function setCameraRotation():void
 		{
@@ -181,12 +181,14 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			_videoPlaneTexture.uploadTexture();
 		}
 		
+		
 		/*
 			var b:BitmapData = new BitmapData(64, 64, false, color);
 			var t:Texture3D = new Texture3D();
 			t.bitmapData = b;
 			maskShader.filters[0].texture = t;
 		*/
+			
 		
 		/**
 		 * Uses Math.log to first smooth the data, then does a linear
@@ -246,7 +248,38 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		 */
 		public function show():void
 		{
-		
+			if (!contains(textContainer)) {
+				addChild(textContainer);
+			}
+			tweetManager = new TweetManager();//gets text tweets and starts to display them in textContainer
+			tweetManager.setContainer(textContainer);
+			
+			for (var i:int = 0; i < sentiment.length; i++) {
+				var t:Pivot3D = _scene.getChildByName(sentiment[i].name);
+				TweenMax.to(t, 1, { scaleZ:sentiment[i].normalized, delay:.5 * i, ease:Bounce.easeOut } );
+				
+				materialRef = _scene.getMaterialByName( String(sentiment[i].name).toLowerCase() ) as Shader3D;
+				if (materialRef) {
+					if(sentiment[i].normalized < 6){
+						materialRef.filters[0].color = stateGray[stateGrayIndex];//gray
+						stateGrayIndex++;
+						if (stateGrayIndex >= stateGray.length) {
+							stateGrayIndex = 0;
+						}
+					}else if (sentiment[i].normalized < 13) {
+						materialRef.filters[0].color = 0xeeb400;//orange
+					}else {
+						materialRef.filters[0].color = 0x008fd3;//blue
+					}
+				}
+			}
+			
+			
+			addEventListener(Event.ENTER_FRAME, videoUpdate, false, 0, true);
+			
+			//slowly rotate map up and left - toward Cali
+			TweenMax.to(rotOb, 25, { mapRotX: -115, mapRotY:-10, onUpdate:setMapRotation, onComplete:toFlorida} );
+			//TweenMax.to(_scene.camera, 22, { z:70} );			
 		}
 		
 		
@@ -264,7 +297,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		 */
 		public function doStop():void
 		{
-			
+			removeEventListener(Event.ENTER_FRAME, videoUpdate);
 		}
 	}
 	

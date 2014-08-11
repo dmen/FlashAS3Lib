@@ -103,8 +103,8 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			
 			switch(quadrant) {
 				case 1:
-					clip.x = 28 + Math.random() * 10;
-					clip.y = 310 + Math.random() * 10;
+					clip.x = 100 + Math.random() * 10;
+					clip.y = 150 + Math.random() * 10;
 					break;
 				case 2:
 					clip.x = 485 + Math.random() * 10;
@@ -131,12 +131,12 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			lineContainer.graphics.moveTo(drawToX, drawToY);
 			tweenOb.x = drawToX;
 			tweenOb.y = drawToY;
-			if (myQuadrant == 2) {
+			//if (myQuadrant == 2) {
 				//point on the left of the tweet	
 				TweenMax.to(tweenOb, .25, { x:0, y:-22, onUpdate:drawLine, delay:.75, ease:Linear.easeNone, onComplete:drawTweetBox} );						
-			}else {			
-				TweenMax.to(tweenOb, .25, { x:rectWidth, y: -22, onUpdate:drawLine, delay:.75, ease:Linear.easeNone, onComplete:drawTweetBox } );			
-			}	
+			//}else {			
+				//TweenMax.to(tweenOb, .25, { x:rectWidth, y: -22, onUpdate:drawLine, delay:.75, ease:Linear.easeNone, onComplete:drawTweetBox } );			
+			//}	
 		}
 		
 		
@@ -161,7 +161,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			
 			var m:Matrix = new Matrix();
 			m.createGradientBox(rectWidth, clip.theText.theText.textHeight + 15, 1.5707963);//the 1.57...PI/2 radians - 90º
-			g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xc0c0c0], [1,1], [20, 255], m);
+			g.beginGradientFill(GradientType.LINEAR, [0xffffff, 0xc8c8c8], [.88,.88], [20, 255], m);
 			g.drawRoundRect(0, 0, rectWidth, clip.theText.theText.textHeight + 15, 18, 18);
 			g.endFill()			
 			

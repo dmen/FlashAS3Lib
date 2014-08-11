@@ -114,9 +114,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			imageString = getBase64(jpeg);		
 			if(id != -1){
-				writeObject( { Image:imageString, RegistrantId:id } );//write object to documents folder
+				writeObject( { Image:imageString, RegistrantId:id, FirstName:"", LastName:"", Email:"" } );//write object to documents folder
 			}else {
-				writeObject( { Image:imageString, RegistrantId:id, fName:fName, lName:lName, email:email } );
+				writeObject( { Image:imageString, RegistrantId:id, FirstName:fName, LastName:lName, Email:email } );
 			}
 			queueWait.reset();			
 			refreshQueue();	
@@ -145,10 +145,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				stream = null;					
 				
 				var hdr:URLRequestHeader = new URLRequestHeader("Content-type", "application/json");
-				var hdr2:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-				
-				//TODO - if RegistrantID is -1 send fname,lname,email...
-				var js:String = JSON.stringify({ Image:ob.Image, RegistrantId:ob.RegistrantId });
+				var hdr2:URLRequestHeader = new URLRequestHeader("Accept", "application/json");				
+				var js:String = JSON.stringify( { Image:ob.Image, RegistrantId:ob.RegistrantId, FirstName:ob.FirstName, LastName:ob.LastName, Email:ob.Email } );
 				
 				var request:URLRequest = new URLRequest(webService);
 				request.data = js;
