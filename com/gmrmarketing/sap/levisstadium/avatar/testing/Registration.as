@@ -35,6 +35,14 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var userID:int; //id from web service
 		private var logMessage:String;
 		
+		private var timeout:Timer;
+		private var notMe:Boolean = false; //if true user entered an email, and said 'no this is not me'
+		
+		//loaders so they can be canceled if a network timeout occurs
+		private var emailLoader:URLLoader;
+		private var fullRegLoader:URLLoader;
+		
+		
 		
 		public function Registration()
 		{
@@ -45,6 +53,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			loaderSprite = new Sprite();
 			
 			tim = TimeoutHelper.getInstance();
+			timeout = new Timer(10000, 1);
 			
 			ims = new ImageService();
 			ims.setServiceURL("http://sap49ersapi.thesocialtab.net/Api/Registrant/SubmitAvatar");
@@ -100,13 +109,16 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			regEmail.errorText.alpha = 0;
 			regEmail.btnSubmit.addEventListener(MouseEvent.MOUSE_DOWN, emailSubmit, false, 0, true);
 			regEmail.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, regReset, false, 0, true);
+			regEmail.btnClose2.addEventListener(MouseEvent.MOUSE_DOWN, regReset, false, 0, true);
 			
 			container.addChild(kbd);
 			kbd.setFocusFields([regEmail.theEmail]);
 			kbd.y = 900;
 			kbd.alpha = 0;
 			kbd.addEventListener(KeyBoard.KBD, keyPressed, false, 0, true);
-			kbd.addEventListener(KeyBoard.SUBMIT, emailSubmit, false, 0, true);			
+			kbd.addEventListener(KeyBoard.SUBMIT, emailSubmit, false, 0, true);
+			
+			timeout.addEventListener(TimerEvent.TIMER, networkTimeoutEmail);
 			
 			TweenMax.to(regEmail, 1, { alpha:1 } );
 			TweenMax.to(kbd, 1, { alpha:1, y:730, delay:1, ease:Back.easeOut } );
@@ -134,7 +146,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			regFull.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, fullRegSubmit);
 			
 			regEmail.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
+			regEmail.btnClose2.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
 			regFull.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
+			regFull.btnClose2.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
 			regConfirm.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
 			regThanks.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
 			
@@ -171,6 +185,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			var em:String = regEmail.theEmail.text;
 			tim.buttonClicked();
 			
+			notMe = false;//true if user presses not me in confirmation dialog
+			
 			if(Validator.isValidEmail(em)){
 			
 				regEmail.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, emailSubmit);
@@ -188,10 +204,13 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				
 				req.data = vars;
 				
-				var lo:URLLoader = new URLLoader();
-				lo.addEventListener(IOErrorEvent.IO_ERROR, emailCheckError, false, 0, true);
-				lo.addEventListener(Event.COMPLETE, emailCheckComplete, false, 0, true);
-				lo.load(req);	
+				timeout.reset();
+				timeout.start(); //will call networkTimeoutEmail() in 10 sec if not stopped
+				
+				emailLoader = new URLLoader();
+				emailLoader.addEventListener(IOErrorEvent.IO_ERROR, emailCheckError, false, 0, true);
+				emailLoader.addEventListener(Event.COMPLETE, emailCheckComplete, false, 0, true);
+				emailLoader.load(req);	
 				
 			}else {
 				regEmail.errorText.alpha = 1;
@@ -203,6 +222,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function emailCheckError(e:IOErrorEvent):void
 		{
+			timeout.reset(); //stop networkTimeout() from being called
 			hideLoader();
 			logMessage = "Registration.emailCheckError - userID set to -1    Error: " + e.toString();
 			dispatchEvent(new Event(REG_LOG));
@@ -211,8 +231,20 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		}
 		
 		
+		private function networkTimeoutEmail(e:TimerEvent):void
+		{			
+			hideLoader();
+			emailLoader.close();//prevent complete or error from being called
+			logMessage = "Registration.networkTimeout - userID set to -1    Error: " + e.toString();
+			dispatchEvent(new Event(REG_LOG));
+			userID = -1;
+			showFull();
+		}
+		
+		
 		private function emailCheckComplete(e:Event):void
 		{
+			timeout.reset(); //stop networkTimeout() from being called
 			hideLoader();
 			var json:Object = JSON.parse(e.currentTarget.data);
 			if (json.Id != undefined) {
@@ -270,7 +302,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			regConfirm.btnYes.removeEventListener(MouseEvent.MOUSE_DOWN, confirmYes);
 			regConfirm.btnNo.removeEventListener(MouseEvent.MOUSE_DOWN, confirmNo);
 			regConfirm.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, regReset);
-			showFull(true);
+			notMe = true;
+			showFull();
 		}
 		
 		
@@ -279,8 +312,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 * Or if a network error occured checking email - in that case userID is set to -1
 		 * @param	blankEmail
 		 */
-		private function showFull(blankEmail:Boolean = false):void
+		private function showFull(mess:String = ""):void
 		{
+			hideLoader();
+			timeout.removeEventListener(TimerEvent.TIMER, networkTimeoutEmail);
+			
 			if (container.contains(regEmail)) {
 				container.removeChild(regEmail);
 			}
@@ -289,17 +325,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				container.addChild(regFull);
 			}
 			regFull.errorText.alpha = 1;
-			regFull.alpha = 0;
-			regFull.theFname.text = "";
-			regFull.theLname.text = "";
-			if (blankEmail) {
-				regFull.theEmail.text = "";//user answered 'no' this isn't me... odd
-			}else{
-				regFull.theEmail.text = regEmail.theEmail.text; //pre-pop with what was entered in email dialog
-			}
+			regFull.alpha = 0;			
 			
 			regFull.btnSubmit.addEventListener(MouseEvent.MOUSE_DOWN, fullRegSubmit, false, 0, true);
 			regFull.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, regReset, false, 0, true);
+			regFull.btnClose2.addEventListener(MouseEvent.MOUSE_DOWN, regReset, false, 0, true);
 			
 			if(!container.contains(kbd)){
 				container.addChild(kbd);				
@@ -316,11 +346,32 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			kbd.setFocusFields([regFull.theFname, regFull.theLname, regFull.theEmail]);			
 			kbd.addEventListener(KeyBoard.SUBMIT, fullRegSubmit, false, 0, true);
+			
+			if (mess != "") {
+				//show message - don't blank the fields
+				regFull.errorText.alpha = 1;
+				regFull.errorText.theText.text = mess;
+				TweenMax.to(regFull.errorText, 2, { alpha:0, delay:2 } );
+			}else {
+				regFull.theFname.text = "";
+				regFull.theLname.text = "";
+				
+				if (notMe) {
+					regFull.theEmail.text = "";//user answered 'no' this isn't me
+				}else{
+					regFull.theEmail.text = regEmail.theEmail.text; //pre-pop with what was entered in email dialog
+				}
+			}
 		}
 		
 		
+		/**
+		 * wildcard event so KeyBoard.SUBMIT event or MouseEvent works
+		 * @param	e
+		 */
 		private function fullRegSubmit(e:*):void
 		{
+			
 			tim.buttonClicked();
 			
 			if (regFull.theFname.text == "" || regFull.theLname.text == "") {
@@ -334,30 +385,94 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				regFull.errorText.alpha = 1;
 				regFull.errorText.theText.text = "Please enter a valid email address";
 				TweenMax.to(regFull.errorText, 2, { alpha:0, delay:2 } );
-				
+			}else if (notMe && regFull.theEmail.text == regEmail.theEmail.text) {
+				regFull.errorText.alpha = 1;
+				regFull.errorText.theText.text = "This email address is already being used";
+				TweenMax.to(regFull.errorText, 2, { alpha:0, delay:2 } );
 			}else{
 			
 				showLoader();
 			
 				//user was not found - submit their data for registration
+				//regFull.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, fullRegSubmit);
 				regFull.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, fullRegSubmit);
 				kbd.removeEventListener(KeyBoard.SUBMIT, fullRegSubmit);
 				
-				var js:String = JSON.stringify( { FirstName:regFull.theFname.text, LastName:regFull.theLname.text, Email:regFull.theEmail.text } );
+				//full reg email check
+				var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
+				var req:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/Api/Registrant/GetRegistrantByEmail");
+				req.method = URLRequestMethod.GET;			
+				req.requestHeaders.push(hdr);			
 				
-				var hdr:URLRequestHeader = new URLRequestHeader("Content-type", "application/json");
-				var hdr2:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-				var req:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/Api/Registrant/Register");
-				req.method = URLRequestMethod.POST;
-				req.requestHeaders.push(hdr);
-				req.requestHeaders.push(hdr2);
-				req.data = js;
+				var vars:URLVariables = new URLVariables();
+				vars.email = regFull.theEmail.text;
 				
-				var lo:URLLoader = new URLLoader();
-				lo.addEventListener(Event.COMPLETE, regDataSubmitted, false, 0, true);
-				lo.addEventListener(IOErrorEvent.IO_ERROR, regDataSubmitError, false, 0, true);
-				lo.load(req);
+				req.data = vars;
+				
+				timeout.addEventListener(TimerEvent.TIMER, fullRegNetworkTimeoutEmail);
+				timeout.reset();
+				timeout.start();
+				
+				emailLoader = new URLLoader();
+				emailLoader.addEventListener(IOErrorEvent.IO_ERROR, fullRegEmailCheckError, false, 0, true);
+				emailLoader.addEventListener(Event.COMPLETE, fullRegEmailCheckComplete, false, 0, true);
+				emailLoader.load(req);	
 			}
+		}		
+		
+		
+		private function fullRegEmailCheckError(e:IOErrorEvent):void
+		{
+			timeout.reset(); //stop fullRegNetworkTimeoutEmail() from being called			
+			logMessage = "Registration.fullRegEmailCheckError - regThisUser()    Error: " + e.toString();
+			dispatchEvent(new Event(REG_LOG));			
+			regThisUser();
+		}
+		
+		
+		private function fullRegNetworkTimeoutEmail(e:TimerEvent):void
+		{	
+			emailLoader.close();//prevent complete or error from being called
+			logMessage = "Registration.fullRegNetworkTimeoutEmail calling regThisUser()    Error: " + e.toString();
+			dispatchEvent(new Event(REG_LOG));
+			regThisUser();
+		}
+		
+		
+		private function fullRegEmailCheckComplete(e:Event):void
+		{
+			timeout.reset(); //stop fullRegNetworkTimeoutEmail() from being called			
+			var json:Object = JSON.parse(e.currentTarget.data);
+			if (json.Id != undefined) {
+				//user was found in the database
+				showFull("This email address is already being used");
+			}else {
+				//not found - submit full reg form
+				regThisUser();
+			}
+		}
+		
+		
+		private function regThisUser():void
+		{
+			var js:String = JSON.stringify( { FirstName:regFull.theFname.text, LastName:regFull.theLname.text, Email:regFull.theEmail.text } );
+			
+			var hdr:URLRequestHeader = new URLRequestHeader("Content-type", "application/json");
+			var hdr2:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
+			var req:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/Api/Registrant/Register");
+			req.method = URLRequestMethod.POST;
+			req.requestHeaders.push(hdr);
+			req.requestHeaders.push(hdr2);
+			req.data = js;
+			
+			timeout.addEventListener(TimerEvent.TIMER, networkTimeoutFullReg);
+			timeout.reset();
+			timeout.start();
+			
+			fullRegLoader = new URLLoader();
+			fullRegLoader.addEventListener(Event.COMPLETE, regDataSubmitted, false, 0, true);
+			fullRegLoader.addEventListener(IOErrorEvent.IO_ERROR, regDataSubmitError, false, 0, true);
+			fullRegLoader.load(req);
 		}
 		
 		
@@ -381,12 +496,25 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		}
 		
 		
+		private function networkTimeoutFullReg(e:TimerEvent):void
+		{
+			fullRegLoader.close();//prevent complete or error from being called
+			logMessage = "Registration.networkTimeoutFullReg - userID set to -1    Error: " + e.toString();
+			dispatchEvent(new Event(REG_LOG));
+			userID = -1;
+			showThanks();
+		}
+		
+		
 		/**
 		 * Shows the thanks dialog
 		 * Calls image service
 		 */
 		private function showThanks():void
 		{
+			timeout.reset(); //stop networkTimeout() from being called
+			timeout.removeEventListener(TimerEvent.TIMER, networkTimeoutFullReg);
+			
 			tim.buttonClicked();
 			
 			if (container.contains(regConfirm)) {
@@ -411,8 +539,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			}
 			
 			regThanks.alpha = 0;
-			TweenMax.to(regThanks, 1, { alpha:1, onComplete:sendToIMS } );			
+			TweenMax.to(regThanks, 1, { alpha:1 } );
+			TweenMax.delayedCall(3, sendToIMS);
 		}
+		
 		
 		//*/called once thanks is showing
 		private function sendToIMS():void
@@ -423,7 +553,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			if(userID != -1){
 				ims.addToQueue(fullSize, userID);	
 			}else {
-				//userID = -1 - error subimitting data - network down... or something
+				//userID = -1 - error submitting data - network down... or something
 				ims.addToQueue(fullSize, userID, regFull.theFname.text, regFull.theLname.text, regFull.theEmail.text);
 			}
 		}

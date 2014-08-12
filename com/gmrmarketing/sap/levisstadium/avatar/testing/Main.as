@@ -179,7 +179,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			switch(yr) {
 				case "0":					
-					bgLoader.load(new URLRequest("backgrounds/sap.png"));
+					bgd.showSlideshow();
 					break;
 				case "2014":					
 					bgLoader.load(new URLRequest("backgrounds/bg2014.png"));

@@ -8,6 +8,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	import flash.events.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
+	import flash.filters.DropShadowFilter;
 	import flash.utils.Timer;
 	
 	
@@ -30,14 +31,16 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var countHolder:Sprite;
 		private var base:Sprite;
 		
-		private const theY:int = 500;
+		private const theY:int = 200;
+		private var radius:int = 100;
 		
 		
 		public function Countdown()
 		{
 			countHolder = new Sprite();
 			base = new Sprite();
-			draw_arc(base.graphics, 960, theY, 150, 0, 360, BASE_COLOR);
+			base.filters = [new DropShadowFilter(0, 0, 0x000000, .8, 5, 5)];
+			draw_arc(base.graphics, 960, theY, radius, 0, 360, BASE_COLOR);
 			
 			clip = new mcCount();
 		}
@@ -91,7 +94,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			count--;			
 			
 			clip.theNumber.theText.text = String(count);
-			draw_arc(countHolder.graphics, 960, theY, 150, 0, 120*count, MAIN_COLOR);
+			draw_arc(countHolder.graphics, 960, theY, radius, 0, 120*count, MAIN_COLOR);
 			
 			if (count == 0) {				
 				//clip.numCount.theText.text = "";
@@ -124,7 +127,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				clip.removeEventListener(Event.ENTER_FRAME, onEnterFrame);				
 				countTimer.start();				
 			}else{		
-				draw_arc(countHolder.graphics, 960, theY, 150, 0, 18 * step, MAIN_COLOR);
+				draw_arc(countHolder.graphics, 960, theY, radius, 0, 18 * step, MAIN_COLOR);
 			}
         }
 		
