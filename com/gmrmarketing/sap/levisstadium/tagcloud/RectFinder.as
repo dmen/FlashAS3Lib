@@ -65,9 +65,16 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		 * called from Main.doStop()
 		 */
 		public function stop():void
-		{
+		{			
 			forceStop = true;
 			stageRef.removeEventListener(Event.ENTER_FRAME, addTag);
+		}
+		
+		
+		public function kill():void
+		{
+			newImage.dispose();
+			image.dispose();
 		}
 		
 		

@@ -27,7 +27,7 @@ package com.gmrmarketing.sap.levisstadium.california
 			container = $container;
 		}
 		
-		public function stop():void
+		public function kill():void
 		{
 			while (container.numChildren) {
 				container.removeChildAt(0);
@@ -37,7 +37,7 @@ package com.gmrmarketing.sap.levisstadium.california
 		private function refresh():void		
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=CaliMapTweets");
+			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=CaliMapTweets"+"&abc="+String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);

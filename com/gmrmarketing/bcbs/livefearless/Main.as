@@ -122,6 +122,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		private function showRules(e:Event = null):void
 		{	
+			/*
 			if(!topContainer.contains(rulesClip)){
 				topContainer.addChild(rulesClip);			
 			}
@@ -132,7 +133,8 @@ package com.gmrmarketing.bcbs.livefearless
 				TweenMax.to(rulesClip, 1, { alpha:1} );
 			}
 			rulesClip.btnPage2.addEventListener(MouseEvent.MOUSE_DOWN, showRulesPage2, false, 0, true);
-			rulesClip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, closeRules, false, 0, true);			
+			rulesClip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, closeRules, false, 0, true);	
+			*/
 		}
 		
 		

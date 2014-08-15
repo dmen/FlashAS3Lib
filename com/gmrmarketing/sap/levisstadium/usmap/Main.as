@@ -41,11 +41,12 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		private var tweetManager:TweetManager; //manages getting and displaying the text tweets
 		private var textContainer:Sprite;
 		
-		
+		private var isMapLoaded:Boolean = false;
 		
 		public function Main()
 		{
 			_scene = new Scene3D(this);
+			_scene.clearColor = new Vector3D ();
 			//_scene.setViewport(0, 0, 1280,720);
 			_scene.antialias = 8;
 			//_scene.pause();
@@ -67,21 +68,8 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			
 			textContainer = new Sprite();
 			
-			map = _scene.addChildFromFile("usmap4.zf3d");
-			_scene.addEventListener( Scene3D.COMPLETE_EVENT, mapLoaded );
-		}
-		
-		
-		private function mapLoaded(e:Event):void
-		{		
-			usa = _scene.getChildByName("usamap2.dae");
-			_scene.getChildByName("Plane").setMaterial(_videoPlaneMaterial);
-			
-			grayIndex = 0;
-			_scene.forEach(setDefaultColor);
-			
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=USMapSentiment");
+			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=USMapSentiment"+"&abc="+String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -92,6 +80,23 @@ package com.gmrmarketing.sap.levisstadium.usmap
 				
 			}
 			
+		}
+		
+		private function loadMap():void
+		{
+			map = _scene.addChildFromFile("usmap4.zf3d");
+			_scene.addEventListener( Scene3D.COMPLETE_EVENT, mapLoaded );
+		}
+		
+		private function mapLoaded(e:Event):void
+		{		
+			_scene.removeEventListener( Scene3D.COMPLETE_EVENT, mapLoaded );
+			usa = _scene.getChildByName("usamap2.dae");
+			_scene.getChildByName("Plane").setMaterial(_videoPlaneMaterial);
+			
+			grayIndex = 0;
+			_scene.forEach(setDefaultColor);
+			
 			//_scene.camera.fieldOfView = 65;
 			//_scene.camera.setRotation(59.19, 10, 1.78);
 			rotOb = new Object();			
@@ -100,7 +105,11 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			rotOb.rotZ = _scene.camera.getRotation().z;
 			rotOb.mapRotX = usa.getRotation().x;
 			rotOb.mapRotY = usa.getRotation().y;	
-			rotOb.mapRotZ = usa.getRotation().z	
+			rotOb.mapRotZ = usa.getRotation().z;
+			
+			isMapLoaded = true;
+			
+			show2();
 		}
 		
 		
@@ -137,7 +146,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			
 			//switch names to match 3d map versions
 			for (var i:int = 0; i < json.length; i++) {
-				if (String(json[i].name).indexOf(" ") != -1) {
+				if (String(json[i].name).indexOf(" ") != -1) {					
 					json[i].name = String(json[i].name).replace(" ", "_");
 				}
 				sentiment.push( { name:json[i].name, pos:json[i].pos } );
@@ -146,7 +155,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			
 			normalize();
 			sentiment.reverse();
-			show();//TESTING
+			
 			dispatchEvent(new Event(READY));//will call show() 
 		}
 		
@@ -174,11 +183,13 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		
 		
 		
-		public function videoUpdate(e:Event):void
+		public function videoUpdate(vid:*):void
 		{
-			videoData.draw(vid);
-			_videoPlaneTexture.bitmapData = videoData;
-			_videoPlaneTexture.uploadTexture();
+			if(isMapLoaded){
+				videoData.draw(vid);
+				_videoPlaneTexture.bitmapData = videoData;
+				_videoPlaneTexture.uploadTexture();
+			}
 		}
 		
 		
@@ -196,8 +207,8 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		 */
 		private function normalize():void
 		{
-			var newRangeMin:Number = 2;
-			var newRangeMax:Number = 20;
+			var newRangeMin:Number = 1.5;
+			var newRangeMax:Number = 15;
 			
 			var min:int = 500;
 			var max:int = 0;
@@ -248,6 +259,10 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		 */
 		public function show():void
 		{
+			loadMap();	
+		}
+		private function show2():void
+		{
 			if (!contains(textContainer)) {
 				addChild(textContainer);
 			}
@@ -255,27 +270,27 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			tweetManager.setContainer(textContainer);
 			
 			for (var i:int = 0; i < sentiment.length; i++) {
+				
 				var t:Pivot3D = _scene.getChildByName(sentiment[i].name);
-				TweenMax.to(t, 1, { scaleZ:sentiment[i].normalized, delay:.5 * i, ease:Bounce.easeOut } );
+				if(t){
+					TweenMax.to(t, 1, { scaleZ:sentiment[i].normalized, delay:.5 * i, ease:Bounce.easeOut } );
+				}
 				
 				materialRef = _scene.getMaterialByName( String(sentiment[i].name).toLowerCase() ) as Shader3D;
 				if (materialRef) {
-					if(sentiment[i].normalized < 6){
+					if(sentiment[i].normalized < 4){
 						materialRef.filters[0].color = stateGray[stateGrayIndex];//gray
 						stateGrayIndex++;
 						if (stateGrayIndex >= stateGray.length) {
 							stateGrayIndex = 0;
 						}
-					}else if (sentiment[i].normalized < 13) {
+					}else if (sentiment[i].normalized < 9) {
 						materialRef.filters[0].color = 0xeeb400;//orange
 					}else {
 						materialRef.filters[0].color = 0x008fd3;//blue
 					}
 				}
-			}
-			
-			
-			addEventListener(Event.ENTER_FRAME, videoUpdate, false, 0, true);
+			}			
 			
 			//slowly rotate map up and left - toward Cali
 			TweenMax.to(rotOb, 25, { mapRotX: -115, mapRotY:-10, onUpdate:setMapRotation, onComplete:toFlorida} );
@@ -298,6 +313,15 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		public function doStop():void
 		{
 			removeEventListener(Event.ENTER_FRAME, videoUpdate);
+		}
+		
+		
+		/**
+		 * ISChedulerMethods
+		 */
+		public function kill():void
+		{
+			
 		}
 	}
 	

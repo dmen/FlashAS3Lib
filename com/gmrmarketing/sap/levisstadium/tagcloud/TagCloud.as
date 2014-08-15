@@ -111,16 +111,16 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			
 			switch(tagName) {
 				case "49ers":
-					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTags49ers");
+					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTags49ers" + "&abc=" + String(new Date().valueOf()));
 					break;
 				case "levis":
-					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsStadium");
+					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsStadium" + "&abc=" + String(new Date().valueOf()));
 					break;
 				case "offense":
-					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsOffense");
+					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsOffense" + "&abc=" + String(new Date().valueOf()));
 					break;
 				case "defense":
-					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsDefense");
+					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsDefense" + "&abc=" + String(new Date().valueOf()));
 					break;
 			}
 			

@@ -68,7 +68,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		 * @param	message up to 140 char message - no checks prevent > 140 though		
 		 * @param	toX Where to shoot the line to - the lat/lon spot
 		 * @param	toY 
-		 * @param	quadrant which quadrant the message goes in 1 - 4
+		 * @param	quadrant which quadrant the message goes in 1 - 2
 		 */
 		public function show(userName:String, message:String, toX:int, toY:int, quadrant:int):void
 		{
@@ -76,15 +76,15 @@ package com.gmrmarketing.sap.levisstadium.usmap
 				container.addChild(clip);
 			}			
 			
+			message = message.replace(/&lt;/g, "<");
+			message = message.replace(/&gt;/g, "<");
+			message = message.replace(/&amp;/g, "&");		
+			
 			clip.userBG.alpha = 0;
 			clip.theText.alpha = 0; //contains the two text fields
 			clip.theText.theUser.text = userName;			
+			clip.theText.theText.text = message;
 			
-			message = message.replace(/&lt;/g, "<");
-			message = message.replace(/&gt;/g, "<");
-			message = message.replace(/&amp;/g, "&");			
-			
-			clip.theText.theText.text = message;	
 			var rectWidth:int = Math.max(200, clip.theText.theText.textWidth + 12);
 			
 			drawToX = toX;
@@ -131,6 +131,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			lineContainer.graphics.moveTo(drawToX, drawToY);
 			tweenOb.x = drawToX;
 			tweenOb.y = drawToY;
+			
 			//if (myQuadrant == 2) {
 				//point on the left of the tweet	
 				TweenMax.to(tweenOb, .25, { x:0, y:-22, onUpdate:drawLine, delay:.75, ease:Linear.easeNone, onComplete:drawTweetBox} );						
@@ -147,15 +148,10 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		
 		
 		private function drawTweetBox():void
-		{
+		{			
 			TweenMax.to(lineContainer, 1, { alpha:0 } );
-			//clip.addEventListener(Event.ENTER_FRAME, drift);
 			
-			var rectWidth:int = Math.max(200, clip.theText.theText.textWidth + 12);
-			
-			//outline rect
-			//outlineContainer.graphics.lineStyle(1, 0xffffff, 1, true);
-			//outlineContainer.graphics.drawRoundRect(0, 0, rectWidth, clip.theText.theText.textHeight + 15, 18, 18);
+			var rectWidth:int = Math.max(200, clip.theText.theText.textWidth + 12);			
 			
 			var g:Graphics = rectContainer.graphics;
 			
@@ -172,40 +168,13 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			u.lineStyle(2, 0xffffff);
 			u.drawRoundRect(0, 0, rectWidth, 36, 18, 18);
 			
-			//TweenMax.to(clip.userBG, 0, { colorTransform: { tint:lineColor, tintAmount:1 }} );			
-			//clip.userBG.width = rectWidth;
-			
 			TweenMax.to(clip.theText, 1, { alpha:1 } );
 			TweenMax.to(clip.userBG, 1, { alpha:1, onComplete:startEndTimer } );
 		}
 		
 		
-		/*
-		private function drift(e:Event):void
-		{
-			vx += Math.random() * 0.2 - 0.1;
-			vy += Math.random() * 0.2 - 0.1;
-			
-			clip.x += vx;
-			clip.y += vy;
-			
-			vx *= .95;
-			vy *= .95;
-			
-			if (clip.x < 0) {
-				clip.x = 0;
-			}
-			if (clip.y - 38 < 0) {
-				clip.y = 38;
-			}
-			if (clip.x + outlineContainer.width > 768) {
-				clip.x = 768 - outlineContainer.width;
-			}
-		}
-		*/
-		
 		private function startEndTimer():void
-		{
+		{			
 			var tLen:int = Math.max(1, clip.theText.theText.length / 24);			
 			var end:Timer = new Timer(tLen * 1000, 1);
 			end.addEventListener(TimerEvent.TIMER, tweetComplete);
@@ -242,7 +211,11 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			if (container.contains(dot)) {
 				container.removeChild(dot);
 			}
-			//clip.removeEventListener(Event.ENTER_FRAME, drift);
+			outlineContainer = null;
+			lineContainer = null;
+			rectContainer = null;
+			clip = null;
+			dot = null;
 			
 			dispatchEvent(new Event(COMPLETE));
 		}

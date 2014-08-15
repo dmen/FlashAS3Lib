@@ -17,7 +17,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private var config:AIRXML;
 		private var thisTask:MovieClip; //the loaded swf
 		private var lastTask:MovieClip; //previous task swf - set in loadNextTask()
-		
+		private var lastTaskWas3D:Boolean;
 		
 		public function Main()
 		{			
@@ -67,7 +67,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			}
 			var r:URLRequest = new URLRequest(tasks[currentTask].@file);
 			var taskLoader:Loader = new Loader();		
-			taskLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, taskLoaded, false, 0, true);
+			taskLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, nextTaskLoaded, false, 0, true);
 			taskLoader.load(r);
 		}
 		
@@ -78,7 +78,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		 * Waits for a 'ready' event from the task
 		 * @param	e
 		 */
-		private function taskLoaded(e:Event):void
+		private function nextTaskLoaded(e:Event):void
 		{
 			var l:Loader = Loader(LoaderInfo(e.target).loader);
 			thisTask = MovieClip(l.content);
@@ -104,11 +104,15 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			
 			if (lastTask) {
 				//thisTask is ready - stop the one on screen - and move it off stage right
+				if (lastTaskWas3D) {					
+					player.x = 0;//move video player back on screen
+				}
 				lastTask.doStop();
 				TweenMax.to(lastTask, 1, { x:1920, ease:Back.easeIn, onComplete:hideLastTask } );
 			}else {
+				
 				TweenMax.to(thisTask, 1, { x:0, ease:Back.easeOut, onComplete:showTask } );
-			}
+			}			
 		}
 		
 		
@@ -119,12 +123,19 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private function hideLastTask():void
 		{
 			TweenMax.to(thisTask, 1, { x:0, ease:Back.easeOut, onComplete:showTask } );			
+			lastTask.kill();
 			lastTask = null;
 		}
 		
 		
 		private function showTask():void
 		{
+			
+			if (tasks[currentTask].@file == "usmap.swf") {
+				addEventListener(Event.ENTER_FRAME, updateMapVideo, false, 0, true);
+				player.x = -768;
+			}
+			
 			thisTask.show();
 			
 			var taskTimer:Timer = new Timer(parseFloat(tasks[currentTask].@time) * 1000, 1);
@@ -135,6 +146,12 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		
 		private function taskComplete(e:TimerEvent):void
 		{
+			lastTaskWas3D = false;
+			if (tasks[currentTask].@file == "usmap.swf") {
+				removeEventListener(Event.ENTER_FRAME, updateMapVideo);
+				lastTaskWas3D = true;
+			}
+				
 			currentTask++;
 			if (currentTask >= tasks.length()) {
 				currentTask = 0;
@@ -142,6 +159,10 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			loadNextTask();
 		}
 		
+		private function updateMapVideo(e:Event):void
+		{
+			thisTask.videoUpdate(player);
+		}
 	}
 	
 }

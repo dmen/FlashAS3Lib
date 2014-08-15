@@ -97,8 +97,8 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			hoursTextClip = new theText();
 			hoursTextClip.theLabel.text = "hr";
 			hoursClip.addChildAt(hoursTextClip, 0);
-			hoursTextClip.x = -95;
-			hoursTextClip.y = -105;
+			hoursTextClip.x = -97;
+			hoursTextClip.y = -100;
 			hoursTextClip.alpha = 0;
 			hoursTextClip.scaleX = hoursTextClip.scaleY = .1;
 			
@@ -112,8 +112,8 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			minsTextClip = new theText();
 			minsTextClip.theLabel.text = "min";
 			minutesClip.addChildAt(minsTextClip, 0);
-			minsTextClip.x = -95;
-			minsTextClip.y = -105;
+			minsTextClip.x = -97;
+			minsTextClip.y = -100;
 			minsTextClip.alpha = 0;
 			minsTextClip.scaleX = minsTextClip.scaleY = .1;
 			
@@ -127,13 +127,13 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			secsTextClip = new theText();
 			secsTextClip.theLabel.text = "sec";
 			secondsClip.addChildAt(secsTextClip, 0);
-			secsTextClip.x = -95;
-			secsTextClip.y = -105;
+			secsTextClip.x = -97;
+			secsTextClip.y = -100;
 			secsTextClip.alpha = 0;
 			secsTextClip.scaleX = secsTextClip.scaleY = .1;			
 			
 			//get kickoff time from the web service
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GetKickoffTime");
+			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GetKickoffTime"+"?abc="+String(new Date().valueOf()));
 			//r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -320,6 +320,13 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
+		/**
+		 * ISChedulerMethods
+		 */
+		public function kill():void
+		{
+		}
+		
 		
 		/**
 		 * callback from show - called by TweenMax
@@ -409,23 +416,54 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		}
 		
 		
-		private function draw_arc(g:Graphics, center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineThickness:int, lineColor:Number, lineAlpha:Number = 1):void
+		private function draw_arc(g:Graphics, center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineThickness:Number, lineColor:Number, alph:Number = 1):void
 		{
 			g.clear();
-			g.lineStyle(lineThickness, lineColor, lineAlpha, false, LineScaleMode.NORMAL, CapsStyle.NONE);
+			//g.lineStyle(1, lineColor, alph, false, LineScaleMode.NORMAL, CapsStyle.NONE);
 			
-			var angle_diff:int = (angle_to) - (angle_from);
-			var steps:int = angle_diff * 1;//1 is precision... use higher numbers for more.
-			var angle:int = angle_from;
-			var px:Number = center_x + radius * Math.cos((angle-90) * degToRad);//sub 90 here and below to rotate the arc to start at 12oclock
-			var py:Number = center_y + radius * Math.sin((angle-90) * degToRad);
-
-			g.moveTo(px, py);
-
-			for (var i:int = 1; i <= steps; i++) {
-				angle = angle_from + angle_diff / steps * i;
-				g.lineTo(center_x + radius * Math.cos((angle-90) * degToRad), center_y + radius * Math.sin((angle-90) * degToRad));
+			var angle_diff:Number = (angle_to) - (angle_from);
+			var steps:int = angle_diff * 2; // 2 is precision... use higher numbers for more.
+			var angle:Number = angle_from;
+			
+			var halfT:Number = lineThickness / 2; // Half thickness used to determine inner and outer points
+			var innerRad:Number = radius - halfT; // Inner radius
+			var outerRad:Number = radius + halfT; // Outer radius
+			
+			var px_inner:Number = getX(angle, innerRad, center_x); //sub 90 here and below to rotate the arc to start at 12oclock
+			var py_inner:Number = getY(angle, innerRad, center_y); 
+			
+			if(angle_diff > 0){
+				g.beginFill(lineColor, alph);
+				g.moveTo(px_inner, py_inner);
+				
+				var i:int;
+			
+				// drawing the inner arc
+				for (i = 1; i <= steps; i++) {
+								angle = angle_from + angle_diff / steps * i;
+								g.lineTo( getX(angle, innerRad, center_x), getY(angle, innerRad, center_y));
+				}
+				
+				// drawing the outer arc
+				for (i = steps; i >= 0; i--) {
+								angle = angle_from + angle_diff / steps * i;
+								g.lineTo( getX(angle, outerRad, center_x), getY(angle, outerRad, center_y));
+				}
+				
+				g.lineTo(px_inner, py_inner);
+				g.endFill();
 			}
+		}
+		
+		private function getX(angle:Number, radius:Number, center_x:Number):Number
+		{
+			return Math.cos((angle-90) * degToRad) * radius + center_x;
+		}
+		
+		
+		private function getY(angle:Number, radius:Number, center_y:Number):Number
+		{
+			return Math.sin((angle-90) * degToRad) * radius + center_y;
 		}
 		
 		

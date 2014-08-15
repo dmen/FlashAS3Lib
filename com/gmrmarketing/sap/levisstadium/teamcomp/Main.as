@@ -62,7 +62,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			
 			tweenObject = { htSent:0, vtSent:0 };
 			
-			setConfig("08/17/14");
+			//setConfig("08/17/14");
 		}
 		
 		
@@ -74,7 +74,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 		public function setConfig(config:String):void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/teamcomparison?gamedate=" + config);
+			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/teamcomparison?gamedate=" + config + "&abc="+String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -114,12 +114,20 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			homeStats.losses.theText.text = ht.Stats[0].Losses;
 			homeStats.week.theText.text = json.Game[0].WeekNumber;
 			
+			homeStats.wins.scaleX = homeStats.wins.scaleY = 0;
+			homeStats.losses.scaleX = homeStats.losses.scaleY = 0;
+			homeStats.week.scaleX = homeStats.week.scaleY = 0;
+			
 			visTwitter.teamName.text = vt.TeamShortName;
 			visTwitter.twitterHandle.text = vt.TeamTwitterHandle;
 			
 			visStats.wins.theText.text = vt.Stats[0].Wins;
 			visStats.losses.theText.text = vt.Stats[0].Losses;
 			visStats.week.theText.text = json.Game[0].WeekNumber;
+			
+			visStats.wins.scaleX = visStats.wins.scaleY = 0;
+			visStats.losses.scaleX = visStats.losses.scaleY = 0;
+			visStats.week.scaleX = visStats.week.scaleY = 0;
 			
 			addChild(homeRing);
 			addChild(homeTwitter);
@@ -133,9 +141,17 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			TweenMax.to(homeTwitter, 1, { x:36, ease:Back.easeOut, delay:.25 } );
 			TweenMax.to(homeStats, 1, { x:36, ease:Back.easeOut, delay:.5 } );
 			
-			TweenMax.to(visRing, 1, { x:514, ease:Back.easeOut } );
-			TweenMax.to(visTwitter, 1, { x:509, ease:Back.easeOut, delay:.25 } );
-			TweenMax.to(visStats, 1, { x:509, ease:Back.easeOut, delay:.5 } );
+			TweenMax.to(homeStats.wins, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.25 } );
+			TweenMax.to(homeStats.losses, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.3 } );
+			TweenMax.to(homeStats.week, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.35 } );
+			
+			TweenMax.to(visRing, 1, { x:514, ease:Back.easeOut, delay:.25 } );
+			TweenMax.to(visTwitter, 1, { x:509, ease:Back.easeOut, delay:.5 } );
+			TweenMax.to(visStats, 1, { x:509, ease:Back.easeOut, delay:.75 } );
+			
+			TweenMax.to(visStats.wins, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.65 } );
+			TweenMax.to(visStats.losses, .5, { scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.55 } );
+			TweenMax.to(visStats.week, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.5 } );
 			
 			TweenMax.to(teams, 1, { y:91, ease:Back.easeOut, delay:1 } );
 			
@@ -150,8 +166,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			visStats.theSentiment.theText.text = 0;
 			
 			TweenMax.to(tweenObject, 5, { htSent:ht.Stats[0].NetbaseSentiment * 3.6, delay:1, onUpdate:drawHSent } );
-			TweenMax.to(tweenObject, 5, { vtSent:vt.Stats[0].NetbaseSentiment * 3.6, delay:1, onUpdate:drawVSent} );
-		
+			TweenMax.to(tweenObject, 5, { vtSent:vt.Stats[0].NetbaseSentiment * 3.6, delay:1, onUpdate:drawVSent} );		
 		}
 		
 		
@@ -170,6 +185,14 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 		public function doStop():void
 		{
 			
+		}
+		
+		
+		/**
+		 * ISChedulerMethods
+		 */
+		public function kill():void
+		{
 		}
 		
 		
@@ -201,10 +224,10 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 		}
 		
 		
-		private function draw_arc(g:Graphics, center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineThickness:Number, lineColor:Number):void
+		private function draw_arc(g:Graphics, center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineThickness:Number, lineColor:Number, alph:Number = 1):void
 		{
 			g.clear();
-			g.lineStyle(1, lineColor, 1, false, LineScaleMode.NORMAL, CapsStyle.NONE);
+			//g.lineStyle(1, lineColor, alph, false, LineScaleMode.NORMAL, CapsStyle.NONE);
 			
 			var angle_diff:Number = (angle_to) - (angle_from);
 			var steps:int = angle_diff * 2; // 2 is precision... use higher numbers for more.
@@ -217,27 +240,28 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			var px_inner:Number = getX(angle, innerRad, center_x); //sub 90 here and below to rotate the arc to start at 12oclock
 			var py_inner:Number = getY(angle, innerRad, center_y); 
 			
-			g.beginFill(lineColor, 1);
-			g.moveTo(px_inner, py_inner);
+			if(angle_diff > 0){
+				g.beginFill(lineColor, alph);
+				g.moveTo(px_inner, py_inner);
+				
+				var i:int;
 			
-			var i:int;
-			
-			// drawing the inner arc
-			for (i = 1; i <= steps; i++) {
-							angle = angle_from + angle_diff / steps * i;
-							g.lineTo( getX(angle, innerRad, center_x), getY(angle, innerRad, center_y));
+				// drawing the inner arc
+				for (i = 1; i <= steps; i++) {
+								angle = angle_from + angle_diff / steps * i;
+								g.lineTo( getX(angle, innerRad, center_x), getY(angle, innerRad, center_y));
+				}
+				
+				// drawing the outer arc
+				for (i = steps; i >= 0; i--) {
+								angle = angle_from + angle_diff / steps * i;
+								g.lineTo( getX(angle, outerRad, center_x), getY(angle, outerRad, center_y));
+				}
+				
+				g.lineTo(px_inner, py_inner);
+				g.endFill();
 			}
-			
-			// drawind the outer arc
-			for (i = steps; i >= 0; i--) {
-							angle = angle_from + angle_diff / steps * i;
-							g.lineTo( getX(angle, outerRad, center_x), getY(angle, outerRad, center_y));
-			}
-			
-			g.lineTo(px_inner, py_inner);
-			g.endFill();
 		}
-		
 		
 		private function getX(angle:Number, radius:Number, center_x:Number):Number
 		{

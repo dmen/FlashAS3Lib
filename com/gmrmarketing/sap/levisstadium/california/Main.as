@@ -55,7 +55,7 @@ package com.gmrmarketing.sap.levisstadium.california
 			var del:Number = 0;
 			for (var j:int = 0; j < tweets.length; j++) {
 				addLoc(tweets[j].lat, Math.abs(tweets[j].lon), tweets[j].normalized, del);
-				del += .5;
+				del += .25;
 			}
 			
 			tweetManager = new TweetManager();//gets text tweets and starts to display them
@@ -76,27 +76,28 @@ package com.gmrmarketing.sap.levisstadium.california
 		 * ISChedulerMethods
 		 */
 		public function doStop():void
+		{			
+			
+			
+		}
+		
+		
+		/**
+		 * ISChedulerMethods
+		 */
+		public function kill():void
 		{
 			if (contains(dots)) {
-				TweenMax.to(dots, .5, { alpha:0, onComplete:killDots } );//lat/lon dots on map
+				removeChild(dots);
 			}
 			if (contains(textContainer)) {
-				TweenMax.to(textContainer, .5, { alpha:0, onComplete:killText } );//twitter text
+				removeChild(textContainer);
 			}
-			
-			tweetManager.stop();
+			tweetManager.kill();
 			tweetManager = null;
 		}
 		
-		private function killDots():void
-		{
-			removeChild(dots)
-		}
-		private function killText():void
-		{
-			removeChild(textContainer);
-		}
-		
+
 		
 		/**
 		 * Callback for refreshData()

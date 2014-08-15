@@ -13,6 +13,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	import flash.utils.ByteArray;
 	import com.gmrmarketing.utilities.SerProxy_Connector;
 	import com.gmrmarketing.utilities.Logger;
+	import com.gmrmarketing.utilities.AIRXML;
 	
 	
 	public class Main extends MovieClip
@@ -42,6 +43,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var bgLoader:Loader; //for loading the bg images
 		
 		private var log:Logger;
+		private var config:AIRXML;
+		
+		private var angleDefault:int = 90;
+		private var angleMin:int = 60;
+		private var angleMax:int = 120;
 		
 		
 		public function Main()
@@ -57,7 +63,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			tim = TimeoutHelper.getInstance();
 			tim.addEventListener(TimeoutHelper.TIMED_OUT, reset);
-			tim.init(120000);//startMonitoring() called in showPreview() / stopped in reset()
+			tim.init(60000);//startMonitoring() called in showPreview() / stopped in reset()
 			
 			resetTimer = new Timer(10000, 1);
 			
@@ -102,13 +108,26 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			bgd = new BGDisplay();
 			bgLoader = new Loader();
 			
-			currentAngle = 90;
-			angleDelta = 0;
-			setServoAngle();//reset to straight on camera			
+			config = new AIRXML(); //reads config.xml in the apps folder
+			config.addEventListener(Event.COMPLETE, configReady);
+			config.readXML();
 			
 			intro.show();
 			intro.addEventListener(Intro.MANUAL_START, gotRFID);
 			bgChange(); //show default 2014 bg
+		}
+		
+		
+		private function configReady(e:Event):void
+		{	
+			var xm:XML = AIRXML(e.currentTarget).getXML();
+			angleDefault = parseInt(xm.defaultAngle);
+			angleMin = parseInt(xm.minAngle);
+			angleMax = parseInt(xm.maxAngle);
+			
+			currentAngle = angleDefault;
+			angleDelta = 0;
+			setServoAngle();//reset to straight on camera	
 		}
 		
 		
@@ -356,8 +375,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			preview.unPause();
 			preview.track();
 			
-			//reset cam to 90
-			currentAngle = 90;
+			//reset cam to default
+			currentAngle = angleDefault;
 			setServoAngle();//reset to straight on camera		
 			
 			bgChange(); //show default bg
@@ -403,11 +422,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{	
 			currentAngle += angleDelta;
 			
-			if (currentAngle > 120) {
-				currentAngle = 120;				
+			if (currentAngle > angleMax) {
+				currentAngle = angleMax;				
 			}
-			if (currentAngle < 60) {
-				currentAngle = 60;				
+			if (currentAngle < angleMin) {
+				currentAngle = angleMin;				
 			}
 			
 			var ba:ByteArray = new ByteArray();

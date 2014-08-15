@@ -77,13 +77,13 @@ package com.gmrmarketing.bcbs.livefearless
 			
 			var f:TextFormat = new TextFormat();
 			if (clip.theText2.numLines > 1) {				
-				f.leading = -24;
+				f.leading = -16;
 				clip.theText2.setTextFormat(f);
 			}else {
 				f.leading = 0;
 				clip.theText2.setTextFormat(f);
 			}
-			clip.theText2.y = 655 + ((140 - clip.theText2.textHeight) * .5);
+			clip.theText2.y = 670 + ((140 - clip.theText2.textHeight) * .5);
 			
 			clip.theName.text = name;
 			clip.theName.y = clip.theText2.y + clip.theText2.textHeight - 4;

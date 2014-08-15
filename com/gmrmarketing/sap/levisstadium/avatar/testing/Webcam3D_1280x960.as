@@ -469,8 +469,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function loadJersey():void
 		{
 			var l:Loader = new Loader();
-			l.contentLoaderInfo.addEventListener(Event.COMPLETE, jerseyLoaded, false, 0, true);
-			trace(jerseyPath + "jersey" + String(eraArray[eraIndex][1]).substr(4, 4) + ".png");
+			l.contentLoaderInfo.addEventListener(Event.COMPLETE, jerseyLoaded, false, 0, true);			
 			l.load(new URLRequest(jerseyPath + "jersey" + String(eraArray[eraIndex][1]).substr(4,4) + ".png"));			
 		}
 		

@@ -34,7 +34,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			
 			ra = new RectFinder(2);
 			
-			dict = new TagCloud(2, 36, 4, tagName, colors);
+			dict = new TagCloud(2, 28, 4, tagName, colors);
 			dict.addEventListener(TagCloud.TAGS_READY, tagsLoaded, false, 0, true);
 			dict.refreshTags();
 		}
@@ -90,6 +90,15 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		public function doStop():void
 		{
 			ra.stop();
+		}
+		
+		
+		/**
+		 * ISChedulerMethods
+		 */
+		public function kill():void
+		{
+			ra.kill();
 		}
 		
 		/**

@@ -11,12 +11,13 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	import com.gmrmarketing.utilities.TimeoutHelper;
 	import com.gmrmarketing.utilities.Validator;
 	
+	
 	public class Registration extends EventDispatcher
 	{
 		public static const REG_COMPLETE:String = "registrationComplete";
 		public static const RESET:String = "registrationReset";
 		public static const REG_LOG:String = "registrationLogEntry";
-		
+		private var degToRad:Number = 0.0174532925; //PI / 180
 		private var regEmail:MovieClip;
 		private var regConfirm:MovieClip;
 		private var regFull:MovieClip;
@@ -42,6 +43,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var emailLoader:URLLoader;
 		private var fullRegLoader:URLLoader;
 		
+		private var willSend:Boolean; //returned as WillSendEmail from GetRegistrantByEmail service - if true thanks dialog changes
 		
 		
 		public function Registration()
@@ -76,7 +78,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		//full size incoming is 716 x 891		
 		public function show(previewImage:BitmapData):void
 		{
-			fullSize = previewImage;
+			fullSize = previewImage;		
 			
 			var prevBmd:BitmapData = new BitmapData(257, 319);
 			var m:Matrix = new Matrix();
@@ -142,6 +144,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			if (container.contains(kbd)) {
 				container.removeChild(kbd);
 			}
+			
+			hideLoader();
+			
 			regEmail.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, emailSubmit);
 			regFull.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, fullRegSubmit);
 			
@@ -184,6 +189,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{
 			var em:String = regEmail.theEmail.text;
 			tim.buttonClicked();
+			
+			willSend = false;
 			
 			notMe = false;//true if user presses not me in confirmation dialog
 			
@@ -250,6 +257,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			if (json.Id != undefined) {
 				//user was found in the database
 				userID = json.Id;
+				willSend = json.WillSendEmail;
+				
 				showConfirmation(json.FirstName + " " + json.LastName, json.Email);
 			}else {
 				//not found
@@ -270,9 +279,12 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			if (container.contains(regThanks)) {
 				container.removeChild(regThanks);
 			}
+			if (!container.contains(regFull)) {
+				container.removeChild(regFull);
+			}
 			if (!container.contains(regConfirm)) {
 				container.addChild(regConfirm);
-			}
+			}			
 			
 			regConfirm.alpha = 0;
 			regConfirm.theName.text = name;
@@ -312,13 +324,17 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 * Or if a network error occured checking email - in that case userID is set to -1
 		 * @param	blankEmail
 		 */
-		private function showFull(mess:String = ""):void
+		private function showFull():void
 		{
 			hideLoader();
 			timeout.removeEventListener(TimerEvent.TIMER, networkTimeoutEmail);
 			
 			if (container.contains(regEmail)) {
 				container.removeChild(regEmail);
+			}
+			
+			if (container.contains(regConfirm)) {
+				container.removeChild(regConfirm);
 			}
 			
 			if (!container.contains(regFull)) {
@@ -345,23 +361,16 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			TweenMax.to(kbd, 1, { alpha:1, y:730, delay:1, ease:Back.easeOut } );
 			
 			kbd.setFocusFields([regFull.theFname, regFull.theLname, regFull.theEmail]);			
-			kbd.addEventListener(KeyBoard.SUBMIT, fullRegSubmit, false, 0, true);
+			kbd.addEventListener(KeyBoard.SUBMIT, fullRegSubmit, false, 0, true);			
 			
-			if (mess != "") {
-				//show message - don't blank the fields
-				regFull.errorText.alpha = 1;
-				regFull.errorText.theText.text = mess;
-				TweenMax.to(regFull.errorText, 2, { alpha:0, delay:2 } );
-			}else {
-				regFull.theFname.text = "";
-				regFull.theLname.text = "";
-				
-				if (notMe) {
-					regFull.theEmail.text = "";//user answered 'no' this isn't me
-				}else{
-					regFull.theEmail.text = regEmail.theEmail.text; //pre-pop with what was entered in email dialog
-				}
-			}
+			regFull.theFname.text = "";
+			regFull.theLname.text = "";
+			
+			if (notMe) {
+				regFull.theEmail.text = "";//user answered 'no' this isn't me
+			}else{
+				regFull.theEmail.text = regEmail.theEmail.text; //pre-pop with what was entered in email dialog
+			}			
 		}
 		
 		
@@ -384,11 +393,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				
 				regFull.errorText.alpha = 1;
 				regFull.errorText.theText.text = "Please enter a valid email address";
-				TweenMax.to(regFull.errorText, 2, { alpha:0, delay:2 } );
-			}else if (notMe && regFull.theEmail.text == regEmail.theEmail.text) {
-				regFull.errorText.alpha = 1;
-				regFull.errorText.theText.text = "This email address is already being used";
-				TweenMax.to(regFull.errorText, 2, { alpha:0, delay:2 } );
+				TweenMax.to(regFull.errorText, 2, { alpha:0, delay:2 } );			
 			}else{
 			
 				showLoader();
@@ -442,10 +447,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function fullRegEmailCheckComplete(e:Event):void
 		{
 			timeout.reset(); //stop fullRegNetworkTimeoutEmail() from being called			
-			var json:Object = JSON.parse(e.currentTarget.data);
+			var json:Object = JSON.parse(e.currentTarget.data);//WillSendEmail
 			if (json.Id != undefined) {
 				//user was found in the database
-				showFull("This email address is already being used");
+				showConfirmation(json.FirstName + " " + json.LastName, json.Email);
 			}else {
 				//not found - submit full reg form
 				regThisUser();
@@ -514,7 +519,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{
 			timeout.reset(); //stop networkTimeout() from being called
 			timeout.removeEventListener(TimerEvent.TIMER, networkTimeoutFullReg);
-			
+			hideLoader();
 			tim.buttonClicked();
 			
 			if (container.contains(regConfirm)) {
@@ -538,13 +543,20 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				regThanks.addChild(prev);
 			}
 			
+			if (willSend) {
+				regThanks.theText.text = "Your 49ers Historical Character has been added\nto your personalized fan page."
+			}else{
+				regThanks.theText.text = "Your email and 49ers character has been sent!";
+			}
+			
 			regThanks.alpha = 0;
+			
 			TweenMax.to(regThanks, 1, { alpha:1 } );
-			TweenMax.delayedCall(3, sendToIMS);
+			TweenMax.delayedCall(5, sendToIMS);
 		}
 		
 		
-		//*/called once thanks is showing
+		//called once thanks is showing
 		private function sendToIMS():void
 		{
 			regThanks.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, regReset, false, 0, true);
@@ -595,27 +607,58 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			if (step >= 360) {
 				step = 0;
 			}
-			draw_arc(1210, 370, 30, 0, step, 0xE5b227);			
+			draw_arc(loaderSprite.graphics, 1210, 370, 30, 0, step, 5, 0xE5b227);			
         }		
 		
 		
-		private function draw_arc(center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineColor:Number, lineAlpha:Number = 1):void
+		private function draw_arc(g:Graphics, center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineThickness:Number, lineColor:Number, alph:Number = 1):void
 		{
-			loaderSprite.graphics.clear();
-			loaderSprite.graphics.lineStyle(10, lineColor, lineAlpha, false, LineScaleMode.NORMAL, CapsStyle.NONE);
+			g.clear();
+			//g.lineStyle(1, lineColor, alph, false, LineScaleMode.NORMAL, CapsStyle.NONE);
 			
-			var angle_diff:int = (angle_to) - (angle_from);
-			var steps:int = angle_diff * 1;//1 is precision... use higher numbers for more.
-			var angle:int = angle_from;
-			var px:Number = center_x + radius * Math.cos((angle-90) * 0.0174532925);//sub 90 here and below to rotate the arc to start at 12oclock
-			var py:Number = center_y + radius * Math.sin((angle-90) * 0.0174532925);
-
-			loaderSprite.graphics.moveTo(px, py);
-
-			for (var i:int = 1; i <= steps; i++) {
-				angle = angle_from + angle_diff / steps * i;
-				loaderSprite.graphics.lineTo(center_x + radius * Math.cos((angle-90) * 0.0174532925), center_y + radius * Math.sin((angle-90) * 0.0174532925));
+			var angle_diff:Number = (angle_to) - (angle_from);
+			var steps:int = angle_diff * 2; // 2 is precision... use higher numbers for more.
+			var angle:Number = angle_from;
+			
+			var halfT:Number = lineThickness / 2; // Half thickness used to determine inner and outer points
+			var innerRad:Number = radius - halfT; // Inner radius
+			var outerRad:Number = radius + halfT; // Outer radius
+			
+			var px_inner:Number = getX(angle, innerRad, center_x); //sub 90 here and below to rotate the arc to start at 12oclock
+			var py_inner:Number = getY(angle, innerRad, center_y); 
+			
+			if(angle_diff > 0){
+				g.beginFill(lineColor, alph);
+				g.moveTo(px_inner, py_inner);
+				
+				var i:int;
+			
+				// drawing the inner arc
+				for (i = 1; i <= steps; i++) {
+								angle = angle_from + angle_diff / steps * i;
+								g.lineTo( getX(angle, innerRad, center_x), getY(angle, innerRad, center_y));
+				}
+				
+				// drawing the outer arc
+				for (i = steps; i >= 0; i--) {
+								angle = angle_from + angle_diff / steps * i;
+								g.lineTo( getX(angle, outerRad, center_x), getY(angle, outerRad, center_y));
+				}
+				
+				g.lineTo(px_inner, py_inner);
+				g.endFill();
 			}
+		}
+		
+		private function getX(angle:Number, radius:Number, center_x:Number):Number
+		{
+			return Math.cos((angle-90) * degToRad) * radius + center_x;
+		}
+		
+		
+		private function getY(angle:Number, radius:Number, center_y:Number):Number
+		{
+			return Math.sin((angle-90) * degToRad) * radius + center_y;
 		}
 		
 	}

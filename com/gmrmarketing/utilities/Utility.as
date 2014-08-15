@@ -1,8 +1,11 @@
 package com.gmrmarketing.utilities
 {
+	import flash.display.Graphics;
 	
 	public class Utility 
 	{
+		private static var degToRad:Number = 0.0174532925; //PI / 180
+		
 		public function Utility():void
 		{			
 		}
@@ -126,6 +129,58 @@ package com.gmrmarketing.utilities
 			} 
 			 //Displays the time in the dynamic text field. 
 			 return dateString + " " + theHours + ":" + theMinutes + ":" + theSeconds + " " + ampm;			
+		}
+		
+		
+		
+		public static function draw_arc(g:Graphics, center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineThickness:Number, lineColor:Number, alph:Number = 1):void
+		{
+			g.clear();
+			//g.lineStyle(1, lineColor, alph, false, LineScaleMode.NORMAL, CapsStyle.NONE);
+			
+			var angle_diff:Number = (angle_to) - (angle_from);
+			var steps:int = angle_diff * 2; // 2 is precision... use higher numbers for more.
+			var angle:Number = angle_from;
+			
+			var halfT:Number = lineThickness / 2; // Half thickness used to determine inner and outer points
+			var innerRad:Number = radius - halfT; // Inner radius
+			var outerRad:Number = radius + halfT; // Outer radius
+			
+			var px_inner:Number = getX(angle, innerRad, center_x); //sub 90 here and below to rotate the arc to start at 12oclock
+			var py_inner:Number = getY(angle, innerRad, center_y); 
+			
+			if(angle_diff > 0){
+				g.beginFill(lineColor, alph);
+				g.moveTo(px_inner, py_inner);
+				
+				var i:int;
+			
+				// drawing the inner arc
+				for (i = 1; i <= steps; i++) {
+								angle = angle_from + angle_diff / steps * i;
+								g.lineTo( getX(angle, innerRad, center_x), getY(angle, innerRad, center_y));
+				}
+				
+				// drawing the outer arc
+				for (i = steps; i >= 0; i--) {
+								angle = angle_from + angle_diff / steps * i;
+								g.lineTo( getX(angle, outerRad, center_x), getY(angle, outerRad, center_y));
+				}
+				
+				g.lineTo(px_inner, py_inner);
+				g.endFill();
+			}
+		}
+		
+		private static function getX(angle:Number, radius:Number, center_x:Number):Number
+		{
+			return Math.cos((angle-90) * degToRad) * radius + center_x;
+		}
+		
+		
+		private static function getY(angle:Number, radius:Number, center_y:Number):Number
+		{
+			return Math.sin((angle-90) * degToRad) * radius + center_y;
 		}
 	}
 }

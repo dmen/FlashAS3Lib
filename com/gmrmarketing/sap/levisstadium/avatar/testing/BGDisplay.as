@@ -33,11 +33,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			bgTimer = new Timer(10000, 1);
 			
-			hasTwoMonitors = false;
-			
+			hasTwoMonitors = false;			
 			
 			//put the window on the 2nd monitor
-			
+			/*
 			if (Screen.screens.length > 1) {
 				var ops:NativeWindowInitOptions = new NativeWindowInitOptions();
                 ops.systemChrome = NativeWindowSystemChrome.NONE;
@@ -65,7 +64,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 					i++;
 				}
 			}
-			
+			*/
 		}
 		
 		private function loadNextBG(e:TimerEvent = null):void

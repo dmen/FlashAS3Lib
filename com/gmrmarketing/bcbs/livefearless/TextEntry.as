@@ -12,6 +12,8 @@ package com.gmrmarketing.bcbs.livefearless
 	import flash.utils.Timer;
 	import com.gmrmarketing.utilities.SwearFilter;
 	import com.gmrmarketing.utilities.TimeoutHelper;
+	import com.gmrmarketing.intel.girls20.ComboBox;
+	
 	
 	public class TextEntry extends EventDispatcher
 	{
@@ -27,7 +29,7 @@ package com.gmrmarketing.bcbs.livefearless
 		private var container:DisplayObjectContainer;
 		private var kbd:KeyBoard;		
 		private var charCountTimer:Timer;
-		
+		private var combo:ComboBox;
 		private var timeoutHelper:TimeoutHelper;
 		
 		
@@ -42,7 +44,13 @@ package com.gmrmarketing.bcbs.livefearless
 			clip.theCount.text = String(MAX_CHARS);
 			
 			charCountTimer = new Timer(200);
-			charCountTimer.addEventListener(TimerEvent.TIMER, updateCharCount, false, 0, true);			
+			charCountTimer.addEventListener(TimerEvent.TIMER, updateCharCount, false, 0, true);
+			
+			combo = new ComboBox("Please select");			
+			combo.populate(["Wellness", "Nutrition", "Fitness", "Healthcare", "Other"]);
+			clip.addChild(combo);
+			combo.x = 621;
+			combo.y = 308;			
 			
 			timeoutHelper = TimeoutHelper.getInstance();
 		}
@@ -69,6 +77,9 @@ package com.gmrmarketing.bcbs.livefearless
 			kbd.setFocusFields([clip.fname, clip.lname, clip.theText]);
 			
 			container.addEventListener(KeyboardEvent.KEY_DOWN, hardKeyDown, false, 0, true);
+			
+			combo.setSelection("");
+			combo.reset();	
 			
 			clip.fname.maxChars = 30;
 			clip.lname.maxChars = 30;
