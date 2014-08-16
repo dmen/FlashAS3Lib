@@ -87,6 +87,7 @@ package com.gmrmarketing.sap.levisstadium.california
 		 */
 		public function kill():void
 		{
+			TweenMax.killAll();
 			if (contains(dots)) {
 				removeChild(dots);
 			}

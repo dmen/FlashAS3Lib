@@ -279,7 +279,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			if (container.contains(regThanks)) {
 				container.removeChild(regThanks);
 			}
-			if (!container.contains(regFull)) {
+			if (container.contains(regFull)) {
 				container.removeChild(regFull);
 			}
 			if (!container.contains(regConfirm)) {

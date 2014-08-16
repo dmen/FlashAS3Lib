@@ -302,14 +302,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		 */
 		public function hide():void
 		{
-			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
-			updateTimer.reset();
-			if (contains(hoursClip)) {
-				removeChild(hoursClip);
-				removeChild(minutesClip);
-				removeChild(secondsClip);
-			}
-			TweenMax.killTweensOf(analogClock);
+			
 		}
 		
 		/**
@@ -325,6 +318,14 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		 */
 		public function kill():void
 		{
+			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+			updateTimer.reset();
+			if (contains(hoursClip)) {
+				removeChild(hoursClip);
+				removeChild(minutesClip);
+				removeChild(secondsClip);
+			}
+			TweenMax.killTweensOf(analogClock);
 		}
 		
 		

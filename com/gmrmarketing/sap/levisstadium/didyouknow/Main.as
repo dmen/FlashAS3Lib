@@ -74,7 +74,6 @@ package  com.gmrmarketing.sap.levisstadium.didyouknow
 		
 		/**
 		 * ISChedulerMethods
-		 * config is a date like 08/17/14
 		 */
 		public function setConfig(config:String):void
 		{

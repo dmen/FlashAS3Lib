@@ -321,6 +321,11 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		 */
 		public function kill():void
 		{
+			map = null;
+			tweetManager.kill();
+			videoData.dispose();
+			_videoPlaneMaterial.dispose();
+			_scene.dispose();
 			
 		}
 	}

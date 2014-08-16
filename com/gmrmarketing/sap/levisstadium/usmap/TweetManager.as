@@ -14,6 +14,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		private var container:DisplayObjectContainer;
 		private var tweets:Array; //all tweets from the service
 		private var quadrants:Array;//there are two quadrants to display tweets in
+		private var killed:Boolean;
 		
 		public function TweetManager()
 		{
@@ -24,6 +25,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		
 		public function setContainer($container:DisplayObjectContainer):void
 		{
+			killed = false;
 			container = $container;
 		}
 		
@@ -75,48 +77,59 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		
 		private function displayNext():void
 		{
-			var a:Tweet = new Tweet();
-			a.setContainer(container);
-			
-			var tw:Object = tweets.shift();				
-			if (tweets.length == 0) {
-				refresh();
-				return;
+			if(!killed){
+				var a:Tweet = new Tweet();
+				a.setContainer(container);
+				
+				var tw:Object = tweets.shift();				
+				if (tweets.length == 0) {
+					refresh();
+					return;
+				}
+				if (tw.favor1 == true) {				
+					if (quadrants[0] == 0) {
+						quadrants[0] = 1; //mark as used
+						a.show(tw.user, tw.message, tw.theX, tw.theY, 1);
+						a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
+					}else if (quadrants[1] == 0) {
+						//favors q1 but it's not available
+						//tweets.unshift(tw); //put the tweet back in tweets array for later use
+						/*
+						quadrants[1] = 1; //mark as used
+						a.show(tw.user, tw.message, tw.theX, tw.theY, 2);
+						a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
+						*/
+						displayNext();
+					}
+				}else{
+					if (quadrants[0] == 0) {
+						quadrants[0] = 1; //mark as used
+						a.show(tw.user, tw.message, tw.theX, tw.theY, 1);
+						a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
+					}else if (quadrants[1] == 0) {
+						quadrants[1] = 1; //mark as used
+						a.show(tw.user, tw.message, tw.theX, tw.theY, 2);
+						a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
+					}
+				}	
 			}
-			if (tw.favor1 == true) {				
-				if (quadrants[0] == 0) {
-					quadrants[0] = 1; //mark as used
-					a.show(tw.user, tw.message, tw.theX, tw.theY, 1);
-					a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
-				}else if (quadrants[1] == 0) {
-					//favors q1 but it's not available
-					//tweets.unshift(tw); //put the tweet back in tweets array for later use
-					/*
-					quadrants[1] = 1; //mark as used
-					a.show(tw.user, tw.message, tw.theX, tw.theY, 2);
-					a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
-					*/
-					displayNext();
-				}
-			}else{
-				if (quadrants[0] == 0) {
-					quadrants[0] = 1; //mark as used
-					a.show(tw.user, tw.message, tw.theX, tw.theY, 1);
-					a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
-				}else if (quadrants[1] == 0) {
-					quadrants[1] = 1; //mark as used
-					a.show(tw.user, tw.message, tw.theX, tw.theY, 2);
-					a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
-				}
-			}			
 		}
 		
+		public function kill():void
+		{		
+			killed = true;
+			while (container.numChildren) {
+				container.removeChildAt(0);
+			}
+		}
 		
 		private function recycleQuadrant(e:Event):void
 		{
-			var q:int = Tweet(e.currentTarget).getQuadrant();//returns 1-2
-			quadrants[q - 1] = 0; //mark as unused and available
-			displayNext();
+			if(!killed){
+				var q:int = Tweet(e.currentTarget).getQuadrant();//returns 1-2
+				quadrants[q - 1] = 0; //mark as unused and available
+				displayNext();
+			}
 		}
 		
 		/**

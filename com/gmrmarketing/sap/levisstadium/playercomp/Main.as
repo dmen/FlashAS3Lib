@@ -204,7 +204,7 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 			
 			p1Stats.theSentiment.theText.text = 0;
 			p2Stats.theSentiment.theText.text = 0;
-			
+						
 			TweenMax.to(tweenObject, 5, { p1Sent:p1.Stats[0].PlayerPositionStatValue * 3.6, delay:1, onUpdate:drawP1Sent } );
 			TweenMax.to(tweenObject, 5, { p2Sent:p2.Stats[0].PlayerPositionStatValue * 3.6, delay:1, onUpdate:drawP2Sent} );
 		}
@@ -299,14 +299,18 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 		private function drawP1Sent():void
 		{
 			draw_arc(p1Sent.graphics, 65, 128, 26, 0, tweenObject.p1Sent, 6, 0xedb01a);
-			p1Stats.theSentiment.theText.text = Math.round(tweenObject.p1Sent / 3.6);
+			if(tweenObject.p1Sent > 0){
+				p1Stats.theSentiment.theText.text = Math.round(tweenObject.p1Sent / 3.6);
+			}
 		}
 		
 		
 		private function drawP2Sent():void
 		{
 			draw_arc(p2Sent.graphics, 65, 128, 26, 0, tweenObject.p2Sent, 6, 0x058bd6);
-			p2Stats.theSentiment.theText.text = Math.round(tweenObject.p2Sent / 3.6)
+			if(tweenObject.p2Sent > 0){
+				p2Stats.theSentiment.theText.text = Math.round(tweenObject.p2Sent / 3.6);
+			}
 		}
 		
 		

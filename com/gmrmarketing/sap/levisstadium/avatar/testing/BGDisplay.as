@@ -25,7 +25,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			//images in the backgrounds folder
 			bgArray = new Array();
-			bgArray.push("sap.png", "bg2014.png", "bg2005.png", "bg1996.png");
+			bgArray.push("bg2014.png", "bg2005.png", "bg1996.png");
 			bgArray.push("bg1994.png", "bg1984.png", "bg1963.png", "bg1952.png", "bg1946.png");
 			
 			bgLoader = new Loader();

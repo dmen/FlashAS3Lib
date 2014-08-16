@@ -34,6 +34,21 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			
 			ra = new RectFinder(2);
 			
+			switch(tagName) {
+				case "levis":
+					bottomBar.theText.text = "#LevisStadium";					
+					break;
+				case "offense":
+					bottomBar.theText.text = "#Offense";
+					break;
+				case "defense":
+					bottomBar.theText.text = "#Defense";
+					break;
+				case "49ers":
+					bottomBar.theText.text = "#49ers";
+					break;
+			}
+			
 			dict = new TagCloud(2, 28, 4, tagName, colors);
 			dict.addEventListener(TagCloud.TAGS_READY, tagsLoaded, false, 0, true);
 			dict.refreshTags();
@@ -54,19 +69,15 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			var tagImage:BitmapData;
 			switch(tagName) {
 				case "levis":
-					bottomBar.theText.text = "#LevisStadium";
 					tagImage = new sap();
 					break;
 				case "offense":
-					bottomBar.theText.text = "#Offense";
 					tagImage = new helmet();
 					break;
 				case "defense":
-					bottomBar.theText.text = "#Defense";
 					tagImage = new helmet_flip();
 					break;
 				case "49ers":
-					bottomBar.theText.text = "#49ers";
 					tagImage = new helmet();
 					break;
 			}
@@ -98,7 +109,10 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		 */
 		public function kill():void
 		{
+			dict.kill();
 			ra.kill();
+			dict = null;
+			ra = null;
 		}
 		
 		/**

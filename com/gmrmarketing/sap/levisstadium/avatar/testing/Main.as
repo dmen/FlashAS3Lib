@@ -385,6 +385,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			resetTimer.start();
 		}
 		
+		
 		//re-enable tracking after 10 sec.
 		private function enableTracking(e:TimerEvent):void
 		{

@@ -96,6 +96,10 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			return tags;
 		}
 		
+		public function kill():void
+		{
+			tags = null;
+		}
 		
 		/**
 		 * Refreshes the tags array
@@ -148,6 +152,12 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 				//normalize value using a logarithm
 				tags[i].value = Math.log(tags[i].value);				
 				totalTagCount += tags[i].value;
+				
+				var name:String = tags[i].name;
+				name = name.replace(/&lt;/g, "<");
+				name = name.replace(/&gt;/g, "<");
+				name = name.replace(/&amp;/g, "&");	
+				tags[i].name = name;
 			}
 			
 						

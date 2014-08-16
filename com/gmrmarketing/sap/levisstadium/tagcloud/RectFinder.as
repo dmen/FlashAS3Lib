@@ -73,6 +73,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		
 		public function kill():void
 		{
+			stageRef.removeEventListener(Event.ENTER_FRAME, addTag);			
 			newImage.dispose();
 			image.dispose();
 		}

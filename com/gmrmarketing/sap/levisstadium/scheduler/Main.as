@@ -19,6 +19,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private var lastTask:MovieClip; //previous task swf - set in loadNextTask()
 		private var lastTaskWas3D:Boolean;
 		
+		
 		public function Main()
 		{			
 			Mouse.hide();				
@@ -48,7 +49,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		 * @param	e
 		 */
 		private function configReady(e:Event):void
-		{			
+		{	
 			tasks = AIRXML(e.currentTarget).getXML().tasks.task;	
 			currentTask = 0;
 			loadNextTask();
@@ -122,9 +123,11 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		 */
 		private function hideLastTask():void
 		{
-			TweenMax.to(thisTask, 1, { x:0, ease:Back.easeOut, onComplete:showTask } );			
 			lastTask.kill();
 			lastTask = null;
+			TweenMax.killAll();
+			TweenMax.to(thisTask, 1, { x:0, ease:Back.easeOut, onComplete:showTask } );	
+			
 		}
 		
 		
@@ -138,6 +141,13 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			
 			thisTask.show();
 			
+			//give the task one second to show before starting the clock
+			TweenMax.delayedCall(1, startCount);
+		}
+		
+		
+		private function startCount():void
+		{
 			var taskTimer:Timer = new Timer(parseFloat(tasks[currentTask].@time) * 1000, 1);
 			taskTimer.addEventListener(TimerEvent.TIMER, taskComplete, false, 0, true);
 			taskTimer.start();

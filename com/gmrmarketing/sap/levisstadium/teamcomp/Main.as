@@ -213,14 +213,19 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 		private function drawHSent():void
 		{
 			draw_arc(homeSent.graphics, 65, 128, 26, 0, tweenObject.htSent, 6, 0xedb01a);
-			homeStats.theSentiment.theText.text = Math.round(tweenObject.htSent/3.6);
+			if(tweenObject.htSent > 0){
+				homeStats.theSentiment.theText.text = Math.round(tweenObject.htSent / 3.6);
+			}
 		}
 		
 		
 		private function drawVSent():void
 		{
 			draw_arc(visSent.graphics, 65, 128, 26, 0, tweenObject.vtSent, 6, 0x058bd6);
-			visStats.theSentiment.theText.text = Math.round(tweenObject.vtSent/3.6)
+			if (tweenObject.vtSent > 0) {
+				visStats.theSentiment.theText.text = Math.round(tweenObject.vtSent / 3.6);
+			}
+			
 		}
 		
 		
