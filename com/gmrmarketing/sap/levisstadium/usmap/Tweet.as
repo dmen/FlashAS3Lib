@@ -36,12 +36,13 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			//outlineContainer.filters = [new DropShadowFilter(0, 0, 0x000000, .8, 7, 7)];
 			
 			lineContainer = new Sprite();
+			lineContainer.blendMode = BlendMode.ADD;
 			//lineContainer.filters = [new DropShadowFilter(0, 0, 0x000000, .8, 7, 7)];
 			
 			rectContainer = new Sprite();//for drawing bg shape into
 			//rectContainer.filters = [new DropShadowFilter(0, 0, 0x000000, .8, 7, 7)]
 			
-			rectContainer.addChild(lineContainer);
+			rectContainer.addChildAt(lineContainer,0);
 			rectContainer.addChild(outlineContainer);	
 			
 			vx = 0;

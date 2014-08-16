@@ -25,7 +25,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			Mouse.hide();				
 			
 			player.autoRewind = true;
-			player.addEventListener(MetadataEvent.CUE_POINT, loop);
+			player.addEventListener(MetadataEvent.CUE_POINT, loop);//listen for cue point one frame back
 			
 			config = new AIRXML(); //reads config.xml in the apps folder
 			config.addEventListener(Event.COMPLETE, configReady);
@@ -134,9 +134,8 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private function showTask():void
 		{
 			
-			if (tasks[currentTask].@file == "usmap.swf") {
-				addEventListener(Event.ENTER_FRAME, updateMapVideo, false, 0, true);
-				player.x = -768;
+			if (tasks[currentTask].@file == "usmap.swf") {				
+				thisTask.addEventListener("3Dready", hidePlayer);
 			}
 			
 			thisTask.show();
@@ -144,7 +143,12 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			//give the task one second to show before starting the clock
 			TweenMax.delayedCall(1, startCount);
 		}
-		
+		private function hidePlayer(e:Event):void
+		{
+			thisTask.removeEventListener("3Dready", hidePlayer);
+			addEventListener(Event.ENTER_FRAME, updateMapVideo, false, 0, true);
+			player.x = -768;
+		}
 		
 		private function startCount():void
 		{

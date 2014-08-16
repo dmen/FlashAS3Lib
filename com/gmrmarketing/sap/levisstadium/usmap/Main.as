@@ -18,6 +18,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
 		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"
+		public static const MAP_LOADED:String = "3Dready";
 		
 		private var _scene:Scene3D;
 		private var _camera:Camera3D;
@@ -42,6 +43,8 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		private var textContainer:Sprite;
 		
 		private var isMapLoaded:Boolean = false;
+		private var image3D:Bitmap;
+		
 		
 		public function Main()
 		{
@@ -90,12 +93,14 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		
 		private function mapLoaded(e:Event):void
 		{		
+			dispatchEvent(new Event(MAP_LOADED));
+			
 			_scene.removeEventListener( Scene3D.COMPLETE_EVENT, mapLoaded );
 			usa = _scene.getChildByName("usamap2.dae");
 			_scene.getChildByName("Plane").setMaterial(_videoPlaneMaterial);
 			
 			grayIndex = 0;
-			_scene.forEach(setDefaultColor);
+			_scene.forEach(setDefaultColor);//set all states to a range of grays
 			
 			//_scene.camera.fieldOfView = 65;
 			//_scene.camera.setRotation(59.19, 10, 1.78);
@@ -155,7 +160,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			
 			normalize();
 			sentiment.reverse();
-			
+			//show(); //TESTING
 			dispatchEvent(new Event(READY));//will call show() 
 		}
 		
@@ -261,6 +266,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		{
 			loadMap();	
 		}
+		
 		private function show2():void
 		{
 			if (!contains(textContainer)) {
@@ -293,7 +299,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			}			
 			
 			//slowly rotate map up and left - toward Cali
-			TweenMax.to(rotOb, 25, { mapRotX: -115, mapRotY:-10, onUpdate:setMapRotation, onComplete:toFlorida} );
+			TweenMax.to(rotOb, 21, { mapRotX: -115, mapRotY:-10, onUpdate:setMapRotation, onComplete:toFlorida} );
 			//TweenMax.to(_scene.camera, 22, { z:70} );			
 		}
 		
@@ -309,10 +315,17 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		
 		/**
 		 * ISChedulerMethods
+		 * called right before task is animated off stage
 		 */
 		public function doStop():void
-		{
+		{			
 			removeEventListener(Event.ENTER_FRAME, videoUpdate);
+			var bmd:BitmapData = new BitmapData(768, 512, false, 0x000000);
+			_scene.context.clear();
+			_scene.render();
+			_scene.context.drawToBitmapData( bmd );
+			image3D = new Bitmap(bmd);
+			addChildAt(image3D, 0);
 		}
 		
 		
@@ -324,6 +337,8 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			map = null;
 			tweetManager.kill();
 			videoData.dispose();
+			image3D.bitmapData.dispose();
+			image3D = null;
 			_videoPlaneMaterial.dispose();
 			_scene.dispose();
 			
