@@ -35,36 +35,14 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 		
 		public function Main()
 		{
-			p1Ring = new playerRing();
-			p1Ring.x = -231;
-			p1Ring.y = 20;
-			p1Name = new whiteTop();
-			p1Name.x = -234;
-			p1Name.y = 188;
-			p1Stats = new stats();
-			p1Stats.x = -234;
-			p1Stats.y = 240;
-			
+			p1Ring = new playerRing();			
 			p2Ring = new playerRing();
-			p2Ring.x = 778;
-			p2Ring.y = 20;
+			p1Name = new whiteTop();
+			p1Stats = new stats();
 			p2Name = new whiteTop();
-			p2Name.x = 775;
-			p2Name.y = 188;
 			p2Stats = new stats();
-			p2Stats.x = 775;
-			p2Stats.y = 240;
-			
-			title.y = -241;
-			
 			p1Sent = new Sprite();
-			p1Stats.addChild(p1Sent);
-			
 			p2Sent = new Sprite();
-			p2Stats.addChild(p2Sent);
-			
-			tweenObject = { p1Sent:0, p2Sent:0 };
-			
 			//setConfig("08/17/14,QB");
 		}
 		
@@ -74,10 +52,38 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 		 * ISChedulerMethods
 		 * config is a String like 08/17/14,QB
 		 */
-		public function setConfig(config:String):void
+		public function init(initValue:String = ""):void
 		{
-			var ar:Array = config.split(",");
+			var ar:Array = initValue.split(",");
 			
+			p1Ring.x = -231;
+			p1Ring.y = 20;
+			
+			p1Name.x = -234;
+			p1Name.y = 188;
+			
+			p1Stats.x = -234;
+			p1Stats.y = 240;
+			
+			p2Ring.x = 778;
+			p2Ring.y = 20;
+			
+			p2Name.x = 775;
+			p2Name.y = 188;
+			
+			p2Stats.x = 775;
+			p2Stats.y = 240;
+			
+			if(!p1Stats.contains(p1Sent)){
+				p1Stats.addChild(p1Sent);
+			}
+			if(!p2Stats.contains(p2Sent)){
+				p2Stats.addChild(p2Sent);
+			}
+			
+			title.y = -241;
+			
+			tweenObject = { p1Sent:0, p2Sent:0 };
 			
 			//text in the middle that slides down
 			switch(ar[1]) {
@@ -233,6 +239,22 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 		 */
 		public function kill():void
 		{
+			removeChild(p1Ring);
+			removeChild(p1Name);
+			removeChild(p1Stats);
+			
+			removeChild(p2Ring);
+			removeChild(p2Name);
+			removeChild(p2Stats);
+			
+			icon.bitmapData.dispose();
+			removeChild(icon);
+			
+			p1Stats.graphics.clear();
+			p2Stats.graphics.clear();			
+			p1Sent.graphics.clear();
+			p2Sent.graphics.clear();
+			
 			p1Image.bitmapData.dispose();
 			p2Image.bitmapData.dispose();
 			p1Image = null;

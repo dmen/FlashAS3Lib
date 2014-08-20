@@ -1,6 +1,5 @@
 package  com.gmrmarketing.sap.levisstadium.didyouknow
 {
-	import com.gmrmarketing.sap.levisstadium.ISchedulerMethods;
 	import flash.display.*;
 	import flash.geom.Rectangle;
 	import flash.net.*;
@@ -9,22 +8,24 @@ package  com.gmrmarketing.sap.levisstadium.didyouknow
 	import flash.text.TextFieldAutoSize;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
+	import fl.video.*;
 	
-	
-	public class Main extends MovieClip implements ISchedulerMethods
+	public class Main_no_net extends MovieClip
 	{
 		public static const READY:String = "ready";
 		public static const ERROR:String = "error";
 		private var degToRad:Number = 0.0174532925; //PI / 180
-		private var json:Object;
+		
 		private var dyk:MovieClip;
 		private var myTime:int;
 		private var tweenOb:Object;
 		private var animRing:Sprite;
 		private var tMask:MovieClip;
 		
+		private var facts:Facts;
 		
-		public function Main()
+		
+		public function Main_no_net()
 		{
 			dyk = new mcRing();//lib clip
 			
@@ -43,69 +44,34 @@ package  com.gmrmarketing.sap.levisstadium.didyouknow
 			
 			tweenOb = { angle:0 };
 			
+			facts = new Facts();
 			
-			//setConfig("15");
-		}
-		
-		/**
-		 * ISChedulerMethods
-		 */
-		public function init(initValue:String = ""):void
-		{
-			myTime = parseInt(initValue);
+			myTime = 12;
 			
-			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/getdidyouknow" + "?abc="+String(new Date().valueOf()));
-			r.requestHeaders.push(hdr);
-			var l:URLLoader = new URLLoader();
-			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
-			l.addEventListener(IOErrorEvent.IO_ERROR, dataError, false, 0, true);
-			try{
-				l.load(r);
-			}catch (e:Error) {
-				
-			}
+			player.autoRewind = true;
+			player.addEventListener(MetadataEvent.CUE_POINT, loop);//listen for cue point one frame back
+			
+			show();
 		}
 		
-		private function dataLoaded(e:Event):void
+		
+		private function loop(e:MetadataEvent):void
 		{
-			json = JSON.parse(e.currentTarget.data);
-			//show();//TESTING
-			dispatchEvent(new Event(READY));
+			player.seek(0);
+			player.play();
 		}
 		
 		
-		private function dataError(e:IOErrorEvent):void
-		{
-			dispatchEvent(new Event(ERROR));
-		}
-		
-		
-		/**
-		 * ISChedulerMethods
-		 */
-		public function kill():void
-		{
-			tMask.y = -706;
-			dyk.textGroup.theTitle.text = "";
-			dyk.textGroup.theText.text = "";
-			animRing.graphics.clear();
-			dyk.scaleX = dyk.scaleY = 0;
-		}
-		
-		/**
-		 * ISChedulerMethods
-		 * Called once scheduler receives READY event
-		 */
 		public function show():void
 		{
 			if (!contains(dyk)) {
 				addChild(dyk);
 			}
+			var thisFact:Object = facts.getFact();
 			
-			dyk.textGroup.theTitle.text = json.Subhead.replace(/\\n/g, '\n');
+			dyk.textGroup.theTitle.text = thisFact.Subhead.replace(/\\n/g, '\n');
 			dyk.textGroup.theTitle.autoSize = TextFieldAutoSize.CENTER;
-			dyk.textGroup.theText.text = json.Body.replace(/\\n/g, '\n');
+			dyk.textGroup.theText.text = thisFact.Body.replace(/\\n/g, '\n');
 			
 			var titleSize:Object = getTextBounds(dyk.textGroup.theTitle);
 			var bodySize:Object = getTextBounds(dyk.textGroup.theText);
@@ -131,7 +97,7 @@ package  com.gmrmarketing.sap.levisstadium.didyouknow
 		private function showText():void
 		{
 			TweenMax.to(tMask, 10, {y:-249} );
-			TweenMax.to(tweenOb, myTime, { angle:360, ease:Linear.easeNone, onUpdate:drawcircleTween } );
+			TweenMax.to(tweenOb, myTime, { angle:360, ease:Linear.easeNone, onUpdate:drawcircleTween, onComplete:removeFact } );
 		}
 		
 		
@@ -140,22 +106,19 @@ package  com.gmrmarketing.sap.levisstadium.didyouknow
 			draw_arc(animRing.graphics, 0, 0, 213, 0, tweenOb.angle, 11, 0xedb01a, 1 );
 		}
 		
-		
-		/**
-		 * ISChedulerMethods
-		 */
-		public function hide():void
+		private function removeFact():void
 		{
-			
+			TweenMax.to(dyk, 1, { x:1000, alpha:0, ease:Back.easeIn, onComplete:reset } );
 		}
 		
-		
-		/**
-		 * ISChedulerMethods
-		 */
-		public function doStop():void
+		private function reset():void
 		{
-			
+			animRing.graphics.clear();
+			dyk.textGroup.theTitle.text = "";
+			dyk.textGroup.theText.text = "";
+			dyk.alpha = 1;
+			tMask.y = -706;
+			TweenMax.delayedCall(1.5, show);
 		}
 		
 		private function getTextBounds(textField:TextField):Object

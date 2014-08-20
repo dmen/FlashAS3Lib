@@ -19,7 +19,6 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		public function TweetManager()
 		{
 			quadrants = new Array(0, 0); //all quadrants are empty
-			refresh();
 		}
 	
 		
@@ -29,15 +28,22 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			container = $container;
 		}
 		
-		public function stop():void
+		
+		public function kill():void
 		{
+			killed = true;
+			
 			while (container.numChildren) {
-				container.removeChildAt(0);
+				var t:MovieClip = MovieClip(container.removeChildAt(0));
+				t.removeEventListener(Tweet.COMPLETE, recycleQuadrant);
 			}
 		}
 		
-		private function refresh():void		
+		
+		public function refresh():void		
 		{
+			quadrants = new Array(0, 0); //all quadrants are empty
+			killed = false;
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
 			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=CaliMapTweets"+"&abc="+String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
@@ -115,13 +121,6 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			}
 		}
 		
-		public function kill():void
-		{		
-			killed = true;
-			while (container.numChildren) {
-				container.removeChildAt(0);
-			}
-		}
 		
 		private function recycleQuadrant(e:Event):void
 		{

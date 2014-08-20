@@ -14,6 +14,7 @@ package com.gmrmarketing.sap.levisstadium.california
 	{
 		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"
 		
+		
 		private var dots:Sprite;//container for all the dot clips
 		private var textContainer:Sprite;//container for twitter text messages
 		private var tweets:Array; //array of lat/lon/weights from the service
@@ -23,8 +24,20 @@ package com.gmrmarketing.sap.levisstadium.california
 		{
 			dots = new Sprite();
 			textContainer = new Sprite();
+			
+			tweetManager = new TweetManager();//gets text tweets and starts to display them
+			tweetManager.setContainer(textContainer);
+		}
+		
+		
+		/**
+		 * ISChedulerMethods
+		 */
+		public function init(initValue:String = ""):void
+		{
 			tweets = new Array();
 			
+			//gest the sentiment values which is for the dots
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
 			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=CaliMapSentiment");
 			r.requestHeaders.push(hdr);
@@ -37,19 +50,12 @@ package com.gmrmarketing.sap.levisstadium.california
 		/**
 		 * ISChedulerMethods
 		 */
-		public function setConfig(config:String):void
-		{
-			
-		}
-		
-		
-		/**
-		 * ISChedulerMethods
-		 */
 		public function show():void
 		{			
 			addChild(dots);//container for dot clips
 			addChild(textContainer);
+			
+			tweetManager.refresh();
 			
 			//add the tweet dots to the map
 			var del:Number = 0;
@@ -58,8 +64,7 @@ package com.gmrmarketing.sap.levisstadium.california
 				del += .25;
 			}
 			
-			tweetManager = new TweetManager();//gets text tweets and starts to display them
-			tweetManager.setContainer(textContainer);
+			
 		}
 		
 		
@@ -88,14 +93,20 @@ package com.gmrmarketing.sap.levisstadium.california
 		public function kill():void
 		{
 			TweenMax.killAll();
+			
+			while (dots.numChildren) {
+				dots.removeChildAt(0);
+			}
+			
 			if (contains(dots)) {
 				removeChild(dots);
 			}
+			
 			if (contains(textContainer)) {
 				removeChild(textContainer);
 			}
-			tweetManager.kill();
-			tweetManager = null;
+			
+			tweetManager.kill();//removes tweets from textContainer
 		}
 		
 

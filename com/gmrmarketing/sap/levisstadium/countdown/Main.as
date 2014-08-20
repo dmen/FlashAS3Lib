@@ -132,12 +132,23 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			secsTextClip.alpha = 0;
 			secsTextClip.scaleX = secsTextClip.scaleY = .1;			
 			
+				
+		}
+		
+		/**
+		 * ISChedulerMethods
+		 * First method called from scheduler
+		 * refreshes the data from the service
+		 * dispatches 'ready' once the data is loaded
+		 */
+		public function init(initValue:String = ""):void
+		{
 			//get kickoff time from the web service
 			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GetKickoffTime"+"?abc="+String(new Date().valueOf()));
 			//r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
-			l.load(r);			
+			l.load(r);		
 		}
 		
 		
@@ -156,13 +167,6 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			//show();//TESTING
 		}
 		
-		
-		/**
-		 * ISChedulerMethods		 
-		 */
-		public function setConfig(config:String):void
-		{
-		}
 		
 		
 		/**
@@ -318,6 +322,26 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		 */
 		public function kill():void
 		{
+			daysBase.graphics.clear();
+			hoursBase.graphics.clear();
+			minutesBase.graphics.clear();
+			secondsBase.graphics.clear();
+			
+			daysColor.graphics.clear();
+			hoursColor.graphics.clear();
+			minutesColor.graphics.clear();
+			secondsColor.graphics.clear();
+			
+			daysTextClip.scaler.theText.text = "";
+			hoursTextClip.scaler.theText.text = "";
+			minsTextClip.scaler.theText.text = "";
+			secsTextClip.scaler.theText.text = "";
+			
+			daysTextClip.alpha = 0;
+			hoursTextClip.alpha = 0;
+			minsTextClip.alpha = 0;
+			secsTextClip.alpha = 0;
+			
 			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 			updateTimer.reset();
 			if (contains(hoursClip)) {

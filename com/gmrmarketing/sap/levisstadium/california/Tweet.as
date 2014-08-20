@@ -180,30 +180,6 @@ package com.gmrmarketing.sap.levisstadium.california
 		}
 		
 		
-		/*
-		private function drift(e:Event):void
-		{
-			vx += Math.random() * 0.2 - 0.1;
-			vy += Math.random() * 0.2 - 0.1;
-			
-			clip.x += vx;
-			clip.y += vy;
-			
-			vx *= .95;
-			vy *= .95;
-			
-			if (clip.x < 0) {
-				clip.x = 0;
-			}
-			if (clip.y - 38 < 0) {
-				clip.y = 38;
-			}
-			if (clip.x + outlineContainer.width > 768) {
-				clip.x = 768 - outlineContainer.width;
-			}
-		}
-		*/
-		
 		private function startEndTimer():void
 		{
 			var tLen:int = Math.max(1, clip.theText.theText.length / 24);			
@@ -221,20 +197,24 @@ package com.gmrmarketing.sap.levisstadium.california
 		
 		private function tweetComplete(e:TimerEvent):void
 		{			
-			TweenMax.to(clip, 1, { alpha:0,onComplete:dispose } );
+			TweenMax.to(clip, 1, { alpha:0, onComplete:dispose } );
 		}
 		
 		
-		private function dispose():void
+		public function dispose():void
 		{
+			lineContainer.graphics.clear();
+			clip.userBG.graphics.clear();
+			
+			
 			if (rectContainer.contains(outlineContainer)) {
 				rectContainer.removeChild(outlineContainer);
 			}
 			if (rectContainer.contains(lineContainer)) {
 				rectContainer.removeChild(lineContainer);
 			}
-			if (clip.contains(rectContainer)) {
-				clip.removeChild(rectContainer);
+			while (clip.numChildren) {
+				clip.removeChildAt(0);
 			}
 			if (container.contains(clip)) {
 				container.removeChild(clip);
@@ -242,7 +222,12 @@ package com.gmrmarketing.sap.levisstadium.california
 			if (container.contains(dot)) {
 				container.removeChild(dot);
 			}
-			//clip.removeEventListener(Event.ENTER_FRAME, drift);
+			
+			outlineContainer = null;
+			lineContainer = null;
+			rectContainer = null;
+			clip = null;
+			dot = null;
 			
 			dispatchEvent(new Event(COMPLETE));
 		}

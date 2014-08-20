@@ -17,8 +17,8 @@ package com.gmrmarketing.sap.levisstadium.usmap
 	
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
-		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"
-		public static const MAP_LOADED:String = "3Dready";
+		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"			
+		public static const MAP_READY:String = "3Dready"; 
 		
 		private var _scene:Scene3D;
 		private var _camera:Camera3D;
@@ -71,6 +71,13 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			
 			textContainer = new Sprite();
 			
+			tweetManager = new TweetManager();//gets text tweets and starts to display them in textContainer
+			tweetManager.setContainer(textContainer);
+		}
+		
+		
+		public function init(initValue:String = ""):void
+		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
 			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=USMapSentiment"+"&abc="+String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
@@ -82,9 +89,9 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			}catch (e:Error) {
 				
 			}
-			
 		}
 		
+		//called from show
 		private function loadMap():void
 		{
 			map = _scene.addChildFromFile("usmap4.zf3d");
@@ -92,34 +99,41 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		}
 		
 		private function mapLoaded(e:Event):void
-		{		
-			dispatchEvent(new Event(MAP_LOADED));
-			
+		{					
 			_scene.removeEventListener( Scene3D.COMPLETE_EVENT, mapLoaded );
 			usa = _scene.getChildByName("usamap2.dae");
 			_scene.getChildByName("Plane").setMaterial(_videoPlaneMaterial);
 			
 			grayIndex = 0;
-			_scene.forEach(setDefaultColor);//set all states to a range of grays
+			_scene.forEach(setDefaultColor);//set all states to a range of grays and scaleZ of 1
 			
 			//_scene.camera.fieldOfView = 65;
 			//_scene.camera.setRotation(59.19, 10, 1.78);
-			rotOb = new Object();			
+			rotOb = new Object();
+			rotOb.camRotX = _scene.camera.getRotation().x;//camera original rotation values - used in kill()
+			rotOb.camRotY = _scene.camera.getRotation().y;
+			rotOb.camRotZ = _scene.camera.getRotation().z;
 			rotOb.rotX = _scene.camera.getRotation().x;
 			rotOb.rotY = _scene.camera.getRotation().y;
 			rotOb.rotZ = _scene.camera.getRotation().z;
+			rotOb.mapRotXo = usa.getRotation().x;//original map rotation values - used in kill
+			rotOb.mapRotYo = usa.getRotation().y;	
+			rotOb.mapRotZo = usa.getRotation().z;
 			rotOb.mapRotX = usa.getRotation().x;
 			rotOb.mapRotY = usa.getRotation().y;	
 			rotOb.mapRotZ = usa.getRotation().z;
 			
 			isMapLoaded = true;
-			
+			dispatchEvent(new Event(MAP_READY));
 			show2();
 		}
 		
 		
 		private function setDefaultColor(p:Pivot3D):void
 		{
+			if(String(p.name).toLowerCase() != "plane"){
+				p.scaleZ = 1;
+			}
 			materialRef = _scene.getMaterialByName( String(p.name).toLowerCase() ) as Shader3D;
 			if(materialRef){
 				materialRef.filters[0].color = grays[grayIndex];
@@ -246,17 +260,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		private function doTrace(p:Pivot3D):void
 		{
 			trace(p.name);
-		}
-		
-		
-		
-		/**
-		 * ISChedulerMethods
-		 */
-		public function setConfig(config:String):void
-		{
-			
-		}
+		}		
 		
 		
 		/**
@@ -264,16 +268,24 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		 */
 		public function show():void
 		{
-			loadMap();	
+			if(!isMapLoaded){
+				loadMap();
+			}else {				
+				_scene.forEach(setDefaultColor);//set all states to a range of grays and scaleZ of 1				
+				usa.setRotation(rotOb.mapRotXo, rotOb.mapRotYo, rotOb.mapRotZo );//reset map rotation
+				dispatchEvent(new Event(MAP_READY));
+				show2();
+			}
 		}
 		
+		//called from mapLoaded()
 		private function show2():void
 		{
 			if (!contains(textContainer)) {
 				addChild(textContainer);
 			}
-			tweetManager = new TweetManager();//gets text tweets and starts to display them in textContainer
-			tweetManager.setContainer(textContainer);
+			
+			tweetManager.refresh();
 			
 			for (var i:int = 0; i < sentiment.length; i++) {
 				
@@ -316,15 +328,18 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		/**
 		 * ISChedulerMethods
 		 * called right before task is animated off stage
+		 * makes a bitmap of the stage so the map and can slide off instead of just disappearing
 		 */
 		public function doStop():void
 		{			
 			removeEventListener(Event.ENTER_FRAME, videoUpdate);
+			
 			var bmd:BitmapData = new BitmapData(768, 512, false, 0x000000);
 			_scene.context.clear();
 			_scene.render();
 			_scene.context.drawToBitmapData( bmd );
 			image3D = new Bitmap(bmd);
+			
 			addChildAt(image3D, 0);
 		}
 		
@@ -334,14 +349,12 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		 */
 		public function kill():void
 		{
-			map = null;
 			tweetManager.kill();
-			videoData.dispose();
+			//videoData.dispose();
+			removeChild(image3D);
 			image3D.bitmapData.dispose();
 			image3D = null;
-			_videoPlaneMaterial.dispose();
-			_scene.dispose();
-			
+			//_videoPlaneMaterial.dispose();
 		}
 	}
 	

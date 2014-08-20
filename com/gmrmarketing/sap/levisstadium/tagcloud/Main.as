@@ -23,13 +23,13 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		
 		/**
 		 * ISChedulerMethods
-		 * config is tagName, array of colors: levis,0xffffff,0xcccccc,0x678900,etc
+		 * initValue is tagName, array of colors: levis,0xffffff,0xcccccc,0x678900,etc
 		 */
-		public function setConfig(config:String):void
+		public function init(initValue:String = ""):void
 		{
-			var i:int = config.indexOf(",");
-			tagName = config.substring(0, i);
-			var cols:String = config.substr(i + 1);
+			var i:int = initValue.indexOf(",");
+			tagName = initValue.substring(0, i);
+			var cols:String = initValue.substr(i + 1);
 			var colors:Array = cols.split(",");
 			
 			ra = new RectFinder(2);

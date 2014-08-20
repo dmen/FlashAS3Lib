@@ -191,12 +191,15 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		
 		private function tweetComplete(e:TimerEvent):void
 		{			
-			TweenMax.to(clip, 1, { alpha:0,onComplete:dispose } );
+			TweenMax.to(clip, 1, { alpha:0, onComplete:dispose } );
 		}
 		
 		
 		private function dispose():void
 		{
+			lineContainer.graphics.clear();
+			clip.userBG.graphics.clear();			
+			
 			if (rectContainer.contains(outlineContainer)) {
 				rectContainer.removeChild(outlineContainer);
 			}
@@ -212,6 +215,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			if (container.contains(dot)) {
 				container.removeChild(dot);
 			}
+			
 			outlineContainer = null;
 			lineContainer = null;
 			rectContainer = null;

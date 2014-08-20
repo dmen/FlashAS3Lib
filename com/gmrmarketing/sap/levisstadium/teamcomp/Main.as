@@ -30,37 +30,18 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 		
 		public function Main()
 		{
-			homeRing = new helmetRing();
-			homeRing.x = -231;
-			homeRing.y = 20;
-			homeTwitter = new whiteTop();
-			homeTwitter.x = -234;
-			homeTwitter.y = 188;
-			homeStats = new stats();
-			homeStats.x = -234;
-			homeStats.y = 240;
+			homeRing = new helmetRing();			
+			homeTwitter = new whiteTop();			
+			homeStats = new stats();			
 			
 			visRing = new helmetRing();
 			visRing.helmet.scaleX = -1;
-			TweenMax.to(visRing.helmet, 0, { colorTransform: { tint:0x058bd6, tintAmount:1 }} );
-			visRing.x = 778;
-			visRing.y = 20;
-			visTwitter = new whiteTop();
-			visTwitter.x = 775;
-			visTwitter.y = 188;
-			visStats = new stats();
-			visStats.x = 775;
-			visStats.y = 240;
+			TweenMax.to(visRing.helmet, 0, { colorTransform: { tint:0x058bd6, tintAmount:1 }} );			
+			visTwitter = new whiteTop();			
+			visStats = new stats();			
 			
-			teams.y = -241;
-			
-			homeSent = new Sprite();
-			homeStats.addChild(homeSent);
-			
-			visSent = new Sprite();
-			visStats.addChild(visSent);
-			
-			tweenObject = { htSent:0, vtSent:0 };
+			homeSent = new Sprite();///home sentiment
+			visSent = new Sprite();//visitor sentiment		
 			
 			//setConfig("08/17/14");
 		}
@@ -69,12 +50,41 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 		
 		/**
 		 * ISChedulerMethods
-		 * config is a date like 08/17/14
+		 * initValue is a date like 08/17/14
 		 */
-		public function setConfig(config:String):void
+		public function init(initValue:String = ""):void
 		{
+			homeRing.x = -231;
+			homeRing.y = 20;
+			
+			homeTwitter.x = -234;
+			homeTwitter.y = 188;
+			
+			homeStats.x = -234;
+			homeStats.y = 240;
+			
+			visRing.x = 778;
+			visRing.y = 20;
+			
+			visTwitter.x = 775;
+			visTwitter.y = 188;
+			
+			visStats.x = 775;
+			visStats.y = 240;			
+			
+			if(!homeStats.contains(homeSent)){
+				homeStats.addChild(homeSent);
+			}
+			if (!visStats.contains(visSent)) {
+				visStats.addChild(visSent);
+			}	
+			
+			teams.y = -241;
+			
+			tweenObject = { htSent:0, vtSent:0 };
+				
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/teamcomparison?gamedate=" + config + "&abc="+String(new Date().valueOf()));
+			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/teamcomparison?gamedate=" + initValue + "&abc="+String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -193,6 +203,19 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 		 */
 		public function kill():void
 		{
+			removeChild(homeRing);
+			removeChild(homeTwitter);
+			removeChild(homeStats);
+			
+			removeChild(visRing);
+			removeChild(visTwitter);
+			removeChild(visStats);
+			
+			homeStats.graphics.clear();
+			visStats.graphics.clear();
+			
+			homeSent.graphics.clear();
+			visSent.graphics.clear();
 		}
 		
 		
