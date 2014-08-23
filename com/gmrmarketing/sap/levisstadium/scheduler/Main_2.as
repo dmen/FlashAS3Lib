@@ -1,3 +1,6 @@
+/**
+ * Scheduler V2
+ */
 package com.gmrmarketing.sap.levisstadium.scheduler
 {
 	import flash.display.*;
@@ -35,6 +38,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		
 		
 		/**
+		 * Called when a cuepoint is passed in the video
 		 * for looping the video background
 		 * @param	e
 		 */
@@ -114,9 +118,9 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 					player.x = 0;//move video player back on screen
 				}
 				lastTask.doStop();
-				TweenMax.to(lastTask, 1, { x:1920, ease:Back.easeIn, onComplete:hideLastTask } );
+				TweenMax.to(lastTask, 1, { x:1920, onComplete:hideLastTask } );
 			}else {				
-				TweenMax.to(thisTask, 1, { x:0, ease:Back.easeOut, onComplete:showTask } );
+				TweenMax.to(thisTask, .75, { x:0, onComplete:showTask } );
 			}			
 		}
 		
@@ -130,7 +134,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			lastTask.kill();
 			lastTask = null;
 			TweenMax.killAll();
-			TweenMax.to(thisTask, 1, { x:0, ease:Back.easeOut, onComplete:showTask } );	
+			TweenMax.to(thisTask, .75, { x:0, onComplete:showTask } );	
 			
 		}
 		
@@ -141,7 +145,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private function showTask():void
 		{			
 			if (tasks[currentTask].@file == "usmap.swf") {				
-				thisTask.addEventListener("3Dready", hidePlayer);
+				//thisTask.addEventListener("3Dready", hidePlayer);
 			}
 			
 			thisTask.show();
@@ -167,10 +171,10 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		
 		private function taskComplete(e:TimerEvent):void
 		{
-			lastTaskWas3D = false;
+			//lastTaskWas3D = false;
 			if (tasks[currentTask].@file == "usmap.swf") {
-				removeEventListener(Event.ENTER_FRAME, updateMapVideo);
-				lastTaskWas3D = true;
+				//removeEventListener(Event.ENTER_FRAME, updateMapVideo);
+				//lastTaskWas3D = true;
 			}
 				
 			currentTask++;

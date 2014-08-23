@@ -15,6 +15,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 	public class TagCloud extends EventDispatcher
 	{
 		public static const TAGS_READY:String = "tagsLoaded";//dispatched from tagsLoaded() after a call to refreshTags()
+		public static const ERROR:String = "tagError";//dispatched from tagsLoaded() after a call to refreshTags()
 		
 		private var tags:Array; //array of objects with name and value properties (fontSize property added in tagsLoaded())
 		
@@ -36,6 +37,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		private var maxFont:int;
 		private var minFont:int;
 		
+		private var localCache:Array;
 		
 		/**
 		 * Constructor
@@ -45,14 +47,12 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		 * @param	name one of: levis,offense,defense,49ers
 		 * @param	colors
 		 */
-		public function TagCloud(ss:int, maxFontSize:int, minFontSize:int, name:String, colors:Array)
+		public function TagCloud(ss:int, maxFontSize:int, minFontSize:int)
 		{
 			sampleSize = ss;
 			maxFont = maxFontSize;
-			minFont = minFontSize;
-			
-			tagName = name;
-			tagColors = colors;			
+			minFont = minFontSize;			
+					
 			hText = new mcHText();//lib
 			vText = new mcVText();//lib	
 			tags = new Array();		
@@ -108,8 +108,11 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			GetTagsDefense            (…same but for Defense)
 			GetTagsStadium			  (word cloud for Levi’s Stadium)
 		 */
-		public function refreshTags():void
+		public function refreshTags(name:String, colors:Array):void
 		{
+			tagName = name;
+			tagColors = colors;			
+			
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
 			var r:URLRequest;
 			
@@ -131,6 +134,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, tagsLoaded, false, 0, true);
+			l.addEventListener(IOErrorEvent.IO_ERROR, tagError, false, 0, true);
 			l.load(r)
 		}
 		
@@ -178,9 +182,21 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 				measure(tags[i]);//passed by reference so tag in array is modified by measure()
 			}
 			
+			localCache = tags.concat();
+			
 			dispatchEvent(new Event(TAGS_READY));
 		}
 		
+		
+		private function tagError(e:IOErrorEvent):void
+		{			
+			if (localCache) {
+				tags = localCache.concat();
+				dispatchEvent(new Event(TAGS_READY));
+			}else {
+				
+			}
+		}
 		
 		/**
 		 * Modifies the passed in tag object 

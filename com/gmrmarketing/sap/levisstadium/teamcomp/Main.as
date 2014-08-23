@@ -26,7 +26,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 		private var visSent:Sprite; //container for animated arc
 		
 		private var tweenObject:Object;
-		
+		private var localCache:Object;
 		
 		public function Main()
 		{
@@ -43,7 +43,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			homeSent = new Sprite();///home sentiment
 			visSent = new Sprite();//visitor sentiment		
 			
-			//setConfig("08/17/14");
+			//init("08/24/14");
 		}
 		
 		
@@ -62,6 +62,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			
 			homeStats.x = -234;
 			homeStats.y = 240;
+			homeStats.scaleY = 0;
 			
 			visRing.x = 778;
 			visRing.y = 20;
@@ -71,6 +72,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			
 			visStats.x = 775;
 			visStats.y = 240;			
+			visStats.scaleY = 0;			
 			
 			if(!homeStats.contains(homeSent)){
 				homeStats.addChild(homeSent);
@@ -149,7 +151,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			
 			TweenMax.to(homeRing, 1, { x:41, ease:Back.easeOut } );
 			TweenMax.to(homeTwitter, 1, { x:36, ease:Back.easeOut, delay:.25 } );
-			TweenMax.to(homeStats, 1, { x:36, ease:Back.easeOut, delay:.5 } );
+			TweenMax.to(homeStats, 1, { x:36, scaleY:1, ease:Back.easeOut, delay:.5 } );
 			
 			TweenMax.to(homeStats.wins, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.25 } );
 			TweenMax.to(homeStats.losses, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.3 } );
@@ -157,7 +159,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			
 			TweenMax.to(visRing, 1, { x:514, ease:Back.easeOut, delay:.25 } );
 			TweenMax.to(visTwitter, 1, { x:509, ease:Back.easeOut, delay:.5 } );
-			TweenMax.to(visStats, 1, { x:509, ease:Back.easeOut, delay:.75 } );
+			TweenMax.to(visStats, 1, { x:509, scaleY:1, ease:Back.easeOut, delay:.75 } );
 			
 			TweenMax.to(visStats.wins, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.65 } );
 			TweenMax.to(visStats.losses, .5, { scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.55 } );
@@ -175,8 +177,28 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			homeStats.theSentiment.theText.text = 0;
 			visStats.theSentiment.theText.text = 0;
 			
-			TweenMax.to(tweenObject, 5, { htSent:ht.Stats[0].NetbaseSentiment * 3.6, delay:1, onUpdate:drawHSent } );
-			TweenMax.to(tweenObject, 5, { vtSent:vt.Stats[0].NetbaseSentiment * 3.6, delay:1, onUpdate:drawVSent} );		
+			if (ht.Stats[0].NetbaseSentiment < 0) {
+				homeSent.scaleX = -1;
+				homeSent.x = 130;
+				tweenObject.htNegSent = true;
+			}else {
+				homeSent.scaleX = 1;
+				homeSent.x = 0;
+				tweenObject.htNegSent = false;
+			}
+				
+			if (vt.Stats[0].NetbaseSentiment < 0) {
+				visSent.scaleX = -1;		
+				visSent.x = 130;
+				tweenObject.vtNegSent = true;
+			}else {
+				visSent.scaleX = 1;
+				visSent.x = 0;
+				tweenObject.vtNegSent = false;
+			}	
+			
+			TweenMax.to(tweenObject, 5, { htSent:Math.abs(ht.Stats[0].NetbaseSentiment * 3.6), delay:1, onUpdate:drawHSent } );
+			TweenMax.to(tweenObject, 5, { vtSent:Math.abs(vt.Stats[0].NetbaseSentiment * 3.6), delay:1, onUpdate:drawVSent} );		
 		}
 		
 		
@@ -222,6 +244,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 		private function dataLoaded(e:Event):void
 		{
 			json = JSON.parse(e.currentTarget.data);
+			localCache = json;
 			//show();//TESTING
 			dispatchEvent(new Event(READY));
 		}
@@ -229,23 +252,32 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 		
 		private function dataError(e:IOErrorEvent):void
 		{
-			dispatchEvent(new Event(ERROR));
+			if (localCache) {
+				json = localCache;
+				dispatchEvent(new Event(READY));
+			}else{
+				dispatchEvent(new Event(ERROR));
+			}
 		}
 		
 		
 		private function drawHSent():void
 		{
 			draw_arc(homeSent.graphics, 65, 128, 26, 0, tweenObject.htSent, 6, 0xedb01a);
-			if(tweenObject.htSent > 0){
-				homeStats.theSentiment.theText.text = Math.round(tweenObject.htSent / 3.6);
-			}
+			if(tweenObject.htNegSent){
+				homeStats.theSentiment.theText.text = Math.round(-tweenObject.htSent / 3.6);
+			}else {
+				homeStats.theSentiment.theText.text = Math.round(tweenObject.htSent / 3.6);				
+			}			
 		}
 		
 		
 		private function drawVSent():void
 		{
 			draw_arc(visSent.graphics, 65, 128, 26, 0, tweenObject.vtSent, 6, 0x058bd6);
-			if (tweenObject.vtSent > 0) {
+			if (tweenObject.vtNegSent) {
+				visStats.theSentiment.theText.text = Math.round(-tweenObject.vtSent / 3.6);
+			}else{
 				visStats.theSentiment.theText.text = Math.round(tweenObject.vtSent / 3.6);
 			}
 			
@@ -276,14 +308,14 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			
 				// drawing the inner arc
 				for (i = 1; i <= steps; i++) {
-								angle = angle_from + angle_diff / steps * i;
-								g.lineTo( getX(angle, innerRad, center_x), getY(angle, innerRad, center_y));
+					angle = angle_from + angle_diff / steps * i;
+					g.lineTo( getX(angle, innerRad, center_x), getY(angle, innerRad, center_y));
 				}
 				
 				// drawing the outer arc
 				for (i = steps; i >= 0; i--) {
-								angle = angle_from + angle_diff / steps * i;
-								g.lineTo( getX(angle, outerRad, center_x), getY(angle, outerRad, center_y));
+					angle = angle_from + angle_diff / steps * i;
+					g.lineTo( getX(angle, outerRad, center_x), getY(angle, outerRad, center_y));
 				}
 				
 				g.lineTo(px_inner, py_inner);

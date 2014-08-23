@@ -19,6 +19,8 @@ package com.gmrmarketing.sap.levisstadium.california
 		private var textContainer:Sprite;//container for twitter text messages
 		private var tweets:Array; //array of lat/lon/weights from the service
 		private var tweetManager:TweetManager; //manages getting and displaying the text tweets
+		private var localCache:Array;
+		
 		
 		public function Main()
 		{
@@ -37,12 +39,13 @@ package com.gmrmarketing.sap.levisstadium.california
 		{
 			tweets = new Array();
 			
-			//gest the sentiment values which is for the dots
+			//gets the sentiment values which is for the dots
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=CaliMapSentiment");
+			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=CaliMapSentiment&abc=" + String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
+			l.addEventListener(IOErrorEvent.IO_ERROR, dataError, false, 0, true);
 			l.load(r);
 		}
 		
@@ -126,11 +129,20 @@ package com.gmrmarketing.sap.levisstadium.california
 			normalize();
 			//tweets.reverse();//draw smaller first
 			tweets = Utility.randomizeArray(tweets);
+			localCache = tweets.concat();
 			
 			//show();//TESTING
 			dispatchEvent(new Event(READY));			
 		}
 		
+		
+		private function dataError(e:IOErrorEvent):void
+		{
+			if (localCache) {
+				tweets = localCache.concat();
+				dispatchEvent(new Event(READY));
+			}
+		}
 		
 		/**
 		 * Normalizes weights with Math.log() and then does a linear normalization:

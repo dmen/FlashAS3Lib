@@ -11,13 +11,16 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		private var dict:TagCloud;//tags from the service
 		private var ra:RectFinder;
 		private var bmp:Bitmap;
-		private var tagName:String; //set in setConfig, one of: levis,offense,defense
-		
+		private var tagName:String; //set in setConfig, one of: levis,offense,defense	
 		
 		public function Main()
 		{		
 			//TESTING
-			//setConfig("levis,0xFFFFFF,0xCCCCCC,0xEEB500");
+			//init("levis,0xFFFFFF,0xCCCCCC,0xEEB500");
+			
+			dict = new TagCloud(2, 28, 4);
+			dict.addEventListener(TagCloud.TAGS_READY, tagsLoaded, false, 0, true);
+			
 		}
 		
 		
@@ -48,10 +51,8 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 					bottomBar.theText.text = "#49ers";
 					break;
 			}
-			
-			dict = new TagCloud(2, 28, 4, tagName, colors);
-			dict.addEventListener(TagCloud.TAGS_READY, tagsLoaded, false, 0, true);
-			dict.refreshTags();
+						
+			dict.refreshTags(tagName, colors);//calls tagsLoaded when ready
 		}
 		
 		
@@ -111,7 +112,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		{
 			dict.kill();
 			ra.kill();
-			dict = null;
+			//dict = null;
 			ra = null;
 		}
 		

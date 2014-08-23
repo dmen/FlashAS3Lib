@@ -20,17 +20,20 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 		private var p1Stats:MovieClip;
 		private var p1Sent:Sprite; //container for animated arc - sentiment
 		private var p1Image:Bitmap;
+		private var lastP1Image:Bitmap;//used with localCache
 		
 		private var p2Ring:MovieClip;
 		private var p2Name:MovieClip;
 		private var p2Stats:MovieClip;
 		private var p2Sent:Sprite; //container for animated arc - sentiment
 		private var p2Image:Bitmap;
+		private var lastP2Image:Bitmap;//used with localCache
 		
 		private var tweenObject:Object;//for tweening arc
 		private var theTitle:String; //QUARTERBACK" etc. Set in setConfig()
 		
 		private var icon:Bitmap;
+		private var localCache:Object;
 		
 		
 		public function Main()
@@ -43,7 +46,8 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 			p2Stats = new stats();
 			p1Sent = new Sprite();
 			p2Sent = new Sprite();
-			//setConfig("08/17/14,QB");
+			
+			//init("08/24/14,QB");
 		}
 		
 		
@@ -64,6 +68,7 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 			
 			p1Stats.x = -234;
 			p1Stats.y = 240;
+			p1Stats.scaleY = 0;
 			
 			p2Ring.x = 778;
 			p2Ring.y = 20;
@@ -73,6 +78,7 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 			
 			p2Stats.x = 775;
 			p2Stats.y = 240;
+			p2Stats.scaleY = 0;
 			
 			if(!p1Stats.contains(p1Sent)){
 				p1Stats.addChild(p1Sent);
@@ -184,7 +190,7 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 			
 			TweenMax.to(p1Ring, 1, { x:41, ease:Back.easeOut } );
 			TweenMax.to(p1Name, 1, { x:36, ease:Back.easeOut, delay:.25 } );
-			TweenMax.to(p1Stats, 1, { x:36, ease:Back.easeOut, delay:.5 } );
+			TweenMax.to(p1Stats, 1, { x:36, scaleY:1, ease:Back.easeOut, delay:.5 } );
 			
 			TweenMax.to(p1Stats.s1, .5, { scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.25 } );			
 			TweenMax.to(p1Stats.s2, .5, { scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.3 } );			
@@ -192,7 +198,7 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 			
 			TweenMax.to(p2Ring, 1, { x:514, ease:Back.easeOut, delay:.25 } );
 			TweenMax.to(p2Name, 1, { x:509, ease:Back.easeOut, delay:.5 } );
-			TweenMax.to(p2Stats, 1, { x:509, ease:Back.easeOut, delay:.75 } );
+			TweenMax.to(p2Stats, 1, { x:509, scaleY:1, ease:Back.easeOut, delay:.75 } );
 			
 			TweenMax.to(p2Stats.s1, .5, { scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.6 } );			
 			TweenMax.to(p2Stats.s2, .5, { scaleX:1, scaleY:1, ease:Back.easeOut, delay:1.55 } );			
@@ -210,9 +216,29 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 			
 			p1Stats.theSentiment.theText.text = 0;
 			p2Stats.theSentiment.theText.text = 0;
+			
+			if (p1.Stats[0].PlayerPositionStatValue < 0) {
+				p1Sent.scaleX = -1;
+				p1Sent.x = 130;
+				tweenObject.p1NegSent = true;
+			}else {
+				p1Sent.scaleX = 1;
+				p1Sent.x = 0;
+				tweenObject.p1NegSent = false;
+			}
+				
+			if (p2.Stats[0].PlayerPositionStatValue < 0) {
+				p2Sent.scaleX = -1;		
+				p2Sent.x = 130;
+				tweenObject.p2NegSent = true;
+			}else {
+				p2Sent.scaleX = 1;
+				p2Sent.x = 0;
+				tweenObject.p2NegSent = false;
+			}			
 						
-			TweenMax.to(tweenObject, 5, { p1Sent:p1.Stats[0].PlayerPositionStatValue * 3.6, delay:1, onUpdate:drawP1Sent } );
-			TweenMax.to(tweenObject, 5, { p2Sent:p2.Stats[0].PlayerPositionStatValue * 3.6, delay:1, onUpdate:drawP2Sent} );
+			TweenMax.to(tweenObject, 5, { p1Sent:Math.abs(p1.Stats[0].PlayerPositionStatValue * 3.6), delay:1, onUpdate:drawP1Sent } );
+			TweenMax.to(tweenObject, 5, { p2Sent:Math.abs(p2.Stats[0].PlayerPositionStatValue * 3.6), delay:1, onUpdate:drawP2Sent} );
 		}
 		
 		
@@ -239,10 +265,18 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 		 */
 		public function kill():void
 		{
+			//don't remove gray circle already in the clip
+			while (p1Ring.numChildren > 1) {
+				p1Ring.removeChildAt(1);
+			}
 			removeChild(p1Ring);
 			removeChild(p1Name);
 			removeChild(p1Stats);
 			
+			//don't remove gray circle already in the clip
+			while (p2Ring.numChildren > 1) {
+				p2Ring.removeChildAt(1);
+			}
 			removeChild(p2Ring);
 			removeChild(p2Name);
 			removeChild(p2Stats);
@@ -254,16 +288,23 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 			p2Stats.graphics.clear();			
 			p1Sent.graphics.clear();
 			p2Sent.graphics.clear();
-			
-			p1Image.bitmapData.dispose();
-			p2Image.bitmapData.dispose();
+			/*
+			if(p1Image){
+				p1Image.bitmapData.dispose();
+			}
+			if(p2Image){
+				p2Image.bitmapData.dispose();
+			}
 			p1Image = null;
 			p2Image = null;
+			*/
 		}
+		
 		
 		private function dataLoaded(e:Event):void
 		{
 			json = JSON.parse(e.currentTarget.data);
+			localCache = json;
 			
 			var p1URL:String;
 			var p2URL:String;
@@ -284,7 +325,7 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 			}
 			
 			//show();//TESTING
-			dispatchEvent(new Event(READY));
+			dispatchEvent(new Event(READY));//will call show()
 		}
 		
 		
@@ -292,6 +333,9 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 		{			
 			p1Image = Bitmap(e.target.content);
 			p1Image.smoothing = true;
+			
+			lastP1Image = Bitmap(e.target.content);
+			lastP1Image.smoothing = true;
 			
 			var m:MovieClip = new ringMask();//lib clip
 			p1Ring.addChild(p1Image);
@@ -305,6 +349,9 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 			p2Image = Bitmap(e.target.content);
 			p2Image.smoothing = true;
 			
+			lastP2Image = Bitmap(e.target.content);
+			lastP2Image.smoothing = true;
+			
 			var m:MovieClip = new ringMask();//lib clip
 			p2Ring.addChild(p2Image);
 			p2Ring.addChild(m);
@@ -314,25 +361,53 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 		
 		private function dataError(e:IOErrorEvent):void
 		{
-			dispatchEvent(new Event(ERROR));
+			if (localCache) {
+				json = localCache;				
+			
+				var m:MovieClip = new ringMask();//lib clip
+				p1Ring.addChild(lastP1Image);
+				p1Ring.addChild(m);
+				lastP1Image.mask = m;				
+			
+				var m2:MovieClip = new ringMask();//lib clip
+				p2Ring.addChild(lastP2Image);
+				p2Ring.addChild(m2);
+				lastP2Image.mask = m2;
+				
+				dispatchEvent(new Event(READY));
+			}else{
+				dispatchEvent(new Event(ERROR));
+			}
 		}
 		
-		
+		/**
+		 * Called by TweenMax - animates ring drawing and text
+		 * 
+		 */
 		private function drawP1Sent():void
 		{
 			draw_arc(p1Sent.graphics, 65, 128, 26, 0, tweenObject.p1Sent, 6, 0xedb01a);
-			if(tweenObject.p1Sent > 0){
-				p1Stats.theSentiment.theText.text = Math.round(tweenObject.p1Sent / 3.6);
+			//if(tweenObject.p1Sent > 0){
+			if(tweenObject.p1NegSent){
+				p1Stats.theSentiment.theText.text = Math.round(-tweenObject.p1Sent / 3.6);
+			}else {
+				p1Stats.theSentiment.theText.text = Math.round(tweenObject.p1Sent / 3.6);					
 			}
+			//}
 		}
 		
 		
 		private function drawP2Sent():void
 		{
 			draw_arc(p2Sent.graphics, 65, 128, 26, 0, tweenObject.p2Sent, 6, 0x058bd6);
-			if(tweenObject.p2Sent > 0){
-				p2Stats.theSentiment.theText.text = Math.round(tweenObject.p2Sent / 3.6);
+			//if(tweenObject.p2Sent > 0){
+			if(tweenObject.p2NegSent){
+				p2Stats.theSentiment.theText.text = Math.round(-tweenObject.p2Sent / 3.6);
+			}else {
+				p2Stats.theSentiment.theText.text = Math.round(tweenObject.p2Sent / 3.6);					
 			}
+				
+			//}
 		}
 		
 		

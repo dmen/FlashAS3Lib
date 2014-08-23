@@ -31,6 +31,11 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		private var rotOb:Object;
 		private var usa:Pivot3D;
 		
+		private var videoData:BitmapData;
+		private var vidShader:Shader3D;
+		private var _videoPlaneTexture : Texture3D;
+		private var _videoPlaneMaterial : Shader3D;
+		
 		private var stateGray:Array;
 		private var stateGrayIndex:int;
 		
@@ -38,22 +43,18 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		private var textContainer:Sprite;
 		
 		private var isMapLoaded:Boolean = false;
+		private var image3D:Bitmap;
 		
 		private var localCache:Array;
 		
-		private var sceneContainer:Sprite;
-		private var sceneBMD:BitmapData;
-		private var sceneImage:Bitmap;
 		
 		public function Main()
 		{
-			sceneContainer = new Sprite();
-			
-			_scene = new Scene3D(sceneContainer);
+			_scene = new Scene3D(this);
 			_scene.clearColor = new Vector3D ();
-			//_scene.setViewport(0, -800, 768, 512);
+			//_scene.setViewport(0, 0, 1280,720);
 			_scene.antialias = 8;
-			//_scene.pause();			
+			//_scene.pause();
 			
 			//default coloring of all states - before sentiment colors are applied
 			grays = new Array(0x141414, 0x181818, 0x202020, 0x242424, 0x282828, 0x303030, 0x343434, 0x383838, 0x404040, 0x484848, 0x505050, 0x585858, 0x606060, 0x686868);
@@ -61,27 +62,24 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			//SAP grays - for the low value states so grays don't match each other
 			stateGray = new Array(0xaaaaaa, 0xbbbbbb, 0xcccccc, 0xdddddd, 0xeeeeee);
 			
-			sceneBMD = new BitmapData(768, 512, true, 0x00000000);
-			sceneImage = new Bitmap(sceneBMD);
+			videoData = new BitmapData(768, 512, false, 0x000000);
+			
+			_videoPlaneTexture = new Texture3D(videoData, true);
+			_videoPlaneTexture.mipMode = Texture3D.MIP_NONE;
+			
+			_videoPlaneMaterial = new Shader3D("_videoPlaneMaterial", [new TextureMapFilter(_videoPlaneTexture)], false);
+			_videoPlaneMaterial.twoSided = false;
+			_videoPlaneMaterial.build();
 			
 			textContainer = new Sprite();
 			
 			tweetManager = new TweetManager();//gets text tweets and starts to display them in textContainer
 			tweetManager.setContainer(textContainer);
-			
-			addChild(sceneImage);
-			sceneContainer.y = -800;
-			addChild(sceneContainer);
-			
-			//init();
 		}
 		
 		
 		public function init(initValue:String = ""):void
 		{
-			sceneImage.alpha = 0;
-			_scene.resume();
-			
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
 			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=USMapSentiment"+"&abc="+String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
@@ -98,15 +96,15 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		//called from show
 		private function loadMap():void
 		{
-			map = _scene.addChildFromFile("usmap5.zf3d");
+			map = _scene.addChildFromFile("usmap4.zf3d");
 			_scene.addEventListener( Scene3D.COMPLETE_EVENT, mapLoaded );
 		}
 		
-		
 		private function mapLoaded(e:Event):void
-		{
+		{					
 			_scene.removeEventListener( Scene3D.COMPLETE_EVENT, mapLoaded );
 			usa = _scene.getChildByName("usamap2.dae");
+			_scene.getChildByName("Plane").setMaterial(_videoPlaneMaterial);
 			
 			grayIndex = 0;
 			_scene.forEach(setDefaultColor);//set all states to a range of grays and scaleZ of 1
@@ -117,8 +115,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			rotOb.mapRotXo = usa.getRotation().x;//original map rotation values - used in kill
 			rotOb.mapRotYo = usa.getRotation().y;	
 			rotOb.mapRotZo = usa.getRotation().z;
-			
-			rotOb.mapRotX = usa.getRotation().x;//used for tweening
+			rotOb.mapRotX = usa.getRotation().x;
 			rotOb.mapRotY = usa.getRotation().y;	
 			rotOb.mapRotZ = usa.getRotation().z;
 			
@@ -130,9 +127,9 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		
 		private function setDefaultColor(p:Pivot3D):void
 		{
-			//if(String(p.name).toLowerCase() != "plane"){
+			if(String(p.name).toLowerCase() != "plane"){
 				p.scaleZ = 1;
-			//}
+			}
 			materialRef = _scene.getMaterialByName( String(p.name).toLowerCase() ) as Shader3D;
 			if(materialRef){
 				materialRef.filters[0].color = grays[grayIndex];
@@ -198,7 +195,14 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		}
 		
 		
-			
+		public function videoUpdate(vid:*):void
+		{
+			if(isMapLoaded){
+				videoData.draw(vid);
+				_videoPlaneTexture.bitmapData = videoData;
+				_videoPlaneTexture.uploadTexture();
+			}
+		}		
 			
 		
 		/**
@@ -250,8 +254,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		 */
 		public function show():void
 		{
-			if (!isMapLoaded) {
-				//first time through
+			if(!isMapLoaded){
 				loadMap();
 			}else {				
 				_scene.forEach(setDefaultColor);//set all states to a range of grays and scaleZ of 1
@@ -268,9 +271,6 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		//called from mapLoaded()
 		private function show2():void
 		{
-			_scene.addEventListener( Scene3D.POSTRENDER_EVENT, renderEvent );
-			//addEventListener(Event.ENTER_FRAME, renderEvent);
-			
 			if (!contains(textContainer)) {
 				addChild(textContainer);
 			}
@@ -306,24 +306,6 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		}
 		
 		
-		//listener is added in show2()
-		private function renderEvent(e:Event):void 
-		{			
-			// if you want to draw with alpha.
-			_scene.clearColor.setTo( 0, 0, 0 );
-			_scene.clearColor.w = 0;
-			//_scene.render();
-			// render to bitmap data.
-			_scene.context.drawToBitmapData( sceneBMD );
-			
-			if (sceneImage.alpha < 1) {
-				sceneImage.alpha += .03;
-			}else {
-				sceneImage.alpha = 1;
-			}			
-		}
-		
-		
 		/**
 		 * ISChedulerMethods
 		 */
@@ -340,7 +322,15 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		 */
 		public function doStop():void
 		{			
+			removeEventListener(Event.ENTER_FRAME, videoUpdate);
 			
+			var bmd:BitmapData = new BitmapData(768, 512, false, 0x000000);
+			_scene.context.clear();
+			_scene.render();
+			_scene.context.drawToBitmapData( bmd );
+			image3D = new Bitmap(bmd);
+			
+			addChildAt(image3D, 0);
 		}
 		
 		
@@ -350,8 +340,11 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		public function kill():void
 		{
 			tweetManager.kill();
-			_scene.removeEventListener( Scene3D.POSTRENDER_EVENT, renderEvent );
-			_scene.pause();
+			//videoData.dispose();
+			removeChild(image3D);
+			image3D.bitmapData.dispose();
+			image3D = null;
+			//_videoPlaneMaterial.dispose();
 		}
 	}
 	

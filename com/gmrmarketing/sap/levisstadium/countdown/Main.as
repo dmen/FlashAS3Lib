@@ -12,6 +12,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
 		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"
+		public static const ERROR:String = "error";
 		
 		private var degToRad:Number = 0.0174532925; //PI / 180
 		private var endDate:Date; //kick off date/time set in dataLoaded
@@ -55,6 +56,9 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		
 		private const BASE_COLOR:Number = 0xA5A8C6;
 		private const MAIN_COLOR:Number = 0xE5b227;
+		
+		private var localCache:Date;
+		
 		
 		public function Main()
 		{
@@ -130,9 +134,13 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			secsTextClip.x = -97;
 			secsTextClip.y = -100;
 			secsTextClip.alpha = 0;
-			secsTextClip.scaleX = secsTextClip.scaleY = .1;			
+			secsTextClip.scaleX = secsTextClip.scaleY = .1;
 			
-				
+			//logo.addEventListener(MouseEvent.CLICK, ii);
+		}
+		private function ii(e:MouseEvent):void
+		{
+			init();
 		}
 		
 		/**
@@ -148,6 +156,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			//r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
+			l.addEventListener(IOErrorEvent.IO_ERROR, dataError, false, 0, true);
 			l.load(r);		
 		}
 		
@@ -160,6 +169,7 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		private function dataLoaded(e:Event):void
 		{
 			endDate = new Date(String(e.currentTarget.data));
+			localCache = endDate;
 			//endDate = new Date("8/8/2014 5:00 PM");
 			
 			dispatchEvent(new Event(READY));
@@ -167,6 +177,17 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			//show();//TESTING
 		}
 		
+		
+		private function dataError(e:IOErrorEvent):void
+		{
+			if (localCache) {
+				endDate = localCache;
+				dispatchEvent(new Event(READY));
+				//show();
+			}else {
+				dispatchEvent(new Event(ERROR));
+			}
+		}
 		
 		
 		/**

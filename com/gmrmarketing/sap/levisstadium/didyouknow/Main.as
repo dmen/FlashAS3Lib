@@ -22,6 +22,7 @@ package  com.gmrmarketing.sap.levisstadium.didyouknow
 		private var tweenOb:Object;
 		private var animRing:Sprite;
 		private var tMask:MovieClip;
+		private var localCache:Object;
 		
 		
 		public function Main()
@@ -70,6 +71,7 @@ package  com.gmrmarketing.sap.levisstadium.didyouknow
 		private function dataLoaded(e:Event):void
 		{
 			json = JSON.parse(e.currentTarget.data);
+			localCache = json;
 			//show();//TESTING
 			dispatchEvent(new Event(READY));
 		}
@@ -77,7 +79,12 @@ package  com.gmrmarketing.sap.levisstadium.didyouknow
 		
 		private function dataError(e:IOErrorEvent):void
 		{
-			dispatchEvent(new Event(ERROR));
+			if (localCache) {
+				json = localCache;
+				dispatchEvent(new Event(READY));
+			}else{
+				dispatchEvent(new Event(ERROR));
+			}
 		}
 		
 		

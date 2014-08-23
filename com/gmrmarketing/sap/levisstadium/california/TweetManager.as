@@ -15,6 +15,7 @@ package com.gmrmarketing.sap.levisstadium.california
 		private var tweets:Array; //all tweets from the service
 		private var quadrants:Array;//there are two quadrants to display tweets in
 		private var killed:Boolean;
+		private var localCache:Array;
 		
 		public function TweetManager()
 		{
@@ -50,6 +51,7 @@ package com.gmrmarketing.sap.levisstadium.california
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
+			l.addEventListener(IOErrorEvent.IO_ERROR, dataError, false, 0, true);
 			l.load(r);
 		}
 		
@@ -76,9 +78,22 @@ package com.gmrmarketing.sap.levisstadium.california
 				}
 			}
 			
+			localCache = tweets.concat();//duplicates array
+			
 			//show tweets in both quadrants
 			displayNext();
 			TweenMax.delayedCall(2, displayNext);
+		}
+		
+		private function dataError(e:IOErrorEvent):void
+		{
+			if (localCache) {
+				tweets = localCache.concat();
+				displayNext();
+				TweenMax.delayedCall(2, displayNext);
+			}else {
+				
+			}
 		}
 		
 		
