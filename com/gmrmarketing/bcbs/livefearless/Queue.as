@@ -1,4 +1,5 @@
 /**
+ * used by Main
  * Stores and manages user objects in two csv files
  * 
  * Each user object:
@@ -59,12 +60,31 @@ package com.gmrmarketing.bcbs.livefearless
 				uploadNext();
 			}
 		}
-		
+		/*
+		public function getPledgeOptions():Array
+		{
+			if (token) {
+				return hubble.getPledgeOptions();
+			}else {
+				//defaults as of 08/27/2014
+				return new Array([["Wellness", 2426], ["Nutrition", 2427], ["Fitness", 2428], ["Healthcare", 2429], ["Other", 2430]]);
+			}
+		}
+		*/
+		public function getPrizeOptions():Array
+		{
+			if (token) {
+				return hubble.getPrizeOptions();
+			}else {
+				//defaults as of 08/27/2014
+				return new Array([["",0]]);
+			}
+		}
 		
 		/**
 		 * Adds a user data object to the csv file
 		 * Called from Main.removeForm() - once form is complete and Thanks is showing
-		 * Data object contains these keys { fname, lname, email, combo, sharephoto, emailoptin, message, image }
+		 * Data object contains these keys { fname:textData[0], lname:textData[1], email:formData[0], combo:textData[2], prizeCombo:textData[4], sharephoto:formData[1], emailoptin:formData[2], message:textData[3], image:im };
 		 */
 		public function add(data:Object):void
 		{
@@ -89,8 +109,8 @@ package com.gmrmarketing.bcbs.livefearless
 			if (token && users.length > 0) {
 				var cur:Object = users[0];
 				debug("submitting user form data: "+cur.fname+" "+cur.lname);
-				//hubble.submitForm(new Array(cur.fname, cur.lname, cur.email, cur.combo, cur.sharephoto, cur.emailoptin, cur.message));
-				hubble.submitForm(new Array(cur.fname, cur.lname, cur.email, cur.sharephoto, cur.emailoptin, cur.message));
+				hubble.submitForm(new Array(cur.fname, cur.lname, cur.email, cur.combo, cur.sharephoto, cur.emailoptin, cur.message, cur.prizeCombo));
+				//hubble.submitForm(new Array(cur.fname, cur.lname, cur.email, cur.sharephoto, cur.emailoptin, cur.message));
 			}
 		}
 		

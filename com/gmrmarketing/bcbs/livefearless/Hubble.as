@@ -1,3 +1,5 @@
+﻿//used by Queue
+
 package com.gmrmarketing.bcbs.livefearless
 {
 	import flash.events.*;
@@ -16,6 +18,9 @@ package com.gmrmarketing.bcbs.livefearless
 		private var token:String; //GUID
 		private var responseId:int;
 		
+		//private var pledgeOptions:Array;//array of fields and values for "how would you categorized your pledge" drop down
+		private var prizeOptions:Array;//array of fields and values for "please selct your prize" drop down
+		
 		private var hdr:URLRequestHeader;
 		private var hdr2:URLRequestHeader;
 		
@@ -30,6 +35,7 @@ package com.gmrmarketing.bcbs.livefearless
 			getToken();			
 		}
 
+		
 		public function getToken(e:TimerEvent = null):void
 		{			
 			var js:String = JSON.stringify({"userName":"BCBS", "password":"fearless!"});
@@ -46,11 +52,65 @@ package com.gmrmarketing.bcbs.livefearless
 			lo.load(req);
 		}
 		
+		
 		private function gotToken(e:Event):void
 		{
 			var j:Object = JSON.parse(e.currentTarget.data);			
 			token = j.ResponseObject;
-			dispatchEvent(new Event(GOT_TOKEN));
+			
+			//Need to get the interactionModel in order to parse out the drop down fields
+			var js:String = JSON.stringify({"AccessToken":token});
+			var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionmodels");
+	
+			req.method = URLRequestMethod.POST;
+			req.data = js;
+			req.requestHeaders.push(hdr);
+			req.requestHeaders.push(hdr2);
+	
+			var lo:URLLoader = new URLLoader();
+			lo.addEventListener(Event.COMPLETE, gotModels, false, 0, true);
+			lo.addEventListener(IOErrorEvent.IO_ERROR, ioError, false, 0, true);
+			lo.load(req);
+			
+			
+		}
+		
+		
+		private function gotModels(e:Event):void
+		{
+			var j:Object = JSON.parse(e.currentTarget.data);	
+			
+			//pledgeOptions = new Array();
+			prizeOptions = new Array();
+			
+			if (j.Status == 1) {
+				
+				for (var i:int = 0; i < j.ResponseObject.FieldOptions.length; i++) {
+					/*
+					if(j.ResponseObject.FieldOptions[i].FieldId == 836){
+						pledgeOptions.push([j.ResponseObject.FieldOptions[i].OptionText,j.ResponseObject.FieldOptions[i].FieldOptionId]);
+					}
+					*/
+					if (j.ResponseObject.FieldOptions[i].FieldId == 902) {						
+						prizeOptions.push([j.ResponseObject.FieldOptions[i].OptionText,j.ResponseObject.FieldOptions[i].FieldOptionId]);
+					}
+				}
+				
+				dispatchEvent(new Event(GOT_TOKEN));
+			}
+			
+		}
+		
+		/*
+		public function getPledgeOptions():Array
+		{
+			return pledgeOptions;
+		}
+		*/
+		
+		public function getPrizeOptions():Array
+		{
+			return prizeOptions;
 		}
 		
 		
@@ -64,34 +124,34 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		/**
 		 * 
-		 * @param	formData Array fname,lname,email,combo choice,photo optin,email optin,message
-		 * @param	formData Array fname,lname,email,photo optin,email optin,message
+		 * @param	formData Array cur.fname, cur.lname, cur.email, cur.combo, cur.sharephoto, cur.emailoptin, cur.message, cur.prizeCombo
+		 * //cur.combo is 0
 		 */
 		public function submitForm(formData:Array):void
 		{
-			/*
-			var cId:int;
+			
+			/*var cId:int;
 			switch(formData[3]) {
-				case "Healthy Eating":
-					cId = 2068;
+				case "Wellness":
+					cId = 2426;
 					break;
-				case "Healthy Lifestyle":
-					cId = 2069;
+				case "Nutrition":
+					cId = 2427;
+					break;
+				case "Fitness":
+					cId = 2428;
 					break;
 				case "Healthcare":
-					cId = 2071;
+					cId = 2429;
 					break;
-				case "Other":
-					cId = 2072;
+				default: // Other
+					cId = 2430;
 					break;
-				default:
-					cId = 2072;
-					break;
-			}
-			*/
+			}*/
 			
-			var phoOpt:Boolean = formData[3] == "true" ? true : false;
-			var	emOpt:Boolean = formData[4] == "true" ? true : false;			
+			
+			var phoOpt:Boolean = formData[4] == "true" ? true : false;
+			var	emOpt:Boolean = formData[5] == "true" ? true : false;			
 				
 			var a:Date = new Date();//now
 			var m:String = String(a.month + 1);
@@ -121,7 +181,8 @@ package com.gmrmarketing.bcbs.livefearless
 			var now:String = a.fullYear + "-" +m + "-" +d + "T" + hor + ":" + min + ":" + sec + "." + ms + "Z";
 			
 			//var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":679, "OptionId":cId }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[6] } ], "Latitude":"0", "Longitude":"0" }};			
-			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[5] } ], "Latitude":"0", "Longitude":"0" }};
+			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[6] }, { "FieldId":902, "Response":formData[7] } ], "Latitude":"0", "Longitude":"0" }};
+			/*var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[5] } ], "Latitude":"0", "Longitude":"0" }};*/
 			
 			
 			var js:String = JSON.stringify(resp);

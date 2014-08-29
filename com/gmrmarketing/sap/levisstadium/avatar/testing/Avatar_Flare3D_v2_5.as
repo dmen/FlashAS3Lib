@@ -261,6 +261,27 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 					
 			return bmd;
 		}
+		
+		
+		public function getMaskImage() : BitmapData 
+		{
+			var bmd : BitmapData = new BitmapData(_scene.viewPort.width, _scene.viewPort.height);
+					
+			_scene.context.clear();
+			//_videoPlane.draw();
+			
+			if(_occlusion != null) {
+				//... write it to the buffer, but hide all coming polys behind it
+				_scene.context.setColorMask(false, false, false, false);
+				_occlusion.draw();
+				_scene.context.setColorMask(true, true, true, true);
+			}
+			
+			_scene.render();
+			_scene.context.drawToBitmapData(bmd);
+					
+			return bmd;
+		}
 
 		
 		//the occlusion magic goes here

@@ -47,16 +47,20 @@ package com.gmrmarketing.sap.ticker
 		
 		public function addFrame(bmd:BitmapData):void
 		{
-			fsFlvEncoder.addFrame(bmd, null);
+			if(fsFlvEncoder){
+				fsFlvEncoder.addFrame(bmd, null);
+			}
 			//fsFlvEncoder.addFrame(myBitmapData, myAudioByteArray); // etc.
 			
 		}
 		
 		public function stop():void
 		{
-			fsFlvEncoder.updateDurationMetadata();
-			fsFlvEncoder.fileStream.close();
-			fsFlvEncoder.kill();
+			if(fsFlvEncoder){
+				fsFlvEncoder.updateDurationMetadata();
+				fsFlvEncoder.fileStream.close();
+				fsFlvEncoder.kill();
+			}
 		}		
 	}	
 }

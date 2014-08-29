@@ -66,9 +66,9 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			updateTimer.addEventListener(TimerEvent.TIMER, update, false, 0, true);
 			
 			analogClock = new analog(); //lib
-			analogClock.x = 700;
-			analogClock.y = 445;
-			analogClock.scaleX = analogClock.scaleY = .5;	
+			analogClock.x = 725;
+			analogClock.y = 473;
+			analogClock.scaleX = analogClock.scaleY = .4;	
 			
 			//Containers
 			daysClip = new Sprite();
@@ -135,13 +135,9 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			secsTextClip.y = -100;
 			secsTextClip.alpha = 0;
 			secsTextClip.scaleX = secsTextClip.scaleY = .1;
-			
-			//logo.addEventListener(MouseEvent.CLICK, ii);
+			//dataLoaded();
 		}
-		private function ii(e:MouseEvent):void
-		{
-			init();
-		}
+		
 		
 		/**
 		 * ISChedulerMethods
@@ -166,11 +162,13 @@ package com.gmrmarketing.sap.levisstadium.countdown
 		 * Gets the endTime which is a string like: 8/17/2014 1:00 PM
 		 * @param	e
 		 */
-		private function dataLoaded(e:Event):void
+		private function dataLoaded(e:Event = null):void
 		{
-			endDate = new Date(String(e.currentTarget.data));
+			if(e != null){
+				endDate = new Date(String(e.currentTarget.data));
+			}
 			localCache = endDate;
-			//endDate = new Date("8/8/2014 5:00 PM");
+			//endDate = new Date("8/29/2014 5:00 PM");
 			
 			dispatchEvent(new Event(READY));
 			
@@ -279,9 +277,10 @@ package com.gmrmarketing.sap.levisstadium.countdown
 				secondsClip.x = 810;					
 				secondsClip.y = 340;	
 				
-				analogClock.alpha = 0;
-				addChild(analogClock);		
+				
 			}
+			analogClock.alpha = 0;
+			addChild(analogClock);
 			
 			addChild(hoursClip);
 			addChild(minutesClip);

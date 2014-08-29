@@ -1,4 +1,4 @@
-package com.gmrmarketing.bcbs.livefearless
+﻿package com.gmrmarketing.bcbs.livefearless
 {
 	import flash.display.*;
 	import flash.events.*;
@@ -79,7 +79,7 @@ package com.gmrmarketing.bcbs.livefearless
 			clip.btnSave.addEventListener(MouseEvent.MOUSE_DOWN, doSave, false, 0, true);
 			clip.btnRules.addEventListener(MouseEvent.MOUSE_DOWN, rulesClicked, false, 0, true);			
 			clip.btnReadRules.addEventListener(MouseEvent.MOUSE_DOWN, readRulesClicked, false, 0, true);			
-			clip.btnReadRules2.addEventListener(MouseEvent.MOUSE_DOWN, readRulesClicked, false, 0, true);			
+			//clip.btnReadRules2.addEventListener(MouseEvent.MOUSE_DOWN, readRulesClicked, false, 0, true);			
 			clip.btnPhoto.addEventListener(MouseEvent.MOUSE_DOWN, photoClicked, false, 0, true);
 			clip.btnOptin.addEventListener(MouseEvent.MOUSE_DOWN, optinClicked, false, 0, true);			
 			
@@ -100,7 +100,7 @@ package com.gmrmarketing.bcbs.livefearless
 			clip.btnSave.removeEventListener(MouseEvent.MOUSE_DOWN, doSave);
 			clip.btnRules.removeEventListener(MouseEvent.MOUSE_DOWN, rulesClicked);			
 			clip.btnReadRules.removeEventListener(MouseEvent.MOUSE_DOWN, readRulesClicked);			
-			clip.btnReadRules2.removeEventListener(MouseEvent.MOUSE_DOWN, readRulesClicked);			
+			//clip.btnReadRules2.removeEventListener(MouseEvent.MOUSE_DOWN, readRulesClicked);			
 			clip.btnPhoto.removeEventListener(MouseEvent.MOUSE_DOWN, photoClicked);
 			clip.btnOptin.removeEventListener(MouseEvent.MOUSE_DOWN, optinClicked);		
 		}
@@ -110,7 +110,6 @@ package com.gmrmarketing.bcbs.livefearless
 		{			
 			var pho:String = clip.checkPhoto.currentFrame == 1 ? "false" : "true";
 			var opt:String = clip.checkOptin.currentFrame == 1 ? "false" : "true";
-			//return new Array(clip.email.text, combo.getSelection(), pho, opt);			
 			return new Array(clip.email.text, pho, opt);			
 		}
 		

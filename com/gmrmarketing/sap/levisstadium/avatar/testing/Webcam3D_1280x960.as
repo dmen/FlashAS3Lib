@@ -528,11 +528,12 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		}
 		
 		
-		//called by main
+		//called by main.takePhoto once the TAKE_PHOTO event is received
 		//returns a 1280x960 camera shot
 		public function shotReady():BitmapData
 		{
-			return Avatar_Flare3D_v2_5(_container3D).getScreenshot();
+			//return Avatar_Flare3D_v2_5(_container3D).getScreenshot();
+			return Avatar_Flare3D_v2_5(_container3D).getMaskImage();
 		}
 		
 		

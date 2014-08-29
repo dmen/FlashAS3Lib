@@ -29,8 +29,12 @@ package com.gmrmarketing.bcbs.livefearless
 		private var container:DisplayObjectContainer;
 		private var kbd:KeyBoard;		
 		private var charCountTimer:Timer;
-		private var combo:ComboBox;
+		//private var combo:ComboBox;//for pledge selection
+		private var prizeCombo:ComboBox;//for prize selection
 		private var timeoutHelper:TimeoutHelper;
+		
+		private var pledgeOptions:Array;
+		private var prizeOptions:Array;
 		
 		
 		public function TextEntry()
@@ -46,11 +50,17 @@ package com.gmrmarketing.bcbs.livefearless
 			charCountTimer = new Timer(200);
 			charCountTimer.addEventListener(TimerEvent.TIMER, updateCharCount, false, 0, true);
 			
-			combo = new ComboBox("Please select");			
-			combo.populate(["Wellness", "Nutrition", "Fitness", "Healthcare", "Other"]);
-			clip.addChild(combo);
-			combo.x = 621;
-			combo.y = 308;			
+			//combo = new ComboBox("Please select");			
+			//combo.populate();
+			//clip.addChild(combo);
+			//combo.x = 621;
+			//combo.y = 308;	
+			
+			prizeCombo = new ComboBox("Please select");			
+			//combo.populate();
+			clip.addChild(prizeCombo);
+			prizeCombo.x = 621;
+			prizeCombo.y = 308;	
 			
 			timeoutHelper = TimeoutHelper.getInstance();
 		}
@@ -62,11 +72,19 @@ package com.gmrmarketing.bcbs.livefearless
 		}
 		
 		
-		public function show(clearText:Boolean = true):void
+		/**
+		 * 
+		 * @param	clearText
+		 * @param	pledgeOptions Array of arrays - contains text and id in each item
+		 */
+		public function show(clearText:Boolean, $prizeOptions:Array):void
 		{
 			if (!container.contains(clip)) {
 				container.addChild(clip);
 			}
+			
+			//pledgeOptions = $pledgeOptions;
+			prizeOptions = $prizeOptions;
 			
 			kbd.x = 525;
 			kbd.y = 720;
@@ -77,9 +95,22 @@ package com.gmrmarketing.bcbs.livefearless
 			kbd.setFocusFields([clip.fname, clip.lname, clip.theText]);
 			
 			container.addEventListener(KeyboardEvent.KEY_DOWN, hardKeyDown, false, 0, true);
-			
+			/*
+			var items:Array = new Array();//need simple array of text values for comboBox
+			for (var i:int = 0; i < pledgeOptions.length; i++) {
+				items.push(pledgeOptions[i][0]);
+			}
+			combo.populate(items);
 			combo.setSelection("");
 			combo.reset();	
+			*/
+			var prizes:Array = new Array();//need simple array of text values for comboBox
+			for (var i:int = 0; i < prizeOptions.length; i++) {				
+				prizes.push(prizeOptions[i][0]);
+			}
+			prizeCombo.populate(prizes);
+			prizeCombo.setSelection("");
+			prizeCombo.reset();	
 			
 			clip.fname.maxChars = 30;
 			clip.lname.maxChars = 30;
@@ -137,10 +168,33 @@ package com.gmrmarketing.bcbs.livefearless
 			return "- " + fn + " " + ln;
 		}
 		
+		
 		public function getData():Array
 		{
-			return new Array(clip.fname.text, clip.lname.text, clip.theText.text);
+			/*return new Array(clip.fname.text, clip.lname.text, combo.getSelection(), clip.theText.text);*/
+			/*
+			var comboSelectionText:String = combo.getSelection();
+			var cId:int;
+			for (var i:int = 0; i < pledgeOptions.length; i++) {
+				if (comboSelectionText == pledgeOptions[i][0]) {
+					cId = pledgeOptions[i][1];
+					break;
+				}
+			}
+			*/
+			var prizeSelectionText:String = prizeCombo.getSelection();
+			var pId:int;
+			for (var i:int = 0; i < prizeOptions.length; i++) {
+				if (prizeSelectionText == prizeOptions[i][0]) {
+					pId = prizeOptions[i][1];
+					break;
+				}
+			}
+			
+			return new Array(clip.fname.text, clip.lname.text, 0, clip.theText.text, pId.toString());
 		}
+		
+		
 		/**
 		 * Called when the Next button is pressed
 		 * @param	e

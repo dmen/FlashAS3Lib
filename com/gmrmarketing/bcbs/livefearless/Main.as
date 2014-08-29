@@ -1,4 +1,4 @@
-package com.gmrmarketing.bcbs.livefearless
+﻿package com.gmrmarketing.bcbs.livefearless
 {
 	import flash.display.*;
 	import flash.events.*;
@@ -121,8 +121,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		
 		private function showRules(e:Event = null):void
-		{	
-			/*
+		{			
 			if(!topContainer.contains(rulesClip)){
 				topContainer.addChild(rulesClip);			
 			}
@@ -133,8 +132,7 @@ package com.gmrmarketing.bcbs.livefearless
 				TweenMax.to(rulesClip, 1, { alpha:1} );
 			}
 			rulesClip.btnPage2.addEventListener(MouseEvent.MOUSE_DOWN, showRulesPage2, false, 0, true);
-			rulesClip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, closeRules, false, 0, true);	
-			*/
+			rulesClip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, closeRules, false, 0, true);
 		}
 		
 		
@@ -178,7 +176,7 @@ package com.gmrmarketing.bcbs.livefearless
 			textEntry.addEventListener(TextEntry.SWEAR, inappropriateMessage, false, 0, true);
 			textEntry.addEventListener(TextEntry.NEXT, showTakePhoto, false, 0, true);
 			editingText = false;
-			textEntry.show(true);//clear any old text
+			textEntry.show(true, queue.getPrizeOptions());//clear any old text
 		}
 		
 		
@@ -252,7 +250,7 @@ package com.gmrmarketing.bcbs.livefearless
 			textEntry.addEventListener(TextEntry.REQUIRED, messageRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.SWEAR, inappropriateMessage, false, 0, true);
 			
-			textEntry.show(false);//don't clear old text
+			textEntry.show(false, queue.getPrizeOptions());//don't clear old text
 		}		
 		
 		
@@ -353,10 +351,10 @@ package com.gmrmarketing.bcbs.livefearless
 			thanks.removeEventListener(Thanks.SHOWING, removeForm);
 			form.hide();
 			var formData:Array = form.getData();//email,pho,opt
-			var textData:Array = textEntry.getData(); //fname,lname,message
+			var textData:Array = textEntry.getData(); //fname, lname, 0, message, prizeID
 			var im:String = takePhoto.getPhotoString();
 			//removed combo
-			var ob:Object = { fname:textData[0], lname:textData[1], email:formData[0], sharephoto:formData[1], emailoptin:formData[2], message:textData[2], image:im };
+			var ob:Object = { fname:textData[0], lname:textData[1], email:formData[0], combo:textData[2], prizeCombo:textData[4], sharephoto:formData[1], emailoptin:formData[2], message:textData[3], image:im };
 			queue.add(ob);
 		}
 		

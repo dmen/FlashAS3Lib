@@ -12,6 +12,8 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 	import com.greensock.easing.*;
 	import flash.utils.Timer;
 	import fl.video.*;
+	import com.gmrmarketing.sap.ticker.Encoder;
+	
 	
 	public class Main_2 extends MovieClip
 	{		
@@ -23,17 +25,22 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private var lastTask:MovieClip; //previous task swf - set in loadNextTask()
 		private var lastTaskWas3D:Boolean;
 		
+		private var encoder:Encoder;
+		private var encoderImage:BitmapData;
 		
 		public function Main_2()
 		{			
 			Mouse.hide();				
+			
+			encoder = new Encoder(768, 512);
+			encoderImage = new BitmapData(768, 512, false, 0x000000);
 			
 			player.autoRewind = true;
 			player.addEventListener(MetadataEvent.CUE_POINT, loop);//listen for cue point one frame back
 			
 			config = new AIRXML(); //reads config.xml in the apps folder
 			config.addEventListener(Event.COMPLETE, configReady);
-			config.readXML();
+			config.readXML();			
 		}
 		
 		
@@ -57,7 +64,13 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private function configReady(e:Event):void
 		{	
 			config.removeEventListener(Event.COMPLETE, configReady);
-			tasks = AIRXML(e.currentTarget).getXML().tasks.task;	
+			tasks = config.getXML().tasks.task;
+			
+			if(config.getXML().record == "true"){
+				encoder.record();
+				addEventListener(Event.ENTER_FRAME, addFrame);
+			}
+			
 			currentTask = 0;
 			taskFiles = new Array();
 			loadTask();//begin loading task files
@@ -143,23 +156,13 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		 * Calls show() on the task
 		 */
 		private function showTask():void
-		{			
-			if (tasks[currentTask].@file == "usmap.swf") {				
-				//thisTask.addEventListener("3Dready", hidePlayer);
-			}
-			
+		{	
 			thisTask.show();
 			
 			//give the task one second to show before starting the clock
 			TweenMax.delayedCall(1, startCount);
 		}
 		
-		private function hidePlayer(e:Event):void
-		{
-			thisTask.removeEventListener("3Dready", hidePlayer);
-			addEventListener(Event.ENTER_FRAME, updateMapVideo, false, 0, true);
-			player.x = -768;
-		}
 		
 		private function startCount():void
 		{
@@ -170,25 +173,25 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		
 		
 		private function taskComplete(e:TimerEvent):void
-		{
-			//lastTaskWas3D = false;
-			if (tasks[currentTask].@file == "usmap.swf") {
-				//removeEventListener(Event.ENTER_FRAME, updateMapVideo);
-				//lastTaskWas3D = true;
-			}
-				
+		{			
 			currentTask++;
 			if (currentTask >= tasks.length()) {
 				currentTask = 0;
+				//loop ended
+				encoder.stop();
+				removeEventListener(Event.ENTER_FRAME, addFrame);
 			}
 			lastTask = thisTask;
 			initTask();
 		}
 		
-		private function updateMapVideo(e:Event):void
+		
+		private function addFrame(e:Event):void
 		{
-			thisTask.videoUpdate(player);
+			encoderImage.draw(stage);
+			encoder.addFrame(encoderImage);
 		}
+	
 	}
 	
 }

@@ -59,7 +59,7 @@ package com.gmrmarketing.bcbs.livefearless
 		public function displayDebug(mess:String):void
 		{			
 			clip.theText.appendText(mess + "\n");
-			clip.theText.scrollV = clip.theText.numLines;	
+			clip.theText.scrollV = clip.theText.numLines;			
 		}
 		
 		
