@@ -23,10 +23,10 @@ package com.gmrmarketing.utilities
 		public static const SAVED:String = "configFileSaved";
 		
 	  
-		public function AIRXML()
+		public function AIRXML(fName:String = "config.xml")
 		{
 			//prefsFile = File.desktopDirectory.resolvePath("config.xml");
-			prefsFile = File.applicationDirectory.resolvePath("config.xml");
+			prefsFile = File.applicationDirectory.resolvePath(fName);
 		}
 		
 		
