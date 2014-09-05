@@ -3,7 +3,7 @@
  * Gets the tags and then creates the tags array
  */
 
-package com.gmrmarketing.sap.levisstadium.tagcloud
+package com.gmrmarketing.sap.metlife.tagcloud
 {
 	import flash.display.*;
 	import flash.events.*;
@@ -253,12 +253,12 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			var wv:int = Math.max(1, Math.ceil(nv.width / sampleSize));
 			var hv:int = Math.max(1, Math.ceil(nv.height / sampleSize));
 			
-			tag.imageh = nh;//horizontal image
-			tag.imagev = nv;//vertical image
-			tag.widthh = wh;
-			tag.heighth = hh;
-			tag.widthv = wv;
-			tag.heightv = hv;
+			tag.imageh = nh;//horizontal image - BitmapData
+			tag.imagev = nv;//vertical image - BitmapData
+			tag.widthh = wh; //int
+			tag.heighth = hh;//int
+			tag.widthv = wv;//int
+			tag.heightv = hv;//int
 			//return {imageh:nh, imagev:nv, widthh:wh, heighth:hh, widthv:wv, heightv:hv};
 		}
 	}

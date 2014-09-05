@@ -1,6 +1,7 @@
 package com.tastenkunst.as3.brf.container {
 	import com.tastenkunst.as3.brf.IBRFContentContainer;
 	import com.tastenkunst.as3.brf.poseestimation.ResultMatrix;
+	import flash.events.EventDispatcher;
 
 	import flash.display.Sprite;
 	import flash.geom.Point;

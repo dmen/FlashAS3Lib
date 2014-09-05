@@ -65,9 +65,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 					container.addChild(clip);
 				}
 			}
+			//var b:Bitmap = new Bitmap(image);
+			//clip.addChild(b);
 			
-			userImage = new BitmapData(761, 891);
-			userImage.copyPixels(image, new Rectangle(236, 37, 761, 891), new Point(0, 0));
+			userImage = new BitmapData(761, 891, true, 0xff0000);
+			userImage.copyPixels(image, new Rectangle(236, 37, 761, 891), new Point(0, 0),null,null,true);
 			
 			//SAP & 49ers logo at upper left
 			logo = new lockup();			
@@ -75,7 +77,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			var cardData:BitmapData = new BitmapData(589, 689);
 			var cardMatrix:Matrix = new Matrix();
-			cardMatrix.scale(.773981, .773981); //for scaling 761x891 to 589x689
+			cardMatrix.scale(.773981, .773981); //for scaling 761x891 to 589x689 for display
 			cardData.draw(userImage, cardMatrix, null, null, null, true);
 			
 			card = new Bitmap(cardData);
@@ -97,6 +99,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			TweenMax.to(clip, 1, { alpha:1 } );
 			TweenMax.to(clip.theText, .5, { alpha:1, y:"75", delay:1 } );
 			TweenMax.to(clip.theButtons, .5, { alpha:1, y:"-75", delay:1 } );
+			
 		}
 		
 		

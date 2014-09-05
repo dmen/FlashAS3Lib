@@ -33,6 +33,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		public static const CAM_STOP:String = "camUpDownReleased";
 		public static const FACE_FOUND:String = "faceFoundStartApp";
 		public static const BG_CHANGE:String = "changeBackground";
+		public static const MASK_READY:String = "maskReady";
 		
 		public var _container3D : BRFContainerFP11;
 		private var _brfBmd : BitmapData;
@@ -532,8 +533,23 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		//returns a 1280x960 camera shot
 		public function shotReady():BitmapData
 		{
-			//return Avatar_Flare3D_v2_5(_container3D).getScreenshot();
-			return Avatar_Flare3D_v2_5(_container3D).getMaskImage();
+			var baseImage:BitmapData = Avatar_Flare3D_v2_5(_container3D).getScreenshot();	
+			
+			var blurImage:BitmapData = new BitmapData(baseImage.width, baseImage.height);
+			blurImage.applyFilter(baseImage, new Rectangle(0, 0, baseImage.width, baseImage.height), new Point(0, 0), new BlurFilter(25, 25, 3));
+			
+			var bmd:BitmapData = Avatar_Flare3D_v2_5(_container3D).getMaskImage();
+			bmd.draw(jerseyBMD, jerseyMatrix, null, null, null, true);
+			
+			var m:BitmapData = new BitmapData(bmd.width, bmd.height, true, 0xff000000);
+			m.threshold(bmd, bmd.rect, new Point(0, 0), ">", 0x00000000, 0xffff0000, 0xff000000, true);
+			
+			var mBlur:BitmapData = new BitmapData(m.width, m.height);
+			mBlur.applyFilter(m, new Rectangle(0, 0, m.width, m.height), new Point(0, 0), new BlurFilter(5, 5, 3));
+
+			blurImage.copyPixels(baseImage, new Rectangle(0, 0, baseImage.width, baseImage.height), new Point(0, 0), mBlur, new Point(0, 0), true);
+			
+			return blurImage;
 		}
 		
 		

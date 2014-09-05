@@ -1,8 +1,10 @@
-package com.gmrmarketing.sap.levisstadium.tagcloud
+package com.gmrmarketing.sap.metlife.tagcloud
 {
 	import com.gmrmarketing.sap.levisstadium.ISchedulerMethods;
+	import com.gmrmarketing.sap.metlife.FlareManager;
 	import flash.display.*;
-	import com.gmrmarketing.sap.levisstadium.tagcloud.RectFinder;	
+	import com.gmrmarketing.sap.metlife.tagcloud.RectFinder;	
+	import com.gmrmarketing.sap.metlife.tagcloud.TagCloud;	
 	import flash.events.*;	
 	import com.greensock.TweenMax;
 	
@@ -11,21 +13,28 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 	{
 		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"
 		
-		private const WIDTH:int = 768;
-		private const HEIGHT:int = 512;
+		private const WIDTH:int = 1008;
+		private const HEIGHT:int = 567;
 		
 		private var dict:TagCloud;//tags from the service
 		private var ra:RectFinder;
 		private var bmp:Bitmap;
-		private var tagName:String; //set in setConfig, one of: levis,offense,defense	
+		private var tagName:String; //set in setConfig, one of: levis,offense,defense
+		private var flares:FlareManager;
+		
 		
 		public function Main()
 		{	
-			dict = new TagCloud(2, 28, 4);
+			dict = new TagCloud(3, 56, 12);
 			dict.addEventListener(TagCloud.TAGS_READY, tagsLoaded, false, 0, true);
 			
 			//TESTING
-			//init("levis,0xFFFFFF,0xCCCCCC,0xEEB500");
+			//init("levis,0xda2c45,0xc7283f,0xa92236");
+			
+			flares = new FlareManager();//will be part of scheduler
+			flares.setContainer(this);
+			
+			init("levis,0xc92845");
 		}
 		
 		
@@ -35,28 +44,13 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		 */
 		public function init(initValue:String = ""):void
 		{
-			var i:int = initValue.indexOf(",");
+			var i:int = initValue.indexOf(",");//first occurence of comma
 			tagName = initValue.substring(0, i);
 			var cols:String = initValue.substr(i + 1);
 			var colors:Array = cols.split(",");
 			
-			ra = new RectFinder(2);
+			ra = new RectFinder(3);
 			
-			switch(tagName) {
-				case "levis":
-					bottomBar.theText.text = "#LevisStadium";					
-					break;
-				case "offense":
-					bottomBar.theText.text = "#Offense";
-					break;
-				case "defense":
-					bottomBar.theText.text = "#Defense";
-					break;
-				case "49ers":
-					bottomBar.theText.text = "#49ers";
-					break;
-			}
-						
 			dict.refreshTags(tagName, colors);//calls tagsLoaded when ready
 		}
 		
@@ -67,29 +61,19 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		 */
 		public function show():void
 		{		
+			flares.newFlare(360, 40, 640,2);	//x,y,toX,delay		
+			flares.newFlare(290, 470, 720, 2);
+			flares.newFlare(300, 93, 710, 1);
+			flares.newFlare(320, 173, 690, 1);
 			
 			var bmd:BitmapData = new BitmapData(WIDTH, HEIGHT, true, 0x00000000);
 			bmp = new Bitmap(bmd);
-			TweenMax.to(bmp, 0, { dropShadowFilter: { color:0x000000, alpha:1, blurX:5, blurY:5, distance:6 }} );
-			addChildAt(bmp, 0);	
+			//TweenMax.to(bmp, 0, { dropShadowFilter: { color:0x000000, alpha:.8, blurX:5, blurY:5, distance:4 }} );
+			addChild(bmp);	
 			
-			var tagImage:BitmapData;
-			switch(tagName) {
-				case "levis":
-					tagImage = new sap();
-					break;
-				case "offense":
-					tagImage = new helmet();
-					break;
-				case "defense":
-					tagImage = new helmet_flip();
-					break;
-				case "49ers":
-					tagImage = new helmet();
-					break;
-			}
+			var tagImage:BitmapData = new cloud();//image to create with word cloud
 			
-			ra.create(bmd, tagImage, dict.getTags(), this.stage);
+			ra.create(this, tagImage, dict.getTags(), this.stage);
 		}
 		
 		/**
@@ -128,7 +112,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 		 */
 		private function tagsLoaded(e:Event):void
 		{
-			//show();//TESTING
+			show();//TESTING
 			dispatchEvent(new Event(READY));
 		}
 	}

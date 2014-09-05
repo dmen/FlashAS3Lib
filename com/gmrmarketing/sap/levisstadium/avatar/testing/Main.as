@@ -14,7 +14,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	import com.gmrmarketing.utilities.SerProxy_Connector;
 	import com.gmrmarketing.utilities.Logger;
 	import com.gmrmarketing.utilities.AIRXML;
-	
+	import com.gmrmarketing.sap.levisstadium.avatar.testing.Avatar_Flare3D_v2_5;
+	import com.gmrmarketing.sap.levisstadium.avatar.testing.Webcam3D_1280x960;
 	
 	public class Main extends MovieClip
 	{
@@ -257,6 +258,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private function takePhoto(e:Event):void
 		{
 			avatarImage = preview.shotReady();
+			
 			countdown.removeEventListener(Countdown.WHITE_FLASH, takePhoto);
 			countdown.addEventListener(Countdown.FLASH_COMPLETE, showReview, false, 0, true);
 			countdown.doFlash();

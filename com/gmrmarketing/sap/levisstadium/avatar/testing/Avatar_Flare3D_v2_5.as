@@ -23,6 +23,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 	 */
 	public class Avatar_Flare3D_v2_5 extends BRFContainerFP11 {
 		public const LOADED:String = "modelLoaded";
+		public static const SHOT_READY:String = "maskReady";
 		
 		//Flare3D extension
 		private var _scene : Scene3D;
@@ -244,8 +245,8 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 		
 		override public function getScreenshot() : BitmapData 
 		{
-			var bmd : BitmapData = new BitmapData(_scene.viewPort.width, _scene.viewPort.height);
-					
+			var bmd:BitmapData = new BitmapData(_scene.viewPort.width, _scene.viewPort.height);
+			
 			_scene.context.clear();
 			_videoPlane.draw();
 			
@@ -258,29 +259,40 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 			
 			_scene.render();
 			_scene.context.drawToBitmapData(bmd);
-					
+			
 			return bmd;
 		}
 		
 		
-		public function getMaskImage() : BitmapData 
+		/**
+		 * returns a bitmapData containing the helmet and occlusion object
+		 * and alpha zero anywhere else called from Webcam3D_1280x960.shotReady()
+		 * @return
+		 */
+		public function getMaskImage():BitmapData 
 		{
-			var bmd : BitmapData = new BitmapData(_scene.viewPort.width, _scene.viewPort.height);
-					
-			_scene.context.clear();
+			_scene.context.clear(0,0,0,0);
+			
+			bmd = new BitmapData(_scene.viewPort.width, _scene.viewPort.height, true);
+			_videoPlane.visible = false;//hide webcam image
+			
+			_scene.setupFrame( _scene.camera );
+			_holder.draw();
 			//_videoPlane.draw();
 			
 			if(_occlusion != null) {
 				//... write it to the buffer, but hide all coming polys behind it
-				_scene.context.setColorMask(false, false, false, false);
+				//_scene.context.setColorMask(false, false, false, false);
 				_occlusion.draw();
-				_scene.context.setColorMask(true, true, true, true);
+				//_scene.context.setColorMask(true, true, true, true);
 			}
 			
-			_scene.render();
+			//_scene.render();
 			_scene.context.drawToBitmapData(bmd);
-					
-			return bmd;
+			
+			_videoPlane.visible = true;
+			
+			return bmd;			
 		}
 
 		
