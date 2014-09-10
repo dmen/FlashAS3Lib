@@ -14,13 +14,17 @@ package com.gmrmarketing.sap.levisstadium.usmap
 	{
 		private var container:DisplayObjectContainer;
 		private var tweets:Array; //all tweets from the service
-		private var quadrants:Array;//there are two quadrants to display tweets in
+		private var q0:Boolean;//true if the quadrant is available
+		private var q1:Boolean;
 		private var killed:Boolean;
 		private var localCache:Array;
 		
+		
+		
 		public function TweetManager()
 		{
-			quadrants = new Array(0, 0); //all quadrants are empty
+			q0 = true;//both quadrants available
+			q1 = true;
 		}
 	
 		
@@ -43,8 +47,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		
 		
 		public function refresh():void		
-		{
-			quadrants = new Array(0, 0); //all quadrants are empty
+		{			
 			killed = false;
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
 			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=CaliMapTweets"+"&abc="+String(new Date().valueOf()));
@@ -63,19 +66,17 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			
 			var p:Point;
 			var m:String;
-			var favorQuadrant1:Boolean;
+			//var favorQuadrant1:Boolean;
 			
 			for (var i:int = 0; i < json.length; i++) {
-				//if(json[i].latitude <= 42 && json[i].latitude > 32 && Math.abs(json[i].longitude) > 114 && Math.abs(json[i].longitude) < 125){
 					p = latLonToXY(json[i].latitude, Math.abs(json[i].longitude));	
 					m = Strings.removeLineBreaks(json[i].text);
 					m = Strings.removeChunk(m, "http://");
-					favorQuadrant1 = false;
-					if (json[i].latitude < 37) {
-						favorQuadrant1 = true;
-					}
-					tweets.push( { user:"@" + json[i].authorname, message:m, theY:p.y, theX:p.x, favor1:favorQuadrant1, pic:json[i].profilepicURL } );
-				//}
+					//favorQuadrant1 = false;
+					//if (json[i].latitude < 37) {
+						//favorQuadrant1 = true;
+					//}
+					tweets.push( { user:"@" + json[i].authorname, message:m, theY:p.y, theX:p.x, pic:json[i].profilepicURL } );//favor1:favorQuadrant1,
 			}
 			
 			localCache = tweets.concat();
@@ -100,53 +101,53 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		
 		private function displayNext():void
 		{
-			if(!killed){
-				var a:Tweet = new Tweet();
-				a.setContainer(container);
+			if (!killed) {
+				
+				var a:Tweet;
 				
 				var tw:Object = tweets.shift();				
 				if (tweets.length == 0) {
 					refresh();
 					return;
 				}
-				if (tw.favor1 == true) {				
-					if (quadrants[0] == 0) {
-						quadrants[0] = 1; //mark as used
-						a.show(tw.user, tw.message, tw.theX, tw.theY, 1);
-						a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
-					}else if (quadrants[1] == 0) {
-						//favors q1 but it's not available
-						//tweets.unshift(tw); //put the tweet back in tweets array for later use
-						/*
-						quadrants[1] = 1; //mark as used
-						a.show(tw.user, tw.message, tw.theX, tw.theY, 2);
-						a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
-						*/
-						displayNext();
-					}
-				}else{
-					if (quadrants[0] == 0) {
-						quadrants[0] = 1; //mark as used
-						a.show(tw.user, tw.message, tw.theX, tw.theY, 1);
-						a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
-					}else if (quadrants[1] == 0) {
-						quadrants[1] = 1; //mark as used
-						a.show(tw.user, tw.message, tw.theX, tw.theY, 2);
-						a.addEventListener(Tweet.COMPLETE, recycleQuadrant, false, 0, true);
-					}
-				}	
+				
+				if (q0) {
+					
+					a = new Tweet();
+					a.setContainer(container);
+					q0 = false; //mark as used
+					a.show(tw.user, tw.message, tw.theX, tw.theY, 0);
+					a.addEventListener(Tweet.COMPLETE, recycleQuadrant);
+					
+				}else if (q1) {
+					
+					a = new Tweet();
+					a.setContainer(container);
+					q1 = false; //mark as used
+					a.show(tw.user, tw.message, tw.theX, tw.theY, 1);
+					a.addEventListener(Tweet.COMPLETE, recycleQuadrant);
+					
+				}
 			}
 		}
 		
 		
 		private function recycleQuadrant(e:Event):void
 		{
-			if(!killed){
-				var q:int = Tweet(e.currentTarget).getQuadrant();//returns 1-2
-				quadrants[q - 1] = 0; //mark as unused and available
+			if (!killed) {
+				var a:Tweet = Tweet(e.currentTarget);
+				a.removeEventListener(Tweet.COMPLETE, recycleQuadrant);
+				var q:int = a.getQuadrant();//returns 0-1
+				a.dispose();
+				if (q == 0) {
+					q0 = true;
+				}else {
+					q1 = true;
+				}
 				displayNext();
 			}
 		}
+		
 		
 		/**
 		 * Latitude is North/South

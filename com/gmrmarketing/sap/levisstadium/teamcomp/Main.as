@@ -197,8 +197,10 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 				tweenObject.vtNegSent = false;
 			}	
 			
-			TweenMax.to(tweenObject, 5, { htSent:Math.abs(ht.Stats[0].NetbaseSentiment * 3.6), delay:1, onUpdate:drawHSent } );
-			TweenMax.to(tweenObject, 5, { vtSent:Math.abs(vt.Stats[0].NetbaseSentiment * 3.6), delay:1, onUpdate:drawVSent} );		
+			var hts:Number = Math.min(100, Math.abs(ht.Stats[0].NetbaseSentiment * 3.6));
+			var vts:Number = Math.min(100, Math.abs(vt.Stats[0].NetbaseSentiment * 3.6));
+			TweenMax.to(tweenObject, 5, { htSent:hts, delay:1, onUpdate:drawHSent } );
+			TweenMax.to(tweenObject, 5, { vtSent:vts, delay:1, onUpdate:drawVSent} );		
 		}
 		
 		

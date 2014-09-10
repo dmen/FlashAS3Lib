@@ -47,7 +47,7 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 			p1Sent = new Sprite();
 			p2Sent = new Sprite();
 			
-			//init("08/24/14,QB");
+			//init("08/24/14,WR");
 		}
 		
 		
@@ -236,9 +236,11 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 				p2Sent.x = 0;
 				tweenObject.p2NegSent = false;
 			}			
-						
-			TweenMax.to(tweenObject, 5, { p1Sent:Math.abs(p1.Stats[0].PlayerPositionStatValue * 3.6), delay:1, onUpdate:drawP1Sent } );
-			TweenMax.to(tweenObject, 5, { p2Sent:Math.abs(p2.Stats[0].PlayerPositionStatValue * 3.6), delay:1, onUpdate:drawP2Sent} );
+				
+			var p1s:Number = Math.min(100, Math.abs(p1.Stats[0].PlayerPositionStatValue * 3.6));
+			var p2s:Number = Math.min(100, Math.abs(p2.Stats[0].PlayerPositionStatValue * 3.6));
+			TweenMax.to(tweenObject, 5, { p1Sent:p1s, delay:1, onUpdate:drawP1Sent } );
+			TweenMax.to(tweenObject, 5, { p2Sent:p2s, delay:1, onUpdate:drawP2Sent} );
 		}
 		
 		

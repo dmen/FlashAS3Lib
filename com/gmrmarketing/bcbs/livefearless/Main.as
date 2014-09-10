@@ -176,7 +176,7 @@
 			textEntry.addEventListener(TextEntry.SWEAR, inappropriateMessage, false, 0, true);
 			textEntry.addEventListener(TextEntry.NEXT, showTakePhoto, false, 0, true);
 			editingText = false;
-			textEntry.show(true, queue.getPrizeOptions());//clear any old text
+			textEntry.show(true, queue.getPrizeOptions(), queue.getPledgeOptions());//clear any old text
 		}
 		
 		
@@ -250,7 +250,7 @@
 			textEntry.addEventListener(TextEntry.REQUIRED, messageRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.SWEAR, inappropriateMessage, false, 0, true);
 			
-			textEntry.show(false, queue.getPrizeOptions());//don't clear old text
+			textEntry.show(false, queue.getPrizeOptions(), queue.getPledgeOptions());//don't clear old text
 		}		
 		
 		
@@ -297,7 +297,7 @@
 			form.addEventListener(Form.RULES, noRules, false, 0, true);			
 			form.addEventListener(Form.SAVE, formComplete, false, 0, true);			
 			form.addEventListener(Form.READ_RULES, showRules, false, 0, true);			
-			form.show();			
+			form.show(queue.getInterestOptions());			
 		}
 		
 			
@@ -350,11 +350,11 @@
 		{
 			thanks.removeEventListener(Thanks.SHOWING, removeForm);
 			form.hide();
-			var formData:Array = form.getData();//email,pho,opt
-			var textData:Array = textEntry.getData(); //fname, lname, 0, message, prizeID
+			var formData:Array = form.getData();//email,pho,opt,interestedID
+			var textData:Array = textEntry.getData(); //fname, lname, 0, message, prizeID, pledgeID
 			var im:String = takePhoto.getPhotoString();
-			//removed combo
-			var ob:Object = { fname:textData[0], lname:textData[1], email:formData[0], combo:textData[2], prizeCombo:textData[4], sharephoto:formData[1], emailoptin:formData[2], message:textData[3], image:im };
+			
+			var ob:Object = { fname:textData[0], lname:textData[1], email:formData[0], pledgeCombo:textData[5], prizeCombo:textData[4], sharephoto:formData[1], emailoptin:formData[2], message:textData[3], image:im, interestCombo:formData[3] };
 			queue.add(ob);
 		}
 		

@@ -70,7 +70,7 @@ package com.gmrmarketing.sap.levisstadium.tagcloud
 			
 			var bmd:BitmapData = new BitmapData(WIDTH, HEIGHT, true, 0x00000000);
 			bmp = new Bitmap(bmd);
-			TweenMax.to(bmp, 0, { dropShadowFilter: { color:0x000000, alpha:1, blurX:5, blurY:5, distance:6 }} );
+			//TweenMax.to(bmp, 0, { dropShadowFilter: { color:0x000000, alpha:1, blurX:5, blurY:5, distance:6 }} );
 			addChildAt(bmp, 0);	
 			
 			var tagImage:BitmapData;

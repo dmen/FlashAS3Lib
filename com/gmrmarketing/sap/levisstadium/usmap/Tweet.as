@@ -1,3 +1,7 @@
+/**
+ * Single instance of a tweet - 
+ * uses mcTweet clip from the library
+ */
 package com.gmrmarketing.sap.levisstadium.usmap
 {
 	import flash.display.*;
@@ -20,12 +24,13 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		private var container:DisplayObjectContainer;
 		private var tweenOb:Object;
 		private var dot:MovieClip;
-		private var myQuadrant:int; // 1 or 2
+		private var myQuadrant:int; // 1 or 2 set in show()
 		private var vx:Number;
 		private var vy:Number;
 		private var drawToX:int;
 		private var drawToY:int;
 		private var lineColor:Number;
+		private var endTimer:Timer;
 		
 		
 		//lib clip - 'clip' contains rectContainer on layer 0 - behind text already in the clip
@@ -69,7 +74,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		 * @param	message up to 140 char message - no checks prevent > 140 though		
 		 * @param	toX Where to shoot the line to - the lat/lon spot
 		 * @param	toY 
-		 * @param	quadrant which quadrant the message goes in 1 - 2
+		 * @param	quadrant which quadrant the message goes in 0 - 1
 		 */
 		public function show(userName:String, message:String, toX:int, toY:int, quadrant:int):void
 		{
@@ -103,11 +108,11 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			TweenMax.to(dot, 1, { alpha:0, scaleX:sc, scaleY:sc, rotation:45 + Math.random() * 90 } );
 			
 			switch(quadrant) {
-				case 1:
+				case 0:
 					clip.x = 100 + Math.random() * 10;
 					clip.y = 150 + Math.random() * 10;
 					break;
-				case 2:
+				case 1:
 					clip.x = 485 + Math.random() * 10;
 					clip.y = 150 + Math.random() * 10;
 					break;
@@ -177,9 +182,10 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		private function startEndTimer():void
 		{			
 			var tLen:int = Math.max(1, clip.theText.theText.length / 24);			
-			var end:Timer = new Timer(tLen * 1000, 1);
-			end.addEventListener(TimerEvent.TIMER, tweetComplete);
-			end.start();
+			
+			endTimer = new Timer(tLen * 1000, 1);
+			endTimer.addEventListener(TimerEvent.TIMER, tweetComplete);
+			endTimer.start();
 		}
 		
 		
@@ -191,11 +197,16 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		
 		private function tweetComplete(e:TimerEvent):void
 		{			
-			TweenMax.to(clip, 1, { alpha:0, onComplete:dispose } );
+			endTimer.removeEventListener(TimerEvent.TIMER, tweetComplete);			
+			TweenMax.to(clip, 1, { alpha:0, onComplete:complete } );
 		}
 		
+		private function complete():void
+		{
+			dispatchEvent(new Event(COMPLETE));
+		}
 		
-		private function dispose():void
+		public function dispose():void
 		{
 			lineContainer.graphics.clear();
 			clip.userBG.graphics.clear();			
@@ -221,8 +232,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			rectContainer = null;
 			clip = null;
 			dot = null;
-			
-			dispatchEvent(new Event(COMPLETE));
+			myQuadrant = -1;			
 		}
 	}
 	

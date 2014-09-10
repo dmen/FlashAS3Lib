@@ -44,7 +44,7 @@ package com.gmrmarketing.sap.levisstadium.california
 		public function refresh():void		
 		{
 			killed = false;
-			quadrants = new Array(0, 0); //all quadrants are empty
+			//quadrants = new Array(0, 0); //all quadrants are empty
 			
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
 			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=CaliMapTweets"+"&abc="+String(new Date().valueOf()));
