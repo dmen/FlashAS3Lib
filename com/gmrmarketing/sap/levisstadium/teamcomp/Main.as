@@ -43,7 +43,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			homeSent = new Sprite();///home sentiment
 			visSent = new Sprite();//visitor sentiment		
 			
-			//init("08/24/14");
+			//init("09/14/14");
 		}
 		
 		

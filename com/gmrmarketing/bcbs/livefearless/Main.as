@@ -297,7 +297,7 @@
 			form.addEventListener(Form.RULES, noRules, false, 0, true);			
 			form.addEventListener(Form.SAVE, formComplete, false, 0, true);			
 			form.addEventListener(Form.READ_RULES, showRules, false, 0, true);			
-			form.show(queue.getInterestOptions());			
+			form.show();// queue.getInterestOptions());			
 		}
 		
 			
@@ -350,11 +350,11 @@
 		{
 			thanks.removeEventListener(Thanks.SHOWING, removeForm);
 			form.hide();
-			var formData:Array = form.getData();//email,pho,opt,interestedID
+			var formData:Array = form.getData();//email,pho,opt
 			var textData:Array = textEntry.getData(); //fname, lname, 0, message, prizeID, pledgeID
 			var im:String = takePhoto.getPhotoString();
 			
-			var ob:Object = { fname:textData[0], lname:textData[1], email:formData[0], pledgeCombo:textData[5], prizeCombo:textData[4], sharephoto:formData[1], emailoptin:formData[2], message:textData[3], image:im, interestCombo:formData[3] };
+			var ob:Object = { fname:textData[0], lname:textData[1], email:formData[0], pledgeCombo:textData[5], prizeCombo:textData[4], sharephoto:formData[1], emailoptin:formData[2], message:textData[3], image:im };// , interestCombo:formData[3] };
 			queue.add(ob);
 		}
 		

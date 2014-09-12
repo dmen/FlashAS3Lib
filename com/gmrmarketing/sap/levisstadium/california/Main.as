@@ -29,6 +29,8 @@ package com.gmrmarketing.sap.levisstadium.california
 			
 			tweetManager = new TweetManager();//gets text tweets and starts to display them
 			tweetManager.setContainer(textContainer);
+			
+			//init();
 		}
 		
 		
@@ -64,10 +66,8 @@ package com.gmrmarketing.sap.levisstadium.california
 			var del:Number = 0;
 			for (var j:int = 0; j < tweets.length; j++) {
 				addLoc(tweets[j].lat, Math.abs(tweets[j].lon), tweets[j].normalized, del);
-				del += .25;
-			}
-			
-			
+				del += .1;
+			}			
 		}
 		
 		
@@ -201,14 +201,14 @@ package com.gmrmarketing.sap.levisstadium.california
 				a = .5 + Math.random() * .2; //.4 - .6
 			}
 			a = .3 + Math.random() * .6; //.7 - .9
-			dot.filters = [new DropShadowFilter(0, 0, 0x000000, .5, 5, 5)];
+			//dot.filters = [new DropShadowFilter(1, 0, 0x000000, 1, 4, 4, .5, 2)];
 			var p:Point = latLonToXY(lat, lon);
 			dot.x = p.x;
 			dot.y = p.y;
 			dot.scaleX = dot.scaleY = .01;
 			dot.alpha = 0;
 			dots.addChild(dot);
-			
+			//trace(w);
 			TweenMax.to(dot, 1, { alpha:a, scaleX:w, scaleY:w, delay:del, ease:Elastic.easeOut } );
 		}
 		

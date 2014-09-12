@@ -290,8 +290,6 @@ package com.gmrmarketing.sap.levisstadium.countdown
 			minutesClip.alpha = 0;
 			secondsClip.alpha = 0;
 			
-					
-			
 			//draw and show the gray bg circles			
 			draw_arc(hoursBase.graphics, -100, -100, radius, 0, 360, lineThickness, BASE_COLOR, .6);
 			draw_arc(minutesBase.graphics,  -100, -100, radius, 0, 360, lineThickness, BASE_COLOR, .6);
@@ -368,6 +366,9 @@ package com.gmrmarketing.sap.levisstadium.countdown
 				removeChild(hoursClip);
 				removeChild(minutesClip);
 				removeChild(secondsClip);
+			}
+			if (contains(analogClock)) {
+				removeChild(analogClock);
 			}
 			TweenMax.killTweensOf(analogClock);
 		}

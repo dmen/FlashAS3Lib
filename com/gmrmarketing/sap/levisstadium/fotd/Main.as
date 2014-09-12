@@ -70,13 +70,13 @@ package com.gmrmarketing.sap.levisstadium.fotd
 		 */
 		public function init(initValue:String = ""):void
 		{
-			delayTime = parseInt(initValue) / 3;
+			delayTime = (parseInt(initValue) - 1.25) / 3;//subtract 1.25 first to compensate for intro animation in show
 			
 			tweenObject = new Object();
 			imagesLoaded = new Array();
 			
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://wall.thesocialtab.net/SocialPosts/GetPosts?ProgramID=48&FilterID=389&Count=3&SwearRating=7" + "&abc=" + String(new Date().valueOf()));
+			var r:URLRequest = new URLRequest("http://wall.thesocialtab.net/SocialPosts/GetPosts?ProgramID=48&Grouping=FOTD49ers&Count=3&SwearRating=7" + "&abc=" + String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -119,6 +119,9 @@ package com.gmrmarketing.sap.levisstadium.fotd
 			if (contains(fan3)) {
 				removeChild(fan3);
 			}
+			fan1.theMessage.y = fan1.theMask.y;
+			fan2.theMessage.y = fan2.theMask.y;
+			fan3.theMessage.y = fan3.theMask.y;
 		}
 		
 		
@@ -127,30 +130,34 @@ package com.gmrmarketing.sap.levisstadium.fotd
 			json = JSON.parse(e.currentTarget.data);
 			localCache = json;
 			
-			var im1URL:String = json.SocialPosts[0].MediumResURL;
-			var im2URL:String = json.SocialPosts[1].MediumResURL;
-			var im3URL:String = json.SocialPosts[2].MediumResURL;			
-			
-			if(im1URL){
-				var im1Loader:Loader = new Loader();
-				im1Loader.contentLoaderInfo.addEventListener(Event.COMPLETE, im1Loaded, false, 0, true);			
-				im1Loader.load(new URLRequest(im1URL));
+			if(json.SocialPosts.length > 2){
+				var im1URL:String = json.SocialPosts[0].MediumResURL;
+				var im2URL:String = json.SocialPosts[1].MediumResURL;
+				var im3URL:String = json.SocialPosts[2].MediumResURL;			
+				
+				if(im1URL){
+					var im1Loader:Loader = new Loader();
+					im1Loader.contentLoaderInfo.addEventListener(Event.COMPLETE, im1Loaded, false, 0, true);			
+					im1Loader.load(new URLRequest(im1URL));
+				}
+				
+				if(im2URL){
+					var im2Loader:Loader = new Loader();
+					im2Loader.contentLoaderInfo.addEventListener(Event.COMPLETE, im2Loaded, false, 0, true);			
+					im2Loader.load(new URLRequest(im2URL));
+				}
+				
+				if(im3URL){
+					var im3Loader:Loader = new Loader();
+					im3Loader.contentLoaderInfo.addEventListener(Event.COMPLETE, im3Loaded, false, 0, true);			
+					im3Loader.load(new URLRequest(im3URL));
+				}
+				
+				//show();//TESTING
+			}else {
+				//social posts is empty
+				dispatchEvent(new Event(ERROR));
 			}
-			
-			if(im2URL){
-				var im2Loader:Loader = new Loader();
-				im2Loader.contentLoaderInfo.addEventListener(Event.COMPLETE, im2Loaded, false, 0, true);			
-				im2Loader.load(new URLRequest(im2URL));
-			}
-			
-			if(im3URL){
-				var im3Loader:Loader = new Loader();
-				im3Loader.contentLoaderInfo.addEventListener(Event.COMPLETE, im3Loaded, false, 0, true);			
-				im3Loader.load(new URLRequest(im3URL));
-			}
-			
-			//show();//TESTING
-			//dispatchEvent(new Event(READY));//will call show()
 		}
 		
 		
@@ -170,14 +177,17 @@ package com.gmrmarketing.sap.levisstadium.fotd
 		
 		
 		private function im1Loaded(e:Event):void
-		{			
-			fan1Image = Bitmap(e.target.content);
-			fan1Image.smoothing = true;
-			
+		{	
 			//remove old image from clip
-			if (fan1.contains(fan1Image)) {
-				fan1.removeChild(fan1Image);
+			if(fan1Image){
+				if (fan1.contains(fan1Image)) {
+					fan1.removeChild(fan1Image);
+				}
 			}
+			
+			fan1Image = Bitmap(e.target.content);
+			fan1Image.smoothing = true;			
+			
 			addFan(0, fan1Image); //adds image to the fan clip
 			
 			imagesLoaded[0] = true;
@@ -186,14 +196,17 @@ package com.gmrmarketing.sap.levisstadium.fotd
 		
 		
 		private function im2Loaded(e:Event):void
-		{			
-			fan2Image = Bitmap(e.target.content);
-			fan2Image.smoothing = true;
-			
+		{	
 			//remove old image from clip
-			if (fan2.contains(fan2Image)) {
-				fan2.removeChild(fan2Image);
+			if(fan2Image){
+				if (fan2.contains(fan2Image)) {
+					fan2.removeChild(fan2Image);
+				}
 			}
+			
+			fan2Image = Bitmap(e.target.content);
+			fan2Image.smoothing = true;			
+			
 			addFan(1, fan2Image);			
 			
 			imagesLoaded[1] = true;
@@ -202,14 +215,17 @@ package com.gmrmarketing.sap.levisstadium.fotd
 		
 		
 		private function im3Loaded(e:Event):void
-		{			
-			fan3Image = Bitmap(e.target.content);
-			fan3Image.smoothing = true;
-			
+		{	
 			//remove old image from clip
-			if (fan3.contains(fan3Image)) {
-				fan3.removeChild(fan3Image);
+			if(fan3Image){
+				if (fan3.contains(fan3Image)) {
+					fan3.removeChild(fan3Image);
+				}
 			}
+			
+			fan3Image = Bitmap(e.target.content);
+			fan3Image.smoothing = true;			
+			
 			addFan(2, fan3Image);			
 			
 			imagesLoaded[2] = true;
@@ -276,8 +292,35 @@ package com.gmrmarketing.sap.levisstadium.fotd
 				f.userName.setTextFormat(tf);
 			}
 			
+			var ft:String = data.Text;
+			
+			var t:Array = ft.split(" ");
+			for(var i:int = t.length -1; i >= 0; i--){
+				if(t[i].indexOf("fuck") != -1 || t[i].indexOf("bitch") != -1 || t[i].indexOf("shit") != -1){
+					t.splice(i,1);		
+				}
+			}
+
+			var m:String = t.join(" ");
+
+			m = m.replace(/fuck/g, "");
+			m = m.replace(/bitch/g, "");
+			m = m.replace(/shit/g, "");
+			
 			f.theMessage.autoSize = TextFieldAutoSize.LEFT;
-			f.theMessage.text = data.Text;
+			f.theMessage.text = m;
+			
+			if (f.theMessage.text == "") {
+				f.theMask.visible = false;
+				f.theMessage.visible = false;
+				f.textBG.visible = false;
+				f.whiteBG.height = 49;
+			}else {
+				f.theMask.visible = true;
+				f.theMessage.visible = true;
+				f.textBG.visible = true;
+				f.whiteBG.height = 157;
+			}
 			
 			f.addChildAt(im, 1); //place image into fan clip
 			im.mask = f.circle;

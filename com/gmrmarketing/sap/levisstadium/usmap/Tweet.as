@@ -11,6 +11,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import flash.utils.Timer;
+	import flash.text.TextFieldAutoSize;
 	
 	
 	public class Tweet extends EventDispatcher
@@ -88,7 +89,8 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			
 			clip.userBG.alpha = 0;
 			clip.theText.alpha = 0; //contains the two text fields
-			clip.theText.theUser.text = userName;			
+			clip.theText.theUser.text = userName;
+			clip.theText.theText.autoSize = TextFieldAutoSize.LEFT;
 			clip.theText.theText.text = message;
 			
 			var rectWidth:int = Math.max(200, clip.theText.theText.textWidth + 12);

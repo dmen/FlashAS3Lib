@@ -20,8 +20,8 @@
 		private var clip:MovieClip;
 		private var container:DisplayObjectContainer;
 		private var kbd:KeyBoard;
-		private var combo:ComboBox;
-		private var interestOptions:Array;
+		//private var combo:ComboBox;
+		//private var interestOptions:Array;
 		private var timeoutHelper:TimeoutHelper;
 		
 		
@@ -32,14 +32,14 @@
 			kbd = new KeyBoard();			
 			kbd.loadKeyFile("bcbs_photobooth.xml");
 			
-			
+			/*
 			combo = new ComboBox("Please select");			
 			combo.populate(["Healthy Eating", "Healthy Lifestyle", "Healthcare", "Other"])
 			clip.addChild(combo);
 			combo.x = 977;
 			combo.y = 358;
 			combo.width = 480;			
-			
+			*/
 			timeoutHelper = TimeoutHelper.getInstance();
 		}
 		
@@ -50,9 +50,9 @@
 		}
 		
 		
-		public function show($interestOptions:Array):void
+		public function show():void//$interestOptions:Array
 		{
-			interestOptions = $interestOptions;
+			//interestOptions = $interestOptions;
 			
 			if (!container.contains(clip)) {
 				container.addChild(clip);
@@ -73,7 +73,7 @@
 			clip.checkRules.gotoAndStop(1);//reset checks
 			clip.checkPhoto.gotoAndStop(1);			
 			clip.checkOptin.gotoAndStop(1);
-			
+			/*
 			var items:Array = new Array();//need simple array of text values for comboBox
 			for (var i:int = 0; i < interestOptions.length; i++) {
 				items.push(interestOptions[i][0]);
@@ -81,7 +81,7 @@
 			combo.populate(items);
 			combo.setSelection("");
 			combo.reset();	
-			
+			*/
 			clip.alpha = 0;
 			clip.btnSave.addEventListener(MouseEvent.MOUSE_DOWN, doSave, false, 0, true);
 			clip.btnRules.addEventListener(MouseEvent.MOUSE_DOWN, rulesClicked, false, 0, true);			
@@ -117,7 +117,7 @@
 		{			
 			var pho:String = clip.checkPhoto.currentFrame == 1 ? "false" : "true";
 			var opt:String = clip.checkOptin.currentFrame == 1 ? "false" : "true";
-			
+			/*
 			var selText:String = combo.getSelection();
 			var cId:int;
 			for (var i:int = 0; i < interestOptions.length; i++) {
@@ -126,8 +126,8 @@
 					break;
 				}
 			}
-			
-			return new Array(clip.email.text, pho, opt, cId);			
+			*/
+			return new Array(clip.email.text, pho, opt);// , cId);			
 		}
 		
 		

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" applicationComplete="init()" horizontalAlign="left">
+<mx:Script>
+	<![CDATA[
+
+		import com.adobe.linguistics.spelling.*;
+		import mx.controls.textClasses.TextRange;
+		
+		private var _newdict:HunspellDictionary = new HunspellDictionary();
+		private var sp:SpellChecker;
+		private function init():void {
+			_newdict.addEventListener(Event.COMPLETE, handleLoadComplete);
+			_newdict.load("dictionaries/en_US/en_US.aff", "dictionaries/en_US/en_US.dic");
+		}
+		private function handleLoadComplete(evt:Event):void
+		{
+			sp = new SpellChecker(_newdict);
+		}
+
+		private function checkText():void {
+			var wordPattern:RegExp =/\b\w+\b/; // match next word...
+			var inputValue:String = inputText.text;
+			var offset:int, curPos:int;
+			for ( ; ; ) {
+				var res:Array = inputValue.match( wordPattern); // lookup word by word....
+				if ( res == null ) break;
+				if ( !sp.checkWord(res[0]) ) {
+					offset = inputText.text.length-inputValue.length;
+					curPos = inputValue.indexOf(res[0]);
+					var currentRange:TextRange = new TextRange(inputText, false, offset+ curPos, offset+ curPos+res[0].length); // mark mispelled word.
+					currentRange.color = "red";
+				}
+				inputValue = inputValue.substr(inputValue.indexOf(res[0])+ res[0].length);
+			}
+		}
+		
+	]]>
+</mx:Script>
+	<mx:HBox>
+		<mx:Button id="check" label="Check Text" click="checkText()"  />
+	</mx:HBox>
+	<mx:TextArea id="inputText" height="100%" width="100%"/>	
+</mx:Application>

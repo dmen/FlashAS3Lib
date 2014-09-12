@@ -34,7 +34,7 @@ package com.gmrmarketing.sap.levisstadium.california
 		public function kill():void
 		{
 			killed = true;
-			
+			quadrants = new Array(0, 0); //all quadrants are empty
 			while (container.numChildren) {
 				var t:MovieClip = MovieClip(container.removeChildAt(0));
 				t.removeEventListener(Tweet.COMPLETE, recycleQuadrant);

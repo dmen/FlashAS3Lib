@@ -2,10 +2,10 @@
  * Scheduler V2
  */
 package com.gmrmarketing.sap.levisstadium.scheduler
-{
+{	
 	import flash.display.*;
 	import flash.events.*;
-	import flash.net.URLRequest;
+	import flash.net.*;
 	import flash.ui.Mouse;
 	import com.gmrmarketing.utilities.AIRXML;
 	import com.greensock.TweenMax;
@@ -20,13 +20,16 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private var tasks:XMLList;//task list from config.xml - each task has file, time and config attributes
 		private var taskFiles:Array; //array of loaded swfs defined in tasks
 		private var currentTask:int;
-		private var config:AIRXML;
+		
 		private var thisTask:MovieClip; //the loaded swf
 		private var lastTask:MovieClip; //previous task swf - set in loadNextTask()
-		private var lastTaskWas3D:Boolean;
 		
-		private var encoder:Encoder;
+		private var encoder:Encoder;//for writing to video
 		private var encoderImage:BitmapData;
+		
+		private var config:AIRXML;
+		private var configLoader:URLLoader;
+		
 		
 		public function Main_2()
 		{			
@@ -38,9 +41,12 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			player.autoRewind = true;
 			player.addEventListener(MetadataEvent.CUE_POINT, loop);//listen for cue point one frame back
 			
-			config = new AIRXML(); //reads config.xml in the apps folder
-			config.addEventListener(Event.COMPLETE, configReady);
-			config.readXML();			
+			var req:URLRequest = new URLRequest("http://design.gmrstage.com/sap/levis/gda/config.xml");
+			configLoader = new URLLoader();
+			configLoader.addEventListener(Event.COMPLETE, configLoaded, false, 0, true);
+			configLoader.addEventListener(IOErrorEvent.IO_ERROR, configError, false, 0, true);			
+			configLoader.load(req);
+			//configError();//TESTING - forces loading of local config
 		}
 		
 		
@@ -53,11 +59,44 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		{
 			player.seek(0);
 			player.play();
+		}		
+		
+		/**
+		 * called when config.xml has been loaded from the server
+		 * creates tasks array: each task has file, time and config attributes 
+		 * @param	e
+		 */
+		private function configLoaded(e:Event):void
+		{
+			configLoader.removeEventListener(Event.COMPLETE, configReady);
+			configLoader.removeEventListener(IOErrorEvent.IO_ERROR, configError);
+			
+			configLoader.removeEventListener(Event.COMPLETE, configLoaded);
+			var xm:XML = XML(configLoader.data);
+			
+			tasks = xm.tasks.task;
+			if(xm.record == "true"){
+				encoder.record();
+				addEventListener(Event.ENTER_FRAME, addFrame);
+			}
+			currentTask = 0;
+			taskFiles = new Array();
+			loadTask();//begin loading task files
 		}
 		
 		
+		private function configError(e:IOErrorEvent = null):void
+		{
+			configLoader.removeEventListener(Event.COMPLETE, configReady);
+			configLoader.removeEventListener(IOErrorEvent.IO_ERROR, configError);
+			
+			config = new AIRXML(); //reads config.xml in the apps folder
+			config.addEventListener(Event.COMPLETE, configReady);
+			config.readXML();
+		}
+		
 		/**
-		 * Called when the config.xml file has been loaded
+		 * Called when the config.xml file has been loaded from local disk
 		 * creates tasks array: each task has file, time and config attributes
 		 * @param	e
 		 */
@@ -75,6 +114,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			taskFiles = new Array();
 			loadTask();//begin loading task files
 		}
+		
 		
 		
 		private function loadTask():void
@@ -109,6 +149,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		{			
 			thisTask = taskFiles[currentTask];		
 			thisTask.addEventListener("ready", taskReadyToShow);
+			thisTask.addEventListener("error", abortTask);
 			thisTask.init(tasks[currentTask].@initData);//value or "" - causes the task to refresh data from the net	
 		}
 		
@@ -121,20 +162,33 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		private function taskReadyToShow(e:Event):void
 		{
 			thisTask.removeEventListener("ready", taskReadyToShow);
+			thisTask.removeEventListener("error", abortTask);
 			thisTask.x = -768;//just off stage left
 			addChild(thisTask);
 			
 			//lastTask is undefined until ?
-			if (lastTask) {
-				//thisTask is ready - stop the one on screen - and move it off stage right
-				if (lastTaskWas3D) {					
-					player.x = 0;//move video player back on screen
-				}
+			if (lastTask) {				
 				lastTask.doStop();
 				TweenMax.to(lastTask, 1, { x:1920, onComplete:hideLastTask } );
 			}else {				
 				TweenMax.to(thisTask, .75, { x:0, onComplete:showTask } );
 			}			
+		}
+		
+		
+		/**
+		 * Called if error event is received from the task
+		 * @param	e
+		 */
+		private function abortTask(e:Event):void
+		{
+			thisTask.removeEventListener("ready", taskReadyToShow);
+			thisTask.removeEventListener("error", abortTask);
+			thisTask.doStop();
+			if (lastTask) {				
+				lastTask.doStop();
+				TweenMax.to(lastTask, 1, { x:1920, onComplete:hideLastTaskAbort } );
+			}
 		}
 		
 		
@@ -148,6 +202,15 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 			lastTask = null;
 			TweenMax.killAll();
 			TweenMax.to(thisTask, .75, { x:0, onComplete:showTask } );	
+			
+		}
+		
+		private function hideLastTaskAbort():void
+		{
+			lastTask.kill();
+			lastTask = null;
+			TweenMax.killAll();
+			taskComplete();	
 			
 		}
 		
@@ -172,7 +235,7 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		}
 		
 		
-		private function taskComplete(e:TimerEvent):void
+		private function taskComplete(e:TimerEvent = null):void
 		{			
 			currentTask++;
 			if (currentTask >= tasks.length()) {

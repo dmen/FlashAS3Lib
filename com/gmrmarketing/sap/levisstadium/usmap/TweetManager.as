@@ -38,7 +38,8 @@ package com.gmrmarketing.sap.levisstadium.usmap
 		public function kill():void
 		{
 			killed = true;
-			
+			q0 = true;//both quadrants available
+			q1 = true;
 			while (container.numChildren) {
 				var t:MovieClip = MovieClip(container.removeChildAt(0));
 				t.removeEventListener(Tweet.COMPLETE, recycleQuadrant);

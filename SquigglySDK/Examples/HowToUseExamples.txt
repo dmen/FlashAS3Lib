@@ -1,0 +1,16 @@
+How to use Squiggly examples
+===================================
+
+To build and run an example, please follow these steps:
+
+1. Import the project into Flex Builder 3 or Flash Builder 4 beta.
+
+2. Copy the dictionary data (including the AdobeSpellingConfig.xml file and the dictionaries folder) from ../src to <project>/src folder. If you want to place the dictionary files in a different folder, please make sure the url is referred correctly in the code or in AdobeSpellingConfig.xml file.
+
+3. Copy the Squiggly lib(s) from ../libs to <project>/libs folder
+   - CheckWord, GetSuggestion, TextEditor needs only AdobeSpellingEngine.swc
+   - SquigglyUIExample, ContextMenuWithResource, CustomContextMenu needs both AdobeSpellingEngine.swc and AdobeSpellingUI.swc
+   - SquigglyTLFExample needs AdobeSpellingUIForTLF.swc
+
+4. Build the project
+

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical">		
+<mx:Script>
+	<![CDATA[
+			import com.adobe.linguistics.spelling.SpellUI;	
+			
+			private function enableFeature():void {
+				SpellUI.enableSpelling(textArea, "en_US");
+			}
+			private function disableFeature() :void {
+				SpellUI.disableSpelling(textArea);
+			
+			}
+	]]>
+</mx:Script>
+		
+	<mx:TextArea id="textArea" width="20%" height="20%" fontSize="30" text="Spell cheecking in TextArea "/>
+	<mx:Button id="tt1" label="disable Feature" click="disableFeature()" /> 
+	<mx:Button id="tt2" label="enable Feature" click="enableFeature()" /> 
+			
+</mx:Application>
+

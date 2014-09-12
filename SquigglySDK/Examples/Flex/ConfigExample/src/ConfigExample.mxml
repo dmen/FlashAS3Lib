@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical" viewSourceURL="srcview/index.html" applicationComplete="init()">		
+	<mx:Script>
+		<![CDATA[
+			import com.adobe.linguistics.spelling.SpellUI;
+			import com.adobe.linguistics.spelling.framework.SpellingConfiguration;
+			import com.adobe.linguistics.spelling.framework.ResourceTable;
+			
+			
+			public function init():void
+			{
+				var resourceTable:ResourceTable = new ResourceTable();
+				resourceTable.setResource("en_US", {rule:"data/en_US.aff", dict:"data/en_US.dic"});
+				resourceTable.setResource("es_ES", {rule:"data/es_ES.aff", dict:"data/es_ES.dic"});
+				SpellingConfiguration.resourceTable = resourceTable;
+			}
+			public function spellEnglish():void
+			{
+				SpellUI.enableSpelling(ta_en,"en_US");
+			}
+			public function spellSpanish():void
+			{
+				SpellUI.enableSpelling(ta_es,"es_ES");
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Label text="ConfigExample.mxml Spell checks using SpellingConfiguration class. Does not need AdobeSpellingConfig.xml" fontSize="20"/>
+	
+	
+		
+		<mx:TextArea id="ta_en" width="50%" height="20%"
+						 text="I know Enlish. Use the context menu to see the suggestions of the missbelled word. " />
+		<mx:Button label="Spell English" id="b1" click="spellEnglish()"/>
+		
+		<mx:TextArea id="ta_es" width="50%" height="20%"
+						 text="Sé esbañol. Utilice el menú contextual para ver las sugerencias de la palabra mal eskrita. " />
+		<mx:Button label="Spell Spanish" id="b2" click="spellSpanish()"/>
+
+</mx:Application>
+
+

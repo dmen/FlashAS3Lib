@@ -94,7 +94,7 @@ package com.gmrmarketing.bcbs.livefearless
 		/**
 		 * Adds a user data object to the csv file
 		 * Called from Main.removeForm() - once form is complete and Thanks is showing
-		 * Data object contains these keys { fname:textData[0], lname:textData[1], email:formData[0], pledgeCombo:textData[2], prizeCombo:textData[4], sharephoto:formData[1], emailoptin:formData[2], message:textData[3], image:im, interestCombo:formData[3] };
+		 * Data object contains these keys { fname:textData[0], lname:textData[1], email:formData[0], pledgeCombo:textData[2], prizeCombo:textData[4], sharephoto:formData[1], emailoptin:formData[2], message:textData[3], image:im };
 		 */
 		public function add(data:Object):void
 		{
@@ -119,7 +119,7 @@ package com.gmrmarketing.bcbs.livefearless
 			if (token && users.length > 0) {
 				var cur:Object = users[0];
 				debug("submitting user form data: "+cur.fname+" "+cur.lname);
-				hubble.submitForm(new Array(cur.fname, cur.lname, cur.email, cur.pledgeCombo, cur.sharephoto, cur.emailoptin, cur.message, cur.prizeCombo, cur.interestCombo));
+				hubble.submitForm(new Array(cur.fname, cur.lname, cur.email, cur.pledgeCombo, cur.sharephoto, cur.emailoptin, cur.message, cur.prizeCombo));//, cur.interestCombo));
 				//hubble.submitForm(new Array(cur.fname, cur.lname, cur.email, cur.sharephoto, cur.emailoptin, cur.message));
 			}
 		}

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600" initialize="init();">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.linguistics.spelling.framework.*;
+			import com.adobe.linguistics.spelling.*;
+			
+			private var spellingService:SpellingService = null;
+			
+			private function init():void {
+				result.text += "AdobeSpellingServiceFramework tests\n===================\n";
+				result.text += "Setting SpellingConfiguration and initializing SpellingService ...\n";
+				
+				var resourceTable:ResourceTable = new ResourceTable();
+				resourceTable.setResource("en_US", {rule:"data/en_US.aff", dict:"data/en_US.dic"});			
+				SpellingConfiguration.resourceTable = resourceTable;
+				
+				spellingService = new SpellingService("en_US");
+				spellingService.addEventListener(Event.COMPLETE, spellingServiceReady);
+				spellingService.init();
+			}
+			
+			private function spellingServiceReady(e:Event):void {
+				result.text += "SpellingService ready for use\n";
+				
+				result.text += "Checking \"hello\" ... " + spellingService.checkWord("hello") + "\n";
+				result.text += "Checking \"heello\" ... " + spellingService.checkWord("heello") + "\n";
+				result.text += "Getting suggestions for \"heello\" ... " + spellingService.getSuggestions("heello") + "\n";
+				
+				
+				var ud:UserDictionary = new UserDictionary();
+				result.text += "Adding \"heello\" to UserDictionary ..." + ud.addWord("heello") + "\n";
+				result.text += "Adding UserDicitonary to SpellingService ..." + spellingService.addUserDictionary(ud) +"\n";
+				result.text += "Checking \"heello\" again, expect true ..." + spellingService.checkWord("heello") + "\n";
+				
+				result.text += "Removing \"heello\" from UserDictionary ..." + ud.removeWord("heello") + "\n"
+				result.text += "Checking \"heello\" again, expect false ..." + spellingService.checkWord("heello") + "\n";
+				
+				result.text += "Number of UserDictionary, expect 1 ..." + spellingService.userDictionaries.length + "\n";
+				
+				var ud2:UserDictionary = new UserDictionary();				
+				result.text += "Adding UserDicitonary 2 to SpellingService ..." + spellingService.addUserDictionary(ud2) +"\n";
+				result.text += "Adding \"heello\" to UserDictionary 2 ..." + ud2.addWord("heello") + "\n";
+				result.text += "Checking \"heello\" again, expect true ..." + spellingService.checkWord("heello") + "\n";
+				result.text += "Number of UserDictionary, expect 2 ..." + spellingService.userDictionaries.length + "\n";
+				
+				spellingService.removeUserDictionary(ud);
+				spellingService.removeUserDictionary(ud2);
+				result.text += "Checking \"heello\" again after removing all UserDictionaries, expect false ..." + spellingService.checkWord("heello") + "\n";
+				result.text += "Number of UserDictionary, expect 0 ..." + spellingService.userDictionaries.length + "\n";
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<mx:Text id="result"/>
+</s:Application>

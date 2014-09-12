@@ -7,6 +7,7 @@ package com.gmrmarketing.sap.levisstadium.california
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import flash.utils.Timer;
+	import flash.text.TextFieldAutoSize;
 	
 	
 	public class Tweet extends EventDispatcher
@@ -84,7 +85,8 @@ package com.gmrmarketing.sap.levisstadium.california
 			message = message.replace(/&gt;/g, "<");
 			message = message.replace(/&amp;/g, "&");			
 			
-			clip.theText.theText.text = message;	
+			clip.theText.theText.autoSize = TextFieldAutoSize.LEFT;
+			clip.theText.theText.text = message;
 			var rectWidth:int = Math.max(200, clip.theText.theText.textWidth + 12);
 			
 			drawToX = toX;
@@ -103,8 +105,8 @@ package com.gmrmarketing.sap.levisstadium.california
 			
 			switch(quadrant) {
 				case 1:
-					clip.x = 28 + Math.random() * 10;
-					clip.y = 310 + Math.random() * 10;
+					clip.x = 32 + Math.random() * 10;
+					clip.y = 290 + Math.random() * 10;
 					break;
 				case 2:
 					clip.x = 485 + Math.random() * 10;
