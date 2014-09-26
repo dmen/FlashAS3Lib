@@ -85,7 +85,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var camEvent:String;//set to CAM_UP or CAM_DOWN
 		
 		private var brfPaused:Boolean = false;
-		
+		private var usingBG:Boolean = false;//true if showing a background on 2nd monitor - doesn't blur the bg
 		
 		
 		public function Webcam3D_1280x960() 
@@ -528,7 +528,10 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			dispatchEvent(new Event(TAKE_PHOTO));
 		}
 		
-		
+		public function setBG(useBG:Boolean):void
+		{
+			usingBG = useBG;
+		}
 		//called by main.takePhoto once the TAKE_PHOTO event is received
 		//returns a 1280x960 camera shot
 		public function shotReady():BitmapData
@@ -549,7 +552,11 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 
 			blurImage.copyPixels(baseImage, new Rectangle(0, 0, baseImage.width, baseImage.height), new Point(0, 0), mBlur, new Point(0, 0), true);
 			
-			return blurImage;
+			if (usingBG) {
+				return baseImage;
+			}else{
+				return blurImage;
+			}
 		}
 		
 		

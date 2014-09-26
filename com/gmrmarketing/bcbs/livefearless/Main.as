@@ -101,11 +101,16 @@
 			
 			queue = new Queue();
 			queue.addEventListener(Queue.DEBUG_MESSAGE, queueDebug, false, 0, true);
+			queue.addEventListener(Queue.GOT_TOKEN, addIntroListener, false, 0, true);
 			
 			intro = new Intro();
-			intro.setContainer(mainContainer);
-			intro.addEventListener(Intro.BEGIN, showTextEntry, false, 0, true);
+			intro.setContainer(mainContainer);			
 			intro.show();
+		}
+		
+		private function addIntroListener(e:Event):void
+		{
+			intro.addEventListener(Intro.BEGIN, showTextEntry, false, 0, true);
 		}
 		
 		
@@ -365,7 +370,7 @@
 		 */
 		private function restart(e:Event):void
 		{
-			timeoutHelper.buttonClicked();
+			timeoutHelper.stopMonitoring(); //don't monitor the intro screen
 			
 			thanks.removeEventListener(Thanks.DONE, restart);
 			thanks.hide();

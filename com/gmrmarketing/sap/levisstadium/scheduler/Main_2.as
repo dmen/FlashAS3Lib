@@ -67,11 +67,10 @@ package com.gmrmarketing.sap.levisstadium.scheduler
 		 * @param	e
 		 */
 		private function configLoaded(e:Event):void
-		{
-			configLoader.removeEventListener(Event.COMPLETE, configReady);
-			configLoader.removeEventListener(IOErrorEvent.IO_ERROR, configError);
-			
+		{		
+			configLoader.removeEventListener(IOErrorEvent.IO_ERROR, configError);			
 			configLoader.removeEventListener(Event.COMPLETE, configLoaded);
+			
 			var xm:XML = XML(configLoader.data);
 			
 			tasks = xm.tasks.task;

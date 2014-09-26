@@ -20,6 +20,7 @@ package com.gmrmarketing.bcbs.livefearless
 	public class Queue extends EventDispatcher  
 	{
 		public static const DEBUG_MESSAGE:String = "newMessageReady";//generated whenever a new debug message is
+		public static const GOT_TOKEN:String = "gotToken";
 		private const DATA_FILE_NAME:String = "bcbsData.csv"; //current users / not yet uploaded
 		private const SAVED_FILE_NAME:String = "bcbsSaved.csv"; //users successfully uploaded
 		
@@ -52,9 +53,10 @@ package com.gmrmarketing.bcbs.livefearless
 		 */
 		private function gotToken(e:Event):void
 		{
+			trace("queue.gotToken");
 			debug("gotToken() - nowpik token");
 			token = true;
-			
+			dispatchEvent(new Event(GOT_TOKEN));
 			//start uploading immediately if there are records waiting
 			if (users.length > 0) {
 				uploadNext();

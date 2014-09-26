@@ -18,6 +18,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var bgIndex:int; //index in bgArray
 		private var bgTimer:Timer;
 		
+		private const useBG:Boolean = true;
 		
 		public function BGDisplay()
 		{
@@ -36,36 +37,44 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			hasTwoMonitors = false;			
 			
 			//put the window on the 2nd monitor
-			/*
-			if (Screen.screens.length > 1) {
-				var ops:NativeWindowInitOptions = new NativeWindowInitOptions();
-                ops.systemChrome = NativeWindowSystemChrome.NONE;
-				
-				var i:int = 0;
-				while(i < Screen.screens.length){
-					var screen:Screen = Screen.screens[i];
-					if(screen.bounds.height == 1920){//could do || 1680 to use testing monitor
-						window = new NativeWindow(ops);
-						window.bounds = screen.bounds;
-						window.activate();
-						
-						window.stage.displayState = StageDisplayState.FULL_SCREEN;
-						window.stage.align = StageAlign.TOP_LEFT;
-						window.stage.scaleMode = StageScaleMode.NO_SCALE;
-						window.stage.color = 0x000000;
-						
-						//window.move(screen.visibleBounds.left, screen.visibleBounds.top);
-						window.x = screen.bounds.left;
-						window.y = screen.bounds.top;
-						hasTwoMonitors = true;
-						
-						break;
+			if(useBG){
+				if (Screen.screens.length > 1) {
+					var ops:NativeWindowInitOptions = new NativeWindowInitOptions();
+					ops.systemChrome = NativeWindowSystemChrome.NONE;
+					
+					var i:int = 0;
+					while(i < Screen.screens.length){
+						var screen:Screen = Screen.screens[i];
+						if(screen.bounds.height == 1920){//could do || 1680 to use testing monitor
+							window = new NativeWindow(ops);
+							window.bounds = screen.bounds;
+							window.activate();
+							
+							window.stage.displayState = StageDisplayState.FULL_SCREEN;
+							window.stage.align = StageAlign.TOP_LEFT;
+							window.stage.scaleMode = StageScaleMode.NO_SCALE;
+							window.stage.color = 0x000000;
+							
+							//window.move(screen.visibleBounds.left, screen.visibleBounds.top);
+							window.x = screen.bounds.left;
+							window.y = screen.bounds.top;
+							hasTwoMonitors = true;
+							
+							break;
+						}
+						i++;
 					}
-					i++;
 				}
 			}
-			*/
+			
 		}
+		
+		
+		public function usingBG():Boolean
+		{
+			return useBG;
+		}
+		
 		
 		private function loadNextBG(e:TimerEvent = null):void
 		{

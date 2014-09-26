@@ -23,26 +23,28 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		private var tagAddedCount:Number; //incremented in spiral
 		private var tagCount:Number; //current tag count
 		private var zeroCount:int;
-		private var tagTimer:Timer;
 		private var totalTags:int; //number of tags
 		private var forceStop:Boolean = false;
 		private var stageRef:Stage;
+		private var shadow:DropShadowFilter;
+		private var delta:Number;
 		
 		public function RectFinder(ss:int)
 		{	
 			sampleSize = ss;			
-			
+			shadow = new DropShadowFilter(12, 45, 0, 1, 12, 12, 1, 2);
 			hText = new mcHText();//lib
 			vText = new mcVText();//lib				
 		}		
 		
 		
-		public function create($container:DisplayObjectContainer, $image:BitmapData, $tags:Array, $stageRef:Stage):void
+		public function create($container:DisplayObjectContainer, $image:BitmapData, $tags:Array, $stageRef:Stage, $delta:Number):void
 		{			
 			container = $container;
 			image = $image;
 			tags = $tags;
 			stageRef = $stageRef;
+			delta = $delta;
 			
 			forceStop = false;
 			
@@ -54,10 +56,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			totalTags = tags.length;
 			tagIndex = 0;
 			
-			stageRef.addEventListener(Event.ENTER_FRAME, addTag);
-			//tagTimer = new Timer(10);
-			//tagTimer.addEventListener(TimerEvent.TIMER, addTag, false, 0, true);
-			//tagTimer.start();			
+			stageRef.addEventListener(Event.ENTER_FRAME, addTag);					
 		}
 		
 		
@@ -74,8 +73,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		
 		public function kill():void
 		{
-			stageRef.removeEventListener(Event.ENTER_FRAME, addTag);			
-			//newImage.dispose();
+			stageRef.removeEventListener(Event.ENTER_FRAME, addTag);
 			image.dispose();
 		}
 		
@@ -91,13 +89,14 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			tagCount++;
 			if (tagCount >= totalTags) {
 				tagCount = 0;
-				var tagPercent:Number = (tagAddedCount / totalTags) * 100;				
+				var tagPercent:int = Math.floor((tagAddedCount / totalTags) * 100);				
 				tagAddedCount = 0;
 				if (tagPercent == 0) {
 					zeroCount++;
-					if (zeroCount == 5) {
-						//trace("rectFinder removing listner");
-						//tagTimer.removeEventListener(TimerEvent.TIMER, addTag);
+					if (zeroCount == 2) {
+						var d:Number = new Date().valueOf() - delta;
+						
+						trace("done -rectFinder removing listener",d/1000);
 						stageRef.removeEventListener(Event.ENTER_FRAME, addTag);
 					}
 				}
@@ -178,9 +177,9 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			var tightenCount:int;
 			var temp:int;
 			
-			var iterations:int = Math.max(w*w, h*h);
+			var iterations:int = Math.max(w * w, h * h);
 			var n:int = 0;
-			while (n < iterations && !forceStop) {
+			while (n < iterations){// && !forceStop) {
 				
 			//for(var n:int = 0; n <iterations; n++){
 				if ((x > -w/2 && x <= w/2) && (y > -h/2 && y <= h/2)){			
@@ -224,6 +223,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 									
 									//try and move rect up to tighten it against any others in the area
 									//limit the tightening to 2 units
+									
 									tightenCount = 0;
 									while (isValidRect(j, i, tag.widthh, tag.heighth)) {
 										j--;
@@ -237,10 +237,10 @@ package com.gmrmarketing.sap.metlife.tagcloud
 									var b:BitmapData = new BitmapData(tag.widthh * sampleSize, tag.heighth * sampleSize, true, 0x00000000);
 									b.copyPixels(tag.imageh, new Rectangle(0, 0, tag.widthh * sampleSize, tag.heighth * sampleSize), new Point(0, 0), null, null, true);
 									var c:Bitmap = new Bitmap(b);
-									container.addChildAt(c,1);
+									container.addChildAt(c, 0);//as they get smaller add behind the bigger ones
 									c.x = i * sampleSize;
 									c.y = j * sampleSize
-									c.filters = [new DropShadowFilter(12, 45, 0, 1, 12, 12, 1, 2)];
+									c.filters = [shadow];
 									
 									//newImage.copyPixels(tag.imageh, new Rectangle(0, 0, tag.widthh * sampleSize, tag.heighth * sampleSize), new Point(i * sampleSize, j * sampleSize), null, null, true);
 									removeRectFromArray(j, i, tag.widthh - 1, tag.heighth - 1);

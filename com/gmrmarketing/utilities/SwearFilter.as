@@ -17,7 +17,7 @@ package com.gmrmarketing.utilities
 		private static var swears:Array;
 		private static var threeCharSwears:Array;
 		private static var punctuation:Array;
-		
+		private static var majorSwears:Array; //used in cleanString
 		
 		public function SwearFilter(){}
 		
@@ -83,9 +83,40 @@ package com.gmrmarketing.utilities
 		}
 		
 		
+		/**
+		 * Returns a cleaned string - where major swears are removed and replaced with null
+		 * @param	s
+		 * @return String cleaned of any words defined in majorSwears
+		 */
+		public static function cleanString(s:String):String
+		{			
+			init();
+			var t:Array = s.split(" ");
+			
+			for (var j:int = 0; j < majorSwears.length; j++){
+				for (var i:int = t.length -1; i >= 0; i--) {
+					if (String(t[i]).toLowerCase().indexOf(String(majorSwears[j]).toLowerCase()) != -1) {					
+						t.splice(i, 1);		
+					}
+				}
+			}
+			
+			var m:String = t.join(" ");
+			
+			for (j = 0; j < majorSwears.length; j++) {
+				var r:RegExp = new RegExp(majorSwears[j], "ig");//flags are ignore case and global
+				m = m.replace(r, "");
+			}
+			
+			return m;
+		}
+		
 		
 		private static function init():void
 		{
+			//used for cleaning major swears out of twitter feeds
+			majorSwears = new Array("fuck", "fvck", "shit", "bitch", "cunt", "fagg", "pussy", "asshole", "nigger", "retard", "vagina", "penis", "douche");
+			
 			//uniques can exist inside a word and still provide a positive
 			unique = new Array();
 			unique.push("assmuncher", "asseater", "assbeater", "asslick", "asshole", "asshat", "assface", "a55", "bullshit", "buttplug", "blowjob");		unique.push("cameltoe", "cunt", "cunny", "prostitute");

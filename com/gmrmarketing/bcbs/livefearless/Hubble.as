@@ -24,11 +24,16 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		private var hdr:URLRequestHeader;
 		private var hdr2:URLRequestHeader;
+		private var so:SharedObject;
 		
 		
 		public function Hubble()
 		{		
 			token = "";
+			so = SharedObject.getLocal("bcbsData");
+			trace(so.data.prizeOptions);
+			trace("----");
+			trace(so.data.pledgeOptions);
 			
 			hdr = new URLRequestHeader("Content-type", "application/json");
 			hdr2 = new URLRequestHeader("Accept", "application/json");
@@ -56,7 +61,6 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		private function gotToken(e:Event):void
 		{
-			trace("gotToken");
 			var j:Object = JSON.parse(e.currentTarget.data);			
 			token = j.ResponseObject;
 			
@@ -73,14 +77,11 @@ package com.gmrmarketing.bcbs.livefearless
 			lo.addEventListener(Event.COMPLETE, gotModels, false, 0, true);
 			lo.addEventListener(IOErrorEvent.IO_ERROR, ioError, false, 0, true);
 			lo.load(req);
-			
-			
 		}
 		
 		
 		private function gotModels(e:Event):void
-		{
-			trace("gotModels");
+		{			
 			var j:Object = JSON.parse(e.currentTarget.data);	
 			
 			pledgeOptions = new Array();
@@ -88,7 +89,6 @@ package com.gmrmarketing.bcbs.livefearless
 			interestOptions = new Array();
 			
 			if (j.Status == 1) {
-				trace("status 1:",j.Status,j.ResponseObject.FieldOptions.length);
 				//trace("gotModels:",j.ResponseObject.FieldOptions.length);
 				for (var i:int = 0; i < j.ResponseObject.FieldOptions.length; i++) {
 					
@@ -107,6 +107,10 @@ package com.gmrmarketing.bcbs.livefearless
 					}
 					*/
 				}
+				
+				so.data.pledgeOptions = pledgeOptions.concat();
+				so.data.prizeOptions = prizeOptions.concat();
+				so.flush();
 				
 				dispatchEvent(new Event(GOT_TOKEN));
 			}
@@ -132,11 +136,16 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		
 		private function ioError(e:IOErrorEvent):void
-		{			
-			trace("ioError");
-			var t:Timer = new Timer(10000, 1);
-			t.addEventListener(TimerEvent.TIMER, getToken, false, 0, true);
-			t.start();
+		{	
+			if (so.data.pledgeOptions != null) {
+				pledgeOptions = so.data.pledgeOptions;
+				prizeOptions = so.data.prizeOptions;
+				dispatchEvent(new Event(GOT_TOKEN));
+			}else {
+				var t:Timer = new Timer(10000, 1);
+				t.addEventListener(TimerEvent.TIMER, getToken, false, 0, true);
+				t.start();
+			}
 		}
 		
 		

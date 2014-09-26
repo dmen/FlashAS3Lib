@@ -10,7 +10,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 	import flash.geom.*;
 	import flash.net.*;
 	import flash.text.*;
-	
+	import com.gmrmarketing.utilities.SwearFilter;
 	
 	
 	public class TagCloud extends EventDispatcher
@@ -161,7 +161,9 @@ package com.gmrmarketing.sap.metlife.tagcloud
 				var name:String = tags[i].name;
 				name = name.replace(/&lt;/g, "<");
 				name = name.replace(/&gt;/g, "<");
-				name = name.replace(/&amp;/g, "&");	
+				name = name.replace(/&amp;/g, "&");
+				name = SwearFilter.cleanString(name);
+				
 				tags[i].name = name;
 			}			
 						

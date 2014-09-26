@@ -3,7 +3,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 	import com.gmrmarketing.utilities.LoggerAIR;
 	import flash.display.*;
 	import flash.events.*;
-	import flash.net.URLRequest;
+	import flash.net.*;
 	import flash.ui.*;	
 	import com.gmrmarketing.utilities.CornerQuit;
 	import flash.desktop.NativeApplication;
@@ -108,6 +108,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			
 			bgd = new BGDisplay();
 			bgLoader = new Loader();
+			preview.setBG(bgd.usingBG());
 			
 			config = new AIRXML(); //reads config.xml in the apps folder
 			config.addEventListener(Event.COMPLETE, configReady);
@@ -150,16 +151,26 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			if(e != null){
 				log.log("Face Not Detected - manual start of interaction");
 			}
+			
 			if(preview.isBrfReady()){
 				preview.removeEventListener(Webcam3D_1280x960.FACE_FOUND, autoStart);
-				intro.removeEventListener(Intro.MANUAL_START, gotRFID);				
+				intro.removeEventListener(Intro.MANUAL_START, gotRFID);
 				
+				registerStart();
 				intro.hide();
 				showPreview();
 			}			
 		}
 	
-		
+		private function registerStart():void
+		{
+			var request:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/registrant/loginteraction?GameName=Avatar");
+				
+			request.method = URLRequestMethod.GET;
+			
+			var lo:URLLoader = new URLLoader();
+			lo.load(request);
+		}
 		/**
 		 * Called by listener on the comm object once the tag_id is sent to the server
 		 * and the user data is returned and ready

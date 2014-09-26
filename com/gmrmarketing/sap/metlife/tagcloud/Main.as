@@ -7,6 +7,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 	import com.gmrmarketing.sap.metlife.tagcloud.TagCloud;	
 	import flash.events.*;	
 	import com.greensock.TweenMax;
+	import flash.desktop.NativeApplication;
 	
 	
 	public class Main extends MovieClip implements ISchedulerMethods
@@ -18,23 +19,34 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		
 		private var dict:TagCloud;//tags from the service
 		private var ra:RectFinder;
-		private var bmp:Bitmap;
 		private var tagName:String; //set in setConfig, one of: levis,offense,defense
 		private var flares:FlareManager;
+		private var tagContainer:Sprite;
+		private var delta:Number;
 		
 		
 		public function Main()
 		{	
-			dict = new TagCloud(3, 56, 12);
+			//addEventListener(Event.ACTIVATE, initWindowPosition);
+			
+			dict = new TagCloud(5, 56, 22);
 			dict.addEventListener(TagCloud.TAGS_READY, tagsLoaded, false, 0, true);
 			
-			//TESTING
-			//init("levis,0xda2c45,0xc7283f,0xa92236");
-			
-			flares = new FlareManager();//will be part of scheduler
+			flares = new FlareManager();
 			flares.setContainer(this);
 			
+			tagContainer = new Sprite();
+			addChild(tagContainer);
+			
 			init("levis,0xc92845");
+		}
+		
+		
+		//TODO - this will be part of scheduler/player
+		private function initWindowPosition(e:Event):void
+		{
+			NativeApplication.nativeApplication.activeWindow.x = 0;
+			NativeApplication.nativeApplication.activeWindow.y = 160;
 		}
 		
 		
@@ -44,12 +56,15 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		 */
 		public function init(initValue:String = ""):void
 		{
+			trace("begin");
+			delta = new Date().valueOf();
+			
 			var i:int = initValue.indexOf(",");//first occurence of comma
 			tagName = initValue.substring(0, i);
 			var cols:String = initValue.substr(i + 1);
 			var colors:Array = cols.split(",");
 			
-			ra = new RectFinder(3);
+			ra = new RectFinder(5);
 			
 			dict.refreshTags(tagName, colors);//calls tagsLoaded when ready
 		}
@@ -66,24 +81,17 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			flares.newFlare(300, 93, 710, 1);
 			flares.newFlare(320, 173, 690, 1);
 			
-			var bmd:BitmapData = new BitmapData(WIDTH, HEIGHT, true, 0x00000000);
-			bmp = new Bitmap(bmd);
-			//TweenMax.to(bmp, 0, { dropShadowFilter: { color:0x000000, alpha:.8, blurX:5, blurY:5, distance:4 }} );
-			addChild(bmp);	
-			
 			var tagImage:BitmapData = new cloud();//image to create with word cloud
 			
-			ra.create(this, tagImage, dict.getTags(), this.stage);
+			ra.create(tagContainer, tagImage, dict.getTags(), this.stage, delta);
 		}
+		
 		
 		/**
 		 * ISChedulerMethods
 		 */
 		public function hide():void
 		{
-			if (contains(bmp)) {
-				removeChild(bmp);
-			}
 		}
 		
 		/**
@@ -113,7 +121,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		private function tagsLoaded(e:Event):void
 		{
 			show();//TESTING
-			dispatchEvent(new Event(READY));
+			dispatchEvent(new Event(READY));//will call show()
 		}
 	}
 	
