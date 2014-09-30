@@ -96,6 +96,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 */
 		public function addToQueue(img:BitmapData, id:int, fName:String = "", lName:String = "", email:String = ""):void
 		{			
+			//trace("addToQueue id:", id,fName,lName,email);
 			var jpeg:ByteArray = getJpeg(img);
 			
 			if(saveFolder != ""){
@@ -108,7 +109,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 					fs.writeBytes(jpeg);				
 					fs.close();
 				}catch(e:Error){
-					trace("addToQueue - catch:", e.message);
+					//trace("addToQueue - catch:", e.message);
 				}
 			}
 			
@@ -147,7 +148,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				var hdr:URLRequestHeader = new URLRequestHeader("Content-type", "application/json");
 				var hdr2:URLRequestHeader = new URLRequestHeader("Accept", "application/json");				
 				var js:String = JSON.stringify( { Image:ob.Image, RegistrantId:ob.RegistrantId, FirstName:ob.FirstName, LastName:ob.LastName, Email:ob.Email } );
-				
+				//trace("processQueue:", js);
 				var request:URLRequest = new URLRequest(webService);
 				request.data = js;
 				request.method = URLRequestMethod.POST;
@@ -183,7 +184,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{			
 			try{
 				var js:Object = JSON.parse(e.currentTarget.data);
-				
+				//trace("saveDone:", js.CreateDate);
 				if (js.CreateDate != undefined) {					
 					
 					//success!

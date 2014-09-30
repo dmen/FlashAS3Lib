@@ -18,7 +18,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		private var bgIndex:int; //index in bgArray
 		private var bgTimer:Timer;
 		
-		private const useBG:Boolean = true;
+		private const useBG:Boolean = false;
 		
 		public function BGDisplay()
 		{

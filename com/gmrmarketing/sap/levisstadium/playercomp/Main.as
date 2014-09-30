@@ -237,8 +237,8 @@ package com.gmrmarketing.sap.levisstadium.playercomp
 				tweenObject.p2NegSent = false;
 			}			
 				
-			var p1s:Number = Math.min(100, Math.abs(p1.Stats[0].PlayerPositionStatValue * 3.6));
-			var p2s:Number = Math.min(100, Math.abs(p2.Stats[0].PlayerPositionStatValue * 3.6));
+			var p1s:Number = Math.abs(p1.Stats[0].PlayerPositionStatValue * 3.6);
+			var p2s:Number = Math.abs(p2.Stats[0].PlayerPositionStatValue * 3.6);
 			TweenMax.to(tweenObject, 5, { p1Sent:p1s, delay:1, onUpdate:drawP1Sent } );
 			TweenMax.to(tweenObject, 5, { p2Sent:p2s, delay:1, onUpdate:drawP2Sent} );
 		}

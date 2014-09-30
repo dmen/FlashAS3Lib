@@ -169,7 +169,12 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			request.method = URLRequestMethod.GET;
 			
 			var lo:URLLoader = new URLLoader();
+			lo.addEventListener(IOErrorEvent.IO_ERROR, interactionError, false, 0, true);
 			lo.load(request);
+		}
+		private function interactionError(e:IOErrorEvent):void
+		{
+			
 		}
 		/**
 		 * Called by listener on the comm object once the tag_id is sent to the server

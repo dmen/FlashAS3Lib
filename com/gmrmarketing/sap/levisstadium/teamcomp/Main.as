@@ -43,7 +43,7 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 			homeSent = new Sprite();///home sentiment
 			visSent = new Sprite();//visitor sentiment		
 			
-			//init("09/14/14");
+			//init("09/28/14");
 		}
 		
 		
@@ -195,10 +195,11 @@ package com.gmrmarketing.sap.levisstadium.teamcomp
 				visSent.scaleX = 1;
 				visSent.x = 0;
 				tweenObject.vtNegSent = false;
-			}	
+			}
 			
-			var hts:Number = Math.min(100, Math.abs(ht.Stats[0].NetbaseSentiment * 3.6));
-			var vts:Number = Math.min(100, Math.abs(vt.Stats[0].NetbaseSentiment * 3.6));
+			var hts:Number = Math.abs(ht.Stats[0].NetbaseSentiment * 3.6);
+			var vts:Number = Math.abs(vt.Stats[0].NetbaseSentiment * 3.6);
+			
 			TweenMax.to(tweenObject, 5, { htSent:hts, delay:1, onUpdate:drawHSent } );
 			TweenMax.to(tweenObject, 5, { vtSent:vts, delay:1, onUpdate:drawVSent} );		
 		}

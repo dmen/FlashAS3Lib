@@ -320,7 +320,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		
 		/**
-		 * Called if the user was not found in the database
+		 * Called if the user was not found in the database where userID is still undefined
 		 * Or if a network error occured checking email - in that case userID is set to -1
 		 * @param	blankEmail
 		 */
