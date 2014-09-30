@@ -1,4 +1,4 @@
-package com.gmrmarketing.sap.metlife.trivia
+package com.gmrmarketing.sap.metlife.quote
 {
 	import com.gmrmarketing.sap.metlife.ISchedulerMethods;
 	import flash.display.*;
@@ -12,8 +12,9 @@ package com.gmrmarketing.sap.metlife.trivia
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
 		public static const FINISHED:String = "finished";//dispatched when the task is complete. Player will call cleanup() now
-		
+		private var playerImage:Bitmap;
 		private var localCache:Object;
+		private var tempCache:Object; //json before the image is loaded
 		private var myDate:String;
 		
 		
@@ -45,11 +46,10 @@ package com.gmrmarketing.sap.metlife.trivia
 			return localCache != null;
 		}
 		
-		
 		private function refreshData():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sapmetlifeapi.thesocialtab.net/api/GameDay/GetTeamInsights?gamedate=" + myDate + "&abc=" + String(new Date().valueOf()));
+			var r:URLRequest = new URLRequest("http://sapmetlifeapi.thesocialtab.net/api/GameDay/GetPlayerQuotes?gamedate=" + myDate + "&abc=" + String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -61,15 +61,54 @@ package com.gmrmarketing.sap.metlife.trivia
 			}
 		}
 		
+		private function dataError(e:IOErrorEvent):void	{ }
 		
 		private function dataLoaded(e:Event):void
 		{
-			localCache = JSON.parse(e.currentTarget.data);
+			tempCache = JSON.parse(e.currentTarget.data);
+			var imageURL:String = tempCache.HeadshotURL + "?abc=" + String(new Date().valueOf());
+			if(tempCache.HeadshotURL){
+				var l:Loader = new Loader();
+				l.contentLoaderInfo.addEventListener(Event.COMPLETE, imLoaded, false, 0, true);			
+				l.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, imError, false, 0, true);			
+				l.load(new URLRequest(imageURL));
+			}
 		}
 		
 		
-		private function dataError(e:IOErrorEvent):void	{}
+		/**
+		 * Called once FOTD data and image have successfully loaded
+		 * refreshes the data in the slider.fotd clip
+		 * @param	e
+		 */
+		private function imLoaded(e:Event):void
+		{
+			//remove old image from clip
+			if(playerImage){
+				if (picHolder.contains(playerImage)) {
+					picHolder.removeChild(playerImage);
+				}
+			}
+			
+			playerImage = Bitmap(e.target.content);
+			playerImage.smoothing = true;
+			
+			picHolder.addChild(playerImage);
+			playerImage.x = 6;
+			playerImage.y = 5;
+			
+			picHolder.x = 420;
+			
+			localCache = tempCache;
+			//show();//TESTING
+		}
+			
 		
+		private function imError(e:IOErrorEvent):void
+		{
+			//do nothing if image error
+			trace("imageError");
+		}
 		
 		/**
 		 * ISchedulerMethods
@@ -79,21 +118,20 @@ package com.gmrmarketing.sap.metlife.trivia
 		{					
 			theVideo.play();
 			
-			holder.trivia.theText.text = localCache.Body;
-			holder.trivia.theText.y = -128 + ((254 - holder.trivia.theText.textHeight) * .5);
-			var baseSize:int = 44;
+			theText.text = localCache.Body;
+			theByline.text = " - " + localCache.Byline;
+			
+			theText.y = 172 + ((212 - theText.textHeight) * .5);
+			
+			var baseSize:int = 33;
 			var myFormat:TextFormat = new TextFormat();			
-			while (holder.trivia.theText.y < -130) {
+			while (theText.y < 172) {
 				baseSize--;
 				myFormat.size = baseSize;
-				holder.trivia.theText.setTextFormat(myFormat);
-				holder.trivia.theText.y = -128 + ((254 - holder.trivia.theText.textHeight) * .5);
+				theText.setTextFormat(myFormat);
+				theText.y = 172 + ((212 - theText.textHeight) * .5);
 			}
-			holder.metric.x = 86; //under the text on the right
-			holder.metric.textHolder.theText.text = localCache.Stat;			
-			
-			TweenMax.to(holder.metric, .5, { x:-246, delay:2 } );
-			
+			TweenMax.to(picHolder, .5, { x:71, delay:1 } );
 			TweenMax.delayedCall(10, complete);
 		}
 		

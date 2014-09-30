@@ -110,7 +110,6 @@ package com.gmrmarketing.sap.metlife.sentiment
 		 */
 		public function show():void
 		{
-			trace("sentiment.show");
 			theVideo.play();
 			theMask.scaleX = 0;
 			pie.scaleX = pie.scaleY = 0;
@@ -133,8 +132,7 @@ package com.gmrmarketing.sap.metlife.sentiment
 		 * 
 		 */
 		public function cleanup():void
-		{
-			trace("sentiment.cleanup");
+		{			
 			maskContainer.graphics.clear();
 			refreshData(); //preload next trivia
 			theVideo.seek(0);
