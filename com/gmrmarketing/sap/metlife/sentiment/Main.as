@@ -50,7 +50,7 @@ package com.gmrmarketing.sap.metlife.sentiment
 			myDate = items[0];
 			myData = items[1];
 			switch(myData) {
-				case "RunningVsPassing":
+				case "PassingVsRunning":
 					title.text = "what type of game are fans excited about today?";
 					break;
 				case "OffenseVsDefense":

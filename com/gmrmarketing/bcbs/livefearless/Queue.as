@@ -25,7 +25,7 @@ package com.gmrmarketing.bcbs.livefearless
 		private const SAVED_FILE_NAME:String = "bcbsSaved.csv"; //users successfully uploaded
 		
 		private var fileFolder:File;
-		private var users:Array;
+		private var users:Array;//current queue
 		
 		private var lastDebug:String; //last debug message set in debug()
 		
@@ -120,7 +120,7 @@ package com.gmrmarketing.bcbs.livefearless
 			debug("uploadNext()");
 			if (token && users.length > 0) {
 				var cur:Object = users[0];
-				debug("submitting user form data: "+cur.fname+" "+cur.lname);
+				debug("submitting user form data: "+cur.fname+" "+cur.lname+"  pledge:"+ cur.pledgeCombo + "  share:" + cur.sharephoto + " emailOptin:" + cur.emailoptin + "  message: " + cur.message + "  prize: " + cur.prizeCombo);
 				hubble.submitForm(new Array(cur.fname, cur.lname, cur.email, cur.pledgeCombo, cur.sharephoto, cur.emailoptin, cur.message, cur.prizeCombo));//, cur.interestCombo));
 				//hubble.submitForm(new Array(cur.fname, cur.lname, cur.email, cur.sharephoto, cur.emailoptin, cur.message));
 			}

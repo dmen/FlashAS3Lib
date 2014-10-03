@@ -18,7 +18,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		public static const TAGS_READY:String = "tagsLoaded";//dispatched from tagsLoaded() after a call to refreshTags()
 		public static const ERROR:String = "tagError";//dispatched from tagsLoaded() after a call to refreshTags()
 		
-		private var tags:Array; //array of objects with name and value properties (fontSize property added in tagsLoaded())
+		private var tags:Object; //contains arrays of tags by level1, level2, level3 keys
 		
 		private var tagIndex:int = 0; //index of current tag in tags
 		private var totalTagCount:int; //total of all value properties in the tags array
@@ -27,7 +27,6 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		private var vText:MovieClip;
 		private var sampleSize:int;//used by measure() to return the size in grid units of each word image
 		
-		private var tagName:String; //from config.xml one of: levis,offense,defense,49ers
 		private var tagColors:Array; //from config.xml
 		private var colorDec:int;
 		private var colorIndex:int;
@@ -39,6 +38,10 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		private var minFont:int;
 		
 		private var localCache:Array;
+		private var tagLevel:int; //current tag level 1-3 used when refreshing tags
+		private var myDate:String;
+		
+		private var tagWords:Object; //contains the hashtag for each level
 		
 		/**
 		 * Constructor
@@ -52,17 +55,17 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		{
 			sampleSize = ss;
 			maxFont = maxFontSize;
-			minFont = minFontSize;			
+			minFont = minFontSize;	
 					
 			hText = new mcHText();//lib			
 			vText = new mcVText();//lib	
-			tags = new Array();		
+				
 			loopCount = 0;			
 		}
 		
 		
 		/**
-		 * Returns the next tag from the tags array
+		 * Returns the next tag from the current tags array
 		 * 
 		 * tags have name,value,fontSize,imageh,imagev,widthh,heighth,widthv,heightv properties
 		 */
@@ -78,59 +81,67 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			return tag;
 		}
 		
-		/**
-		 * Returns the number of tags in the tags array
-		 * @return int
-		 */
-		public function getNumTags():int
-		{
-			return tags.length;
-		}
-		
 		
 		/**
-		 * Returns the tags array
+		 * Returns the current tags array
 		 * @return Array all tags
 		 */
-		public function getTags():Array
+		public function getTags(level:int):Array
 		{
-			return tags;
+			var t:Array;
+			switch(level) {
+				case 1:
+					t = tags.level1;
+					break;
+				case 2:
+					t = tags.level2;
+					break;
+				case 3:
+					t = tags.level3;
+					break;
+			}			
+			return t;
 		}
 		
-		public function kill():void
+		
+		public function getHashTag(level:int):String
 		{
-			tags = null;
+			var t:String;
+			switch(level) {
+				case 1:
+					t = tagWords.level1;
+					break;
+				case 2:
+					t = tagWords.level2;
+					break;
+				case 3:
+					t = tagWords.level3;
+					break;
+			}
+			return t;
 		}
 		
 		/**
-		 * Refreshes the tags array
-		 * 	GetTags49ers              (general word cloud for #49ers)
-			GetTagsOffense            (…same but for Offense)
-			GetTagsDefense            (…same but for Defense)
-			GetTagsStadium			  (word cloud for Levi’s Stadium)
+		 * Refreshes the tags object from the web service
+		 * @param	colors
+		 * @param	date
 		 */
-		public function refreshTags(name:String, colors:Array):void
+		public function refreshTags(colors:Array, date:String):void
 		{
-			tagName = name;
-			tagColors = colors;			
-			
+			tags = new Object();
+			tagWords = new Object();
+			tagLevel = 1;
+			tagColors = colors;
+			myDate = date;
+			getTagsByLevel();
+		}
+		
+		
+		private function getTagsByLevel():void
+		{			
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest;
 			
-			switch(tagName) {
-				case "49ers":
-					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTags49ers" + "&abc=" + String(new Date().valueOf()));
-					break;
-				case "levis":
-					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsStadium" + "&abc=" + String(new Date().valueOf()));
-					break;
-				case "offense":
-					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsOffense" + "&abc=" + String(new Date().valueOf()));
-					break;
-				case "defense":
-					r = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=GetTagsDefense" + "&abc=" + String(new Date().valueOf()));
-					break;
-			}
+			var r:URLRequest = new URLRequest("http://sapmetlifeapi.thesocialtab.net/api/GameDay/GetMetLifeWordCloud?gamedate=" + myDate + "&level=" + tagLevel +"&abc=" + String(new Date().valueOf()));					
 			
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
@@ -146,47 +157,76 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		 * @param	e
 		 */
 		private function tagsLoaded(e:Event):void
-		{			
+		{	
 			var j:Object = JSON.parse(e.currentTarget.data);
-			tags = j.insights[0].dataset[0].set;
+			var data:Array = j.insights[0].dataset[0].set;
+			var localTags:Array;
+			
+			switch(tagLevel) {
+				case 1:
+					tags.level1 = data;
+					localTags = tags.level1;
+					tagWords.level1 = j.themename;
+					break;
+				case 2:
+					tags.level2 = data;
+					localTags = tags.level2;
+					tagWords.level2 = j.themename;
+					break;
+				case 3:
+					tags.level3 = data;
+					localTags = tags.level3;
+					tagWords.level3 = j.themename;
+					break;
+			}
+			
 			tagIndex = 0;
 			totalTagCount = 0;
 			
-			for (var i:int = 0; i < tags.length; i++) {				
+			//use localTags - passed by reference so localTags will affect tags.leveln
+			for (var i:int = 0; i < localTags.length; i++) {				
 				
 				//normalize value using a logarithm
-				tags[i].value = Math.log(tags[i].value);				
-				totalTagCount += tags[i].value;
+				localTags[i].value = Math.log(localTags[i].value);				
+				totalTagCount += localTags[i].value;
 				
-				var name:String = tags[i].name;
+				var name:String = localTags[i].name;
 				name = name.replace(/&lt;/g, "<");
 				name = name.replace(/&gt;/g, "<");
 				name = name.replace(/&amp;/g, "&");
 				name = SwearFilter.cleanString(name);
 				
-				tags[i].name = name;
+				localTags[i].name = name;
 			}			
 						
 			//font size by tag weight - possible because of mormalizing the counts
 			//var fontRatio:Number = maxFontSize / ((tags[0].value / totalTagCount) * 100);
 			
 			//even distribution of font size along the list
-			var fontRatio:Number = maxFont / tags.length;
+			var fontRatio:Number = maxFont / localTags.length;
 			
-			colorDec = Math.ceil(tags.length / tagColors.length);			
+			colorDec = Math.ceil(localTags.length / tagColors.length);			
 			colorIndex = 0;
 			currColor = 0;
 			
-			for (i = 0; i < tags.length; i++) {				
+			for (i = 0; i < localTags.length; i++) {				
 				//tags[i].fontSize = Math.max(12, Math.round(((tags[i].value / totalTagCount) * 100) * fontRatio));
-				tags[i].fontSize = Math.max(minFont, Math.round(maxFont - fontRatio * i));	
-				//trace(tags[i].fontSize );
-				measure(tags[i]);//passed by reference so tag in array is modified by measure()
+				localTags[i].fontSize = Math.max(minFont, Math.round(maxFont - fontRatio * i));	
+				//trace(localTags[i].fontSize );
+				measure(localTags[i]);//passed by reference so tag in array is modified by measure()
 			}
 			
-			localCache = tags.concat();
+			tagLevel++;
+			if (tagLevel < 4) {
+				getTagsByLevel();
+			}else {
+				//trace("tags processed", tags.level1.length, tags.level2.length, tags.level3.length);
+				dispatchEvent(new Event(TAGS_READY));
+			}
 			
-			dispatchEvent(new Event(TAGS_READY));
+			//localCache = localTags.concat();//concat duplicates the array
+			
+			//
 		}
 		
 		

@@ -31,9 +31,14 @@ package com.gmrmarketing.bcbs.livefearless
 		{		
 			token = "";
 			so = SharedObject.getLocal("bcbsData");
+			
+			trace("============================");
+			trace("     In Local Storage:");
+			trace("============================");
 			trace(so.data.prizeOptions);
 			trace("----");
 			trace(so.data.pledgeOptions);
+			trace("============================");
 			
 			hdr = new URLRequestHeader("Content-type", "application/json");
 			hdr2 = new URLRequestHeader("Accept", "application/json");
@@ -106,10 +111,20 @@ package com.gmrmarketing.bcbs.livefearless
 						interestOptions.push([j.ResponseObject.FieldOptions[i].OptionText,j.ResponseObject.FieldOptions[i].FieldOptionId]);
 					}
 					*/
-				}
+				}				
 				
 				so.data.pledgeOptions = pledgeOptions.concat();
 				so.data.prizeOptions = prizeOptions.concat();
+				
+				trace("============================");
+				trace("        Got Models");
+				trace("============================");
+				trace(prizeOptions);
+				trace("-------------");
+				trace(pledgeOptions);
+				trace("============================");
+				trace("replacing local storage");
+				
 				so.flush();
 				
 				dispatchEvent(new Event(GOT_TOKEN));
@@ -150,7 +165,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		
 		/**
-		 * 
+		 * Called from Queue.uploadNext()
 		 * @param	formData Array cur.fname, cur.lname, cur.email, cur.pledgeCombo, cur.sharephoto, cur.emailoptin, cur.message, cur.prizeCombo	
 		 */
 		public function submitForm(formData:Array):void

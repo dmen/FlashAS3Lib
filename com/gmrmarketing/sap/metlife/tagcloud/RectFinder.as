@@ -27,7 +27,6 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		private var forceStop:Boolean = false;
 		private var stageRef:Stage;
 		private var shadow:DropShadowFilter;
-		private var delta:Number;
 		
 		public function RectFinder(ss:int)
 		{	
@@ -38,13 +37,12 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		}		
 		
 		
-		public function create($container:DisplayObjectContainer, $image:BitmapData, $tags:Array, $stageRef:Stage, $delta:Number):void
+		public function create($container:DisplayObjectContainer, $image:BitmapData, $tags:Array, $stageRef:Stage):void
 		{			
 			container = $container;
 			image = $image;
 			tags = $tags;
 			stageRef = $stageRef;
-			delta = $delta;
 			
 			forceStop = false;
 			
@@ -70,13 +68,13 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			stageRef.removeEventListener(Event.ENTER_FRAME, addTag);
 		}
 		
-		
+		/*
 		public function kill():void
 		{
 			stageRef.removeEventListener(Event.ENTER_FRAME, addTag);
 			image.dispose();
 		}
-		
+		*/
 		
 		private function addTag(e:Event):void
 		{
@@ -94,10 +92,8 @@ package com.gmrmarketing.sap.metlife.tagcloud
 				if (tagPercent == 0) {
 					zeroCount++;
 					if (zeroCount == 2) {
-						var d:Number = new Date().valueOf() - delta;
-						
-						trace("done -rectFinder removing listener",d/1000);
 						stageRef.removeEventListener(Event.ENTER_FRAME, addTag);
+						//trace("done");
 					}
 				}
 			}

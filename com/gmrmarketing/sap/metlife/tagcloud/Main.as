@@ -1,18 +1,17 @@
 package com.gmrmarketing.sap.metlife.tagcloud
 {
-	import com.gmrmarketing.sap.levisstadium.ISchedulerMethods;
-	import com.gmrmarketing.sap.metlife.FlareManager;
+	import com.gmrmarketing.sap.metlife.ISchedulerMethods;
 	import flash.display.*;
 	import com.gmrmarketing.sap.metlife.tagcloud.RectFinder;	
 	import com.gmrmarketing.sap.metlife.tagcloud.TagCloud;	
 	import flash.events.*;	
 	import com.greensock.TweenMax;
-	import flash.desktop.NativeApplication;
+	import com.greensock.easing.*;	
 	
 	
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
-		public static const READY:String = "ready"; //scheduler requires the READY event to be the string "ready"
+		public static const FINISHED:String = "finished";//dispatched when the task is complete. Player will call cleanup() now
 		
 		private const WIDTH:int = 1008;
 		private const HEIGHT:int = 567;
@@ -20,99 +19,148 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		private var dict:TagCloud;//tags from the service
 		private var ra:RectFinder;
 		private var tagName:String; //set in setConfig, one of: levis,offense,defense
-		private var flares:FlareManager;
 		private var tagContainer:Sprite;
-		private var delta:Number;
+		
+		private var localCache:Object;
+		private var myDate:String; //from xml
+		private var currentLevel:int;
+		
+		private var tag1:MovieClip;
+		private var tag2:MovieClip;
 		
 		
 		public function Main()
 		{	
-			//addEventListener(Event.ACTIVATE, initWindowPosition);
+			tag1 = new tagHolder();//lib clip
+			tag2 = new tagHolder();//lib clip
 			
 			dict = new TagCloud(5, 56, 22);
 			dict.addEventListener(TagCloud.TAGS_READY, tagsLoaded, false, 0, true);
 			
-			flares = new FlareManager();
-			flares.setContainer(this);
-			
 			tagContainer = new Sprite();
 			addChild(tagContainer);
 			
-			init("levis,0xc92845");
-		}
-		
-		
-		//TODO - this will be part of scheduler/player
-		private function initWindowPosition(e:Event):void
-		{
-			NativeApplication.nativeApplication.activeWindow.x = 0;
-			NativeApplication.nativeApplication.activeWindow.y = 160;
-		}
+			//init("10/12/14,0xFFFFFF,0xDDDDDD,0xBBBBBB,0xAAAAAA");
+		}				
 		
 		
 		/**
 		 * ISChedulerMethods
-		 * initValue is tagName, array of colors: levis,0xffffff,0xcccccc,0x678900,etc
+		 * initValue is gameDate, array of colors: levis,0xffffff,0xcccccc,0x678900,etc
 		 */
 		public function init(initValue:String = ""):void
-		{
-			trace("begin");
-			delta = new Date().valueOf();
-			
+		{	
 			var i:int = initValue.indexOf(",");//first occurence of comma
-			tagName = initValue.substring(0, i);
+			myDate = initValue.substring(0, i);
 			var cols:String = initValue.substr(i + 1);
 			var colors:Array = cols.split(",");
 			
 			ra = new RectFinder(5);
 			
-			dict.refreshTags(tagName, colors);//calls tagsLoaded when ready
+			dict.refreshTags(colors, myDate);//calls tagsLoaded when ready
+		}
+		
+		
+		/**
+		 * ISchedulerMethods
+		 * Returns true if localCache has data in it
+		 * ie if the service has completed successfully at least once
+		 * @return
+		 */
+		public function isReady():Boolean
+		{
+			return localCache != null;
 		}
 		
 		
 		/**
 		 * ISChedulerMethods
-		 * show will be called once ready event is received
 		 */
 		public function show():void
-		{		
-			flares.newFlare(360, 40, 640,2);	//x,y,toX,delay		
-			flares.newFlare(290, 470, 720, 2);
-			flares.newFlare(300, 93, 710, 1);
-			flares.newFlare(320, 173, 690, 1);
+		{
+			theVideo.play();
 			
-			var tagImage:BitmapData = new cloud();//image to create with word cloud
-			
-			ra.create(tagContainer, tagImage, dict.getTags(), this.stage, delta);
+			currentLevel = 1;			
+			nextLevel();			
 		}
+		
+		
+		private function nextLevel():void
+		{					
+			ra.create(tagContainer, new cloud(), dict.getTags(currentLevel), this.stage);
+			if(currentLevel < 3){
+				TweenMax.delayedCall(7, transitionLevel);
+			}else {
+				TweenMax.delayedCall(7, done);
+			}
+		}
+		
+		private function done():void
+		{
+			dispatchEvent(new Event(FINISHED));//will call cleanup
+		}
+		
+		
+		private function transitionLevel():void
+		{
+			if (currentLevel == 1) {
+				//about to show level 2
+				tag1.x = 395;
+				tag1.y = 126;
+				addChildAt(tag1, numChildren - 2);//add behind text layer on stage
+				TweenMax.to(tag1, .5, { y:180, ease:Back.easeOut } );
+			}
+			if (currentLevel == 2) {
+				//about to show level 3
+				tag2.x = 395;
+				tag2.y = 180;
+				addChildAt(tag2, numChildren - 2);//add behind first tag
+				TweenMax.to(tag1, .5, { x:269, ease:Back.easeOut } );
+				TweenMax.to(tag2, .5, { x:507, ease:Back.easeOut } );
+			}
+			var n:int = tagContainer.numChildren - 1;
+			var t:Bitmap;
+			var delay:Number = 0;
+			for (var i:int = n; i >= 1; i--) {
+				t = Bitmap(tagContainer.getChildAt(i));
+				TweenMax.to(t, .75, { z: -500, y:"-25", alpha:0, delay:delay } );
+				delay += .015;
+			}
+			t = Bitmap(tagContainer.getChildAt(0));
+			TweenMax.to(t, .75, { z: -500, y:"-25", alpha:0, delay:delay, onComplete:clearLevel } );
+		}
+		
+		
+		private function clearLevel():void
+		{
+			while (tagContainer.numChildren) {
+				tagContainer.removeChildAt(0);
+			}
+			currentLevel++;			
+			nextLevel();
+		}
+		
 		
 		
 		/**
 		 * ISChedulerMethods
 		 */
-		public function hide():void
-		{
+		public function cleanup():void
+		{			
+			theVideo.seek(0);
+			theVideo.stop();
+			if (contains(tag1)) {
+				removeChild(tag1);
+			}
+			if (contains(tag2)) {
+				removeChild(tag2);
+			}
+			while (tagContainer.numChildren) {
+				tagContainer.removeChildAt(0);
+			}
+			//ra.kill();
 		}
 		
-		/**
-		 * ISChedulerMethods
-		 */
-		public function doStop():void
-		{
-			ra.stop();
-		}
-		
-		
-		/**
-		 * ISChedulerMethods
-		 */
-		public function kill():void
-		{
-			dict.kill();
-			ra.kill();
-			//dict = null;
-			ra = null;
-		}
 		
 		/**
 		 * callback from setConfig()
@@ -120,8 +168,10 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		 */
 		private function tagsLoaded(e:Event):void
 		{
-			show();//TESTING
-			dispatchEvent(new Event(READY));//will call show()
+			localCache = dict.getTags(1);//this just so isready() will return true
+			tag1.theText.text = dict.getHashTag(2);
+			tag2.theText.text = dict.getHashTag(3);
+			//show();//TESTING
 		}
 	}
 	

@@ -7,6 +7,7 @@ package com.gmrmarketing.sap.metlife.player
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;	
 	import flash.utils.Timer;
+	import flash.desktop.NativeApplication;
 	
 	
 	public class Main extends MovieClip
@@ -20,11 +21,16 @@ package com.gmrmarketing.sap.metlife.player
 		//for transitions
 		private var BGClip:MovieClip; //stadium pic
 		private var flareClip:MovieClip; //flare png
-		private var sapRunSimple:MovieClip;//logo and text
 		
+		//images for transition between screens
+		private var sapRunSimple:MovieClip;//logo and text
+		private var followSports:MovieClip;//logo and text
+		private var transitionCounter:int; //take mod of this to switch between transitions
 		
 		public function Main()
 		{
+			addEventListener(Event.ACTIVATE, initWindowPosition);
+			
 			BGClip = new stadium(); //lib clip
 			
 			flareClip = new flare();//lib clip
@@ -36,6 +42,12 @@ package com.gmrmarketing.sap.metlife.player
 			sapRunSimple.x = 504;
 			sapRunSimple.y = 283;
 			
+			followSports = new follow();
+			followSports.x = 504;
+			followSports.y = 283;
+			
+			transitionCounter = 1;
+			
 			var req:URLRequest = new URLRequest("http://design.gmrstage.com/sap/metlife/gda/config.xml?abc=" + String(new Date().valueOf()));
 			var configLoader:URLLoader = new URLLoader();
 			configLoader.addEventListener(Event.COMPLETE, configLoaded, false, 0, true);
@@ -43,6 +55,13 @@ package com.gmrmarketing.sap.metlife.player
 			configLoader.load(req);
 		}
 		
+		
+		//used to put player within ticker app
+		private function initWindowPosition(e:Event):void
+		{
+			NativeApplication.nativeApplication.activeWindow.x = 0;
+			NativeApplication.nativeApplication.activeWindow.y = 160;
+		}
 		
 		private function configLoaded(e:Event):void
 		{			
@@ -120,8 +139,13 @@ package com.gmrmarketing.sap.metlife.player
 		{
 			if (contains(BGClip)) {
 				//transition was running
-				removeChild(BGClip);
+				removeChild(BGClip);				
+			}
+			if (contains(sapRunSimple)) {
 				removeChild(sapRunSimple);
+			}
+			if (contains(followSports)) {
+				removeChild(followSports);
 			}
 			currentTask++;
 			if (currentTask >= taskFiles.length) {
@@ -132,7 +156,7 @@ package com.gmrmarketing.sap.metlife.player
 			theTask.y = 0;
 			theTask.alpha = 0;
 			addChild(theTask);
-			TweenMax.to(theTask, .3, { alpha:1 } );
+			TweenMax.to(theTask, .5, { alpha:1 } );
 			theTask.addEventListener("finished", showTransition, false, 0, true);
 			theTask.show();//starts task timer
 		}
@@ -158,12 +182,22 @@ package com.gmrmarketing.sap.metlife.player
 			theTask.cleanup();
 			
 			//add the logo transition			
-			addChildAt(BGClip, numChildren - 1);//add behind the flare
-			addChild(sapRunSimple);
-			sapRunSimple.scaleX = sapRunSimple.scaleY = .5;
-			sapRunSimple.alpha = 1;
+			addChildAt(BGClip, numChildren - 1);//add behind the flare - stadium background image
+			var tranClip:MovieClip;
+			if (transitionCounter % 2 == 0) {
+				addChild(followSports);
+				tranClip = followSports;
+			}else{
+				addChild(sapRunSimple);
+				tranClip = sapRunSimple;
+			}
+			tranClip.scaleX = tranClip.scaleY = .5;
+			tranClip.alpha = 1;
 			
-			TweenMax.to(sapRunSimple, .5, { scaleX:3, scaleY:3, delay:.75, alpha:0, onComplete:showNextTask } );
+			transitionCounter++;
+			
+			TweenMax.to(tranClip, 2.5, { scaleX:.55, scaleY:.55 } );
+			TweenMax.to(tranClip, .5, { scaleX:3, scaleY:3, delay:2, alpha:0, onComplete:showNextTask } );
 		}
 		
 		

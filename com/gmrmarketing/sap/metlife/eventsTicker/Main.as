@@ -6,6 +6,7 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import com.gmrmarketing.sap.metlife.FlareManager;
+	import fl.video.MetadataEvent;
 	
 	public class Main extends MovieClip
 	{		
@@ -21,9 +22,15 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 			flares = new FlareManager();//will be part of scheduler
 			flares.setContainer(this);
 			totalSlides = 3; //two logos and fotd
+			theVideo.addEventListener(MetadataEvent.CUE_POINT, loop);
 			refreshFOTD();
 		}
 		
+		private function loop(e:Event):void
+		{
+			theVideo.seek(0);
+			theVideo.play();
+		}
 		
 		/**
 		 * refreshes FOTD data from the web service
@@ -54,7 +61,7 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		private function dataError(e:IOErrorEvent):void
 		{
 			//do nothing if error...			
-			trace("dateError()");
+			trace("dataError()");
 		}
 		
 		
@@ -81,7 +88,7 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 			if(fanImage){
 				if (slider.fotd.contains(fanImage)) {
 					slider.fotd.removeChild(fanImage);
-				}
+				}				
 			}
 			
 			fanImage = Bitmap(e.target.content);

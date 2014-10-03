@@ -102,12 +102,13 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 		 */
 		private function move(e:Event):void
 		{		
-			/*
+			//scroll city background
+			
 			bg.x += .12;
 			if (bg.x >= 0) {
 				bg.x = -1008;//reset to starting position
 			}
-			*/
+			
 			//move all tweets
 			for (var i:int = 0; i < tweets.length; i++){
 				tweets[i].x -= 1;				
