@@ -66,6 +66,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		private function gotToken(e:Event):void
 		{
+			trace("gotToken");
 			var j:Object = JSON.parse(e.currentTarget.data);			
 			token = j.ResponseObject;
 			
@@ -87,6 +88,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		private function gotModels(e:Event):void
 		{			
+			trace("gotModels");
 			var j:Object = JSON.parse(e.currentTarget.data);	
 			
 			pledgeOptions = new Array();
@@ -97,11 +99,11 @@ package com.gmrmarketing.bcbs.livefearless
 				//trace("gotModels:",j.ResponseObject.FieldOptions.length);
 				for (var i:int = 0; i < j.ResponseObject.FieldOptions.length; i++) {
 					
-					if(j.ResponseObject.FieldOptions[i].FieldId == 836){
+					if(j.ResponseObject.FieldOptions[i].FieldId == 836 && j.ResponseObject.FieldOptions[i].ActiveStatusType == 1){
 						pledgeOptions.push([j.ResponseObject.FieldOptions[i].OptionText, j.ResponseObject.FieldOptions[i].FieldOptionId]);						
 					}
 					
-					if (j.ResponseObject.FieldOptions[i].FieldId == 902) {
+					if (j.ResponseObject.FieldOptions[i].FieldId == 902 && j.ResponseObject.FieldOptions[i].ActiveStatusType == 1) {
 						//trace("opt 902 found", j.ResponseObject.FieldOptions[i].OptionText, j.ResponseObject.FieldOptions[i].FieldOptionId);
 						prizeOptions.push([j.ResponseObject.FieldOptions[i].OptionText,j.ResponseObject.FieldOptions[i].FieldOptionId]);
 					}
@@ -152,12 +154,13 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		private function ioError(e:IOErrorEvent):void
 		{	
+			trace("ioError");
 			if (so.data.pledgeOptions != null) {
 				pledgeOptions = so.data.pledgeOptions;
 				prizeOptions = so.data.prizeOptions;
 				dispatchEvent(new Event(GOT_TOKEN));
 			}else {
-				var t:Timer = new Timer(10000, 1);
+				var t:Timer = new Timer(1000, 1);
 				t.addEventListener(TimerEvent.TIMER, getToken, false, 0, true);
 				t.start();
 			}

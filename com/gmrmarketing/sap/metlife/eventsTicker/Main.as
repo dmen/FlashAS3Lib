@@ -5,24 +5,27 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 	import flash.net.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
-	import com.gmrmarketing.sap.metlife.FlareManager;
+	import com.gmrmarketing.sap.metlife.player.LensFlares;
 	import fl.video.MetadataEvent;
+	import flash.text.TextFormat;
 	
 	public class Main extends MovieClip
 	{		
 		private var fanCache:Object;//last good pull of FOTD JSON from the web service
 		private var eventsCache:Object;//last good pull of events JSON from the web service
-		private var fanImage:Bitmap;
+		private var fanImages:Array;
+		private var fanIndex:int; //current index in fanCache - reset in dataLoaded()
 		private var slideIndex:int; //current showing slide in the slider
 		private var totalSlides:int; //total number of slides - starts at 3
-		private var flares:FlareManager;
+		private var flares:LensFlares;
 		
 		public function Main()
 		{
-			flares = new FlareManager();//will be part of scheduler
+			flares = new LensFlares();
 			flares.setContainer(this);
 			totalSlides = 3; //two logos and fotd
 			theVideo.addEventListener(MetadataEvent.CUE_POINT, loop);
+			fanImages = new Array();
 			refreshFOTD();
 		}
 		
@@ -53,6 +56,7 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		
 		private function dataLoaded(e:Event):void
 		{
+			fanIndex = 0; //first person in the list
 			fanCache = JSON.parse(e.currentTarget.data);			
 			loadFOTDImage();
 		}
@@ -60,14 +64,16 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		
 		private function dataError(e:IOErrorEvent):void
 		{
-			//do nothing if error...			
-			trace("dataError()");
+			if (fanCache) {
+				fanIndex = 0;
+				loadFOTDImage();
+			}			
 		}
 		
 		
 		private function loadFOTDImage():void
 		{			
-			var imageURL:String = fanCache.SocialPosts[0].MediumResURL;			
+			var imageURL:String = fanCache.SocialPosts[fanIndex].MediumResURL;			
 			if(imageURL){
 				var l:Loader = new Loader();
 				l.contentLoaderInfo.addEventListener(Event.COMPLETE, imLoaded, false, 0, true);			
@@ -85,32 +91,34 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		private function imLoaded(e:Event):void
 		{
 			//remove old image from clip
-			if(fanImage){
-				if (slider.fotd.contains(fanImage)) {
-					slider.fotd.removeChild(fanImage);
+			if(fanImages[fanIndex]){
+				if (slider.fotd.contains(fanImages[fanIndex])) {
+					slider.fotd.removeChild(fanImages[fanIndex]);
 				}				
 			}
 			
-			fanImage = Bitmap(e.target.content);
-			fanImage.smoothing = true;
+			var im:Bitmap =  Bitmap(e.target.content);
+			im.smoothing = true;			
 			
 			var r:Number;
-			if (144 / fanImage.width > 145 / fanImage.height) {
+			if (144 / im.width > 145 / im.height) {
 				//height is greater than width
-				r = 144 / fanImage.width;
+				r = 144 / im.width;
 			}else {
-				r = 145 / fanImage.height;
+				r = 145 / im.height;
 			}
-			fanImage.width = fanImage.width * r;
-			fanImage.height = fanImage.height * r;
+			im.width = im.width * r;
+			im.height = im.height * r;
 			
-			slider.fotd.addChild(fanImage);
-			fanImage.x = 43;//TODO: Center if too big still?
-			fanImage.y = 78;
-			fanImage.mask = slider.fotd.picMask;
+			fanImages[fanIndex] = im;
 			
-			slider.fotd.userName.text = fanCache.SocialPosts[0].AuthorName;
-			slider.fotd.theText.text = fanCache.SocialPosts[0].Text;	
+			slider.fotd.addChild(fanImages[fanIndex]);
+			fanImages[fanIndex].x = 43;//TODO: Center if too big still?
+			fanImages[fanIndex].y = 78;
+			fanImages[fanIndex].mask = slider.fotd.picMask;
+			
+			slider.fotd.userName.text = fanCache.SocialPosts[fanIndex].AuthorName;
+			slider.fotd.theText.text = fanCache.SocialPosts[fanIndex].Text;	
 			
 			refreshEvents();
 		}
@@ -118,8 +126,18 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		
 		private function imError(e:IOErrorEvent):void
 		{
-			//do nothing if image error
-			trace("imageError");
+			if(fanImages[fanIndex]){
+				if (slider.fotd.contains(fanImages[fanIndex])) {
+					slider.fotd.removeChild(fanImages[fanIndex]);
+				}				
+			}	
+			
+			slider.fotd.addChild(fanImages[fanIndex]);
+			fanImages[fanIndex].x = 43;//TODO: Center if too big still?
+			fanImages[fanIndex].y = 78;
+			fanImages[fanIndex].mask = slider.fotd.picMask;
+			
+			refreshEvents();
 		}
 		
 		
@@ -142,6 +160,10 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		
 		private function eventsLoaded(e:Event):void
 		{
+			while (slider.numChildren > 3) {
+				slider.removeChildAt(3);				
+			}
+			totalSlides = 3;
 			eventsCache = JSON.parse(e.currentTarget.data);
 			//for each event add an events clip t the end of the slider
 			for (var i:int = 0; i < eventsCache.length; i++) {
@@ -151,9 +173,22 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 				ev.headline.text = eventsCache[i].Headline;
 				ev.displayTime.text = eventsCache[i].DisplayTime;
 				ev.title.text = eventsCache[i].Title;
+				
+				//change font size so that authorName fits fully in the field
+				var fSize:int = 60;//default font size
+				var tf:TextFormat = new TextFormat();
+
+				while(ev.title.textWidth > ev.title.width){
+					fSize--;
+					tf.size = fSize;
+					ev.title.setTextFormat(tf);
+				}
+				ev.title.y = 147 + ((76 - ev.title.textHeight) * .5);
+					
 				ev.hashtag.text = eventsCache[i].Hashtag;
 				totalSlides++;
 			}
+			
 			//add sap logo to end
 			var l:MovieClip = new logoLockup();
 			l.x = slider.width;
@@ -165,7 +200,8 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		
 		private function eventsError(e:IOErrorEvent):void
 		{
-			//do nothing if error...			
+			//do nothing if error...	
+			resetSlide();
 		}
 		
 		
@@ -191,19 +227,22 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		{
 			if (slideIndex == 1) {
 				TweenMax.to(slider.fotd.theMask, .5, { x:191, delay:.5 } );
-				flares.newFlare(190, 85, 530, 1.5);	//x,y,toX,delay		
-				flares.newFlare(80, 240, 925, 1);	//x,y,toX,delay		
+				flares.show([[192, 86, 530, "point", 1.5], [192,133,973,"line",1.7],[45,242,963,"line",4],[57,284,952,"point",4.2]]);
 			}
+			//events flares
 			if (slideIndex > 2 && slideIndex < totalSlides-1) {
-				flares.newFlare(90, 75, 920, 1.5);	//x,y,toX,delay		
-				flares.newFlare(135, 228, 870, 1);	//x,y,toX,delay		
+				flares.show([[252, 16, 754, "line", 1.5], [268,60,739,"point",1.7],[94,75,914,"line",4],[138,228,868,"point",4.2],[417,246,590,"point",5]]);
 			}
 		}
 		
 		private function checkForEnd():void
 		{
 			if (slider.x <= -slider.width + 1008) {
-				resetSlide();
+				fanIndex++;
+				if (fanIndex >= fanCache.SocialPosts.length) {
+					fanIndex = 0;
+				}
+				loadFOTDImage();
 			}else {
 				slideNext();
 			}

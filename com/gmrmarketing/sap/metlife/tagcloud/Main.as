@@ -23,6 +23,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		
 		private var localCache:Object;
 		private var myDate:String; //from xml
+		private var myColors:Array; //from xml
 		private var currentLevel:int;
 		
 		private var tag1:MovieClip;
@@ -41,7 +42,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			addChild(tagContainer);
 			
 			//init("10/12/14,0xFFFFFF,0xDDDDDD,0xBBBBBB,0xAAAAAA");
-		}				
+		}
 		
 		
 		/**
@@ -53,11 +54,53 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			var i:int = initValue.indexOf(",");//first occurence of comma
 			myDate = initValue.substring(0, i);
 			var cols:String = initValue.substr(i + 1);
-			var colors:Array = cols.split(",");
+			myColors = cols.split(",");
 			
 			ra = new RectFinder(5);
 			
-			dict.refreshTags(colors, myDate);//calls tagsLoaded when ready
+			dict.refreshTags(myColors, myDate);//calls tagsLoaded when ready
+		}
+		
+		
+		/**
+		 * ISChedulerMethods
+		 */
+		public function getFlareList():Array
+		{
+			var fl:Array = new Array();
+			//screen 1
+			fl.push([300, 94, 700, "line", 1]);//x, y, to x, type, delay
+			fl.push([327, 172, 682, "point", 1.5]);//x, y, to x, type, delay
+			fl.push([286, 473, 718, "line", 2]);//x, y, to x, type, delay
+			fl.push([301, 515, 702, "point", 2.2]);//x, y, to x, type, delay
+			//screen 2
+			fl.push([300, 94, 700, "line", 7.5]);//x, y, to x, type, delay
+			fl.push([327, 172, 682, "point", 8.5]);//x, y, to x, type, delay
+			fl.push([286, 473, 718, "line", 9]);//x, y, to x, type, delay
+			fl.push([301, 515, 702, "point", 9.2]);//x, y, to x, type, delay
+			//screen 3
+			fl.push([300, 94, 700, "line", 17]);//x, y, to x, type, delay
+			fl.push([327, 172, 682, "point", 17.5]);//x, y, to x, type, delay
+			fl.push([286, 473, 718, "line", 18]);//x, y, to x, type, delay
+			fl.push([301, 515, 702, "point", 18.2]);//x, y, to x, type, delay			
+			//hash tags
+			fl.push([395, 180, 610, "line", 7.5]);//x, y, to x, type, delay
+			fl.push([507, 180, 720, "line", 16]);//x, y, to x, type, delay
+			
+			return fl;
+		}
+		
+		
+		/**
+		 * callback from setConfig()
+		 * @param	e
+		 */
+		private function tagsLoaded(e:Event):void
+		{
+			localCache = dict.getTags(1);//this just so isready() will return true
+			tag1.theText.text = dict.getHashTag(2);
+			tag2.theText.text = dict.getHashTag(3);
+			//show();//TESTING
 		}
 		
 		
@@ -158,21 +201,11 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			while (tagContainer.numChildren) {
 				tagContainer.removeChildAt(0);
 			}
-			//ra.kill();
+			dict.refreshTags(myColors, myDate);//calls tagsLoaded when ready
 		}
 		
 		
-		/**
-		 * callback from setConfig()
-		 * @param	e
-		 */
-		private function tagsLoaded(e:Event):void
-		{
-			localCache = dict.getTags(1);//this just so isready() will return true
-			tag1.theText.text = dict.getHashTag(2);
-			tag2.theText.text = dict.getHashTag(3);
-			//show();//TESTING
-		}
+		
 	}
 	
 }

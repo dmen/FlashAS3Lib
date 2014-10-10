@@ -5,53 +5,56 @@ package com.gmrmarketing.sap.metlife.usmap
 	import flash.net.*;
 	import flash.events.*;
 	import flash.geom.Point;
-	import com.gmrmarketing.sap.levisstadium.california.Tweet;
+	import com.gmrmarketing.sap.metlife.usmap.Tweet;
 	import com.gmrmarketing.utilities.Strings;
 	import com.greensock.TweenMax;
 	
 	
-	public class TweetManager
+	public class TweetManager extends EventDispatcher
 	{
+		public static const READY:String = "dataReady";
 		private var container:DisplayObjectContainer;
-		private var tweets:Array; //all tweets from the service
 		private var q0:Boolean;//true if the quadrant is available
 		private var q1:Boolean;
-		private var killed:Boolean;
-		private var localCache:Array;
+		private var localCache:Array;//all tweets from the service
+		private var cacheIndex:int; //current loc in localCache
+		private var isRunning:Boolean;
 		
-		
-		
-		public function TweetManager()
-		{
-			q0 = true;//both quadrants available
-			q1 = true;
-		}
+		public function TweetManager(){}
 	
 		
 		public function setContainer($container:DisplayObjectContainer):void
 		{
-			killed = false;
 			container = $container;
 		}
 		
-		
-		public function kill():void
+		public function start():void
 		{
-			killed = true;
+			isRunning = true;
 			q0 = true;//both quadrants available
 			q1 = true;
+			cacheIndex = 0;
+			displayNext();
+			TweenMax.delayedCall(1, displayNext);
+		}
+		
+		
+		public function stop():void
+		{			
+			isRunning = false;
 			while (container.numChildren) {
-				var t:MovieClip = MovieClip(container.removeChildAt(0));
-				t.removeEventListener(Tweet.COMPLETE, recycleQuadrant);
+				container.removeChildAt(0);				
 			}
 		}
 		
 		
+		/**
+		 * Gets new tweet data from the server
+		 */
 		public function refresh():void		
-		{			
-			killed = false;
+		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=CaliMapTweets"+"&abc="+String(new Date().valueOf()));
+			var r:URLRequest = new URLRequest("http://sapmetlifeapi.thesocialtab.net/api/GameDay/GetCachedFeed?feed=NYJetsUSMapTweets"+"&abc="+String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -60,91 +63,72 @@ package com.gmrmarketing.sap.metlife.usmap
 		}
 		
 		
+		/**
+		 * Callback from service call
+		 * Populates localCache
+		 * @param	e
+		 */
 		private function dataLoaded(e:Event = null):void
 		{			
 			var json:Object = JSON.parse(e.currentTarget.data);
-			tweets = new Array();
-			
+			localCache = new Array();
+			cacheIndex = 0;
 			var p:Point;
 			var m:String;
-			//var favorQuadrant1:Boolean;
 			
 			for (var i:int = 0; i < json.length; i++) {
-					p = latLonToXY(json[i].latitude, Math.abs(json[i].longitude));	
-					m = Strings.removeLineBreaks(json[i].text);
-					m = Strings.removeChunk(m, "http://");
-					//favorQuadrant1 = false;
-					//if (json[i].latitude < 37) {
-						//favorQuadrant1 = true;
-					//}
-					tweets.push( { user:"@" + json[i].authorname, message:m, theY:p.y, theX:p.x, pic:json[i].profilepicURL } );//favor1:favorQuadrant1,
-			}
-			
-			localCache = tweets.concat();
-			
-			//show tweets in both quadrants
-			displayNext();
-			TweenMax.delayedCall(2, displayNext);
+				p = latLonToXY(json[i].latitude, Math.abs(json[i].longitude));	
+				m = Strings.removeLineBreaks(json[i].text);
+				m = Strings.removeChunk(m, "http://");
+				localCache.push( { user:"@" + json[i].authorname, message:m, theY:p.y, theX:p.x, pic:json[i].profilepicURL } );
+			}			
+			dispatchEvent(new Event(READY));
 		}
 		
 		
-		private function dataError(e:IOErrorEvent):void
-		{
-			if (localCache) {
-				tweets = localCache.concat();
-				displayNext();
-				TweenMax.delayedCall(2, displayNext);
-			}else {
-				
-			}
-		}
+		private function dataError(e:IOErrorEvent):void	{}
 		
 		
 		private function displayNext():void
 		{
-			if (!killed) {
-				
-				var a:Tweet;
-				
-				var tw:Object = tweets.shift();				
-				if (tweets.length == 0) {
-					refresh();
-					return;
-				}
-				
-				if (q0) {
-					
-					a = new Tweet();
-					a.setContainer(container);
-					q0 = false; //mark as used
-					a.show(tw.user, tw.message, tw.theX, tw.theY, 0);
-					a.addEventListener(Tweet.COMPLETE, recycleQuadrant);
-					
-				}else if (q1) {
-					
-					a = new Tweet();
-					a.setContainer(container);
-					q1 = false; //mark as used
-					a.show(tw.user, tw.message, tw.theX, tw.theY, 1);
-					a.addEventListener(Tweet.COMPLETE, recycleQuadrant);
-					
-				}
+			var a:Tweet;
+			
+			var tw:Object = localCache[cacheIndex];
+			cacheIndex++;
+			if (cacheIndex >= localCache.length) {
+				cacheIndex = 0;
+			}
+			
+			a = new Tweet();
+			a.setContainer(container);
+			a.addEventListener(Tweet.COMPLETE, recycleQuadrant);
+			
+			if (q0) {				
+				q0 = false; //mark as used
+				a.show(tw.user, tw.message, tw.theX, tw.theY, 0);				
+			}else if (q1) {				
+				q1 = false; //mark as used
+				a.show(tw.user, tw.message, tw.theX, tw.theY, 1);
 			}
 		}
 		
 		
+		/**
+		 * Callback from Tweet object - tweet has removed itself
+		 * @param	e
+		 */
 		private function recycleQuadrant(e:Event):void
-		{
-			if (!killed) {
-				var a:Tweet = Tweet(e.currentTarget);
-				a.removeEventListener(Tweet.COMPLETE, recycleQuadrant);
-				var q:int = a.getQuadrant();//returns 0-1
-				a.dispose();
-				if (q == 0) {
-					q0 = true;
-				}else {
-					q1 = true;
-				}
+		{			
+			var a:Tweet = Tweet(e.currentTarget);
+			a.removeEventListener(Tweet.COMPLETE, recycleQuadrant);
+			var q:int = a.getQuadrant();//returns 0-1
+			a.dispose();
+			if (q == 0) {
+				q0 = true;
+			}else {
+				q1 = true;
+			}
+			if(isRunning){
 				displayNext();
 			}
 		}
@@ -160,17 +144,33 @@ package com.gmrmarketing.sap.metlife.usmap
 		 */
 		private function latLonToXY(lat:Number, lon:Number):Point
 		{
-			//latitude: northern extent of wash is 48.0º - 192 pixels - southern is 25º - 467 pixels
-			//longitude: western extent is 124.5º - 80 pixels - eastern is 66º - 638 pixels
+			//latitude: northern extent of wash is 48.0º - 180 pixels - southern is 25º - 493 pixels
+			//longitude: western extent is 124.5º - 227 pixels - eastern is 66º - 776 pixels
+			
+			lat = lat < 25 ? 25 : lat;
+			lat = lat > 48 ? 48 : lat;
+			lon = lon > 124.5 ? 124.5 : lon;
+			lon = lon < 66 ? 66 : lon;
 			
 			var latDelta:Number = 48.0 - lat;
 			var lonDelta:Number = 124.5 - lon;
 			
-			var latMultiplier:Number = 11.956521; //pixel extents / degree extents (467 - 192)/(48 - 25) = 275 / 23
-			var lonMultiplier:Number = 9.5384615; // (638 - 80) / (124.5 - 66) = 558 / 58.5
+			var latMultiplier:Number = 14.5; //pixel extents / degree extents (493 - 180)/(48 - 25) = 313 / 23   - NORTH
+			var lonMultiplier:Number = 9.9; // (776 - 227) / (124.5 - 66) = 549 / 58.5     - WEST
 			
-			var tx:Number = 80 + (lonDelta * lonMultiplier); //left edge of cali at 279 on stage
-			var ty:Number = 192 + (latDelta * latMultiplier); //top of cali at 123 on stage
+			//east of 
+			if (lon < 80) {
+				lonMultiplier = 10.2;
+				latMultiplier = 11;
+			}
+			//southern state
+			if (lat < 37) {
+				latMultiplier = 11.9;
+				lonMultiplier = 10.6;
+			}
+			
+			var tx:Number = 227 + lonDelta * lonMultiplier;
+			var ty:Number = 180 + latDelta * latMultiplier;
 			
 			return new Point(tx,ty);
 		}

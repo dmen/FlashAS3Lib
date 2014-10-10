@@ -36,6 +36,26 @@ package com.gmrmarketing.sap.metlife.trivia
 		
 		/**
 		 * ISchedulerMethods
+		 */ 
+		public function getFlareList():Array
+		{
+			var fl:Array = new Array();
+			
+			fl.push([296, 38, 710, "line", 3]);//x, y, to x, type, delay
+			fl.push([308, 82, 698, "point", 3.5]);//x, y, to x, type, delay
+			
+			fl.push([395, 488, 610, "line", 5]);//x, y, to x, type, delay
+			fl.push([407, 531, 598, "point", 5.3]);//x, y, to x, type, delay
+			//quote
+			fl.push([428, 149, 911, "line", 8]);//x, y, to x, type, delay
+			fl.push([428, 410, 840, "line", 8.3]);//x, y, to x, type, delay
+			
+			return fl;
+		}
+		
+		
+		/**
+		 * ISchedulerMethods
 		 * Returns true if localCache has data in it
 		 * ie if the service has completed successfully at least once
 		 * @return
@@ -94,7 +114,7 @@ package com.gmrmarketing.sap.metlife.trivia
 			
 			TweenMax.to(holder.metric, .5, { x:-246, delay:2 } );
 			
-			TweenMax.delayedCall(10, complete);
+			TweenMax.delayedCall(15, complete);
 		}
 		
 		

@@ -54,16 +54,33 @@ package com.gmrmarketing.sap.metlife.sentiment
 					title.text = "what type of game are fans excited about today?";
 					break;
 				case "OffenseVsDefense":
-					title.text = "what is more important in today's game, offense or defense?"
+					title.text = "what is more important\nin today's game?"
 					break;
 				case "HomeVsVisiting":
 					title.text = "which fans are more passionate about today's game?";
 					break;
 				case "Tailgating":
-					title.text = "what do fans prefer to eat when tailgating?";
+					title.text = "what do fans prefer\nto eat when tailgating?";
 					break;
 			}
 			refreshData();
+		}
+		
+		
+		/**
+		 * ISchedulerMethods
+		 */ 
+		public function getFlareList():Array
+		{
+			var fl:Array = new Array();
+			
+			fl.push([145, 64, 858, "line", 3]);//x, y, to x, type, delay
+			fl.push([175, 184, 828, "point", 3.5]);//x, y, to x, type, delay
+			
+			fl.push([283, 474, 722, "line", 4]);//x, y, to x, type, delay
+			fl.push([295, 515, 709, "point", 4.3]);//x, y, to x, type, delay
+			
+			return fl;
 		}
 		
 		

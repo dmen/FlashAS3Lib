@@ -1,6 +1,6 @@
 package com.gmrmarketing.sap.metlife.player
 {
-	import com.gmrmarketing.sap.metlife.Flare;
+	import com.gmrmarketing.sap.metlife.player.LensFlares;
 	import flash.display.*;
 	import flash.events.*;
 	import flash.net.*;
@@ -8,7 +8,9 @@ package com.gmrmarketing.sap.metlife.player
 	import com.greensock.easing.*;	
 	import flash.utils.Timer;
 	import flash.desktop.NativeApplication;
-	
+	import flash.display.StageDisplayState;
+	import flash.display.StageScaleMode;
+	import flash.ui.Mouse;
 	
 	public class Main extends MovieClip
 	{
@@ -27,9 +29,17 @@ package com.gmrmarketing.sap.metlife.player
 		private var followSports:MovieClip;//logo and text
 		private var transitionCounter:int; //take mod of this to switch between transitions
 		
+		private var taskContainer:Sprite;
+		private var flareContainer:Sprite;
+		private var lensFlares:LensFlares;//for horizontal flare
+		
+		
 		public function Main()
 		{
-			addEventListener(Event.ACTIVATE, initWindowPosition);
+			//addEventListener(Event.ACTIVATE, initWindowPosition);
+			stage.displayState = StageDisplayState.FULL_SCREEN;
+			stage.scaleMode = StageScaleMode.EXACT_FIT;
+			Mouse.hide();
 			
 			BGClip = new stadium(); //lib clip
 			
@@ -48,6 +58,15 @@ package com.gmrmarketing.sap.metlife.player
 			
 			transitionCounter = 1;
 			
+			taskContainer = new Sprite();
+			addChild(taskContainer);
+			
+			flareContainer = new Sprite();
+			addChild(flareContainer);
+			
+			lensFlares = new LensFlares();
+			lensFlares.setContainer(flareContainer);
+			
 			var req:URLRequest = new URLRequest("http://design.gmrstage.com/sap/metlife/gda/config.xml?abc=" + String(new Date().valueOf()));
 			var configLoader:URLLoader = new URLLoader();
 			configLoader.addEventListener(Event.COMPLETE, configLoaded, false, 0, true);
@@ -63,10 +82,10 @@ package com.gmrmarketing.sap.metlife.player
 			NativeApplication.nativeApplication.activeWindow.y = 160;
 		}
 		
+		
 		private function configLoaded(e:Event):void
 		{			
-			var xm:XML = XML(URLLoader(e.currentTarget).data);	
-			trace(xm);
+			var xm:XML = XML(URLLoader(e.currentTarget).data);
 			tasks = xm.tasks.task;		
 			currentTask = 0;
 			taskFiles = new Array();
@@ -80,6 +99,9 @@ package com.gmrmarketing.sap.metlife.player
 		}
 		
 		
+		/**
+		 * loadTask and taskLoaded loop until all tasks defined in the config file are loaded.
+		 */
 		private function loadTask():void
 		{
 			var r:URLRequest = new URLRequest(tasks[currentTask].@file);
@@ -137,15 +159,15 @@ package com.gmrmarketing.sap.metlife.player
 		
 		private function showNextTask():void
 		{
-			if (contains(BGClip)) {
+			if (taskContainer.contains(BGClip)) {
 				//transition was running
-				removeChild(BGClip);				
+				taskContainer.removeChild(BGClip);				
 			}
-			if (contains(sapRunSimple)) {
-				removeChild(sapRunSimple);
+			if (taskContainer.contains(sapRunSimple)) {
+				taskContainer.removeChild(sapRunSimple);
 			}
-			if (contains(followSports)) {
-				removeChild(followSports);
+			if (taskContainer.contains(followSports)) {
+				taskContainer.removeChild(followSports);
 			}
 			currentTask++;
 			if (currentTask >= taskFiles.length) {
@@ -155,7 +177,12 @@ package com.gmrmarketing.sap.metlife.player
 			theTask.x = 0;
 			theTask.y = 0;
 			theTask.alpha = 0;
-			addChild(theTask);
+			if (!taskContainer.contains(theTask)) {
+				taskContainer.addChild(theTask);
+			}
+			
+			lensFlares.show(theTask.getFlareList());
+			
 			TweenMax.to(theTask, .5, { alpha:1 } );
 			theTask.addEventListener("finished", showTransition, false, 0, true);
 			theTask.show();//starts task timer
@@ -167,7 +194,7 @@ package com.gmrmarketing.sap.metlife.player
 			theTask.removeEventListener("finished", showTransition);
 			flareClip.scaleX = flareClip.scaleY = 0;
 			flareClip.alpha = 1;
-			addChild(flareClip);
+			taskContainer.addChild(flareClip);
 			TweenMax.to(flareClip, .6, {scaleX:10, scaleY:10,ease:Linear.easeNone});
 			TweenMax.to(flareClip, .3, {alpha:0,delay:.3, onStart:logoTransition, onComplete:removeFlare});
 		}
@@ -177,19 +204,21 @@ package com.gmrmarketing.sap.metlife.player
 		 * Called at the start of fading the flare out - ie when it's at full brightness
 		 */
 		private function logoTransition():void
-		{
-			removeChild(theTask); //remove the current task now behind the flare
+		{			
 			theTask.cleanup();
 			
+			//removeChild(theTask); //remove the current task now behind the flare
+			theTask.y = -1500;
+			
 			//add the logo transition			
-			addChildAt(BGClip, numChildren - 1);//add behind the flare - stadium background image
+			taskContainer.addChildAt(BGClip, numChildren - 1);//add behind the flare - stadium background image
 			var tranClip:MovieClip;
 			if (transitionCounter % 2 == 0) {
-				addChild(followSports);
-				tranClip = followSports;
+				taskContainer.addChild(sapRunSimple);
+				tranClip = sapRunSimple;				
 			}else{
-				addChild(sapRunSimple);
-				tranClip = sapRunSimple;
+				taskContainer.addChild(followSports);
+				tranClip = followSports;
 			}
 			tranClip.scaleX = tranClip.scaleY = .5;
 			tranClip.alpha = 1;
@@ -203,7 +232,7 @@ package com.gmrmarketing.sap.metlife.player
 		
 		private function removeFlare():void
 		{
-			removeChild(flareClip);
+			taskContainer.removeChild(flareClip);
 		}
 		
 	

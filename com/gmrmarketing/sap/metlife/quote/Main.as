@@ -37,6 +37,29 @@ package com.gmrmarketing.sap.metlife.quote
 		
 		/**
 		 * ISchedulerMethods
+		 */ 
+		public function getFlareList():Array
+		{
+			var fl:Array = new Array();
+			
+			//title
+			fl.push([314, 71, 692, "line", 3]);//x, y, to x, type, delay
+			fl.push([324, 114, 680, "point", 3.3]);//x, y, to x, type, delay			
+			
+			//quote
+			fl.push([420, 152, 942, "line", 6]);//x, y, to x, type, delay
+			fl.push([420, 82, 868, "point", 6]);//x, y, to x, type, delay
+			
+			//player pic
+			fl.push([73, 168, 415, "point", 8]);//x, y, to x, type, delay
+			fl.push([73, 448, 415, "point", 8.3]);//x, y, to x, type, delay
+			
+			return fl;
+		}
+		
+		
+		/**
+		 * ISchedulerMethods
 		 * Returns true if localCache has data in it
 		 * ie if the service has completed successfully at least once
 		 * @return
@@ -132,7 +155,7 @@ package com.gmrmarketing.sap.metlife.quote
 				theText.y = 172 + ((212 - theText.textHeight) * .5);
 			}
 			TweenMax.to(picHolder, .5, { x:71, delay:1 } );
-			TweenMax.delayedCall(10, complete);
+			TweenMax.delayedCall(20, complete);
 		}
 		
 		

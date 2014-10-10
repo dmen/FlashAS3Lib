@@ -12,6 +12,7 @@ package com.gmrmarketing.sap.metlife.usmap
 	import com.greensock.easing.*;
 	import flash.utils.Timer;
 	import flash.text.TextFieldAutoSize;
+	import com.gmrmarketing.utilities.Strings;
 	
 	
 	public class Tweet extends EventDispatcher
@@ -30,7 +31,6 @@ package com.gmrmarketing.sap.metlife.usmap
 		private var vy:Number;
 		private var drawToX:int;
 		private var drawToY:int;
-		private var lineColor:Number;
 		private var endTimer:Timer;
 		
 		
@@ -58,8 +58,8 @@ package com.gmrmarketing.sap.metlife.usmap
 			
 			dot = new mapDot(); //lib clip - animated expanding circle at lat/lon
 			
-			clip = new mcTweet();//lib clip - contains text field	
-			clip.addChildAt(rectContainer, 0); //add behind text already in the clip			
+			clip = new mcTweet();//lib clip - contains text fields
+			clip.addChildAt(rectContainer, 0); //add rectContainer behind text already in the clip			
 		}
 		
 		
@@ -85,7 +85,8 @@ package com.gmrmarketing.sap.metlife.usmap
 			
 			message = message.replace(/&lt;/g, "<");
 			message = message.replace(/&gt;/g, "<");
-			message = message.replace(/&amp;/g, "&");		
+			message = message.replace(/&amp;/g, "&");
+			message = Strings.removeChunk(message, "http://");
 			
 			clip.userBG.alpha = 0;
 			clip.theText.alpha = 0; //contains the two text fields
@@ -106,31 +107,23 @@ package com.gmrmarketing.sap.metlife.usmap
 			dot.scaleX = dot.scaleY = .1;
 			dot.alpha = 1;
 			container.addChild(dot);
-			var sc:Number = .7 + 2 * Math.random();			
-			TweenMax.to(dot, 1, { alpha:0, scaleX:sc, scaleY:sc, rotation:45 + Math.random() * 90 } );
+			//var sc:Number = .7 + 2 * Math.random();			
+			TweenMax.to(dot, .5, { scaleX:.5, scaleY:.5, ease:Elastic.easeOut} );
+			TweenMax.to(dot, .5, { alpha:0, delay:1.25 } );
 			
 			switch(quadrant) {
 				case 0:
-					clip.x = 100 + Math.random() * 10;
-					clip.y = 150 + Math.random() * 10;
+					clip.x = 40 + Math.random() * 10;
+					clip.y = 150 + Math.random() * 50;
 					break;
 				case 1:
-					clip.x = 485 + Math.random() * 10;
-					clip.y = 150 + Math.random() * 10;
+					clip.x = 745 + Math.random() * 10;
+					clip.y = 140 + Math.random() * 10;
 					break;
-			}	
-			
-			var r:Number = Math.random();
-			if (r < .33) {
-				lineColor = 0xeeb400;//orange
-			}else if (r < .66 ) {
-				lineColor = 0x008fd3;//blue
-			}else {
-				lineColor = 0xa19a92;//gray
-			}
+			}			
 			
 			//animated line			
-			lineContainer.graphics.lineStyle(2, lineColor, 1);			
+			lineContainer.graphics.lineStyle(2, 0xffffff, 1);			
 			
 			//change toX,toY to screen coords, instead of outlineContainer coords
 			drawToX = toX - clip.x;
@@ -142,7 +135,7 @@ package com.gmrmarketing.sap.metlife.usmap
 			
 			//if (myQuadrant == 2) {
 				//point on the left of the tweet	
-				TweenMax.to(tweenOb, .25, { x:0, y:-22, onUpdate:drawLine, delay:.75, ease:Linear.easeNone, onComplete:drawTweetBox} );						
+				TweenMax.to(tweenOb, .25, { x:0, y:-22, onUpdate:drawLine, delay:.5, ease:Linear.easeNone, onComplete:drawTweetBox} );						
 			//}else {			
 				//TweenMax.to(tweenOb, .25, { x:rectWidth, y: -22, onUpdate:drawLine, delay:.75, ease:Linear.easeNone, onComplete:drawTweetBox } );			
 			//}	
@@ -169,8 +162,9 @@ package com.gmrmarketing.sap.metlife.usmap
 			g.drawRoundRect(0, 0, rectWidth, clip.theText.theText.textHeight + 15, 18, 18);
 			g.endFill()			
 			
+			//user name bg
 			var u:Graphics = clip.userBG.graphics;
-			u.beginFill(lineColor, 1);
+			u.beginFill(0x0b3126, 1);
 			u.drawRoundRect(0, 0, rectWidth, 36, 18, 18);
 			u.endFill();
 			u.lineStyle(2, 0xffffff);
@@ -183,7 +177,7 @@ package com.gmrmarketing.sap.metlife.usmap
 		
 		private function startEndTimer():void
 		{			
-			var tLen:int = Math.max(1, clip.theText.theText.length / 24);			
+			var tLen:int = Math.max(1, clip.theText.theText.length / 14);			
 			
 			endTimer = new Timer(tLen * 1000, 1);
 			endTimer.addEventListener(TimerEvent.TIMER, tweetComplete);
@@ -203,11 +197,17 @@ package com.gmrmarketing.sap.metlife.usmap
 			TweenMax.to(clip, 1, { alpha:0, onComplete:complete } );
 		}
 		
+		
 		private function complete():void
 		{
 			dispatchEvent(new Event(COMPLETE));
 		}
 		
+		
+		/**
+		 * Called from TweetManager.reycleQuadrant once it receives the 
+		 * COMPLETE event
+		 */
 		public function dispose():void
 		{
 			lineContainer.graphics.clear();

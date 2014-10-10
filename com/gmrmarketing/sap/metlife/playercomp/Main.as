@@ -35,6 +35,42 @@ package com.gmrmarketing.sap.metlife.playercomp
 		
 		/**
 		 * ISchedulerMethods
+		 */ 
+		public function getFlareList():Array
+		{
+			var fl:Array = new Array();
+			
+			//title
+			fl.push([273, 26, 727, "line", 3]);//x, y, to x, type, delay
+			fl.push([283, 69, 714, "point", 3.3]);//x, y, to x, type, delay			
+			
+			//quote
+			fl.push([154, 510, 855, "line", 7]);//x, y, to x, type, delay
+			fl.push([163, 546, 846, "point", 7]);//x, y, to x, type, delay
+			
+			//player pic1
+			fl.push([194, 93, 451, "line", 5.5]);//x, y, to x, type, delay
+			fl.push([194, 304, 451, "point", 5.7]);//x, y, to x, type, delay
+			
+			//player pic2
+			fl.push([564, 93, 822, "line", 5.5]);//x, y, to x, type, delay
+			fl.push([564, 304, 822, "point", 5.7]);//x, y, to x, type, delay
+			
+			//player pic3
+			fl.push([46, 93, 303, "line", 8.5]);//x, y, to x, type, delay
+			fl.push([46, 304, 303, "point", 8.7]);//x, y, to x, type, delay
+			//player pic4
+			fl.push([375, 93, 634, "line", 9.5]);//x, y, to x, type, delay
+			fl.push([375, 304, 634, "point", 9.7]);//x, y, to x, type, delay
+			//player pic5
+			fl.push([706, 93, 964, "line", 10.5]);//x, y, to x, type, delay
+			fl.push([706, 304, 964, "point", 10.7]);//x, y, to x, type, delay
+			return fl;
+		}
+		
+		
+		/**
+		 * ISchedulerMethods
 		 * Returns true if localCache has data in it
 		 * ie if the service has completed successfully at least once
 		 * @return
@@ -241,12 +277,12 @@ package com.gmrmarketing.sap.metlife.playercomp
 			TweenMax.to(stats.sh2.stat1BG, 1, { x:String((104 - stats.sh2.stat1BG.x) * (players[1].Stats[0].PlayerPositionStatValue / 20)), delay:1 } );
 			
 			//animate bar behind yds metric
-			TweenMax.to(stats.sh1.stat2BG, 1, { x:String((54 - stats.sh1.stat2BG.x) * (players[0].Stats[1].PlayerPositionStatValue / 400)), delay:1 } );
-			TweenMax.to(stats.sh2.stat2BG, 1, { x:String((54 - stats.sh2.stat2BG.x) * (players[1].Stats[1].PlayerPositionStatValue / 400)), delay:1 } );
+			TweenMax.to(stats.sh1.stat2BG, 1, { x:String((54 - stats.sh1.stat2BG.x) * (players[0].Stats[1].PlayerPositionStatValue / 2500)), delay:1 } );
+			TweenMax.to(stats.sh2.stat2BG, 1, { x:String((54 - stats.sh2.stat2BG.x) * (players[1].Stats[1].PlayerPositionStatValue / 2500)), delay:1 } );
 			
 			//animate bar behind tds metric
-			TweenMax.to(stats.sh1.stat3BG, 1, { x:String((54 - stats.sh1.stat3BG.x) * (players[0].Stats[2].PlayerPositionStatValue / 8)), delay:1 } );
-			TweenMax.to(stats.sh2.stat3BG, 1, { x:String((54 - stats.sh2.stat3BG.x) * (players[1].Stats[2].PlayerPositionStatValue / 8)), delay:1 } );
+			TweenMax.to(stats.sh1.stat3BG, 1, { x:String((54 - stats.sh1.stat3BG.x) * (players[0].Stats[2].PlayerPositionStatValue / 50)), delay:1 } );
+			TweenMax.to(stats.sh2.stat3BG, 1, { x:String((54 - stats.sh2.stat3BG.x) * (players[1].Stats[2].PlayerPositionStatValue / 50)), delay:1 } );
 			
 			TweenMax.to(stats, .5, { x: -797, delay:8, onComplete:animateBars } );			
 		}
@@ -266,14 +302,14 @@ package com.gmrmarketing.sap.metlife.playercomp
 			TweenMax.to(stats.sh5.stat1BG, 1, { x:String((104 - stats.sh5.stat1BG.x) * (players[4].Stats[0].PlayerPositionStatValue / 20)), delay:1 } );
 			
 			//animate bar behind yds metric
-			TweenMax.to(stats.sh3.stat2BG, 1, { x:String((54 - stats.sh3.stat2BG.x) * (players[2].Stats[1].PlayerPositionStatValue / 400)), delay:1 } );
-			TweenMax.to(stats.sh4.stat2BG, 1, { x:String((54 - stats.sh4.stat2BG.x) * (players[3].Stats[1].PlayerPositionStatValue / 400)), delay:1 } );
-			TweenMax.to(stats.sh5.stat2BG, 1, { x:String((54 - stats.sh5.stat2BG.x) * (players[4].Stats[1].PlayerPositionStatValue / 400)), delay:1 } );
+			TweenMax.to(stats.sh3.stat2BG, 1, { x:String((54 - stats.sh3.stat2BG.x) * (players[2].Stats[1].PlayerPositionStatValue / 2500)), delay:1 } );
+			TweenMax.to(stats.sh4.stat2BG, 1, { x:String((54 - stats.sh4.stat2BG.x) * (players[3].Stats[1].PlayerPositionStatValue / 2500)), delay:1 } );
+			TweenMax.to(stats.sh5.stat2BG, 1, { x:String((54 - stats.sh5.stat2BG.x) * (players[4].Stats[1].PlayerPositionStatValue / 2500)), delay:1 } );
 			
 			//animate bar behind tds metric
-			TweenMax.to(stats.sh3.stat3BG, 1, { x:String((54 - stats.sh3.stat3BG.x) * (players[2].Stats[2].PlayerPositionStatValue / 8)), delay:1 } );
-			TweenMax.to(stats.sh4.stat3BG, 1, { x:String((54 - stats.sh4.stat3BG.x) * (players[3].Stats[2].PlayerPositionStatValue / 8)), delay:1 } );
-			TweenMax.to(stats.sh5.stat3BG, 1, { x:String((54 - stats.sh5.stat3BG.x) * (players[4].Stats[2].PlayerPositionStatValue / 8)), delay:1 } );
+			TweenMax.to(stats.sh3.stat3BG, 1, { x:String((54 - stats.sh3.stat3BG.x) * (players[2].Stats[2].PlayerPositionStatValue / 50)), delay:1 } );
+			TweenMax.to(stats.sh4.stat3BG, 1, { x:String((54 - stats.sh4.stat3BG.x) * (players[3].Stats[2].PlayerPositionStatValue / 50)), delay:1 } );
+			TweenMax.to(stats.sh5.stat3BG, 1, { x:String((54 - stats.sh5.stat3BG.x) * (players[4].Stats[2].PlayerPositionStatValue / 50)), delay:1 } );
 			
 			TweenMax.delayedCall(10, complete);
 		}

@@ -114,8 +114,8 @@ package com.gmrmarketing.utilities
 		
 		private static function init():void
 		{
-			//used for cleaning major swears out of twitter feeds
-			majorSwears = new Array("fuck", "fvck", "shit", "bitch", "cunt", "fagg", "pussy", "asshole", "nigger", "retard", "vagina", "penis", "douche");
+			//used by cleanString() for cleaning major swears out of twitter feeds
+			majorSwears = new Array("fuck", "fvck", "shit", "bitch", "cunt", "fagg", "pussy", "pu55y", "asshole", "nigger", "retard", "vagina", "penis", "douche", "whore", "piss");
 			
 			//uniques can exist inside a word and still provide a positive
 			unique = new Array();

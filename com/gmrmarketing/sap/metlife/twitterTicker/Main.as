@@ -6,13 +6,14 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 	import flash.text.*;
 	import com.greensock.TweenMax;
 	import com.gmrmarketing.utilities.Strings;
+	import com.gmrmarketing.utilities.SwearFilter;
 	
 	public class Main extends MovieClip
-	{
-		private var json:Object;//current data from the service
+	{		
 		private var localCache:Object; //copy of last good json get from the web service
 		private var tweetIndex:int; //current index in json array		
 		private var tweets:Array; //references to tweets on screen
+		private var refreshing:Boolean;
 		
 		public function Main()
 		{			
@@ -26,6 +27,7 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 		 */
 		public function init():void
 		{
+			refreshing = true;
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
 			var r:URLRequest = new URLRequest("http://sapmetlifeapi.thesocialtab.net/Api/GameDay/GetCachedFeed?feed=SAPJetsTweets" + "&abc=" + String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
@@ -42,8 +44,8 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 		
 		private function dataLoaded(e:Event):void
 		{
-			json = JSON.parse(e.currentTarget.data);//array of objects with authorname and text properties			
-			localCache = json;
+			refreshing = false;
+			localCache = JSON.parse(e.currentTarget.data);//array of objects with authorname and text properties			
 			show(); 
 		}
 		
@@ -51,10 +53,8 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 		private function dataError(e:IOErrorEvent):void
 		{
 			if (localCache) {
-				json = localCache;
+				refreshing = false;
 				show();
-			}else {
-				//use some kind of local json?
 			}
 		}
 		
@@ -68,10 +68,10 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 		
 		
 		private function addTweet():void
-		{			
+		{	
 			var tw:MovieClip = new tickerText(); //lib clip
 			tw.theText.autoSize = TextFieldAutoSize.LEFT;
-			var message:String = json[tweetIndex].text;
+			var message:String = localCache[tweetIndex].text;
 			
 			//Clean up the message
 			message = Strings.removeLineBreaks(message);
@@ -79,19 +79,15 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 			message = message.replace(/&gt;/g, "<");
 			message = message.replace(/&amp;/g, "&");
 			message = Strings.removeChunk(message, "http://");
+			message = SwearFilter.cleanString(message); //remove any major swears
 			
-			tw.theText.text = "@" + json[tweetIndex].authorname + " " + message;
+			tw.theText.text = "@" + localCache[tweetIndex].authorname + " " + message;
 			tw.theText.cacheAsBitmap = true;
 			tw.slash.x = tw.theText.textWidth + 18;
 			tw.x = 1018;//1008 - but add 10 to space out the slash
 			tw.y = -3;
 			addChild(tw);
 			tweets.push(tw);
-			
-			tweetIndex++;
-			if (tweetIndex >= json.length) {
-				init();//refresh tweets
-			}		
 		}
 		
 		
@@ -114,10 +110,16 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 				tweets[i].x -= 1;				
 			}
 			
-			//see if last tweet has moved past screen right - if so add another tweet
+			//see if last tweet has moved left of the screens right edge - if so add another tweet
 			var m:MovieClip = MovieClip(tweets[tweets.length - 1]);
-			if (m.x <= 1008 - m.width  ){
-				addTweet();
+			if (m.x <= 1008 - m.width  && !refreshing) {
+				tweetIndex++;
+				if (tweetIndex >= localCache.length) {
+					refreshing = true;
+					init();
+				}else{
+					addTweet();
+				}
 			}
 			
 			//see if the first tweet is off screen left and remove it if so
