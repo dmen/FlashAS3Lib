@@ -52,8 +52,7 @@ package com.gmrmarketing.bcbs.livefearless
 		 * @param	e
 		 */
 		private function gotToken(e:Event):void
-		{
-			trace("queue.gotToken");
+		{			
 			debug("gotToken() - nowpik token");
 			token = true;
 			dispatchEvent(new Event(GOT_TOKEN));

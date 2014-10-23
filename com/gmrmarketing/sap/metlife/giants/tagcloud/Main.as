@@ -1,7 +1,4 @@
-/**
- * Jets
- */
-package com.gmrmarketing.sap.metlife.tagcloud
+package com.gmrmarketing.sap.metlife.giants.tagcloud
 {
 	import com.gmrmarketing.sap.metlife.ISchedulerMethods;
 	import flash.display.*;
@@ -13,6 +10,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 	import flash.filters.DropShadowFilter;
 	import flash.utils.getTimer;
 	import flash.utils.Timer;
+	
 	
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
@@ -48,7 +46,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			tagContainer = new Sprite();
 			addChild(tagContainer);
 			
-			//init("10/26/14,0xFFFFFF,0xDDDDDD,0xBBBBBB,0xAAAAAA");
+			//init("10/12/14,0xFFFFFF,0xDDDDDD,0xBBBBBB,0xAAAAAA");
 		}
 		
 		
@@ -135,11 +133,12 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		
 		
 		private function nextLevel():void
-		{		
+		{
 			flareDelay = getTimer();
-			ra.create(tagContainer, new cloud(), dict.getTags(currentLevel), true, false, 8000, 0, new DropShadowFilter(8,45,0,1,12,12,2,2));
+			ra.create(tagContainer, new cloud(), dict.getTags(currentLevel), true, false, 10000, 0, new DropShadowFilter(8,45,0,1,12,12,2,2));
 			ra.addEventListener(RectFinder.FINISHED, tagsComplete, false, 0, true);
 		}
+		
 		
 		/**
 		 * called when the cloud has completed

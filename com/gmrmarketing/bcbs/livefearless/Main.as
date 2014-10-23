@@ -108,8 +108,10 @@
 			intro.show();
 		}
 		
+		
 		private function addIntroListener(e:Event):void
 		{
+			trace("addIntroListener");
 			intro.addEventListener(Intro.BEGIN, showTextEntry, false, 0, true);
 		}
 		
@@ -173,11 +175,14 @@
 		
 		private function showTextEntry(e:Event):void
 		{
+			trace("showTextEntry");
 			timeoutHelper.startMonitoring();
 			
 			textEntry.addEventListener(TextEntry.SHOWING, removeIntro, false, 0, true);
 			textEntry.addEventListener(TextEntry.NAME, nameRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.REQUIRED, messageRequired, false, 0, true);
+			textEntry.addEventListener(TextEntry.PRIZE_REQUIRED, prizeRequired, false, 0, true);
+			textEntry.addEventListener(TextEntry.PLEDGE_REQUIRED, pledgeRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.SWEAR, inappropriateMessage, false, 0, true);
 			textEntry.addEventListener(TextEntry.NEXT, showTakePhoto, false, 0, true);
 			editingText = false;
@@ -191,6 +196,7 @@
 		 */
 		private function removeIntro(e:Event):void
 		{
+			trace("removeIntro");
 			textEntry.removeEventListener(TextEntry.SHOWING, removeIntro);
 			intro.hide();
 		}
@@ -205,6 +211,16 @@
 			dialog.show("Please enter your Live Fearless story");
 		}
 		
+		private function prizeRequired(e:Event):void
+		{
+			dialog.show("Please choose a prize selection");
+		}
+		
+		private function pledgeRequired(e:Event):void
+		{
+			dialog.show("Please choose your pledge type");
+		}
+		
 		private function inappropriateMessage(e:Event):void
 		{
 			dialog.show("Inappropriate language is not allowed");
@@ -213,10 +229,13 @@
 		
 		private function showTakePhoto(e:Event):void
 		{
+			trace("showTakePhoto");
 			timeoutHelper.buttonClicked();
 			
 			textEntry.removeEventListener(TextEntry.NAME, nameRequired);
 			textEntry.removeEventListener(TextEntry.REQUIRED, messageRequired);
+			textEntry.removeEventListener(TextEntry.PRIZE_REQUIRED, prizeRequired);
+			textEntry.removeEventListener(TextEntry.PLEDGE_REQUIRED, pledgeRequired);
 			textEntry.removeEventListener(TextEntry.SWEAR, inappropriateMessage);
 			textEntry.removeEventListener(TextEntry.NEXT, showTakePhoto);			
 			
@@ -423,6 +442,7 @@
 		
 		private function queueDebug(e:Event):void
 		{
+			//trace(queue.getDebug());
 			admin.displayDebug(queue.getDebug());		
 		}
 		

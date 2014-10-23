@@ -35,6 +35,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		public function hide():void
 		{
+			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, doBegin);
 			if (container.contains(clip)) {
 				container.removeChild(clip);
 			}
@@ -42,8 +43,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		
 		private function doBegin(e:MouseEvent):void
-		{
-			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, doBegin);
+		{			
 			dispatchEvent(new Event(BEGIN));
 		}
 	}

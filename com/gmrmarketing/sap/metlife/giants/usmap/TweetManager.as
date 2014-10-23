@@ -1,4 +1,4 @@
-package com.gmrmarketing.sap.metlife.usmap
+package com.gmrmarketing.sap.metlife.giants.usmap
 {
 	import flash.display.*;
 	import flash.errors.IOError;
@@ -33,7 +33,7 @@ package com.gmrmarketing.sap.metlife.usmap
 			container = $container;
 		}
 		
-		//called from Main.dateReady()
+		//called from Main.dataReady()
 		public function start():void
 		{
 			isRunning = true;
@@ -64,7 +64,7 @@ package com.gmrmarketing.sap.metlife.usmap
 		{
 			if(needsRefreshing){
 				var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-				var r:URLRequest = new URLRequest("http://sapmetlifeapi.thesocialtab.net/api/GameDay/GetCachedFeed?feed=NYJetsUSMapTweets"+"&abc="+String(new Date().valueOf()));
+				var r:URLRequest = new URLRequest("http://sapmetlifeapi.thesocialtab.net/api/GameDay/GetCachedFeed?feed=NYGiantsUSMapTweets"+"&abc="+String(new Date().valueOf()));
 				r.requestHeaders.push(hdr);
 				var l:URLLoader = new URLLoader();
 				l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);

@@ -51,7 +51,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 		
 		public function ControllerMain()
 		{
-			stage.displayState = StageDisplayState.FULL_SCREEN;
+			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
 			
 			socketConnected = false;

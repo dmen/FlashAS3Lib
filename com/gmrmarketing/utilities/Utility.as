@@ -4,12 +4,38 @@ package com.gmrmarketing.utilities
 	
 	public class Utility 
 	{
-		private static var degToRad:Number = 0.0174532925; //PI / 180
+		private static const degToRad:Number = 0.0174532925; //radians per degree - PI / 180
+		
 		
 		public function Utility():void
 		{			
 		}
 		
+		
+		/**
+		 * Returns radians from degrees
+		 * 180º = Pi radians
+		 * 1 radian = ~57.2º = the arc length equal to the circle's radius
+		 * @param	degrees
+		 * @return	radians
+		 */
+		public static function getRadians(degrees:Number):Number
+		{
+			return degrees * degToRad;
+		}
+		
+		
+		/**
+		 * Returns degrees from radians 
+		 * 180º = Pi radians
+		 * 1 radian = ~57.2º = the arc length equal to the circle's radius
+		 * @param	radians
+		 * @return 	degrees
+		 */
+		public static function getDegrees(radians:Number):Number
+		{
+			return radians / degToRad;
+		}
 		
 		
 		/**

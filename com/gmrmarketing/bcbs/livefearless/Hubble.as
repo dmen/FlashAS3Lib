@@ -60,11 +60,12 @@ package com.gmrmarketing.bcbs.livefearless
 			var lo:URLLoader = new URLLoader();
 			lo.addEventListener(Event.COMPLETE, gotToken, false, 0, true);
 			lo.addEventListener(IOErrorEvent.IO_ERROR, ioError, false, 0, true);
+			lo.addEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler, false, 0, true);
 			lo.load(req);
 		}
 		
 		
-		private function gotToken(e:Event):void
+		private function gotToken(e:Event = null):void
 		{
 			trace("gotToken");
 			var j:Object = JSON.parse(e.currentTarget.data);			
@@ -82,6 +83,7 @@ package com.gmrmarketing.bcbs.livefearless
 			var lo:URLLoader = new URLLoader();
 			lo.addEventListener(Event.COMPLETE, gotModels, false, 0, true);
 			lo.addEventListener(IOErrorEvent.IO_ERROR, ioError, false, 0, true);
+			lo.addEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler, false, 0, true);
 			lo.load(req);
 		}
 		
@@ -151,10 +153,20 @@ package com.gmrmarketing.bcbs.livefearless
 			return interestOptions;
 		}
 		
-		
+		private function httpStatusHandler(e:HTTPStatusEvent):void
+		{			
+			if (e.status != 200) {
+				var t:Timer = new Timer(1000, 1);
+				if(token == ""){
+					t.addEventListener(TimerEvent.TIMER, getToken, false, 0, true);
+				}else {
+					t.addEventListener(TimerEvent.TIMER, gotToken, false, 0, true);//gets models if we already have the token
+				}
+				t.start();
+			}
+		}
 		private function ioError(e:IOErrorEvent):void
 		{	
-			trace("ioError");
 			if (so.data.pledgeOptions != null) {
 				pledgeOptions = so.data.pledgeOptions;
 				prizeOptions = so.data.prizeOptions;
@@ -203,10 +215,7 @@ package com.gmrmarketing.bcbs.livefearless
 			}
 			var now:String = a.fullYear + "-" +m + "-" +d + "T" + hor + ":" + min + ":" + sec + "." + ms + "Z";
 			
-			//var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":679, "OptionId":cId }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[6] } ], "Latitude":"0", "Longitude":"0" }};			
 			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[6] }, { "FieldId":902, "OptionId":parseInt(formData[7]) }, { "FieldId":836, "OptionId":parseInt(formData[3]) }], "Latitude":"0", "Longitude":"0" }};
-			/*var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[5] } ], "Latitude":"0", "Longitude":"0" }};*/
-			
 			
 			var js:String = JSON.stringify(resp);
 			var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionresponse");
@@ -225,11 +234,15 @@ package com.gmrmarketing.bcbs.livefearless
 		private function formPosted(e:Event):void
 		{
 			var j:Object = JSON.parse(e.currentTarget.data);			
-			responseId = j.ResponseObject;
-			dispatchEvent(new Event(FORM_POSTED));
+			responseId = j.ResponseObject;//used in submitPhoto() and processFollowups()
+			if(j.Status == 1){
+				dispatchEvent(new Event(FORM_POSTED));
+			}else {
+				formError();
+			}
 		}
 		
-		private function formError(e:IOErrorEvent):void
+		private function formError(e:IOErrorEvent = null):void
 		{
 			dispatchEvent(new Event(ERROR));
 		}
@@ -258,15 +271,21 @@ package com.gmrmarketing.bcbs.livefearless
 			
 			if (j.Status == 1) {
 				processFollowups();
+			}else {
+				photoError();
 			}
 		}
 		
-		private function photoError(e:IOErrorEvent):void
+		private function photoError(e:IOErrorEvent = null):void
 		{
 			dispatchEvent(new Event(ERROR));
 		}
 		
 		
+		/**
+		 * called from photoPosted()
+		 * responseID is set in formPosted if Status response == 1
+		 */
 		private function processFollowups():void
 		{	
 			var resp:Object = { "AccessToken":token, "MethodData": responseId };			

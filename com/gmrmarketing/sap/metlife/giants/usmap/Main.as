@@ -1,4 +1,4 @@
-package com.gmrmarketing.sap.metlife.usmap
+package com.gmrmarketing.sap.metlife.giants.usmap
 {
 	import flash.display.*;
 	import flash.events.*;
@@ -273,21 +273,21 @@ package com.gmrmarketing.sap.metlife.usmap
 				materialRef = _scene.getMaterialByName( String(localCache[i].name).toLowerCase() ) as Shader3D;
 				if (materialRef) {
 					if(localCache[i].normalized < 1.7){
-						materialRef.filters[0].color = 0xdefff4;
+						materialRef.filters[0].color = 0xc7d7e8;
 					}else if (localCache[i].normalized < 3.4) {
-						materialRef.filters[0].color = 0xc3f4e2;
+						materialRef.filters[0].color = 0xb3c9e0;
 					}else if (localCache[i].normalized < 5.2) {
-						materialRef.filters[0].color = 0xafe1d0;
+						materialRef.filters[0].color = 0x98b6d6;
 					}else if (localCache[i].normalized < 6.75) {
-						materialRef.filters[0].color = 0x96c9b6;
+						materialRef.filters[0].color = 0x7ba1ca;
 					}else if (localCache[i].normalized < 8.2) {
-						materialRef.filters[0].color = 0x7aaa98;
+						materialRef.filters[0].color = 0x5e8dbf;
 					}else if (localCache[i].normalized < 10) {
-						materialRef.filters[0].color = 0x6a9a87;
+						materialRef.filters[0].color = 0x487eb5;
 					}else if (localCache[i].normalized < 11.75) {
-						materialRef.filters[0].color = 0x578775;
+						materialRef.filters[0].color = 0x3f77b2;
 					}else {
-						materialRef.filters[0].color = 0x4e8671;
+						materialRef.filters[0].color = 0x2f6bac;
 					}
 				}
 			}

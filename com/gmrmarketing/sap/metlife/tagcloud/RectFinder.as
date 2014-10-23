@@ -1,3 +1,6 @@
+/**
+ * Last update 10/22/14
+ */
 package com.gmrmarketing.sap.metlife.tagcloud
 {
 	import flash.display.*;
@@ -9,9 +12,11 @@ package com.gmrmarketing.sap.metlife.tagcloud
 	
 	public class RectFinder extends EventDispatcher
 	{			
+		public static const FINISHED:String = "finished";//dispatched when no more tags can be added or time runs out
+		
 		private var image:BitmapData; //passed in image to create with words
 		private var container:DisplayObjectContainer;//the container to fill with word sprites
-		private var sampleSize:int;//sample size		
+		private var sampleSize:int;//sample size used for turning bitmap into an array of 1's and 0's
 		private var grid:Array;//2d array of 1's and 0's created from image		
 		private var hText:MovieClip;//lib clips used for drawing text into
 		private var vText:MovieClip;		
@@ -22,29 +27,61 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		private var scaleDec:Number; //startScale / number of tags		
 		private var tagAddedCount:Number; //incremented in spiral
 		private var tagCount:Number; //current tag count
-		private var zeroCount:int;
-		private var totalTags:int; //number of tags
-		private var forceStop:Boolean = false;
-		private var stageRef:Stage;
-		private var shadow:DropShadowFilter;
+		private var zeroCount:int;//number of times no tags areas were found to draw in - incremented in addTag()
+		private var totalTags:int; //number of tags		
+		private var shadow:DropShadowFilter;//set in create if used
+		private var maxTime:int;//set in create -used by maxTimer to limit the time cloud will run
+		private var maxTimer:Timer;//used to limit the time the cloud will run
+		private var speed:int;//limits the return from spiral so that the tag sent in will be reused for successive iterations of the spiral
+		private var doHoriz:Boolean;//set in create - if true horizontal tags will be drawn
+		private var doVert:Boolean;//set in create - if true vertical tags will be drawn
 		
+		
+		/**
+		 * Constructor
+		 * @param	ss The Sample Size - this must match the sample size used when creating a new
+		 * TagCloud object
+		 */
 		public function RectFinder(ss:int)
 		{	
 			sampleSize = ss;			
-			shadow = new DropShadowFilter(12, 45, 0, 1, 12, 12, 1, 2);
 			hText = new mcHText();//lib
 			vText = new mcVText();//lib				
 		}		
 		
 		
-		public function create($container:DisplayObjectContainer, $image:BitmapData, $tags:Array, $stageRef:Stage):void
+		/**
+		 * Will remove all tags from the container defined in create()
+		 * called from create() - called automatically from create()
+		 */
+		public function clear():void
+		{
+			while (container.numChildren) {
+				container.removeChildAt(0);
+			}
+		}
+		
+		
+		/**
+		 * Creates the tag cloud image
+		 * @param	$container DisplayObjectContainer in which to place the tag Bitmap objects
+		 * @param	$image	Black and white image used to create the tag cloud image
+		 * @param	$tags Array of tag objects retrieved from TagCloud.getTags()
+		 * @param	$maxTime The max time, in milliseconds, tag cloud creation will run
+		 * @param	$speed Speed multiplier - the higher the number the more the current tag will be reused, instead of getting a new tag
+		 */
+		public function create($container:DisplayObjectContainer, $image:BitmapData, $tags:Array, $doHoriz:Boolean = true, $doVert:Boolean = true, $maxTime:int = 120000, $speed:int = 0, $shadow:DropShadowFilter = null):void
 		{			
 			container = $container;
 			image = $image;
-			tags = $tags;
-			stageRef = $stageRef;
+			tags = $tags;	
+			doHoriz = $doHoriz;
+			doVert = $doVert;
+			maxTime = $maxTime;
+			speed = $speed;
+			shadow = $shadow;
 			
-			forceStop = false;
+			clear();//removes anything in the container
 			
 			createGridArray();
 			
@@ -54,50 +91,13 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			totalTags = tags.length;
 			tagIndex = 0;
 			
-			stageRef.addEventListener(Event.ENTER_FRAME, addTag);					
+			container.addEventListener(Event.ENTER_FRAME, addTag);
+			
+			maxTimer = new Timer(maxTime, 1);
+			maxTimer.addEventListener(TimerEvent.TIMER, maxTimeReached, false, 0, true);
+			maxTimer.start();
 		}
 		
-		
-		/**
-		 * stops the while loop from executing in spiral
-		 * called from Main.doStop()
-		 */
-		public function stop():void
-		{			
-			forceStop = true;
-			stageRef.removeEventListener(Event.ENTER_FRAME, addTag);
-		}
-		
-		/*
-		public function kill():void
-		{
-			stageRef.removeEventListener(Event.ENTER_FRAME, addTag);
-			image.dispose();
-		}
-		*/
-		
-		private function addTag(e:Event):void
-		{
-			var t:Object = tags[tagIndex];
-			tagIndex++;
-			if (tagIndex >= tags.length) {
-				tagIndex = 0;
-			}
-			spiral(t);
-			tagCount++;
-			if (tagCount >= totalTags) {
-				tagCount = 0;
-				var tagPercent:int = Math.floor((tagAddedCount / totalTags) * 100);				
-				tagAddedCount = 0;
-				if (tagPercent == 0) {
-					zeroCount++;
-					if (zeroCount == 2) {
-						stageRef.removeEventListener(Event.ENTER_FRAME, addTag);
-						//trace("done");
-					}
-				}
-			}
-		}
 		
 		/**
 		 * Creates the grid array variable
@@ -117,15 +117,14 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			
 			while (curX < image.width && curY < image.height) {
 				
-				//sample the four corners and center of the current grid square
+				//sample the four corners of the current grid square
 				var p1:uint = image.getPixel(curX, curY);
 				var p2:uint = image.getPixel(curX + sampleSize - 1, curY);
 				var p3:uint = image.getPixel(curX, curY + sampleSize - 1);
 				var p4:uint = image.getPixel(curX + sampleSize - 1, curY + sampleSize - 1);
-				var p5:uint = image.getPixel(curX + Math.floor(sampleSize * .5), curY + Math.floor(sampleSize * .5));//center
 				
 				//if there's black anywhere mark the square
-				if (p1 <= 0x111111 || p2 <= 0x111111 || p3 <= 0x111111 || p4 <= 0x111111 || p5 <= 0x111111) {					
+				if (p1 <= 0x111111 || p2 <= 0x111111 || p3 <= 0x111111 || p4 <= 0x111111) {					
 					row.push(1);
 				}else {
 					row.push(0);
@@ -138,6 +137,56 @@ package com.gmrmarketing.sap.metlife.tagcloud
 					curY += sampleSize;
 					grid.push(row);
 					row = [];
+				}
+			}
+		}
+		
+		
+		/**
+		 * Called from addTag once zeroCount has reached 2
+		 */
+		private function stop():void
+		{
+			maxTimer.reset();
+			maxTimer.removeEventListener(TimerEvent.TIMER, maxTimeReached);
+			container.removeEventListener(Event.ENTER_FRAME, addTag);
+			dispatchEvent(new Event(FINISHED));
+		}
+		
+		
+		/**
+		 * Callback for maxTimer reaching its timeout
+		 * @param	e
+		 */
+		private function maxTimeReached(e:TimerEvent):void
+		{		
+			stop();
+		}
+		
+		
+		/**
+		 * called by enterFrame listener on container
+		 * listener is added in create()
+		 * @param	e ENTER_FRAME event
+		 */
+		private function addTag(e:Event):void
+		{
+			var t:Object = tags[tagIndex];
+			tagIndex++;
+			if (tagIndex >= tags.length) {
+				tagIndex = 0;
+			}
+			spiral(t);
+			tagCount++;
+			if (tagCount >= totalTags) {
+				tagCount = 0;
+				var tagPercent:int = Math.floor((tagAddedCount / totalTags) * 100);				
+				tagAddedCount = 0;
+				if (tagPercent == 0) {
+					zeroCount++;
+					if (zeroCount == 2) {
+						stop();
+					}
 				}
 			}
 		}
@@ -175,9 +224,12 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			
 			var iterations:int = Math.max(w * w, h * h);
 			var n:int = 0;
-			while (n < iterations){// && !forceStop) {
+			var spiralCount:int = 0;
+			var r:Boolean;
+			
+			
+			while (n < iterations) {
 				
-			//for(var n:int = 0; n <iterations; n++){
 				if ((x > -w/2 && x <= w/2) && (y > -h/2 && y <= h/2)){			
 					
 					i = cx + x;
@@ -211,72 +263,45 @@ package com.gmrmarketing.sap.metlife.tagcloud
 						
 						tightenCount = 0;
 						
-						//if (Math.random() < .5) {
-							//Do a horizontal
-							if (h1 >= tag.widthh && v1 >= tag.heighth) {
-								
-								if (isValidRect(j, i, tag.widthh, tag.heighth)) {
-									
-									//try and move rect up to tighten it against any others in the area
-									//limit the tightening to 2 units
-									
-									tightenCount = 0;
-									while (isValidRect(j, i, tag.widthh, tag.heighth)) {
-										j--;
-										tightenCount++;
-										if (tightenCount > 2) {
-											break;
-										}
+						if(doHoriz && doVert){
+							if (Math.random() < .5) {
+								//Do a horizontal
+								r = doHorizontal(h1, v1, j, i, tag);
+								if (r) {
+									spiralCount++;
+									if(spiralCount >= speed){
+										return;			
 									}
-									j++;
-									
-									var b:BitmapData = new BitmapData(tag.widthh * sampleSize, tag.heighth * sampleSize, true, 0x00000000);
-									b.copyPixels(tag.imageh, new Rectangle(0, 0, tag.widthh * sampleSize, tag.heighth * sampleSize), new Point(0, 0), null, null, true);
-									var c:Bitmap = new Bitmap(b);
-									container.addChildAt(c, 0);//as they get smaller add behind the bigger ones
-									c.x = i * sampleSize;
-									c.y = j * sampleSize
-									c.filters = [shadow];
-									
-									//newImage.copyPixels(tag.imageh, new Rectangle(0, 0, tag.widthh * sampleSize, tag.heighth * sampleSize), new Point(i * sampleSize, j * sampleSize), null, null, true);
-									removeRectFromArray(j, i, tag.widthh - 1, tag.heighth - 1);
-									tagAddedCount++;
-									return;
+								}
+							}else {
+								//do a vertical
+								r = doVertical(h1, v1, j, i, tag);
+								if (r) {
+									spiralCount++;
+									if(spiralCount >= speed){
+										return;			
+									}
+								}			
+							}
+						}else if(doHoriz){
+							//Do a horizontal
+							r = doHorizontal(h1, v1, j, i, tag);
+							if (r) {
+								spiralCount++;
+								if(spiralCount >= speed){
+									return;			
 								}
 							}
-							/*
 						}else {
 							//do a vertical
-							if (h1 >= tag.widthv && v1 >= tag.heightv) {
-								if (isValidRect(j, i, tag.widthv, tag.heightv)) {
-									
-									//try and move rect left to tighten it against any others in the area
-									//limit the tightening to 2 units
-									tightenCount = 0;
-									while (isValidRect(j, i, tag.widthv, tag.heightv)) {
-										i--;
-										tightenCount++;
-										if (tightenCount > 2) {
-											break;
-										}
-									}
-									i++;									
-									
-									b = new BitmapData(tag.widthv * sampleSize, tag.heightv * sampleSize, true, 0x00000000);
-									b.copyPixels(tag.imagev, new Rectangle(0, 0, tag.widthv * sampleSize, tag.heightv * sampleSize), new Point(0, 0), null, null, true);
-									c = new Bitmap(b);
-									container.addChildAt(c,1);
-									c.x = i * sampleSize;
-									c.y = j * sampleSize
-									c.filters = [new DropShadowFilter(10, 45, 0, 1, 9, 9, 1, 2)];
-									
-									//newImage.copyPixels(tag.imagev, new Rectangle(0, 0, tag.widthv * sampleSize, tag.heightv * sampleSize), new Point(i * sampleSize, j * sampleSize), null, null, true);
-									removeRectFromArray(j, i, tag.widthv - 1, tag.heightv - 1);
-									tagAddedCount++;									
-									return;
+							r = doVertical(h1, v1, j, i, tag);
+							if (r) {
+								spiralCount++;
+								if(spiralCount >= speed){
+									return;			
 								}
-							}					
-						}	*/
+							}	
+						}
 					}					
 				}
 				
@@ -288,16 +313,106 @@ package com.gmrmarketing.sap.metlife.tagcloud
 				x += dx;
 				y += dy;
 				n++;
-			}//for/while
+			}//while
+		}
+	
+		/**
+		 * Adds a horizontal tag. Returns true if the tag was added, or false if not
+		 * @param	h1
+		 * @param	v1
+		 * @param	j
+		 * @param	i
+		 * @param	tag
+		 * @return
+		 */
+		private function doHorizontal(h1:int, v1:int, j:int, i:int, tag:Object):Boolean
+		{			
+			if (h1 >= tag.widthh && v1 >= tag.heighth) {
+								
+				if (isValidRect(j, i, tag.widthh, tag.heighth)) {
+					
+					//try and move rect up to tighten it against any others in the area
+					//limit the tightening to 2 units
+					
+					var tightenCount:int = 0;
+					while (isValidRect(j, i, tag.widthh, tag.heighth)) {
+						j--;
+						tightenCount++;
+						if (tightenCount > 2) {
+							break;
+						}
+					}
+					j++;
+					
+					var b:BitmapData = new BitmapData(tag.widthh * sampleSize, tag.heighth * sampleSize, true, 0x00000000);
+					b.copyPixels(tag.imageh, new Rectangle(0, 0, tag.widthh * sampleSize, tag.heighth * sampleSize), new Point(0, 0), null, null, true);
+					var c:Bitmap = new Bitmap(b);
+					container.addChildAt(c, 0);//as they get smaller add behind the bigger ones
+					c.x = i * sampleSize;
+					c.y = j * sampleSize;
+					if(shadow){
+						c.filters = [shadow];
+					}
+					
+					removeRectFromArray(j, i, tag.widthh - 1, tag.heighth - 1);
+					tagAddedCount++;
+					return true;
+				}								
+			}
+			return false;
+		}
+		
+		
+		/**
+		 * Adds a vertical tag. Returns true if the tag was added, or false if not.
+		 * @param	h1
+		 * @param	v1
+		 * @param	j
+		 * @param	i
+		 * @param	tag
+		 * @return
+		 */
+		private function doVertical(h1:int, v1:int, j:int, i:int, tag:Object):Boolean
+		{
+			if (h1 >= tag.widthv && v1 >= tag.heightv) {
+				if (isValidRect(j, i, tag.widthv, tag.heightv)) {
+					
+					//try and move rect left to tighten it against any others in the area
+					//limit the tightening to 2 units
+					var tightenCount:int = 0;
+					while (isValidRect(j, i, tag.widthv, tag.heightv)) {
+						i--;
+						tightenCount++;
+						if (tightenCount > 2) {
+							break;
+						}
+					}
+					i++;									
+					
+					var b:BitmapData = new BitmapData(tag.widthv * sampleSize, tag.heightv * sampleSize, true, 0x00000000);
+					b.copyPixels(tag.imagev, new Rectangle(0, 0, tag.widthv * sampleSize, tag.heightv * sampleSize), new Point(0, 0), null, null, true);
+					var c:Bitmap = new Bitmap(b);
+					container.addChildAt(c,0);
+					c.x = i * sampleSize;
+					c.y = j * sampleSize;
+					if(shadow){
+						c.filters = [shadow];
+					}
+					
+					removeRectFromArray(j, i, tag.widthv - 1, tag.heightv - 1);
+					tagAddedCount++;									
+					return true;
+				}
+			}
+			return false;
 		}
 	
 		
-	
 		/**
 		 * Tests the array rect found in findRects - false is returned if any 0's
 		 * are found in the search rectangle
 		 */
-		private function isValidRect(row:int,col:int,width:int,height:int):Boolean
+		private function isValidRect(row:int, col:int, width:int, height:int):Boolean
 		{	
 			if (row < 0 || col < 0) {
 				return false;
@@ -317,7 +432,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		 * Sets all grid units within the specified rectangle to 0
 		 * This removes the rect from the array so that further hunting will ignore this area
 		 */
-		private function removeRectFromArray(row:int,col:int,width:int,height:int):void
+		private function removeRectFromArray(row:int, col:int, width:int, height:int):void
 		{	
 			for (var r:int = row; r <= row + height; r++) {
 				for (var c:int = col; c <= col + width; c++) {					

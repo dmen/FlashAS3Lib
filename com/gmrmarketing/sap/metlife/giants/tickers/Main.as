@@ -1,8 +1,8 @@
 /**
  * Loads and controls the three tickers
- * Brading, Twitter and Events
+ * Branding, Twitter and Events
  */
-package com.gmrmarketing.sap.metlife.tickers
+package com.gmrmarketing.sap.metlife.giants.tickers
 {
 	import flash.display.*;
 	import flash.net.*;
@@ -29,7 +29,7 @@ package com.gmrmarketing.sap.metlife.tickers
 			Mouse.hide();	
 			addEventListener(Event.ACTIVATE, initWindowPosition);			
 			
-			var req:URLRequest = new URLRequest("http://design.gmrstage.com/sap/metlife/gda/config.xml");
+			var req:URLRequest = new URLRequest("http://design.gmrstage.com/sap/metlife/giants/gda/config.xml");
 			configLoader = new URLLoader();
 			configLoader.addEventListener(Event.COMPLETE, configLoaded, false, 0, true);
 			configLoader.addEventListener(IOErrorEvent.IO_ERROR, configError, false, 0, true);			
@@ -49,7 +49,7 @@ package com.gmrmarketing.sap.metlife.tickers
 			eventsDate = xm.eventsDate;
 			
 			//load top ticker
-			var r:URLRequest = new URLRequest("jets.swf");
+			var r:URLRequest = new URLRequest("giants.swf");
 			var l:Loader = new Loader();		
 			l.contentLoaderInfo.addEventListener(Event.COMPLETE, brandingTickerLoaded, false, 0, true);
 			l.load(r);

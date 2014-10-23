@@ -1,4 +1,4 @@
-package com.gmrmarketing.sap.metlife.eventsTicker
+package com.gmrmarketing.sap.metlife.giants.eventsTicker
 {
 	import flash.display.*;
 	import flash.events.*;
@@ -17,7 +17,7 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		private var fanIndex:int; //current index in fanCache - reset in dataLoaded()
 		private var slideIndex:int; //current showing slide in the slider
 		private var totalSlides:int; //total number of slides - starts at 3
-		private var flares:LensFlares;
+		private var flares:LensFlares;		
 		private var eventDate:String;
 		
 		
@@ -28,12 +28,13 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 			totalSlides = 3; //two logos and fotd
 			theVideo.addEventListener(MetadataEvent.CUE_POINT, loop);
 			fanImages = new Array();
-			//getData("10/26/14");
+			//refreshFOTD();
 		}
 		
 		
 		public function getData(theDate:String):void
 		{
+			trace("getData");
 			eventDate = theDate;
 			refreshFOTD();
 		}
@@ -51,7 +52,7 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		private function refreshFOTD():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://wall.thesocialtab.net/SocialPosts/GetPosts?ProgramID=52&Count=5&Grouping=SAPJets" + "&abc=" + String(new Date().valueOf()));
+			var r:URLRequest = new URLRequest("http://wall.thesocialtab.net/SocialPosts/GetPosts?ProgramID=52&Count=5&Grouping=SAPGiants" + "&abc=" + String(new Date().valueOf()));
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -77,18 +78,24 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 			if (fanCache) {
 				fanIndex = 0;
 				loadFOTDImage();
-			}			
+			}else {
+				refreshEvents();
+			}
 		}
 		
 		
 		private function loadFOTDImage():void
 		{			
-			var imageURL:String = fanCache.SocialPosts[fanIndex].MediumResURL;	
-			if(imageURL){
-				var l:Loader = new Loader();
-				l.contentLoaderInfo.addEventListener(Event.COMPLETE, imLoaded, false, 0, true);			
-				l.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, imError, false, 0, true);			
-				l.load(new URLRequest(imageURL));
+			if(fanCache.SocialPosts.length){
+				var imageURL:String = fanCache.SocialPosts[fanIndex].MediumResURL;			
+				if(imageURL){
+					var l:Loader = new Loader();
+					l.contentLoaderInfo.addEventListener(Event.COMPLETE, imLoaded, false, 0, true);			
+					l.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, imError, false, 0, true);			
+					l.load(new URLRequest(imageURL));
+				}
+			}else {
+				refreshEvents();
 			}
 		}
 		
@@ -135,27 +142,21 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		
 		
 		private function imError(e:IOErrorEvent):void
-		{			
+		{
 			if(fanImages[fanIndex]){
 				if (slider.fotd.contains(fanImages[fanIndex])) {
 					slider.fotd.removeChild(fanImages[fanIndex]);
 				}
+			
 				slider.fotd.addChild(fanImages[fanIndex]);
 				fanImages[fanIndex].x = 43;//TODO: Center if too big still?
 				fanImages[fanIndex].y = 78;
 				fanImages[fanIndex].mask = slider.fotd.picMask;
-				
-				
-			}else {
-				//no image in cache - use default
-				
 			}
-			slider.fotd.userName.text = fanCache.SocialPosts[fanIndex].AuthorName;
-				slider.fotd.theText.text = fanCache.SocialPosts[fanIndex].Text;	
 			refreshEvents();
 		}
 		
-				
+		
 		private function refreshEvents():void
 		{			
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
@@ -174,6 +175,7 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		
 		private function eventsLoaded(e:Event):void
 		{
+			trace("eventsloaded");
 			while (slider.numChildren > 3) {
 				slider.removeChildAt(3);				
 			}

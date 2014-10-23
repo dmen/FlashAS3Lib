@@ -2,7 +2,7 @@
  * Single instance of a tweet - 
  * uses mcTweet clip from the library
  */
-package com.gmrmarketing.sap.metlife.usmap
+package com.gmrmarketing.sap.metlife.giants.usmap
 {
 	import flash.display.*;
 	import flash.events.*;
@@ -172,7 +172,7 @@ package com.gmrmarketing.sap.metlife.usmap
 			
 			//user name bg
 			var u:Graphics = clip.userBG.graphics;
-			u.beginFill(0x0b3126, 1);
+			u.beginFill(0x01162d, 1);
 			u.drawRoundRect(0, 0, rectWidth, 36, 18, 18);
 			u.endFill();
 			u.lineStyle(2, 0xffffff);

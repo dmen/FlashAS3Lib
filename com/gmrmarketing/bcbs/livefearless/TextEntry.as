@@ -20,6 +20,8 @@ package com.gmrmarketing.bcbs.livefearless
 		public static const SHOWING:String = "clipShowing";
 		public static const NEXT:String = "nextPressed";
 		public static const REQUIRED:String = "messageRequired";
+		public static const PRIZE_REQUIRED:String = "prizeRequired";
+		public static const PLEDGE_REQUIRED:String = "prizeRequired";
 		public static const NAME:String = "nameRequired";
 		public static const SWEAR:String = "inappropriate";
 		
@@ -205,6 +207,12 @@ package com.gmrmarketing.bcbs.livefearless
 			
 			if (clip.fname.text == "" || clip.lname.text == "") {
 				dispatchEvent(new Event(NAME));
+			}else if (prizeCombo.getSelection() == prizeCombo.getResetMessage()) {
+				trace("no prize");
+				dispatchEvent(new Event(PRIZE_REQUIRED));
+			}else if (pledgeCombo.getSelection() == pledgeCombo.getResetMessage()) {
+				trace("no pledge");
+				dispatchEvent(new Event(PLEDGE_REQUIRED));
 			}else if (clip.theText.length < 2) {
 				dispatchEvent(new Event(REQUIRED));
 			}else if (SwearFilter.isSwear(clip.theText.text)) {
