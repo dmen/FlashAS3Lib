@@ -67,7 +67,11 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		private function dataLoaded(e:Event):void
 		{
 			fanIndex = 0; //first person in the list
-			fanCache = JSON.parse(e.currentTarget.data);			
+			fanCache = JSON.parse(e.currentTarget.data);
+			if(fanCache.MaxID == -1){
+				slider.fotd.userName.text = "#SAPJets";
+				slider.fotd.theText.text = "Tag your instagrams with #SAPJets and you could be a featured fan";
+			}
 			loadFOTDImage();
 		}
 		
@@ -77,18 +81,26 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 			if (fanCache) {
 				fanIndex = 0;
 				loadFOTDImage();
-			}			
+			}else {
+				slider.fotd.userName.text = "#SAPJets";
+				slider.fotd.theText.text = "Tag your instagrams with #SAPJets and you could be a featured fan";
+				refreshEvents();
+			}
 		}
 		
 		
 		private function loadFOTDImage():void
 		{			
-			var imageURL:String = fanCache.SocialPosts[fanIndex].MediumResURL;	
-			if(imageURL){
-				var l:Loader = new Loader();
-				l.contentLoaderInfo.addEventListener(Event.COMPLETE, imLoaded, false, 0, true);			
-				l.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, imError, false, 0, true);			
-				l.load(new URLRequest(imageURL));
+			if(fanCache.SocialPosts.length){
+				var imageURL:String = fanCache.SocialPosts[fanIndex].MediumResURL;			
+				if(imageURL){
+					var l:Loader = new Loader();
+					l.contentLoaderInfo.addEventListener(Event.COMPLETE, imLoaded, false, 0, true);			
+					l.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, imError, false, 0, true);			
+					l.load(new URLRequest(imageURL));
+				}
+			}else {
+				refreshEvents();
 			}
 		}
 		
@@ -150,8 +162,13 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 				//no image in cache - use default
 				
 			}
-			slider.fotd.userName.text = fanCache.SocialPosts[fanIndex].AuthorName;
+			if(fanCache.SocialPosts[fanIndex].AuthorName){
+				slider.fotd.userName.text = fanCache.SocialPosts[fanIndex].AuthorName;
 				slider.fotd.theText.text = fanCache.SocialPosts[fanIndex].Text;	
+			}else {
+				slider.fotd.userName.text = "#SAPJets";
+				slider.fotd.theText.text = "Tag your instagrams with #SAPJets and you could be a featured fan";
+			}
 			refreshEvents();
 		}
 		
@@ -184,6 +201,9 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 				var ev:MovieClip = new event(); //lib clip
 				ev.x = slider.width;
 				slider.addChild(ev);
+				if (CONFIG::SCALE) {
+					ev.height = 250;
+				}
 				ev.headline.text = eventsCache[i].Headline;
 				ev.displayTime.text = eventsCache[i].DisplayTime;
 				ev.title.text = eventsCache[i].Title;
@@ -206,6 +226,9 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 			//add sap logo to end
 			var l:MovieClip = new logoLockup();
 			l.x = slider.width;
+			if(CONFIG::SCALE){
+				l.y = -30;
+			}
 			slider.addChild(l);
 			totalSlides++;
 			resetSlide();
@@ -241,11 +264,19 @@ package com.gmrmarketing.sap.metlife.eventsTicker
 		{
 			if (slideIndex == 1) {
 				TweenMax.to(slider.fotd.theMask, .5, { x:191, delay:.5 } );
-				flares.show([[192, 86, 530, "point", 1.5], [192,133,973,"line",1.7],[45,242,963,"line",4],[57,284,952,"point",4.2]]);
+				if(!CONFIG::SCALE){
+					flares.show([[192, 86, 530, "point", 1.5], [192, 133, 973, "line", 1.7], [45, 242, 963, "line", 4], [57, 284, 952, "point", 4.2]]);
+				}else{
+					flares.show([[200, 70, 442, "point", 1.5], [190, 110, 795, "line", 1.7], [50, 198, 856, "line", 4]]);
+				}
 			}
 			//events flares
 			if (slideIndex > 2 && slideIndex < totalSlides-1) {
-				flares.show([[252, 16, 754, "line", 1.5], [268,60,739,"point",1.7],[94,75,914,"line",4],[138,228,868,"point",4.2],[417,246,590,"point",5]]);
+				if (!CONFIG::SCALE) {
+					flares.show([[252, 16, 754, "line", 1.5], [268, 60, 739, "point", 1.7], [94, 75, 914, "line", 4], [138, 228, 868, "point", 4.2], [410, 246, 650, "point", 5]]);					
+				}else {
+					flares.show([[252, 13, 754, "line", 1.5], [268, 49, 739, "point", 1.7], [94, 61, 914, "line", 4], [138, 185, 868, "point", 4.2], [410, 200, 650, "point", 5]]);
+				}
 			}
 		}
 		

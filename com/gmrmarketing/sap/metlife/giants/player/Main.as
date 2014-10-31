@@ -35,10 +35,13 @@ package com.gmrmarketing.sap.metlife.giants.player
 		
 		
 		public function Main()
-		{
-			addEventListener(Event.ACTIVATE, initWindowPosition);
-			//stage.displayState = StageDisplayState.FULL_SCREEN;
-			//stage.scaleMode = StageScaleMode.EXACT_FIT;
+		{			
+			if(CONFIG::SUITE){
+				stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+				stage.scaleMode = StageScaleMode.EXACT_FIT;
+			}else {
+				addEventListener(Event.ACTIVATE, initWindowPosition);
+			}
 			Mouse.hide();
 			
 			BGClip = new stadium(); //lib clip

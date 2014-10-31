@@ -15,7 +15,7 @@ package com.gmrmarketing.sap.metlife.usmap
 	import flare.primitives.Plane;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
-	
+	import flash.system.Capabilities;
 	
 	public class Main extends MovieClip implements ISchedulerMethods
 	{
@@ -57,7 +57,7 @@ package com.gmrmarketing.sap.metlife.usmap
 			
 			_scene = new Scene3D(sceneContainer);
 			_scene.clearColor = new Vector3D ();
-			_scene.antialias = 16;
+			_scene.antialias = 16;			
 			
 			videoData = new BitmapData(1008, 567, false, 0x000000);
 			
@@ -82,7 +82,21 @@ package com.gmrmarketing.sap.metlife.usmap
 			foreground = new titles();//lib clip
 			addChild(foreground);
 			
+			if(CONFIG::SUITE){
+				addEventListener(Event.ADDED_TO_STAGE, scaleScene);
+			}
 			//init();//TESTING
+		}
+		
+		
+		/**
+		 * Scales the 3D scene to the monitor resolution
+		 * only runs if the config constant SUITE is true
+		 * @param	e
+		 */
+		private function scaleScene(e:Event):void
+		{
+			_scene.setViewport( 0, 0, Capabilities.screenResolutionX, Capabilities.screenResolutionY );
 		}
 		
 		

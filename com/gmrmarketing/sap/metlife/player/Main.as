@@ -36,9 +36,12 @@ package com.gmrmarketing.sap.metlife.player
 		
 		public function Main()
 		{
-			//addEventListener(Event.ACTIVATE, initWindowPosition);
-			stage.displayState = StageDisplayState.FULL_SCREEN;
-			stage.scaleMode = StageScaleMode.EXACT_FIT;
+			if(CONFIG::SUITE){
+				stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+				stage.scaleMode = StageScaleMode.EXACT_FIT;
+			}else {
+				addEventListener(Event.ACTIVATE, initWindowPosition);
+			}
 			Mouse.hide();
 			
 			BGClip = new stadium(); //lib clip
@@ -193,7 +196,7 @@ package com.gmrmarketing.sap.metlife.player
 		{
 			theTask.removeEventListener("finished", showTransition);
 			flareClip.scaleX = flareClip.scaleY = 0;
-			flareClip.alpha = 1;
+			flareClip.alpha = 1;			
 			taskContainer.addChild(flareClip);
 			TweenMax.to(flareClip, .6, {scaleX:10, scaleY:10,ease:Linear.easeNone});
 			TweenMax.to(flareClip, .3, {alpha:0,delay:.3, onStart:logoTransition, onComplete:removeFlare});
@@ -204,7 +207,7 @@ package com.gmrmarketing.sap.metlife.player
 		 * Called at the start of fading the flare out - ie when it's at full brightness
 		 */
 		private function logoTransition():void
-		{			
+		{
 			theTask.cleanup();
 			
 			//removeChild(theTask); //remove the current task now behind the flare
@@ -234,7 +237,6 @@ package com.gmrmarketing.sap.metlife.player
 		{
 			taskContainer.removeChild(flareClip);
 		}
-		
 	
 	}
 	

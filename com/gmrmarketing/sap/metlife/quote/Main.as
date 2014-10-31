@@ -121,6 +121,7 @@ package com.gmrmarketing.sap.metlife.quote
 			playerImage.y = 5;
 			
 			picHolder.x = 420;
+			picHolder.alpha = 0;
 			
 			localCache = tempCache;
 			//show();//TESTING
@@ -131,6 +132,8 @@ package com.gmrmarketing.sap.metlife.quote
 		{
 			//do nothing if image error
 			trace("imageError");
+			picHolder.x = 420;
+			picHolder.alpha = 0;
 		}
 		
 		/**
@@ -154,7 +157,9 @@ package com.gmrmarketing.sap.metlife.quote
 				theText.setTextFormat(myFormat);
 				theText.y = 172 + ((212 - theText.textHeight) * .5);
 			}
+			
 			TweenMax.to(picHolder, .5, { x:71, delay:1 } );
+			TweenMax.to(picHolder, 0, { alpha:1, delay:1 } );
 			TweenMax.delayedCall(20, complete);
 		}
 		

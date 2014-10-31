@@ -8,7 +8,6 @@
 	import flash.ui.Mouse;
 	import com.greensock.TweenMax;
 	
-	
 	public class Main extends MovieClip
 	{
 		private var intro:Intro;
@@ -34,8 +33,7 @@
 		private var cb:CornerQuit; //back to intro - upper left
 		private var ca:CornerQuit; //show admin screen - lower left
 		
-		private var editingText:Boolean;
-		
+		private var editingText:Boolean;		
 		
 		
 		public function Main()
@@ -100,18 +98,20 @@
 			admin.setContainer(topContainer);
 			
 			queue = new Queue();
-			queue.addEventListener(Queue.DEBUG_MESSAGE, queueDebug, false, 0, true);
-			queue.addEventListener(Queue.GOT_TOKEN, addIntroListener, false, 0, true);
+			queue.addEventListener(Queue.READY, addIntroListener, false, 0, true);
 			
 			intro = new Intro();
 			intro.setContainer(mainContainer);			
 			intro.show();
 		}
 		
-		
+		/**
+		 * Callback on Queue
+		 * called once model data is retrieved from Hubble
+		 * @param	e READY event
+		 */
 		private function addIntroListener(e:Event):void
 		{
-			trace("addIntroListener");
 			intro.addEventListener(Intro.BEGIN, showTextEntry, false, 0, true);
 		}
 		
@@ -175,7 +175,6 @@
 		
 		private function showTextEntry(e:Event):void
 		{
-			trace("showTextEntry");
 			timeoutHelper.startMonitoring();
 			
 			textEntry.addEventListener(TextEntry.SHOWING, removeIntro, false, 0, true);
@@ -195,8 +194,7 @@
 		 * @param	e
 		 */
 		private function removeIntro(e:Event):void
-		{
-			trace("removeIntro");
+		{			
 			textEntry.removeEventListener(TextEntry.SHOWING, removeIntro);
 			intro.hide();
 		}
@@ -229,7 +227,6 @@
 		
 		private function showTakePhoto(e:Event):void
 		{
-			trace("showTakePhoto");
 			timeoutHelper.buttonClicked();
 			
 			textEntry.removeEventListener(TextEntry.NAME, nameRequired);
@@ -273,6 +270,8 @@
 			textEntry.addEventListener(TextEntry.NAME, nameRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.REQUIRED, messageRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.SWEAR, inappropriateMessage, false, 0, true);
+			textEntry.addEventListener(TextEntry.PRIZE_REQUIRED, prizeRequired, false, 0, true);
+			textEntry.addEventListener(TextEntry.PLEDGE_REQUIRED, pledgeRequired, false, 0, true);
 			
 			textEntry.show(false, queue.getPrizeOptions(), queue.getPledgeOptions());//don't clear old text
 		}		
@@ -437,13 +436,6 @@
 		private function quitApplication(e:Event):void
 		{
 			NativeApplication.nativeApplication.exit();
-		}
-		
-		
-		private function queueDebug(e:Event):void
-		{
-			//trace(queue.getDebug());
-			admin.displayDebug(queue.getDebug());		
 		}
 		
 		

@@ -21,7 +21,7 @@ package com.gmrmarketing.bcbs.livefearless
 		public static const NEXT:String = "nextPressed";
 		public static const REQUIRED:String = "messageRequired";
 		public static const PRIZE_REQUIRED:String = "prizeRequired";
-		public static const PLEDGE_REQUIRED:String = "prizeRequired";
+		public static const PLEDGE_REQUIRED:String = "pledgeRequired";
 		public static const NAME:String = "nameRequired";
 		public static const SWEAR:String = "inappropriate";
 		
@@ -102,17 +102,24 @@ package com.gmrmarketing.bcbs.livefearless
 			for (var i:int = 0; i < pledgeOptions.length; i++) {
 				items.push(pledgeOptions[i][0]);
 			}
-			pledgeCombo.populate(items);
-			pledgeCombo.setSelection("");
-			pledgeCombo.reset();	
+			
+			if (clearText) {
+				pledgeCombo.populate(items);
+				pledgeCombo.setSelection("");
+				pledgeCombo.reset();	
+			}
+			
 			
 			var prizes:Array = new Array();//need simple array of text values for comboBox
 			for (i = 0; i < prizeOptions.length; i++) {				
 				prizes.push(prizeOptions[i][0]);
 			}
-			prizeCombo.populate(prizes);
-			prizeCombo.setSelection("");
-			prizeCombo.reset();	
+			
+			if (clearText) {
+				prizeCombo.populate(prizes);
+				prizeCombo.setSelection("");
+				prizeCombo.reset();	
+			}			
 			
 			clip.fname.maxChars = 30;
 			clip.lname.maxChars = 30;
@@ -208,10 +215,8 @@ package com.gmrmarketing.bcbs.livefearless
 			if (clip.fname.text == "" || clip.lname.text == "") {
 				dispatchEvent(new Event(NAME));
 			}else if (prizeCombo.getSelection() == prizeCombo.getResetMessage()) {
-				trace("no prize");
 				dispatchEvent(new Event(PRIZE_REQUIRED));
 			}else if (pledgeCombo.getSelection() == pledgeCombo.getResetMessage()) {
-				trace("no pledge");
 				dispatchEvent(new Event(PLEDGE_REQUIRED));
 			}else if (clip.theText.length < 2) {
 				dispatchEvent(new Event(REQUIRED));

@@ -28,7 +28,7 @@ package com.gmrmarketing.utilities
 		}
 		
 		
-		public function writeLine(newLine:Array):void
+		public function writeLine(newLine:String):void
 		{
 			if (fileName != "") {
 				try{

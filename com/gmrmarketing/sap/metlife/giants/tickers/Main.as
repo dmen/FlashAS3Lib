@@ -20,7 +20,7 @@ package com.gmrmarketing.sap.metlife.giants.tickers
 		private var twitterTicker:MovieClip;//ticker under the main content area - 1008x47
 		private var eventsTicker:MovieClip;//bottom ticker - 1008x306
 		private var configLoader:URLLoader;
-		private var eventsDate:String;
+		private var eventsDate:String;		
 		
 		public function Main()
 		{
@@ -64,7 +64,7 @@ package com.gmrmarketing.sap.metlife.giants.tickers
 		{
 			var l:Loader = Loader(LoaderInfo(e.target).loader);
 			sapTicker = MovieClip(l.content);
-			addChild(sapTicker);
+			addChild(sapTicker);			
 			
 			//load twitter ticker
 			var r:URLRequest = new URLRequest("twitterTicker.swf");
@@ -93,7 +93,7 @@ package com.gmrmarketing.sap.metlife.giants.tickers
 		{
 			var l:Loader = Loader(LoaderInfo(e.target).loader);
 			eventsTicker = MovieClip(l.content);
-			eventsTicker.y = 774;
+			eventsTicker.y = 774;			
 			eventsTicker.getData(eventsDate);
 			addChild(eventsTicker);
 		}		

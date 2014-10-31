@@ -15,6 +15,7 @@ package com.gmrmarketing.sap.metlife.giants.usmap
 	import flare.primitives.Plane;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
+	import flash.system.Capabilities;
 	
 	
 	public class Main extends MovieClip implements ISchedulerMethods
@@ -82,7 +83,20 @@ package com.gmrmarketing.sap.metlife.giants.usmap
 			foreground = new titles();//lib clip
 			addChild(foreground);
 			
+			if(CONFIG::SUITE){
+				addEventListener(Event.ADDED_TO_STAGE, scaleScene);
+			}
 			//init();//TESTING
+		}
+		
+		/**
+		 * Scales the 3D map to the monitor resolution
+		 * Only runs if config constang SUITE is true
+		 * @param	e
+		 */
+		private function scaleScene(e:Event):void
+		{
+			_scene.setViewport( 0, 0, Capabilities.screenResolutionX, Capabilities.screenResolutionY );
 		}
 		
 		
