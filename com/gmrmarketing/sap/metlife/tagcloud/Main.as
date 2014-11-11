@@ -48,13 +48,13 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			tagContainer = new Sprite();
 			addChild(tagContainer);
 			
-			//init("10/26/14,0xFFFFFF,0xDDDDDD,0xBBBBBB,0xAAAAAA");
+			//init("11/03/14,0xFFFFFF,0xDDDDDD,0xBBBBBB,0xAAAAAA");
 		}
 		
 		
 		/**
 		 * ISChedulerMethods
-		 * initValue is gameDate, array of colors: levis,0xffffff,0xcccccc,0x678900,etc
+		 * initValue is gameDate, array of colors: 11/09/14,0xffffff,0xcccccc,0x678900,etc
 		 */
 		public function init(initValue:String = ""):void
 		{	

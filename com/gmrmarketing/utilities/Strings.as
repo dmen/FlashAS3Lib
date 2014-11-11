@@ -114,6 +114,18 @@ package com.gmrmarketing.utilities
 			
 			return newString;
 		}
+		
+		
+		/**
+		 * Uses a regEx replace to add commas to a number
+		 * ex: 928309 becomes 928,309
+		 * @param	num
+		 * @return	String num with commas
+		 */
+		public static function addCommas(num:Number):String
+		{
+			return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+		}
 	}
 	
 }

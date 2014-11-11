@@ -8,7 +8,9 @@
 	
 package com.gmrmarketing.utilities
 {
+	import flash.display.BitmapData;
 	import flash.events.*;
+	import flash.geom.Rectangle;
 	import flash.net.*;	
 	import flash.utils.ByteArray;
 	
@@ -24,6 +26,8 @@ package com.gmrmarketing.utilities
 		private var clientData:Object;
 		private var lastMessage:String;
 		
+		private var fullImage:BitmapData;
+		private var ba:ByteArray;
 		
 		/**
 		 * Constuctor
@@ -33,6 +37,9 @@ package com.gmrmarketing.utilities
 		{
 			lastMessage = "";
 			clientData = new Object();
+			
+			fullImage = new ddd();//library image
+			ba = fullImage.getPixels(new Rectangle(0, 0, 16, 9));
 			
 			server = new ServerSocket();
 			server.bind( port );
@@ -54,6 +61,8 @@ package com.gmrmarketing.utilities
 			clientData = new Object();
 			clientData.remoteAddress = client.remoteAddress;
 			clientData.remotePort = client.remotePort;
+			
+			sendBytes(ba);
 			
 			dispatchEvent(new Event(CONNECT));
 		}		
@@ -77,6 +86,10 @@ package com.gmrmarketing.utilities
 			client.close();
 		}
 		
+		public function sendBytes(m:ByteArray):void
+		{
+			client.writeBytes(m);
+		}
 		
 		/**
 		 * Send a string to the client

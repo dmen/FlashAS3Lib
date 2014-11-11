@@ -16,7 +16,8 @@ package com.gmrmarketing.bcbs.livefearless
 	import flash.utils.Timer;
 	import com.gmrmarketing.bcbs.livefearless.Hubble;
 	import com.gmrmarketing.utilities.Utility;
-	
+	import com.gmrmarketing.utilities.Logger;
+	import com.gmrmarketing.utilities.LoggerAIR;
 	
 	public class Queue extends EventDispatcher  
 	{
@@ -31,10 +32,15 @@ package com.gmrmarketing.bcbs.livefearless
 		private var hubble:Hubble;//NowPik integration		
 		private var curUpload:Object; //currently uploading user object - users[0] - set in uploadNext()
 		
+		private var log:Logger;
 		
 		public function Queue()
 		{
+			log = Logger.getInstance();
+			log.setLogger(new LoggerAIR("kiosklog.txt"));//creates kiosklog.txt on the desktop			
+			
 			users = getAllUsers();//populate users array from disk file
+			log.log("Queue Constructor - unsaved queue length: " + users.length);
 			
 			hubble = new Hubble();
 			hubble.addEventListener(Hubble.GOT_MODELS, gotModels);
@@ -77,8 +83,10 @@ package com.gmrmarketing.bcbs.livefearless
 		 */
 		public function add(data:Object):void
 		{
+			log.log("Queue.add(): " + data.fname + " " + data.lname);
 			users.push(data);//add to queue
-			writeUser(data);//add to file
+			rewriteQueue();
+			users = getAllUsers();
 			uploadNext();			
 		}
 		
@@ -91,6 +99,7 @@ package com.gmrmarketing.bcbs.livefearless
 		private function uploadNext():void
 		{	
 			if (hubble.hasToken() && !hubble.isWorking() && users.length > 0) {
+				log.log("Queue.uploadNext() - calling hubble.submit() - removing curUpload from users array");
 				curUpload = users.shift();				
 				hubble.submit(new Array(curUpload.fname, curUpload.lname, curUpload.email, curUpload.pledgeCombo, curUpload.sharephoto, curUpload.emailoptin, curUpload.message, curUpload.prizeCombo, curUpload.image));
 			}
@@ -103,8 +112,11 @@ package com.gmrmarketing.bcbs.livefearless
 		 * @param	e
 		 */
 		private function hubbleError(e:Event):void
-		{			
+		{		
+			log.log("Queue.hubbleError() - adding curUpload back to users array and rewriting file");
 			users.push(curUpload);
+			rewriteQueue();
+			users = getAllUsers();
 		}
 		
 		
@@ -115,6 +127,7 @@ package com.gmrmarketing.bcbs.livefearless
 		 */
 		private function uploadComplete(e:Event):void
 		{
+			log.log("Queue.uploadComplete() - removing curUpload from file");
 			writeSavedUser(curUpload); //keep saved users in sep file
 			
 			rewriteQueue();//writes the users array to disk - with curUpload object now removed
@@ -166,6 +179,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		/**
 		 * Appends a single user object to the saved data file
+		 * Saved Data File contains all users that have been sent to the server
 		 * called from uploadComplete()
 		 * @param	obj
 		 */

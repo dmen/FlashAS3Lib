@@ -194,7 +194,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 				name = name.replace(/&lt;/g, "<");
 				name = name.replace(/&gt;/g, "<");
 				name = name.replace(/&amp;/g, "&");
-				name = SwearFilter.cleanString(name);
+				name = SwearFilter.cleanString(name);				
 				
 				localTags[i].name = name;
 			}			
@@ -211,7 +211,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			
 			for (i = 0; i < localTags.length; i++) {				
 				//tags[i].fontSize = Math.max(12, Math.round(((tags[i].value / totalTagCount) * 100) * fontRatio));
-				localTags[i].fontSize = Math.max(minFont, Math.round(maxFont - fontRatio * i));	
+				localTags[i].fontSize = Math.max(minFont, Math.round(maxFont - fontRatio * i));					
 				//trace(localTags[i].fontSize );
 				measure(localTags[i]);//passed by reference so tag in array is modified by measure()
 			}
@@ -219,7 +219,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			tagLevel++;
 			if (tagLevel < 4) {
 				getTagsByLevel();
-			}else {
+			}else {				
 				//trace("tags processed", tags.level1.length, tags.level2.length, tags.level3.length);
 				dispatchEvent(new Event(TAGS_READY));
 			}
@@ -280,6 +280,12 @@ package com.gmrmarketing.sap.metlife.tagcloud
 			var rh:Rectangle = h.getColorBoundsRect(0xff000000, 0x00000000, false);
 			var rv:Rectangle = v.getColorBoundsRect(0xff000000, 0x00000000, false);
 			
+			if (rh.width == 0 && rh.height == 0) {
+				rh.width = 1; rh.height = 1;
+			}
+			if (rv.width == 0 && rv.height == 0) {
+				rv.width = 1; rv.height = 1;
+			}
 			//new bitmap at rect size - actual text size
 			var nh:BitmapData = new BitmapData(rh.width, rh.height, true, 0x00000000);
 			nh.copyPixels(h, rh, new Point(0, 0));

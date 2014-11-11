@@ -35,8 +35,8 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		public function Hubble()
 		{		
-			log = new Logger();
-			log.setLogger(new LoggerAIR());//creates kiosklog.txt on the desktop
+			log = Logger.getInstance();
+			//don't need to setLogger because queue already did it
 			log.log("Hubble Constructor");
 			
 			token = "";

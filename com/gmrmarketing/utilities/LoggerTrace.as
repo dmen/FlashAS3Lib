@@ -1,6 +1,6 @@
 ﻿/**
  * Trace Logger
- * writes log messages to trace
+ * writes log messages to the Flash console
  */
 
 package com.gmrmarketing.utilities

@@ -46,7 +46,7 @@ package com.gmrmarketing.sap.metlife.giants.tagcloud
 			tagContainer = new Sprite();
 			addChild(tagContainer);
 			
-			//init("10/12/14,0xFFFFFF,0xDDDDDD,0xBBBBBB,0xAAAAAA");
+			//init("11/03/14,0xFFFFFF,0xDDDDDD,0xBBBBBB,0xAAAAAA");
 		}
 		
 		
@@ -105,6 +105,7 @@ package com.gmrmarketing.sap.metlife.giants.tagcloud
 			localCache = dict.getTags(1);//this just so isready() will return true
 			tag1.theText.text = dict.getHashTag(2);
 			tag2.theText.text = dict.getHashTag(3);
+			//trace("tagsLoaded", dict.getHashTag(2), dict.getHashTag(3));
 			//show();//TESTING
 		}
 		
@@ -135,7 +136,7 @@ package com.gmrmarketing.sap.metlife.giants.tagcloud
 		private function nextLevel():void
 		{
 			flareDelay = getTimer();
-			ra.create(tagContainer, new cloud(), dict.getTags(currentLevel), true, false, 10000, 0, new DropShadowFilter(8,45,0,1,12,12,2,2));
+			ra.create(tagContainer, new cloud(), dict.getTags(currentLevel), true, false, 8000, 0, new DropShadowFilter(8,45,0,1,12,12,2,2));
 			ra.addEventListener(RectFinder.FINISHED, tagsComplete, false, 0, true);
 		}
 		

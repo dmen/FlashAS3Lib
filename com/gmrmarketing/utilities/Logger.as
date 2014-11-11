@@ -1,19 +1,36 @@
-﻿package com.gmrmarketing.utilities
+﻿/**
+ * Main Logger class
+ * Singleton
+ * Wraps an instance of an ILogger object
+ */
+package com.gmrmarketing.utilities
 {
 	
 	public class Logger
 	{		
-		private var myLogger:ILogger; //type ILogger interface, so loggers can be swapped
-		private var loggerAvailable:Boolean = false;
+		private static var instance:Logger;
+		private var myLogger:ILogger; //type ILogger so loggers can be swapped
+		private var loggerAvailable:Boolean = false; //true is setLogger has been called
 		
 		
-		public function Logger(){}
+		public function Logger(p_key:SingletonBlocker)
+		{			
+		}
+		
+		
+		public static function getInstance():Logger 
+		{
+			if (instance == null) {
+				instance = new Logger(new SingletonBlocker());
+			}
+			return instance;
+		}
 		
 		
 		/**
 		 * Sets the logger being used
 		 * 
-		 * @param	aLogger Instance of ILogger
+		 * @param	aLogger Instance of an ILogger
 		 */
 		public function setLogger(aLogger:ILogger):void
 		{
@@ -26,10 +43,13 @@
 		 * Calls log within the set logger
 		 * @param	logMessage String message to log
 		 */
-		public function log(logMessage:String):void
+		public function log(logMessage:String):Boolean
 		{
 			if(loggerAvailable){
 				myLogger.log(logMessage);
+				return true;
+			}else {
+				return false;
 			}
 		}	
 		
@@ -40,17 +60,28 @@
 		 */
 		public function getLog():Array
 		{
-			return myLogger.getLog();
+			if(loggerAvailable){
+				return myLogger.getLog();
+			}else {
+				return [];				
+			}
 		}
 		
 		
 		/**
 		 * Erases the log
 		 */
-		public function clearLog():void
+		public function clearLog():Boolean
 		{
-			myLogger.clearLog();
+			if(loggerAvailable){
+				myLogger.clearLog();
+				return true;
+			}else {
+				return false;
+			}
 		}
 		
 	}	
 }
+
+internal class SingletonBlocker {}

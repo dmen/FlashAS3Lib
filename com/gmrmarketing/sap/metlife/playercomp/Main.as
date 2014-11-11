@@ -18,7 +18,7 @@ package com.gmrmarketing.sap.metlife.playercomp
 		
 		public function Main()
 		{
-			//init("10/12/14");//TESTING
+			//init("11/09/14");//TESTING
 		}
 		
 		

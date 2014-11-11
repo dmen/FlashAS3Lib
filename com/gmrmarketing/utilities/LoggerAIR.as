@@ -1,6 +1,6 @@
 ﻿/**
  * AIR Logger
- * Uses Adobe AIR to write log data to file kiosklog.txt on the desktop
+ * Writes to a log file on the desktop
  */
 
 package com.gmrmarketing.utilities
@@ -11,17 +11,22 @@ package com.gmrmarketing.utilities
 
 	public class LoggerAIR implements ILogger
 	{
+		private var fName:String;
 			
-		public function LoggerAIR(){}		
+		
+		public function LoggerAIR($fName:String = "kiosklog.txt")
+		{
+			fName = $fName;
+		}		
 	
 		/**
-		 * Writes a line into kiosklog.txt
+		 * Writes a line into the log
 		 * Log file is located on the desktop
 		 * @param	newLine
 		 */
 		public function log(message:String):void
 		{			
-			var targetFile:File = File.desktopDirectory.resolvePath("kiosklog.txt")
+			var targetFile:File = File.desktopDirectory.resolvePath(fName)
 			var fs:FileStream = new FileStream();
 			try {
 				fs.open(targetFile, FileMode.APPEND);
@@ -39,7 +44,7 @@ package com.gmrmarketing.utilities
 		public function getLog():Array
 		{
 			var myArray = new Array();
-			var targetFile:File = File.desktopDirectory.resolvePath("kiosklog.txt")
+			var targetFile:File = File.desktopDirectory.resolvePath(fName)
 			var fs:FileStream = new FileStream();
 			try {
 				fs.open(targetFile, FileMode.READ);
@@ -54,19 +59,12 @@ package com.gmrmarketing.utilities
 		
 		
 		/**
-		 * Erases the log file
+		 * Deletes the log file
 		 */
 		public function clearLog():void
 		{
-			var targetFile:File = File.desktopDirectory.resolvePath("kiosklog.txt")
-			var fs:FileStream = new FileStream();
-			try {
-				fs.open(targetFile, FileMode.WRITE);
-				fs.writeMultiByte("", "utf-8");
-				fs.close();
-			}catch (e:Error) {
-				trace(e);
-			}
+			var targetFile:File = File.desktopDirectory.resolvePath(fName)
+			targetFile.deleteFile();
 		}
 	}	
 }
