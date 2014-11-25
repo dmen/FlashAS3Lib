@@ -105,6 +105,7 @@
 			intro.show();
 		}
 		
+		
 		/**
 		 * Callback on Queue
 		 * called once model data is retrieved from Hubble
@@ -180,7 +181,7 @@
 			textEntry.addEventListener(TextEntry.SHOWING, removeIntro, false, 0, true);
 			textEntry.addEventListener(TextEntry.NAME, nameRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.REQUIRED, messageRequired, false, 0, true);
-			textEntry.addEventListener(TextEntry.PRIZE_REQUIRED, prizeRequired, false, 0, true);
+			//textEntry.addEventListener(TextEntry.PRIZE_REQUIRED, prizeRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.PLEDGE_REQUIRED, pledgeRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.SWEAR, inappropriateMessage, false, 0, true);
 			textEntry.addEventListener(TextEntry.NEXT, showTakePhoto, false, 0, true);
@@ -270,7 +271,7 @@
 			textEntry.addEventListener(TextEntry.NAME, nameRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.REQUIRED, messageRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.SWEAR, inappropriateMessage, false, 0, true);
-			textEntry.addEventListener(TextEntry.PRIZE_REQUIRED, prizeRequired, false, 0, true);
+			//textEntry.addEventListener(TextEntry.PRIZE_REQUIRED, prizeRequired, false, 0, true);
 			textEntry.addEventListener(TextEntry.PLEDGE_REQUIRED, pledgeRequired, false, 0, true);
 			
 			textEntry.show(false, queue.getPrizeOptions(), queue.getPledgeOptions());//don't clear old text
@@ -374,7 +375,7 @@
 			thanks.removeEventListener(Thanks.SHOWING, removeForm);
 			form.hide();
 			var formData:Array = form.getData();//email,pho,opt
-			var textData:Array = textEntry.getData(); //fname, lname, 0, message, prizeID, pledgeID
+			var textData:Array = textEntry.getData(); //fname, lname, 0, message, prizeID, pledgeID - 11/21/14 update prizeID is -1
 			var im:String = takePhoto.getPhotoString();
 			
 			var ob:Object = { fname:textData[0], lname:textData[1], email:formData[0], pledgeCombo:textData[5], prizeCombo:textData[4], sharephoto:formData[1], emailoptin:formData[2], message:textData[3], image:im };// , interestCombo:formData[3] };

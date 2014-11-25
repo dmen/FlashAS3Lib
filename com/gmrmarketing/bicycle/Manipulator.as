@@ -10,6 +10,8 @@
 	
 	public class Manipulator extends EventDispatcher
 	{
+		public static const DELETE:String = "deletePressed";
+		
 		private var myObject:DisplayObjectContainer;
 		private var manLayer:Sprite; //new layer for the manipulator	
 		private var angleOffset:Number;
@@ -33,6 +35,10 @@
 		
 		private var dragOK:Boolean = true;
 		
+		//limiters for scaling - used in updateScale
+		private var scaleMin:Number = .3;
+		private var scaleMax:Number = 2;
+		
 		
 		public function Manipulator()
 		{	
@@ -52,8 +58,7 @@
 			//center for moving
 			cDot = new Sprite();
 			cDot.graphics.beginFill(0xAAFF00, 0);
-			cDot.graphics.drawRect(0, 0, 1, 1);
-			
+			cDot.graphics.drawRect(0, 0, 1, 1);			
 			
 			//invis dots for positioning
 			ltDot2 = new Sprite();
@@ -80,6 +85,7 @@
 		
 		public function show():void
 		{	
+			manLayer.graphics.clear();
 			var bounds:Rectangle = myObject.getBounds(myObject);
 			
 			//invis dots
@@ -97,7 +103,7 @@
 			manLayer.x = bounds.x;
 			manLayer.y = bounds.y;
 			
-			manLayer.graphics.lineStyle(1, 0x000000, 1);
+			manLayer.graphics.lineStyle(1, 0x315b09, .7);
 			manLayer.graphics.drawRect(0, 0, bounds.width, bounds.height);			
 			
 			ltDot.x = 0;
@@ -115,10 +121,9 @@
 			rtDot2.x = rtDot.x;
 			rtDot2.y = rtDot.y;
 			rbDot2.x = rbDot.x;
-			rbDot2.y = rbDot.y;
+			rbDot2.y = rbDot.y;			
 			
-			ltDot.addEventListener(MouseEvent.CLICK, deleteIcon, false, 0, true);
-			ltDot.addEventListener(MouseEvent.MOUSE_DOWN, stopDragDelete, false, 0, true);
+			ltDot.addEventListener(MouseEvent.MOUSE_DOWN, deleteIcon, false, 0, true);
 			rtDot.addEventListener(MouseEvent.MOUSE_DOWN, startScale, false, 0, true);
 			rbDot.addEventListener(MouseEvent.MOUSE_DOWN, startRotation, false, 0, true);
 			cDot.addEventListener(MouseEvent.MOUSE_DOWN, startMove, false, 0, true);
@@ -140,7 +145,7 @@
 			
 			showing = true;
 			
-			startMove();
+			//startMove();
 		}
 		
 		
@@ -149,8 +154,7 @@
 		{				
 			manLayer.graphics.clear();
 			
-			ltDot.removeEventListener(MouseEvent.CLICK, deleteIcon);
-			ltDot.removeEventListener(MouseEvent.MOUSE_DOWN, stopDragDelete);
+			ltDot.removeEventListener(MouseEvent.MOUSE_DOWN, deleteIcon);
 			rtDot.removeEventListener(MouseEvent.MOUSE_DOWN, startScale);			
 			rbDot.removeEventListener(MouseEvent.MOUSE_DOWN, startRotation);
 			cDot.removeEventListener(MouseEvent.MOUSE_DOWN, startMove);			
@@ -158,8 +162,10 @@
 			while (manLayer.numChildren) {
 				manLayer.removeChildAt(0); //remove all dots
 			}
-			if(myObject != null){
-				myObject.stage.removeEventListener(MouseEvent.MOUSE_UP, endManipulations);
+			if (myObject != null) {
+				if(myObject.stage){
+					myObject.stage.removeEventListener(MouseEvent.MOUSE_UP, endManipulations);
+				}
 				if (myObject.contains(manLayer)) {
 					myObject.removeChild(manLayer);
 				}
@@ -167,13 +173,23 @@
 			showing = false;
 		}
 		
+		/**
+		 * Chagnes the defaults for scaleMin and scaleMax
+		 * @param	min new scaleMin
+		 * @param	max new scaleMax
+		 */
+		public function limitScale(min:Number = .3, max:Number = 2):void
+		{
+			scaleMin = min;
+			scaleMax = max;
+			if (scaleMax < scaleMin) {
+				scaleMax = scaleMin;
+			}
+		}
+		
 		private function deleteIcon(e:MouseEvent):void
 		{
-			if (MovieClip(myObject).isInitials) {
-				dispatchEvent(new Event("killInitials"));
-			}else {
-				dispatchEvent(new Event("killIcon"));
-			}
+			dispatchEvent(new Event(DELETE));
 		}
 		
 		public function getIcon():DisplayObjectContainer
@@ -186,7 +202,7 @@
 			myObject = null;
 		}
 		
-		private function startMove(e:MouseEvent = null):void
+		public function startMove(e:MouseEvent = null):void
 		{
 			if(dragOK){
 				MovieClip(myObject).startDrag(false);
@@ -228,6 +244,13 @@
 			var xDist:Number = myObject.stage.mouseX - initScalePoint.x;					
 			myObject.scaleX = myObject.scaleY = initScale + (xDist / 100);
 			
+			if (myObject.scaleX < scaleMin) {
+				myObject.scaleX = myObject.scaleY = scaleMin;
+			}
+			if (myObject.scaleX > scaleMax) {
+				myObject.scaleX = myObject.scaleY = scaleMax;
+			}
+			
 			ltDot.scaleX = ltDot.scaleY = 1 / myObject.scaleX;
 			rtDot.scaleX = rtDot.scaleY = 1 / myObject.scaleX;
 			rbDot.scaleX = rbDot.scaleY = 1 / myObject.scaleX;
@@ -249,15 +272,6 @@
 			doStopDrag();
 		}
 		
-		/**
-		 * called by mouseDown on the delete button
-		 * @param	e
-		 */
-		private function stopDragDelete(e:MouseEvent):void
-		{
-			dragOK = false;
-			doStopDrag();
-		}
 		
 		private function doStopDrag():void
 		{

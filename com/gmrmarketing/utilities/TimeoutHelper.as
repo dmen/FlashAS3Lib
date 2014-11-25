@@ -54,6 +54,10 @@ package com.gmrmarketing.utilities
 		}
 		
 		
+		/**
+		 * Returns the single instance of TimeoutHelper
+		 * @return
+		 */
 		public static function getInstance():TimeoutHelper 
 		{
 			if (instance == null) {

@@ -27,7 +27,7 @@ package com.gmrmarketing.bcbs.livefearless
 		private var hdr2:URLRequestHeader;
 		private var so:SharedObject;
 		
-		private var working:Boolean; //true when submitting data
+		private var busy:Boolean; //true when submitting data
 		private var thePhoto:String;		
 		
 		private var log:Logger;
@@ -42,7 +42,7 @@ package com.gmrmarketing.bcbs.livefearless
 			token = "";
 			pledgeOptions = new Array();
 			prizeOptions = new Array();
-			working = false;
+			busy = false;
 			so = SharedObject.getLocal("bcbsData");			
 			hdr = new URLRequestHeader("Content-type", "application/json");
 			hdr2 = new URLRequestHeader("Accept", "application/json");
@@ -76,9 +76,9 @@ package com.gmrmarketing.bcbs.livefearless
 			return token == "" ? false : true;
 		}
 		
-		public function isWorking():Boolean
+		public function isBusy():Boolean
 		{
-			return working;
+			return  busy;
 		}
 		
 		
@@ -92,8 +92,7 @@ package com.gmrmarketing.bcbs.livefearless
 			if(j.Status == 1){
 				log.log("Hubble.gotToken() - Status = 1");
 				token = j.ResponseObject;				
-				getModels();
-				
+				getModels();				
 			}else {
 				tokenError();
 			}
@@ -158,13 +157,15 @@ package com.gmrmarketing.bcbs.livefearless
 						pledgeOptions.push([j.ResponseObject.FieldOptions[i].OptionText, j.ResponseObject.FieldOptions[i].FieldOptionId]);						
 					}
 					
+					/*
 					if (j.ResponseObject.FieldOptions[i].FieldId == 902 && j.ResponseObject.FieldOptions[i].ActiveStatusType == 1) {
 						prizeOptions.push([j.ResponseObject.FieldOptions[i].OptionText,j.ResponseObject.FieldOptions[i].FieldOptionId]);
 					}
+					*/
 				}				
 				
 				so.data.pledgeOptions = pledgeOptions.concat();
-				so.data.prizeOptions = prizeOptions.concat();
+				//so.data.prizeOptions = prizeOptions.concat();
 				
 				so.flush();
 				
@@ -231,6 +232,8 @@ package com.gmrmarketing.bcbs.livefearless
 		/**
 		 * Called from Queue.uploadNext()
 		 * @param	formData Array fname, lname, email, pledgeCombo, sharephoto, emailoptin, message, prizeCombo, image	
+		 * 
+		 * update 11/21/14 - prizeCombo is -1
 		 */
 		public function submit(formData:Array):void
 		{	
@@ -238,7 +241,7 @@ package com.gmrmarketing.bcbs.livefearless
 				
 				thePhoto = formData[8]; //used in submitPhoto
 				
-				working = true;//true while hubble is submitting the user object
+				busy = true;//true when submitting the user object
 				
 				var phoOpt:Boolean = formData[4] == "true" ? true : false;
 				var	emOpt:Boolean = formData[5] == "true" ? true : false;			
@@ -272,7 +275,10 @@ package com.gmrmarketing.bcbs.livefearless
 				
 				log.log("Hubble.submit() " + formData[0] + " " + formData[1] + " " + formData[2] + "now: " + now);
 				
-				var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[6] }, { "FieldId":902, "OptionId":parseInt(formData[7]) }, { "FieldId":836, "OptionId":parseInt(formData[3]) }], "Latitude":"0", "Longitude":"0" }};
+				//var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[6] }, { "FieldId":902, "OptionId":parseInt(formData[7]) }, { "FieldId":836, "OptionId":parseInt(formData[3]) }], "Latitude":"0", "Longitude":"0" }};
+				
+				//update 11/21/14 - Removed PRIZE ID
+				var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":102, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":677, "Response":formData[0] }, { "FieldId":678, "Response":formData[1] }, { "FieldId":671, "Response":formData[2] }, { "FieldId":672, "Response":emOpt }, { "FieldId":680, "Response":true }, { "FieldId":681, "Response":phoOpt }, { "FieldId":667, "Response":formData[6] }, { "FieldId":836, "OptionId":parseInt(formData[3]) }], "Latitude":"0", "Longitude":"0" }};
 				
 				var js:String = JSON.stringify(resp);
 				var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionresponse");
@@ -307,7 +313,7 @@ package com.gmrmarketing.bcbs.livefearless
 		private function formError(e:IOErrorEvent = null):void
 		{
 			log.log("Hubble.formError()");
-			working = false;
+			busy = false;
 			dispatchEvent(new Event(ERROR));
 		}
 		
@@ -351,7 +357,7 @@ package com.gmrmarketing.bcbs.livefearless
 		private function photoError(e:IOErrorEvent = null):void
 		{
 			log.log("Hubble.photoError()");
-			working = false;
+			 busy = false;
 			dispatchEvent(new Event(ERROR));
 		}
 		
@@ -383,7 +389,7 @@ package com.gmrmarketing.bcbs.livefearless
 		{
 			
 			var j:Object = JSON.parse(e.currentTarget.data);
-			working = false;
+			busy = false;
 			if (j.Status == 1) {
 				log.log("Hubble.followupsProcessed() - Status = 1");
 				dispatchEvent(new Event(COMPLETE));
@@ -396,7 +402,7 @@ package com.gmrmarketing.bcbs.livefearless
 		private function followupError(e:IOErrorEvent = null):void
 		{
 			log.log("Hubble.followupError()");
-			working = false;
+			busy = false;
 			dispatchEvent(new Event(ERROR));
 		}
 	}

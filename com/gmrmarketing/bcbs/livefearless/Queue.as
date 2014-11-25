@@ -79,14 +79,18 @@ package com.gmrmarketing.bcbs.livefearless
 		/**
 		 * Adds a user data object to the csv file
 		 * Called from Main.removeForm() - once form is complete and Thanks is showing
-		 * Data object contains these keys { fname:textData[0], lname:textData[1], email:formData[0], pledgeCombo:textData[2], prizeCombo:textData[4], sharephoto:formData[1], emailoptin:formData[2], message:textData[3], image:im };
+		 * Data object contains these keys {fname, lname, email, pledgeCombo, prizeCombo, sharephoto, emailoptin, message, image}
+		 * 
+		 * update 11/21/4 - removed prizing selection - prizeCombo is -1
 		 */
 		public function add(data:Object):void
 		{
 			log.log("Queue.add(): " + data.fname + " " + data.lname);
 			users.push(data);//add to queue
+			//log.log("Queue.add() - users.length after users.push: " + users.length);
 			rewriteQueue();
 			users = getAllUsers();
+			//log.log("Queue.add() - users.length after rewrite/get: " + users.length);
 			uploadNext();			
 		}
 		
@@ -98,7 +102,7 @@ package com.gmrmarketing.bcbs.livefearless
 		 */
 		private function uploadNext():void
 		{	
-			if (hubble.hasToken() && !hubble.isWorking() && users.length > 0) {
+			if (hubble.hasToken() && !hubble.isBusy() && users.length > 0) {
 				log.log("Queue.uploadNext() - calling hubble.submit() - removing curUpload from users array");
 				curUpload = users.shift();				
 				hubble.submit(new Array(curUpload.fname, curUpload.lname, curUpload.email, curUpload.pledgeCombo, curUpload.sharephoto, curUpload.emailoptin, curUpload.message, curUpload.prizeCombo, curUpload.image));
@@ -108,7 +112,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		/**
 		 * called if submitting form, photo, or followups generate a hubble error
-		 * adds the curUpload object back onto the end users - it was removed with shift in uploadNext()
+		 * adds the curUpload object back onto the end users - it was removed with queue.shift in uploadNext()
 		 * @param	e
 		 */
 		private function hubbleError(e:Event):void
@@ -148,12 +152,12 @@ package com.gmrmarketing.bcbs.livefearless
 				var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
 				file.deleteFile();
 				
-				while (users.length) {
-					var aUser:Object = users.shift();
-					writeUser(aUser);
-				}
-				
 			}catch (e:Error) {
+			}
+			
+			while (users.length) {
+				var aUser:Object = users.shift();
+				writeUser(aUser);
 			}
 		}
 		
@@ -164,6 +168,7 @@ package com.gmrmarketing.bcbs.livefearless
 		 */
 		private function writeUser(obj:Object):void
 		{
+			obj.timeAdded = Utility.getTimeStamp();
 			try{
 				var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
 				var stream:FileStream = new FileStream();

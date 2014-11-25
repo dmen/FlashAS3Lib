@@ -56,14 +56,14 @@ package com.gmrmarketing.bcbs.livefearless
 			//pledgeCombo.populate();
 			clip.addChild(pledgeCombo);
 			pledgeCombo.x = 621;
-			pledgeCombo.y = 615;	
-			
+			pledgeCombo.y = 268;// 615;	
+			/*
 			prizeCombo = new ComboBox("Please select");			
 			//combo.populate();
 			clip.addChild(prizeCombo);
 			prizeCombo.x = 621;
 			prizeCombo.y = 268;	
-			
+			*/
 			timeoutHelper = TimeoutHelper.getInstance();
 		}
 		
@@ -89,7 +89,7 @@ package com.gmrmarketing.bcbs.livefearless
 			prizeOptions = $prizeOptions;
 			
 			kbd.x = 525;
-			kbd.y = 720;
+			kbd.y = 660;
 			if(!clip.contains(kbd)){
 				clip.addChildAt(kbd,1);
 			}
@@ -107,20 +107,19 @@ package com.gmrmarketing.bcbs.livefearless
 				pledgeCombo.populate(items);
 				pledgeCombo.setSelection("");
 				pledgeCombo.reset();	
-			}
-			
+			}			
 			
 			var prizes:Array = new Array();//need simple array of text values for comboBox
 			for (i = 0; i < prizeOptions.length; i++) {				
 				prizes.push(prizeOptions[i][0]);
 			}
-			
+			/*
 			if (clearText) {
 				prizeCombo.populate(prizes);
 				prizeCombo.setSelection("");
 				prizeCombo.reset();	
 			}			
-			
+			*/
 			clip.fname.maxChars = 30;
 			clip.lname.maxChars = 30;
 			
@@ -190,7 +189,7 @@ package com.gmrmarketing.bcbs.livefearless
 					break;
 				}
 			}
-			
+			/*
 			var prizeSelectionText:String = prizeCombo.getSelection();
 			var pId:int;
 			for (i = 0; i < prizeOptions.length; i++) {
@@ -199,8 +198,9 @@ package com.gmrmarketing.bcbs.livefearless
 					break;
 				}
 			}
-			
-			return new Array(clip.fname.text, clip.lname.text, 0, clip.theText.text, pId.toString(), cId.toString());
+			*/
+			//return new Array(clip.fname.text, clip.lname.text, 0, clip.theText.text, pId.toString(), cId.toString());
+			return new Array(clip.fname.text, clip.lname.text, 0, clip.theText.text, -1, cId.toString());
 		}
 		
 		
@@ -214,8 +214,8 @@ package com.gmrmarketing.bcbs.livefearless
 			
 			if (clip.fname.text == "" || clip.lname.text == "") {
 				dispatchEvent(new Event(NAME));
-			}else if (prizeCombo.getSelection() == prizeCombo.getResetMessage()) {
-				dispatchEvent(new Event(PRIZE_REQUIRED));
+			//}else if (prizeCombo.getSelection() == prizeCombo.getResetMessage()) {
+				//dispatchEvent(new Event(PRIZE_REQUIRED));
 			}else if (pledgeCombo.getSelection() == pledgeCombo.getResetMessage()) {
 				dispatchEvent(new Event(PLEDGE_REQUIRED));
 			}else if (clip.theText.length < 2) {

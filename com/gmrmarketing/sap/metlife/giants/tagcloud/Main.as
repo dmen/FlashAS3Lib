@@ -46,7 +46,7 @@ package com.gmrmarketing.sap.metlife.giants.tagcloud
 			tagContainer = new Sprite();
 			addChild(tagContainer);
 			
-			//init("11/03/14,0xFFFFFF,0xDDDDDD,0xBBBBBB,0xAAAAAA");
+			//init("11/16/14,0xFFFFFF,0xDDDDDD,0xBBBBBB,0xAAAAAA");
 		}
 		
 		

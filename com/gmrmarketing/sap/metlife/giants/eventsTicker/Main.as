@@ -28,7 +28,7 @@ package com.gmrmarketing.sap.metlife.giants.eventsTicker
 			totalSlides = 3; //two logos and fotd
 			theVideo.addEventListener(MetadataEvent.CUE_POINT, loop);
 			fanImages = new Array();
-			//getData("10/26/14");
+			//getData("11/16/14");
 		}
 		
 		
