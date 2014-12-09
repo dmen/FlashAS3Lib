@@ -7,6 +7,7 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 	import com.greensock.TweenMax;
 	import com.gmrmarketing.utilities.Strings;
 	import com.gmrmarketing.utilities.SwearFilter;
+	import flash.utils.Timer;
 	
 	public class Main extends MovieClip
 	{		
@@ -25,7 +26,7 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 		/**
 		 * Loads the tweets from the web service
 		 */
-		public function init():void
+		public function init(e:TimerEvent = null):void
 		{
 			refreshing = true;
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
@@ -45,8 +46,12 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 		private function dataLoaded(e:Event):void
 		{
 			refreshing = false;
-			localCache = JSON.parse(e.currentTarget.data);//array of objects with authorname and text properties			
-			show(); 
+			localCache = JSON.parse(e.currentTarget.data);//array of objects with authorname and text properties
+			if(localCache.length > 0){
+				show();
+			}else {
+				checkAgain();
+			}
 		}
 		
 		
@@ -55,7 +60,17 @@ package com.gmrmarketing.sap.metlife.twitterTicker
 			if (localCache) {
 				refreshing = false;
 				show();
+			}else {
+				checkAgain();
 			}
+		}
+		
+		
+		private function checkAgain():void
+		{
+			var t:Timer = new Timer(30000, 1);
+			t.addEventListener(TimerEvent.TIMER, init, false, 0, true);
+			t.start();
 		}
 		
 		

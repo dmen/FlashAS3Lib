@@ -11,6 +11,7 @@
 package starling.textures
 {
     import flash.display3D.Context3D;
+    import flash.display3D.VertexBuffer3D;
     import flash.display3D.textures.TextureBase;
     import flash.geom.Matrix;
     import flash.geom.Rectangle;
@@ -20,6 +21,7 @@ package starling.textures
     import starling.display.DisplayObject;
     import starling.display.Image;
     import starling.errors.MissingContextError;
+    import starling.utils.execute;
     import starling.utils.getNextPowerOfTwo;
 
     /** A RenderTexture is a dynamic texture onto which you can draw any display object.
@@ -56,6 +58,7 @@ package starling.textures
      */
     public class RenderTexture extends SubTexture
     {
+        private const CONTEXT_POT_SUPPORT_KEY:String = "RenderTexture.supportsNonPotDimensions";
         private const PMA:Boolean = true;
         
         private var mActiveTexture:Texture;
@@ -66,29 +69,48 @@ package starling.textures
         private var mSupport:RenderSupport;
         
         /** helper object */
-        private static var sScissorRect:Rectangle = new Rectangle();
+        private static var sClipRect:Rectangle = new Rectangle();
         
-        /** Creates a new RenderTexture with a certain size. If the texture is persistent, the
-         *  contents of the texture remains intact after each draw call, allowing you to use the
-         *  texture just like a canvas. If it is not, it will be cleared before each draw call.
-         *  Persistancy doubles the required graphics memory! Thus, if you need the texture only 
-         *  for one draw (or drawBundled) call, you should deactivate it. */
+        /** Creates a new RenderTexture with a certain size (in points). If the texture is
+         *  persistent, the contents of the texture remains intact after each draw call, allowing
+         *  you to use the texture just like a canvas. If it is not, it will be cleared before each
+         *  draw call. Persistancy doubles the required graphics memory! Thus, if you need the
+         *  texture only for one draw (or drawBundled) call, you should deactivate it. */
         public function RenderTexture(width:int, height:int, persistent:Boolean=true, scale:Number=-1)
         {
-            if (scale <= 0) scale = Starling.contentScaleFactor; 
+            // TODO: when Adobe has fixed this bug on the iPad 1 (see 'supportsNonPotDimensions'),
+            //       we can remove 'legalWidth/Height' and just pass on the original values.
+            //
+            // [Workaround]
+
+            if (scale <= 0) scale = Starling.contentScaleFactor;
+
+            var legalWidth:Number  = width;
+            var legalHeight:Number = height;
+
+            if (!supportsNonPotDimensions)
+            {
+                legalWidth  = getNextPowerOfTwo(width  * scale) / scale;
+                legalHeight = getNextPowerOfTwo(height * scale) / scale;
+            }
+
+            // [/Workaround]
+
+            mActiveTexture = Texture.empty(legalWidth, legalHeight, PMA, false, true, scale);
+            mActiveTexture.root.onRestore = mActiveTexture.root.clear;
             
-            var nativeWidth:int  = getNextPowerOfTwo(width  * scale);
-            var nativeHeight:int = getNextPowerOfTwo(height * scale);
-            mActiveTexture = Texture.empty(width, height, PMA, true, scale);
+            super(mActiveTexture, new Rectangle(0, 0, width, height), true, null, false);
             
-            super(mActiveTexture, new Rectangle(0, 0, width, height), true);
+            var rootWidth:Number  = mActiveTexture.root.width;
+            var rootHeight:Number = mActiveTexture.root.height;
             
             mSupport = new RenderSupport();
-            mSupport.setOrthographicProjection(0, 0, nativeWidth/scale, nativeHeight/scale);
+            mSupport.setOrthographicProjection(0, 0, rootWidth, rootHeight);
             
             if (persistent)
             {
-                mBufferTexture = Texture.empty(width, height, PMA, true, scale);
+                mBufferTexture = Texture.empty(legalWidth, legalHeight, PMA, false, true, scale);
+                mBufferTexture.root.onRestore = mBufferTexture.root.clear;
                 mHelperImage = new Image(mBufferTexture);
                 mHelperImage.smoothing = TextureSmoothing.NONE; // solves some antialias-issues
             }
@@ -98,6 +120,7 @@ package starling.textures
         public override function dispose():void
         {
             mSupport.dispose();
+            mActiveTexture.dispose();
             
             if (isPersistent) 
             {
@@ -116,33 +139,47 @@ package starling.textures
          *                      properties for position, scale, and rotation. If it is not null,
          *                      the object will be drawn in the orientation depicted by the matrix.
          *  @param alpha        The object's alpha value will be multiplied with this value.
-         *  @param antiAliasing This parameter is currently ignored by Stage3D.
+         *  @param antiAliasing Only supported beginning with AIR 13, and only on Desktop.
+         *                      Values range from 0 (no antialiasing) to 4 (best quality).
          */
-        public function draw(object:DisplayObject, matrix:Matrix=null, alpha:Number=1.0, 
+        public function draw(object:DisplayObject, matrix:Matrix=null, alpha:Number=1.0,
                              antiAliasing:int=0):void
         {
             if (object == null) return;
             
             if (mDrawing)
-                render();
+                render(object, matrix, alpha);
             else
-                drawBundled(render, antiAliasing);
-            
-            function render():void
-            {
-                mSupport.loadIdentity();
-                mSupport.blendMode = object.blendMode;
-                
-                if (matrix) mSupport.prependMatrix(matrix);
-                else        mSupport.transformMatrix(object);
-                
-                object.render(mSupport, alpha);
-            }
+                renderBundled(render, object, matrix, alpha, antiAliasing);
         }
         
         /** Bundles several calls to <code>draw</code> together in a block. This avoids buffer 
-         *  switches and allows you to draw multiple objects into a non-persistent texture. */
+         *  switches and allows you to draw multiple objects into a non-persistent texture.
+         *  Note that the 'antiAliasing' setting provided here overrides those provided in
+         *  individual 'draw' calls.
+         *  
+         *  @param drawingBlock: a callback with the form: <pre>function():void;</pre>
+         *  @param antiAliasing: Only supported beginning with AIR 13, and only on Desktop.
+         *                       Values range from 0 (no antialiasing) to 4 (best quality). */
         public function drawBundled(drawingBlock:Function, antiAliasing:int=0):void
+        {
+            renderBundled(drawingBlock, null, null, 1.0, antiAliasing);
+        }
+        
+        private function render(object:DisplayObject, matrix:Matrix=null, alpha:Number=1.0):void
+        {
+            mSupport.loadIdentity();
+            mSupport.blendMode = object.blendMode;
+            
+            if (matrix) mSupport.prependMatrix(matrix);
+            else        mSupport.transformMatrix(object);
+            
+            object.render(mSupport, alpha);
+        }
+        
+        private function renderBundled(renderBlock:Function, object:DisplayObject=null,
+                                       matrix:Matrix=null, alpha:Number=1.0,
+                                       antiAliasing:int=0):void
         {
             var context:Context3D = Starling.context;
             if (context == null) throw new MissingContextError();
@@ -160,10 +197,10 @@ package starling.textures
             }
             
             // limit drawing to relevant area
-            sScissorRect.setTo(0, 0, mActiveTexture.nativeWidth, mActiveTexture.nativeHeight);
+            sClipRect.setTo(0, 0, mActiveTexture.width, mActiveTexture.height);
 
-            mSupport.scissorRectangle = sScissorRect;
-            mSupport.renderTarget = mActiveTexture;
+            mSupport.pushClipRect(sClipRect);
+            mSupport.setRenderTarget(mActiveTexture, antiAliasing);
             mSupport.clear();
             
             // draw buffer
@@ -175,10 +212,7 @@ package starling.textures
             try
             {
                 mDrawing = true;
-                
-                // draw new objects
-                if (drawingBlock != null)
-                    drawingBlock();
+                execute(renderBlock, object, matrix, alpha);
             }
             finally
             {
@@ -186,21 +220,72 @@ package starling.textures
                 mSupport.finishQuadBatch();
                 mSupport.nextFrame();
                 mSupport.renderTarget = null;
-                mSupport.scissorRectangle = null;
+                mSupport.popClipRect();
             }
         }
         
-        /** Clears the texture (restoring full transparency). */
-        public function clear():void
+        /** Clears the render texture with a certain color and alpha value. Call without any
+         *  arguments to restore full transparency. */
+        public function clear(rgb:uint=0, alpha:Number=0.0):void
         {
             var context:Context3D = Starling.context;
             if (context == null) throw new MissingContextError();
             
             mSupport.renderTarget = mActiveTexture;
-            mSupport.clear();
+            mSupport.clear(rgb, alpha);
             mSupport.renderTarget = null;
         }
         
+        // workaround for iPad 1
+
+        /** On the iPad 1 (and maybe other hardware?) clearing a non-POT RectangleTexture causes
+         *  an error in the next "createVertexBuffer" call. Thus, we're forced to make this
+         *  really ... elegant check here. */
+        private function get supportsNonPotDimensions():Boolean
+        {
+            var target:Starling = Starling.current;
+            var context:Context3D = Starling.context;
+            var support:Object = target.contextData[CONTEXT_POT_SUPPORT_KEY];
+
+            if (support == null)
+            {
+                if (target.profile != "baselineConstrained" && "createRectangleTexture" in context)
+                {
+                    var texture:TextureBase;
+                    var buffer:VertexBuffer3D;
+
+                    try
+                    {
+                        texture = context["createRectangleTexture"](2, 3, "bgra", true);
+                        context.setRenderToTexture(texture);
+                        context.clear();
+                        context.setRenderToBackBuffer();
+                        context.createVertexBuffer(1, 1);
+                        support = true;
+                    }
+                    catch (e:Error)
+                    {
+                        support = false;
+                    }
+                    finally
+                    {
+                        if (texture) texture.dispose();
+                        if (buffer) buffer.dispose();
+                    }
+                }
+                else
+                {
+                    support = false;
+                }
+
+                target.contextData[CONTEXT_POT_SUPPORT_KEY] = support;
+            }
+
+            return support;
+        }
+
+        // properties
+
         /** Indicates if the texture is persistent over multiple draw calls. */
         public function get isPersistent():Boolean { return mBufferTexture != null; }
         

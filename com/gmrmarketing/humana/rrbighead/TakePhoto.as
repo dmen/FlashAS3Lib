@@ -3,6 +3,7 @@ package com.gmrmarketing.humana.rrbighead
 	import flash.display.*;	
 	import flash.events.*;	
 	import com.greensock.TweenMax;
+	import com.greensock.easing.*;
 	import com.gmrmarketing.utilities.CamPic;	
 	import flash.geom.Matrix;
 	import flash.media.Video;
@@ -79,6 +80,13 @@ package com.gmrmarketing.humana.rrbighead
 			
 			clip.whiteFlash.visible = false;
 			
+			clip.position.x = 1700;			
+			clip.dontForget.x = 1700;
+			clip.btnTake.x = 1700;//1308
+			clip.position.alpha = 0;
+			clip.dontForget.alpha = 0;
+			clip.btnTake.alpha = 0;
+			
 			clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, startCountdown, false, 0, true);
 			
 			//vid.attachCamera(cam);
@@ -89,7 +97,9 @@ package com.gmrmarketing.humana.rrbighead
 			tim.buttonClicked();//reset timeout
 			
 			TweenMax.to(clip, 1, { alpha:1, delay:.25, onComplete:showing } );
-			//TweenMax.from(clip.theText, 1, { alpha:0, x:"100", delay:.5 } );
+			TweenMax.to(clip.position, .4, { x:1308, alpha:1, ease:Back.easeOut, delay:.5 } );
+			TweenMax.to(clip.dontForget, .4, { x:1308, alpha:1, ease:Back.easeOut, delay:.8 } );
+			TweenMax.to(clip.btnTake, .4, { x:1308, alpha:1, ease:Back.easeOut, delay:1 } );			
 		}
 		
 		
@@ -128,7 +138,7 @@ package com.gmrmarketing.humana.rrbighead
 		
 		
 		private function showing():void
-		{			
+		{	
 			dispatchEvent(new Event(TAKE_SHOWING));
 		}
 		

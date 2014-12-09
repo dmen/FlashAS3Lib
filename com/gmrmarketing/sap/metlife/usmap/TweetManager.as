@@ -33,7 +33,7 @@ package com.gmrmarketing.sap.metlife.usmap
 			container = $container;
 		}
 		
-		//called from Main.dateReady()
+		//called from Main.show()
 		public function start():void
 		{
 			isRunning = true;
@@ -104,25 +104,26 @@ package com.gmrmarketing.sap.metlife.usmap
 		private function displayNext():void
 		{
 			var a:Tweet;
-			
-			var tw:Object = localCache[cacheIndex];
-			cacheIndex++;
-			if (cacheIndex >= localCache.length) {
-				cacheIndex = 0;
-				needsRefreshing = true;
+			if(localCache.length){
+				var tw:Object = localCache[cacheIndex];
+				cacheIndex++;
+				if (cacheIndex >= localCache.length) {
+					cacheIndex = 0;
+					needsRefreshing = true;
+				}
+				
+				a = new Tweet();
+				a.setContainer(container);
+				a.addEventListener(Tweet.COMPLETE, recycleQuadrant);
+				
+				if (q0) {				
+					q0 = false; //mark as used
+					a.show(tw.user, tw.message, tw.theX, tw.theY, 0);				
+				}else if (q1) {				
+					q1 = false; //mark as used
+					a.show(tw.user, tw.message, tw.theX, tw.theY, 1);
+				}			
 			}
-			
-			a = new Tweet();
-			a.setContainer(container);
-			a.addEventListener(Tweet.COMPLETE, recycleQuadrant);
-			
-			if (q0) {				
-				q0 = false; //mark as used
-				a.show(tw.user, tw.message, tw.theX, tw.theY, 0);				
-			}else if (q1) {				
-				q1 = false; //mark as used
-				a.show(tw.user, tw.message, tw.theX, tw.theY, 1);
-			}			
 		}
 		
 		

@@ -116,6 +116,13 @@ package com.gmrmarketing.humana.rrbighead
 			clip.outlineHeadband.gotoAndStop(1);//gray outlines
 			clip.outlineMoustache.gotoAndStop(1);
 			
+			clip.btnRetake.x = 1300;
+			clip.btnRetake.alpha = 0;
+			clip.btnPrint.x = 1400;
+			clip.btnPrint.alpha = 0;
+			
+			TweenMax.to(clip.btnRetake, .5, { x:980, alpha:1, ease:Back.easeOut, delay:.5 });
+			TweenMax.to(clip.btnPrint, .5, { x:1252, alpha:1, ease:Back.easeOut, delay:.75 });
 			TweenMax.to(clip, 1, { alpha:1, onComplete:showing } );			
 		}
 		

@@ -21,14 +21,17 @@ package com.gmrmarketing.nissan.rodale2013
 		{			
 		}
 		
-		
+		/**
+		 * Comes in as 800x800 bmd
+		 * @param	bmd
+		 */
 		public function beginPrint(bmd:BitmapData):void 
 		{
-			var mat:Matrix = new Matrix();
-			mat.scale(4, 4);
+			//var mat:Matrix = new Matrix();
+			//mat.scale(4, 4);
 			
-			var printBMD:BitmapData = new BitmapData(3200, 3200);
-			printBMD.draw(bmd, mat, null, null, null, true);
+			//var printBMD:BitmapData = new BitmapData(3200, 3200);
+			//printBMD.draw(bmd, mat, null, null, null, true);
 			
             var printJob:PrintJob = new PrintJob();
             
@@ -38,7 +41,7 @@ package com.gmrmarketing.nissan.rodale2013
 			if (printJob.start2(null, false)) {				
 				
 				var page:Sprite = new Sprite();
-				var bmp:Bitmap = new Bitmap(printBMD);				
+				var bmp:Bitmap = new Bitmap(bmd);//printBMD);				
 				
 				page.addChild(bmp);
 				page.width = printJob.pageWidth;

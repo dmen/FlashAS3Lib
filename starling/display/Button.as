@@ -76,7 +76,18 @@ package starling.display
             addChild(mContents);
             addEventListener(TouchEvent.TOUCH, onTouch);
             
-            if (text.length != 0) this.text = text;
+            this.touchGroup = true;
+            this.text = text;
+        }
+        
+        /** @inheritDoc */
+        public override function dispose():void
+        {
+            // text field might be disconnected from parent, so we have to dispose it manually
+            if (mTextField)
+                mTextField.dispose();
+            
+            super.dispose();
         }
         
         private function resetContents():void
@@ -96,7 +107,7 @@ package starling.display
                 mTextField.hAlign = HAlign.CENTER;
                 mTextField.touchable = false;
                 mTextField.autoScale = true;
-                mContents.addChild(mTextField);
+                mTextField.batchable = true;
             }
             
             mTextField.width  = mTextBounds.width;
@@ -165,10 +176,24 @@ package starling.display
         public function get text():String { return mTextField ? mTextField.text : ""; }
         public function set text(value:String):void
         {
-            createTextField();
-            mTextField.text = value;
+            if (value.length == 0)
+            {
+                if (mTextField)
+                {
+                    mTextField.text = value;
+                    mTextField.removeFromParent();
+                }
+            }
+            else
+            {
+                createTextField();
+                mTextField.text = value;
+                
+                if (mTextField.parent == null)
+                    mContents.addChild(mTextField);
+            }
         }
-       
+        
         /** The name of the font displayed on the button. May be a system font or a registered 
           * bitmap font. */
         public function get fontName():String { return mTextField ? mTextField.fontName : "Verdana"; }
@@ -225,7 +250,11 @@ package starling.display
         }
         
         /** The vertical alignment of the text on the button. */
-        public function get textVAlign():String { return mTextField.vAlign; }
+        public function get textVAlign():String
+        {
+            return mTextField ? mTextField.vAlign : VAlign.CENTER;
+        }
+        
         public function set textVAlign(value:String):void
         {
             createTextField();
@@ -233,7 +262,11 @@ package starling.display
         }
         
         /** The horizontal alignment of the text on the button. */
-        public function get textHAlign():String { return mTextField.hAlign; }
+        public function get textHAlign():String
+        {
+            return mTextField ? mTextField.hAlign : HAlign.CENTER;
+        }
+        
         public function set textHAlign(value:String):void
         {
             createTextField();

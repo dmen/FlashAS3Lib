@@ -23,7 +23,7 @@
 				yVel *= -1;
 			}
 			draw();
-			addEventListener(Event.ENTER_FRAME, loop);
+			//addEventListener(Event.ENTER_FRAME, loop);
 		}
 		
 		private function draw():void
@@ -31,7 +31,7 @@
 			var angleStep:Number = .5;
 			var curAngle:Number = 0;
 			
-			var radiusVar:Number = Math.random() * 15;
+			var radiusVar:Number = Math.random() * 25;
 			var xPos:Number = (myRadius + radiusVar) * Math.cos(curAngle);
 			var yPos:Number = (myRadius + radiusVar) * Math.sin(curAngle);
 			var initX = xPos;
@@ -40,8 +40,8 @@
 			//var aTexture:BitmapData = new AsTexture(;
 			
 			//graphics.lineStyle(1, 0xFFFFFF, 1);
-			graphics.beginBitmapFill(new AsTexture(283,259),null,false);
-			//graphics.beginFill(0x888888, .2);
+			//graphics.beginBitmapFill(new wcTex(171,166),null, true, true);
+			graphics.beginFill(0x803a0d0, .3);
 			graphics.moveTo(initX, initY);
 			
 			while (curAngle < Math.PI * 2)

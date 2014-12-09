@@ -102,6 +102,20 @@ package starling.animation
             }
         }
         
+        /** Figures out if the juggler contains one or more tweens with a certain target. */
+        public function containsTweens(target:Object):Boolean
+        {
+            if (target == null) return false;
+            
+            for (var i:int=mObjects.length-1; i>=0; --i)
+            {
+                var tween:Tween = mObjects[i] as Tween;
+                if (tween && tween.target == target) return true;
+            }
+            
+            return false;
+        }
+        
         /** Removes all objects at once. */
         public function purge():void
         {
@@ -118,20 +132,49 @@ package starling.animation
             }
         }
         
-        /** Delays the execution of a function until a certain time has passed. Creates an
-         *  object of type 'DelayedCall' internally and returns it. Remove that object
-         *  from the juggler to cancel the function call. */
-        public function delayCall(call:Function, delay:Number, ...args):DelayedCall
+        /** Delays the execution of a function until <code>delay</code> seconds have passed.
+         *  This method provides a convenient alternative for creating and adding a DelayedCall
+         *  manually.
+         *
+         *  <p>To cancel the call, pass the returned 'IAnimatable' instance to 'Juggler.remove()'.
+         *  Do not use the returned IAnimatable otherwise; it is taken from a pool and will be
+         *  reused.</p> */
+        public function delayCall(call:Function, delay:Number, ...args):IAnimatable
         {
             if (call == null) return null;
             
-            var delayedCall:DelayedCall = new DelayedCall(call, delay, args);
+            var delayedCall:DelayedCall = DelayedCall.starling_internal::fromPool(call, delay, args);
+            delayedCall.addEventListener(Event.REMOVE_FROM_JUGGLER, onPooledDelayedCallComplete);
             add(delayedCall);
+
+            return delayedCall; 
+        }
+
+        /** Runs a function at a specified interval (in seconds). A 'repeatCount' of zero
+         *  means that it runs indefinitely.
+         *
+         *  <p>To cancel the call, pass the returned 'IAnimatable' instance to 'Juggler.remove()'.
+         *  Do not use the returned IAnimatable otherwise; it is taken from a pool and will be
+         *  reused.</p> */
+        public function repeatCall(call:Function, interval:Number, repeatCount:int=0, ...args):IAnimatable
+        {
+            if (call == null) return null;
+            
+            var delayedCall:DelayedCall = DelayedCall.starling_internal::fromPool(call, interval, args);
+            delayedCall.repeatCount = repeatCount;
+            delayedCall.addEventListener(Event.REMOVE_FROM_JUGGLER, onPooledDelayedCallComplete);
+            add(delayedCall);
+            
             return delayedCall;
         }
         
-        /** Utilizes a tween to animate the target object over a certain time. Internally, this
-         *  method uses a tween instance (taken from an object pool) that is added to the
+        private function onPooledDelayedCallComplete(event:Event):void
+        {
+            DelayedCall.starling_internal::toPool(event.target as DelayedCall);
+        }
+        
+        /** Utilizes a tween to animate the target object over <code>time</code> seconds. Internally,
+         *  this method uses a tween instance (taken from an object pool) that is added to the
          *  juggler right away. This method provides a convenient alternative for creating 
          *  and adding a tween manually.
          *  
@@ -145,8 +188,11 @@ package starling.animation
          *      x: 50      // -> tween.animate("x", 50)
          *  });
          *  </pre> 
-         */
-        public function tween(target:Object, time:Number, properties:Object):void
+         *
+         *  <p>To cancel the tween, call 'Juggler.removeTweens' with the same target, or pass
+         *  the returned 'IAnimatable' instance to 'Juggler.remove()'. Do not use the returned
+         *  IAnimatable otherwise; it is taken from a pool and will be reused.</p> */
+        public function tween(target:Object, time:Number, properties:Object):IAnimatable
         {
             var tween:Tween = Tween.starling_internal::fromPool(target, time);
             
@@ -164,6 +210,8 @@ package starling.animation
             
             tween.addEventListener(Event.REMOVE_FROM_JUGGLER, onPooledTweenComplete);
             add(tween);
+
+            return tween;
         }
         
         private function onPooledTweenComplete(event:Event):void
@@ -222,7 +270,10 @@ package starling.animation
                 add(tween.nextTween);
         }
         
-        /** The total life time of the juggler. */
-        public function get elapsedTime():Number { return mElapsedTime; }        
+        /** The total life time of the juggler (in seconds). */
+        public function get elapsedTime():Number { return mElapsedTime; }
+ 
+        /** The actual vector that contains all objects that are currently being animated. */
+        protected function get objects():Vector.<IAnimatable> { return mObjects; }
     }
 }

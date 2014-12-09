@@ -52,7 +52,7 @@ package com.gmrmarketing.humana.rrbighead
 		
 		private function animButton(e:TimerEvent):void
 		{
-			TweenMax.to(clip.btn, .25, { x:200, ease:Bounce.easeOut } );
+			TweenMax.to(clip.btn, .25, { x:200 } );
 			TweenMax.to(clip.btn, .5, { x:96, ease:Bounce.easeOut, delay:.3 } );
 		}
 		

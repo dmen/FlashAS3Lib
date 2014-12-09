@@ -10,6 +10,8 @@
 
 package starling.utils
 {
+    import flash.geom.Matrix;
+    import flash.geom.Point;
     import flash.geom.Rectangle;
     
     import starling.errors.AbstractClassError;
@@ -17,6 +19,11 @@ package starling.utils
     /** A utility class containing methods related to the Rectangle class. */
     public class RectangleUtil
     {
+        /** Helper objects. */
+        private static const sHelperPoint:Point = new Point();
+        private static const sPositions:Vector.<Point> =
+            new <Point>[ new Point(0, 0), new Point(1, 0), new Point(0, 1), new Point(1, 1) ];
+
         /** @private */
         public function RectangleUtil() { throw new AbstractClassError(); }
         
@@ -27,10 +34,10 @@ package starling.utils
         {
             if (resultRect == null) resultRect = new Rectangle();
             
-            var left:Number   = Math.max(rect1.x, rect2.x);
-            var right:Number  = Math.min(rect1.x + rect1.width, rect2.x + rect2.width);
-            var top:Number    = Math.max(rect1.y, rect2.y);
-            var bottom:Number = Math.min(rect1.y + rect1.height, rect2.y + rect2.height);
+            var left:Number   = rect1.x      > rect2.x      ? rect1.x      : rect2.x;
+            var right:Number  = rect1.right  < rect2.right  ? rect1.right  : rect2.right;
+            var top:Number    = rect1.y      > rect2.y      ? rect1.y      : rect2.y;
+            var bottom:Number = rect1.bottom < rect2.bottom ? rect1.bottom : rect2.bottom;
             
             if (left > right || top > bottom)
                 resultRect.setEmpty();
@@ -110,6 +117,50 @@ package starling.utils
             }
             
             return 1.0 / divisor;
+        }
+        
+        /** If the rectangle contains negative values for width or height, all coordinates
+         *  are adjusted so that the rectangle describes the same region with positive values. */
+        public static function normalize(rect:Rectangle):void
+        {
+            if (rect.width < 0)
+            {
+                rect.width = -rect.width;
+                rect.x -= rect.width;
+            }
+            
+            if (rect.height < 0)
+            {
+                rect.height = -rect.height;
+                rect.y -= rect.height;
+            }
+        }
+
+        /** Calculates the bounds of a rectangle after transforming it by a matrix.
+         *  If you pass a 'resultRect', the result will be stored in this rectangle
+         *  instead of creating a new object. */
+        public static function getBounds(rectangle:Rectangle, transformationMatrix:Matrix,
+                                         resultRect:Rectangle=null):Rectangle
+        {
+            if (resultRect == null) resultRect = new Rectangle();
+            
+            var minX:Number = Number.MAX_VALUE, maxX:Number = -Number.MAX_VALUE;
+            var minY:Number = Number.MAX_VALUE, maxY:Number = -Number.MAX_VALUE;
+            
+            for (var i:int=0; i<4; ++i)
+            {
+                MatrixUtil.transformCoords(transformationMatrix,
+                    sPositions[i].x * rectangle.width, sPositions[i].y * rectangle.height,
+                    sHelperPoint);
+                
+                if (minX > sHelperPoint.x) minX = sHelperPoint.x;
+                if (maxX < sHelperPoint.x) maxX = sHelperPoint.x;
+                if (minY > sHelperPoint.y) minY = sHelperPoint.y;
+                if (maxY < sHelperPoint.y) maxY = sHelperPoint.y;
+            }
+            
+            resultRect.setTo(minX, minY, maxX - minX, maxY - minY);
+            return resultRect;
         }
     }
 }

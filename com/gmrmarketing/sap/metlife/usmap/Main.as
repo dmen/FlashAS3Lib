@@ -192,7 +192,7 @@ package com.gmrmarketing.sap.metlife.usmap
 			
 			_scene.getChildByName("Plane").setMaterial(_videoPlaneMaterial);		
 			
-			//show();
+			//show();//TESTING
 		}		
 		
 		

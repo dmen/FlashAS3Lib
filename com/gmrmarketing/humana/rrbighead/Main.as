@@ -4,14 +4,10 @@ package com.gmrmarketing.humana.rrbighead
 	import flash.display.*;
 	import flash.events.*;
 	import flash.ui.Mouse;
-	import com.gmrmarketing.utilities.TimeoutHelper;
-	import com.gmrmarketing.nissan.rodale2013.Print;
+	import com.gmrmarketing.utilities.TimeoutHelper;	
 	import flash.net.SharedObject;
 	import flash.desktop.NativeApplication;
-	//for saving images to the local filesystem
-	import flash.utils.ByteArray;
-	import flash.filesystem.*; 
-	import com.adobe.images.JPEGEncoder;
+	
 	
 	
 	public class Main extends MovieClip 
@@ -20,8 +16,7 @@ package com.gmrmarketing.humana.rrbighead
 		
 		private var intro:Intro;
 		private var take:TakePhoto;
-		private var confirm:Confirm; //overlay screen
-		private var print:Print;
+		private var confirm:Confirm; //overlay screen		
 		private var thanks:ThankYou;
 		private var dialog:Dialog;
 		
@@ -65,9 +60,7 @@ package com.gmrmarketing.humana.rrbighead
 			thanks.container = mainContainer;
 			
 			dialog = new Dialog();
-			dialog.container = mainContainer;			
-			
-			print = new Print();
+			dialog.container = mainContainer;	
 			
 			cq = new CornerQuit();
 			cq.init(cornerContainer, "ul");
@@ -79,6 +72,16 @@ package com.gmrmarketing.humana.rrbighead
 		
 		private function init():void
 		{
+			//remove any listeners
+			take.removeEventListener(TakePhoto.PIC_TAKEN, picTaken);
+			take.removeEventListener(TakePhoto.TAKE_SHOWING, removeIntro);
+			confirm.removeEventListener(Confirm.RETAKE, retake);
+			confirm.removeEventListener(Confirm.PRINT, beginPrint);
+			confirm.removeEventListener(Confirm.CONFIRM_SHOWING, removeTakePhoto);
+			thanks.removeEventListener(ThankYou.SHOWING, removeConfirm);
+			thanks.removeEventListener(ThankYou.COMPLETE, resetApp);
+			thanks.removeEventListener(ThankYou.PRINT_ERROR, printError);
+			
 			tim.buttonClicked();
 			thanks.hide();
 			intro.addEventListener(Intro.BEGIN, introComplete);
@@ -163,24 +166,21 @@ package com.gmrmarketing.humana.rrbighead
 		 */
 		private function beginPrint(e:Event):void
 		{
+			confirm.removeEventListener(Confirm.RETAKE, retake);
+			confirm.removeEventListener(Confirm.PRINT, beginPrint);
+			confirm.removeEventListener(Confirm.CONFIRM_SHOWING, removeTakePhoto);
+			
 			tim.buttonClicked();
-			
-			//take.killCam(); //turns off the camera
-			
-			thanks.addEventListener(ThankYou.SHOWING, removeConfirm, false, 0, true);
-			thanks.addEventListener(ThankYou.COMPLETE, resetApp, false, 0, true);			
-			thanks.show(confirm.getPic());//800x800 bmd			
-						
-			print.addEventListener(Print.ADD_ERROR, printError, false, 0, true);//removed in resetApp()
-			print.addEventListener(Print.SEND_ERROR, printError, false, 0, true);
-			print.beginPrint(confirm.getPic());//800x800
-			
-			//save full image to local HD
-			writeImage(confirm.getPic(false)); //false to not include white cirle
 			
 			numPrints++;
 			so.data.prints = numPrints;			
 			so.flush();
+			
+			thanks.addEventListener(ThankYou.SHOWING, removeConfirm, false, 0, true);
+			thanks.addEventListener(ThankYou.COMPLETE, thanksComplete, false, 0, true);
+			thanks.addEventListener(ThankYou.PRINT_ERROR, printError, false, 0, true);
+			thanks.setPic(confirm.getPic());			
+			thanks.show();
 		}
 		
 		
@@ -195,16 +195,20 @@ package com.gmrmarketing.humana.rrbighead
 		{
 			dialog.show("An error occurred.\nPlease check the printer");
 		}
+		
 			
+		private function thanksComplete(e:Event):void
+		{
+			init();//init removes all listeners
+		}
+		
+		
 		/**
 		 * Called if tim times out
 		 * @param	e
 		 */
 		private function resetApp(e:Event = null):void
 		{
-			thanks.removeEventListener(ThankYou.COMPLETE, resetApp);
-			print.removeEventListener(Print.ADD_ERROR, printError);
-			print.removeEventListener(Print.SEND_ERROR, printError);
 			init();//shows intro
 		}
 		
@@ -219,30 +223,7 @@ package com.gmrmarketing.humana.rrbighead
 		}
 		
 		
-		/**
-		 * 
-		 * @param	bmpd
-		 */
-		private function writeImage(bmpd:BitmapData):void
-		{
-			var encoder:JPEGEncoder = new JPEGEncoder(82);
-			var ba:ByteArray = encoder.encode(bmpd);
-			
-			var a:Date = new Date();
-			var fileName:String = "humana_bh_rr_" + String(a.valueOf()) + ".jpg";			
-			
-			try{
-				var file:File = File.documentsDirectory.resolvePath( fileName );
-				var stream:FileStream = new FileStream();
-				stream.open( file, FileMode.APPEND );
-				stream.writeBytes (ba, 0, ba.length );
-				stream.close();
-				file = null;
-				stream = null;
-			}catch (e:Error) {
-				
-			}
-		}		
+		
 	}
 	
 }
