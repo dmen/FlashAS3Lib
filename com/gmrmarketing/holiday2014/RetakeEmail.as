@@ -7,8 +7,9 @@ package com.gmrmarketing.holiday2014
 	public class RetakeEmail extends EventDispatcher
 	{
 		public static const RETAKE:String = "retakePressed";
-		public static const CONTINUE:String = "continuePressed";
+		public static const CANCEL:String = "cancelPressed";
 		public static const EMAIL:String = "emailPressed";
+		
 		private var myContainer:DisplayObjectContainer;
 		private var clip:MovieClip;
 		
@@ -35,7 +36,7 @@ package com.gmrmarketing.holiday2014
 				}
 			}
 			clip.btnRetake.addEventListener(MouseEvent.MOUSE_DOWN, doRetake, false, 0, true);
-			clip.btnCancel.addEventListener(MouseEvent.MOUSE_DOWN, doContinue, false, 0, true);
+			clip.btnCancel.addEventListener(MouseEvent.MOUSE_DOWN, doCancel, false, 0, true);
 			clip.btnEmail.addEventListener(MouseEvent.MOUSE_DOWN, doEmail, false, 0, true);
 		}
 		
@@ -47,9 +48,9 @@ package com.gmrmarketing.holiday2014
 					myContainer.removeChild(clip);
 				}
 			}
-			clip.btnRetake.addEventListener(MouseEvent.MOUSE_DOWN, doRetake);
-			clip.btnContinue.addEventListener(MouseEvent.MOUSE_DOWN, doContinue);
-			clip.btnEmail.addEventListener(MouseEvent.MOUSE_DOWN, doEmail);
+			clip.btnRetake.removeEventListener(MouseEvent.MOUSE_DOWN, doRetake);
+			clip.btnCancel.removeEventListener(MouseEvent.MOUSE_DOWN, doCancel);
+			clip.btnEmail.removeEventListener(MouseEvent.MOUSE_DOWN, doEmail);
 		}
 		
 		
@@ -59,9 +60,9 @@ package com.gmrmarketing.holiday2014
 		}
 		
 		
-		private function doContinue(e:MouseEvent):void
+		private function doCancel(e:MouseEvent):void
 		{
-			dispatchEvent(new Event(CONTINUE));
+			dispatchEvent(new Event(CANCEL));
 		}
 		
 		

@@ -21,6 +21,7 @@ package com.gmrmarketing.holiday2014
 			
 			pRotation = 0;
 			
+			//cyan,blue,bright pink/purple,red,purple
 			particles = new Array(new p1(), new p2(), new p3(), new p4(), new p5());
 			particleIndex = 0;
 			
@@ -61,10 +62,10 @@ package com.gmrmarketing.holiday2014
 			var ty:int;
 			
 			if(r < .5){		
-				tx = 1400 + 400 * Math.random();
+				tx = 1300 + 580 * Math.random();
 				ty= 100 + 800 * Math.random();
 			}else{		
-				tx = 100 + 500 * Math.random();
+				tx = 50 + 600 * Math.random();//first 650
 				ty = 100 + 800 * Math.random();
 			}	
 			

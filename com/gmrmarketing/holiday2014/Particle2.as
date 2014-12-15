@@ -33,7 +33,7 @@ package com.gmrmarketing.holiday2014
 			
 			addChild(bit);//add to this sprite
 			
-			startAlpha = .3 + Math.random() * .5;
+			startAlpha = .5 + Math.random() * .5;
 			alphaVel = startAlpha / lifeTime;
 			alpha = startAlpha;
 			

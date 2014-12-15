@@ -16,6 +16,8 @@ package com.gmrmarketing.holiday2014
 	public class Take extends EventDispatcher
 	{
 		public static const TAKE:String = "takePressed";
+		public static const BWPRESED:String = "bwPressed";
+		public static const COLORPRESSED:String = "colorPressed";
 		private const rc:Number = .30;
 		private const gc:Number = .59;
 		private const bc:Number = .11;
@@ -29,6 +31,8 @@ package com.gmrmarketing.holiday2014
 		private var camScaler:Matrix;
 		private var useBW:Boolean;
 		
+		private var theHeff:BitmapData;
+		private var heffShowing:Boolean;
 		
 		public function Take():void
 		{			
@@ -36,8 +40,8 @@ package com.gmrmarketing.holiday2014
 			
 			displayData = new BitmapData(1442, 811);			
 			display = new Bitmap(displayData, "auto", true);			
-			display.x = 229;//camMask at 544
-			display.y = 87;	
+			display.x = 249;//camMask at 565,87
+			display.y = 86;	
 			
 			camScaler = new Matrix(-1, 0, 0, 1, 1442, 0);//mirror cam
 			//camScaler.scale(.751, .751); //scales to 1920x1080 to 1442x811
@@ -51,6 +55,9 @@ package com.gmrmarketing.holiday2014
 			theVideo = new Video(1442, 811);
 			theVideo.attachCamera(cam);
 			
+			theHeff = new heffBMD();					
+			heffShowing = false;
+			
 			useBW = false;
 		}
 		
@@ -61,6 +68,12 @@ package com.gmrmarketing.holiday2014
 		}
 		
 		
+		public function heff():void
+		{
+			heffShowing = !heffShowing;			
+		}
+		
+		
 		public function show():void
 		{
 			if (myContainer) {
@@ -68,10 +81,13 @@ package com.gmrmarketing.holiday2014
 					myContainer.addChild(clip);
 				}
 			}
+			
+			heffShowing = false;
+			
 			clip.x = 1920;
 			TweenMax.to(clip, .5, { x: 0, delay:.5, ease:Back.easeOut, ease:Linear.easeNone } );
 			
-			clip.addChild(display);
+			clip.addChildAt(display,0);
 			display.mask = clip.camMask;
 			display.alpha = 0;
 			TweenMax.to(display, .5, { alpha:1, delay:1 } );
@@ -90,14 +106,34 @@ package com.gmrmarketing.holiday2014
 		
 		
 		/**
-		 * returns the current camera image
+		 * returns the current color and black and white camera image
+		 * Both are 811x811
 		 * @return
 		 */
-		public function getPic():BitmapData
+		public function getPic():Array
 		{
-			var b:BitmapData = new BitmapData(811, 811);
-			b.copyPixels(displayData, new Rectangle(clip.camMask.x - display.x, 0, 811, 811), new Point(0, 0));
-			return b;
+			displayData.lock();
+			//color
+			displayData.draw(theVideo, camScaler, null, null, null, true);
+			
+			if (heffShowing) {
+				displayData.copyPixels(theHeff, new Rectangle(0, 0, 617, 716), new Point(520, 113), null, null, true);
+			}
+			
+			var colorImage:BitmapData = new BitmapData(811, 811);
+			var bwImage:BitmapData = new BitmapData(811, 811);
+			
+			colorImage.copyPixels(displayData, new Rectangle(clip.camMask.x - display.x, 0, 811, 811), new Point(0, 0));
+			
+			//bw image
+			displayData.applyFilter(displayData, displayData.rect, new Point(), new ColorMatrixFilter([rc, gc, bc, 0, 0, rc, gc, bc, 0, 0, rc, gc, bc, 0, 0, 0, 0, 0, 1, 0]));			
+			
+			
+			bwImage.copyPixels(displayData, new Rectangle(clip.camMask.x - display.x, 0, 811, 811), new Point(0, 0));
+			
+			displayData.unlock();
+			
+			return new Array(colorImage, bwImage);
 		}
 		
 		
@@ -108,24 +144,30 @@ package com.gmrmarketing.holiday2014
 					myContainer.removeChild(clip);
 				}
 			}
-			clip.outline.x = 63;//reset to color side
+			clip.outline.x = 84;//reset to color side
 			clip.btnPic1.removeEventListener(MouseEvent.MOUSE_DOWN, picColor);
 			clip.btnPic2.removeEventListener(MouseEvent.MOUSE_DOWN, picBW);
 			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, takePic);
 		}
 		
 		
-		private function picColor(e:MouseEvent):void
+		public function picColor(e:MouseEvent = null):void
 		{
-			TweenMax.to(clip.outline, .5, { x:63, ease:Back.easeOut } );
-			useBW = false;
+			TweenMax.to(clip.outline, .5, { x:84, ease:Back.easeOut } );
+			useBW = false;			
+			dispatchEvent(new Event(COLORPRESSED));			
 		}
 		
-		
-		private function picBW(e:MouseEvent):void
+		public function isColor():Boolean
 		{
-			TweenMax.to(clip.outline, .5, { x:265, ease:Back.easeOut } );
-			useBW = true;			
+			return !useBW;
+		}
+		
+		public function picBW(e:MouseEvent = null):void
+		{
+			TweenMax.to(clip.outline, .5, { x:285, ease:Back.easeOut } );
+			useBW = true;
+			dispatchEvent(new Event(BWPRESED));
 		}
 		
 		
@@ -137,7 +179,11 @@ package com.gmrmarketing.holiday2014
 		
 		private function camUpdate(e:TimerEvent):void
 		{			
-			displayData.draw(theVideo, camScaler, null, null, null, true);
+			displayData.draw(theVideo, camScaler, null, null, null, true);				
+			
+			if (heffShowing) {
+				displayData.copyPixels(theHeff, new Rectangle(0, 0, 617, 716), new Point(520, 113), null, null, true);
+			}
 			
 			if (useBW) {
 				displayData.applyFilter(displayData, displayData.rect, new Point(), new ColorMatrixFilter([rc, gc, bc, 0, 0, rc, gc, bc, 0, 0, rc, gc, bc, 0, 0, 0, 0, 0, 1, 0]));

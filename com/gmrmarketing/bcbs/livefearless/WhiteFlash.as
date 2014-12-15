@@ -2,7 +2,8 @@ package com.gmrmarketing.bcbs.livefearless
 {
 	import flash.display.*;
 	import flash.events.*;
-	import com.greensock.TweenMax;
+	import com.greensock.TweenMax;	
+	
 	
 	public class WhiteFlash extends EventDispatcher
 	{
@@ -14,7 +15,7 @@ package com.gmrmarketing.bcbs.livefearless
 		
 		public function WhiteFlash()
 		{
-			clip = new mcFlash();
+			clip = new mcFlash();			
 		}
 		
 		
@@ -28,7 +29,7 @@ package com.gmrmarketing.bcbs.livefearless
 		{
 			if (!container.contains(clip)) {
 				container.addChild(clip);
-			}
+			}			
 			clip.alpha = 1;
 			TweenMax.to(clip, .5, { alpha:0, onComplete:done } );
 		}

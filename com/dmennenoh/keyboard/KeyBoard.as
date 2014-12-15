@@ -23,6 +23,12 @@
 	  6/26/14
 	  Made the Shift key stay highlighted, after being pressed, until a second key
 	  is pressed.
+	  
+	  12/10/14
+	  Modified draw() to allow keys to have individual font colors. In the XML file when type is flat or linear
+	  the key will use the fontColor attribute to color the key text.
+	  
+	  TODO: Need to update Editor to write the fontColor attribute
  */
 
 package com.dmennenoh.keyboard
@@ -434,7 +440,7 @@ package com.dmennenoh.keyboard
 				thisKey = keys[i];
 				if(thisKey.@type != undefined) {
 					//this key has  unique color data - use it instead of the defaults
-					a = new Key(i, thisKey.@val, thisKey.@shiftval, thisKey.@showshiftval, parseInt(thisKey.@w), parseInt(thisKey.@h), parseInt(setup.keybackground.@r), setup.keybackground.@borderWidth, setup.keybackground.@borderColor, setup.highlight.@color, setup.highlight.@startAlpha, thisKey.@type, thisKey.@gradienttype, thisKey.@color1, thisKey.@color2, parseInt(setup.font.@size), setup.font.@color, keyboardFont, setup.keyTextNudge.@x, setup.keyTextNudge.@y, setup.keyTextNudge.@shiftX, setup.keyTextNudge.@shiftY);
+					a = new Key(i, thisKey.@val, thisKey.@shiftval, thisKey.@showshiftval, parseInt(thisKey.@w), parseInt(thisKey.@h), parseInt(setup.keybackground.@r), setup.keybackground.@borderWidth, setup.keybackground.@borderColor, setup.highlight.@color, setup.highlight.@startAlpha, thisKey.@type, thisKey.@gradienttype, thisKey.@color1, thisKey.@color2, parseInt(setup.font.@size), thisKey.@fontColor, keyboardFont, setup.keyTextNudge.@x, setup.keyTextNudge.@y, setup.keyTextNudge.@shiftX, setup.keyTextNudge.@shiftY);
 				}else{
 					a = new Key(i, thisKey.@val, thisKey.@shiftval, thisKey.@showshiftval, parseInt(thisKey.@w), parseInt(thisKey.@h), parseInt(setup.keybackground.@r), setup.keybackground.@borderWidth, setup.keybackground.@borderColor, setup.highlight.@color, setup.highlight.@startAlpha, setup.keybackground.@type, setup.keybackground.@gradienttype, setup.keybackground.@color1, setup.keybackground.@color2, parseInt(setup.font.@size), setup.font.@color, keyboardFont, setup.keyTextNudge.@x, setup.keyTextNudge.@y, setup.keyTextNudge.@shiftX, setup.keyTextNudge.@shiftY);
 				}

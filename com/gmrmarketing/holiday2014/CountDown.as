@@ -3,7 +3,7 @@ package com.gmrmarketing.holiday2014
 	import flash.display.*;
 	import flash.events.*;
 	import flash.utils.Timer;
-	
+	import flash.media.Sound;
 	
 	public class CountDown extends EventDispatcher
 	{
@@ -14,11 +14,14 @@ package com.gmrmarketing.holiday2014
 		private var timer:Timer;
 		private var theCount:int;
 		
+		private var beep:Sound;
+		
 		
 		public function CountDown():void
 		{
 			timer = new Timer(1000);
 			clip = new mcCount();//lib
+			beep = new soundBeep();//lib
 		}
 		
 		
@@ -47,6 +50,7 @@ package com.gmrmarketing.holiday2014
 			clip.num3.gotoAndStop(2);//show white
 			
 			theCount = 3;
+			beep.play();
 			timer.addEventListener(TimerEvent.TIMER, decCounter, false, 0, true);
 			timer.start();//calls decCounter
 		}
@@ -64,12 +68,15 @@ package com.gmrmarketing.holiday2014
 		
 		private function decCounter(e:TimerEvent):void
 		{
+			
 			theCount--;
 			clip.num3.gotoAndStop(1); //blue
 			
 			if (theCount == 2) {
+				beep.play();
 				clip.num2.gotoAndStop(2); //white
 			}else if (theCount == 1) {
+				beep.play();
 				clip.num2.gotoAndStop(1); //blue;
 				clip.num1.gotoAndStop(2); //white
 			}else if (theCount == 0) {
