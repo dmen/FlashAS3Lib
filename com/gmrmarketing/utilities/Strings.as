@@ -126,6 +126,17 @@ package com.gmrmarketing.utilities
 		{
 			return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 		}
+		
+		
+		/**
+		 * Returns th last character in the string
+		 * @param	s
+		 * @return
+		 */
+		public static function lastChar(s:String):String
+		{
+			return s.charAt(s.length - 1);
+		}
 	}
 	
 }
