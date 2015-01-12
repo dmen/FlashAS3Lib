@@ -23,16 +23,13 @@ package com.gmrmarketing.sap.metlife.giants.usmap
 		public static const FINISHED:String = "finished";
 		
 		private var _scene:Scene3D;
-		private var _camera:Camera3D;
 		private var map:Pivot3D;
 		
 		private var materialRef:Shader3D;
 		private var usa:Pivot3D;		
 		
 		private var tweetManager:TweetManager; //manages getting and displaying the text tweets
-		private var textContainer:Sprite;//tweets container
-		
-		private var isMapLoaded:Boolean = false;
+		private var textContainer:Sprite;//tweets container		
 		
 		private var localCache:Array;//state sentiment data from the service
 		

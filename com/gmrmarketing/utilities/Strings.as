@@ -129,13 +129,45 @@ package com.gmrmarketing.utilities
 		
 		
 		/**
-		 * Returns th last character in the string
+		 * Returns the first character in the string
+		 * @param	s
+		 * @return
+		 */
+		public static function firstChar(s:String):String
+		{
+			return s.charAt(0);
+		}
+		
+		
+		/**
+		 * Returns the last character in the string
 		 * @param	s
 		 * @return
 		 */
 		public static function lastChar(s:String):String
 		{
 			return s.charAt(s.length - 1);
+		}
+		
+		
+		/**
+		 * Removes all punctuation from a string and returns the compacted version
+		 * @param	s String like 39º, or F/U\C.K
+		 * @return String like 39 or FUCK
+		 */
+		public static function clean(s:String):String
+		{
+			var compacted:String;
+			//regExps to remove all punctuation from the string
+			var regs:Array = new Array(/\º/g,/\!/g,/\./g,/\,/g,/\</g,/\>/g,/\|/g,/\@/g,/\#/g,/\$/g,/\%/g,/\^/g,/\&/g,/\*/g,/\,/g,/\(/g,/\)/g,/\-/g,/\_/g,/\+/g,/\=/g,/\:/g,/\;/g,/\~/g,/\`/g,/\//g,/\\/g);
+			
+
+			compacted = s.replace(regs[0], "");
+			for(var i:int = 1; i < regs.length; i++){
+				compacted = compacted.replace(regs[i],  "");
+			}
+			
+			return compacted;
 		}
 	}
 	

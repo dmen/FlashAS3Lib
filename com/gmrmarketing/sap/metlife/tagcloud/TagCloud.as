@@ -14,7 +14,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 	
 	
 	public class TagCloud extends EventDispatcher
-	{
+	{		
 		public static const TAGS_READY:String = "tagsLoaded";//dispatched from tagsLoaded() after a call to refreshTags()
 		public static const ERROR:String = "tagError";//dispatched from tagsLoaded() after a call to refreshTags()
 		
@@ -41,7 +41,7 @@ package com.gmrmarketing.sap.metlife.tagcloud
 		private var tagLevel:int; //current tag level 1-3 used when refreshing tags
 		private var myDate:String;
 		
-		private var tagWords:Object; //contains the hashtag for each level
+		private var tagWords:Object; //contains the hashtag for each level - has level1,level2,level3 keys - set in tagsLoaded()
 		
 		/**
 		 * Constructor

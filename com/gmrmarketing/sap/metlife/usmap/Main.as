@@ -22,7 +22,6 @@ package com.gmrmarketing.sap.metlife.usmap
 		public static const FINISHED:String = "finished";
 		
 		private var _scene:Scene3D;
-		private var _camera:Camera3D;
 		private var map:Pivot3D;
 		
 		private var materialRef:Shader3D;

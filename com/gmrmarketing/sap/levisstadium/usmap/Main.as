@@ -70,7 +70,7 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			tweetManager.setContainer(textContainer);
 			
 			addChild(sceneImage);
-			sceneContainer.y = -800;
+			sceneContainer.y = -800;//3d scene off screen top
 			addChild(sceneContainer);
 			
 			//init();
@@ -127,7 +127,11 @@ package com.gmrmarketing.sap.levisstadium.usmap
 			show2();
 		}
 		
-		
+		/**
+		 * forEach call from mapLoaded()
+		 * sets the default scale and color for each state
+		 * @param	p
+		 */
 		private function setDefaultColor(p:Pivot3D):void
 		{
 			//if(String(p.name).toLowerCase() != "plane"){

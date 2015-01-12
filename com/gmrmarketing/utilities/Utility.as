@@ -1,6 +1,8 @@
 package com.gmrmarketing.utilities
 {
-	import flash.display.Graphics;
+	import flash.display.*;
+	import flash.text.*;
+	import flash.geom.*;
 	
 	public class Utility 
 	{
@@ -157,6 +159,42 @@ package com.gmrmarketing.utilities
 			 return dateString + " " + theHours + ":" + theMinutes + ":" + theSeconds + " " + ampm;			
 		}
 		
+		
+		/**
+		 * Gets the actual pixel width and height of a textField
+		 * @param	textField
+		 * @return Object with width and height properties
+		 */
+		public static function getTextBounds(textField:TextField):Object
+		{
+			// Create a completely transparent BitmapData:
+			var bmd:BitmapData = new BitmapData(textField.width, textField.height, true, 0x00ffffff);
+
+			// Note that some cases may require you to render a Sprite/MovieClip
+			// CONTAINING the TextField for anything to get drawn.
+			// For example, AntiAliasType.ADVANCED (antialias for readability) is known to 
+			// not be renderable in some cases - other settings may cause nothing to be
+			// rendered too. In that case, simply wrap add the TextField as a child of an 
+			// otherwise empty Sprite/MovieClip, and pass that to draw() instead:
+			bmd.draw(textField);
+
+			// This gets the bounds of pixels that are not completely transparent.
+			// Param 1: mask  = specifies which color components to check (0xAARRGGBB)
+			// Param 2: color = is the color to check for.
+			// Param 3: findColor = whether to bound pixels OF the specified color (true),
+			//                      or NOT OF the specified color (false)
+			//
+			// In this case, we're interested in:
+			// 1: the alpha channel (0xff000000)
+			// 2: being 00 (0x00......)
+			// 3: and want the bounding box of pixels that DON'T meet that criterium (false)
+			var rect:Rectangle = bmd.getColorBoundsRect(0xff000000, 0x00000000, false);
+
+			// Do remember to dispose BitmapData when done with it:
+			bmd.dispose();
+
+			return { width:rect.width, height:rect.height };
+		}
 		
 		
 		public static function drawArc(g:Graphics, center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineThickness:Number, lineColor:Number, alph:Number = 1):void

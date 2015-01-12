@@ -1,10 +1,9 @@
 package com.gmrmarketing.sap
-{
-	import com.adobe.air.logging.FileTarget;
-	import com.gmrmarketing.utilities.Logger;
+{	
 	import flash.filesystem.*;
 	import flash.events.*;
 	import flash.net.*;
+	import com.gmrmarketing.utilities.Logger;
 	import com.gmrmarketing.utilities.GUID;
 	
 	
@@ -76,8 +75,6 @@ package com.gmrmarketing.sap
 		}
 		
 		
-		
-		
 		/**
 		 * This needs a crossdomain.xml file on the root of the server
 		 * uses File.upload 
@@ -128,7 +125,7 @@ package com.gmrmarketing.sap
 		
 		private function uploadComplete(e:Event):void
 		{
-			logger.log("Successful upload: " + e.toString());
+			logger.log("UPLOAD:" + curUpload.file + " " + curUpload.qr + " " + curUpload.playerID + " :: " + e.toString());
 			
 			isUploading = false;
 			
@@ -147,18 +144,18 @@ package com.gmrmarketing.sap
 		 * @param	obj Record object in the file contains file, qr and playerID properties
 		 */
 		private function writeUser(obj:Object):void
-		{			
+		{
+			var stream:FileStream = new FileStream();
+			var qFile:File = new File(QUEUE_FILE);
+			
 			try {
-				var stream:FileStream = new FileStream();
-				var qFile:File = new File(QUEUE_FILE);
-				
 				stream.open( qFile, FileMode.APPEND );
-				stream.writeObject(obj);
-				stream.close();
-				
+				stream.writeObject(obj);				
 			}catch (e:Error) {
-				logger.log("Error in writeUser()");
-			}	
+				logger.log("Error in writeUser(): " + e.message);
+			}
+			
+			stream.close();
 			qFile = null;
 			stream = null;
 		}
@@ -171,18 +168,18 @@ package com.gmrmarketing.sap
 		 * @param	obj
 		 */
 		private function writeSavedUser(obj:Object):void
-		{			
-			try {
-				var stream:FileStream = new FileStream();
-				var qFile:File = new File(SAVED_FILE);
+		{	
+			var stream:FileStream = new FileStream();
+			var qFile:File = new File(SAVED_FILE);
 				
+			try {				
 				stream.open( qFile, FileMode.APPEND );
-				stream.writeObject(obj);
-				stream.close();
-				
+				stream.writeObject(obj);				
 			}catch (e:Error) {
-				logger.log("Error in writeSavedUser()");
+				logger.log("Error in writeSavedUser(): " + e.message);
 			}	
+			
+			stream.close();
 			qFile = null;
 			stream = null;
 		}
@@ -201,10 +198,10 @@ package com.gmrmarketing.sap
 			var obs:Array = new Array();
 			var a:Object = { };
 		
-			try {
-				var stream:FileStream = new FileStream();
-				var qFile:File = new File(QUEUE_FILE);
+			var stream:FileStream = new FileStream();
+			var qFile:File = new File(QUEUE_FILE);
 				
+			try {				
 				stream.open( qFile, FileMode.READ );
 				
 				a = stream.readObject();
@@ -212,7 +209,6 @@ package com.gmrmarketing.sap
 					obs.push(a);					
 					a = stream.readObject();
 				}				
-				
 			}catch (e:Error) {
 				//Commented this because the while loop above will generate an EOF error every time it runs
 				//logger.log("Error in getAllUsers() " + e);
@@ -236,12 +232,12 @@ package com.gmrmarketing.sap
 		 */
 		private function rewriteQueue():void
 		{
-			try{
-				var qFile:File = new File(QUEUE_FILE);
-				qFile.deleteFile();
-				
+			var qFile:File = new File(QUEUE_FILE);
+			
+			try{				
+				qFile.deleteFile();				
 			}catch (e:Error) {
-				logger.log("Error in rewriteQueue() - fileExists: " + qFile.exists);
+				logger.log("Error in rewriteQueue(): " + e.message);
 			}
 			
 			while (users.length) {
@@ -249,6 +245,5 @@ package com.gmrmarketing.sap
 				writeUser(aUser);
 			}
 		}
-	}
-	
+	}	
 }
