@@ -19,7 +19,7 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		public static const FINISHED:String = "finished";//dispatched when the task is complete. Player will call cleanup() now
 		
 		private var localCache:Object;		
-		
+		private var iconContainer:Sprite;
 		private var tweenObject:Object;		
 		private var speed:Number;
 		private var limit:Number;
@@ -28,11 +28,13 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		
 		private var initPoint:Point;
 		
-		private var TESTING:Boolean = true;
+		private var TESTING:Boolean = false;
 		
 		
 		public function Main_Icon()
 		{			
+			iconContainer = new Sprite();
+			addChild(iconContainer);
 			if (TESTING) {
 				init("Tailgating");//Tailgating or FanExcitement
 			}
@@ -47,6 +49,8 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		 */
 		public function init(initValue:String = ""):void
 		{
+			question.alpha = 0;
+			question.y = 10;
 			sentimentType = initValue;
 			refreshData();
 		}
@@ -55,7 +59,7 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		private function refreshData():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetOpinionPoll?data=" + sentimentType + "&abc=" + String(new Date().valueOf()));
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetOpinionPoll?poll=" + sentimentType);
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -97,7 +101,7 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 			question.y = 10;
 			question.text = localCache.Question;
 		
-			TweenMax.to(question, 1, { y:67, alpha:1, delay:.3, ease:Back.easeOut, onComplete:showIcons } );			
+			TweenMax.to(question, 1, { y:74, alpha:1, delay:.3, ease:Back.easeOut, onComplete:showIcons } );			
 			TweenMax.delayedCall(DISPLAY_TIME, complete);
 		}
 		
@@ -114,25 +118,25 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 					case "Cornhole":
 						ic = new Icon();
 						ic.icon = new cornhole();//lib
-						ic.container = this;
+						ic.container = iconContainer;
 						ic.show(95, ty, localCache.PollValues[i].Weight / 100, "CORNHOLE");
 						break;
 					case "Kan Jam":
 						ic = new Icon();
 						ic.icon = new kanjam();//lib
-						ic.container = this;
+						ic.container = iconContainer;
 						ic.show(245, ty, localCache.PollValues[i].Weight / 100, "KAN JAM", .2);
 						break;
 					case "Ladder Toss":
 						ic = new Icon();
 						ic.icon = new laddertoss();//lib
-						ic.container = this;
+						ic.container = iconContainer;
 						ic.show(395, ty, localCache.PollValues[i].Weight / 100, "LADDER TOSS", .4);
 						break;
 					case "Football":
 						ic = new Icon();
 						ic.icon = new football();//lib
-						ic.container = this;
+						ic.container = iconContainer;
 						ic.show(545, ty, localCache.PollValues[i].Weight / 100, "FOOTBALL", .6);
 						break;
 						
@@ -140,19 +144,19 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 					case "The Game":
 						ic = new Icon();
 						ic.icon = new game();//lib
-						ic.container = this;
+						ic.container = iconContainer;
 						ic.show(115, ty, localCache.PollValues[i].Weight / 100, "THE GAME");
 						break;
 					case "Halftime":
 						ic = new Icon();
 						ic.icon = new halftime();//lib
-						ic.container = this;
+						ic.container = iconContainer;
 						ic.show(320, ty, localCache.PollValues[i].Weight / 100, "THE HALFTIME SHOW", .2);
 						break;
 					case "Commercials":
 						ic = new Icon();
 						ic.icon = new commercials();//lib
-						ic.container = this;
+						ic.container = iconContainer;
 						ic.show(525, ty, localCache.PollValues[i].Weight / 100, "THE COMMERCIALS", .4);
 						break;
 				}
@@ -168,6 +172,12 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		
 		public function cleanup():void
 		{			
+			while (iconContainer.numChildren) {
+				iconContainer.removeChildAt(0);
+			}
+			question.alpha = 0;
+			question.y = 10;
+			
 			refreshData(); //preload next
 		}			
 		

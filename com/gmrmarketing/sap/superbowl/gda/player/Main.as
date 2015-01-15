@@ -20,6 +20,7 @@ package com.gmrmarketing.sap.superbowl.gda.player
 		private var screenIndex:int;
 		private var taskIndex:int;//
 		private var topTask:MovieClip;
+		private var botTask:MovieClip;
 		private var taskCheckTimer:Timer;
 		
 		private var taskContainer:Sprite;
@@ -30,7 +31,7 @@ package com.gmrmarketing.sap.superbowl.gda.player
 			Mouse.hide();
 			
 			taskContainer = new Sprite();
-			addChild(taskContainer);
+			addChildAt(taskContainer, numChildren - 1);//behind nfl logo
 			
 			var req:URLRequest = new URLRequest("http://design.gmrstage.com/sap/SuperBowl49/gda/config.xml?abc=" + String(new Date().valueOf()));
 			var configLoader:URLLoader = new URLLoader();
@@ -38,6 +39,8 @@ package com.gmrmarketing.sap.superbowl.gda.player
 			configLoader.addEventListener(IOErrorEvent.IO_ERROR, configError, false, 0, true);
 			configLoader.load(req);
 			
+			taskCheckTimer = new Timer(1000);
+			taskCheckTimer.addEventListener(TimerEvent.TIMER, checkFirstTask);
 			addEventListener(Event.ENTER_FRAME, update);
 		}		
 		
@@ -45,8 +48,9 @@ package com.gmrmarketing.sap.superbowl.gda.player
 
 		private function update(e:Event):void
 		{
-			barBottom.rotation += .1;
-			barTop.rotation -= .05;
+			barBottom.rotation += .3;
+			barTop.rotation -= .2;
+			barMid.rotation += .4;
 		}
 		
 		
@@ -67,14 +71,13 @@ package com.gmrmarketing.sap.superbowl.gda.player
 					var thisTask:Object = { };
 					thisTask.file = thisScreen[j].@file;
 					thisTask.data = thisScreen[j].@initData;
-					
+					thisTask.y = parseInt(thisScreen[j].@y);
 					aScreen.push(thisTask);
-					trace( i, j, thisScreen[j].@file, thisScreen[j].@initData);
+					trace( i, j, thisScreen[j].@file, thisScreen[j].@initData, thisScreen[j].@y);
 				}
 				
 				screens.push(aScreen);
-			}
-			
+			}			
 			
 			screenIndex = 0;
 			taskIndex = 0;
@@ -103,10 +106,9 @@ package com.gmrmarketing.sap.superbowl.gda.player
 		
 		private function taskLoaded(e:Event):void
 		{
-			trace("taskLoaded()");
 			var l:Loader = Loader(LoaderInfo(e.target).loader);			
 			screens[screenIndex][taskIndex].clip = MovieClip(l.content);			
-			
+			screens[screenIndex][taskIndex].clip.x = 640; //place loaded clips off screen right
 			taskIndex++;
 			if (taskIndex < screens[screenIndex].length) {
 				loadTask();
@@ -115,7 +117,9 @@ package com.gmrmarketing.sap.superbowl.gda.player
 				screenIndex++;
 				if (screenIndex < screens.length) {					
 					loadTask();
-				}else{
+				}else {
+					screenIndex = 0;
+					taskIndex = 0;
 					initTasks();
 				}
 			}
@@ -127,25 +131,27 @@ package com.gmrmarketing.sap.superbowl.gda.player
 		 * calls init on all tasks then waits for the first task to be ready
 		 */
 		private function initTasks():void
-		{		
-			trace("initTasks()");
-			screenIndex = 0;
-			taskIndex = 0;
+		{	
+			//screenIndex = 0;
+			//taskIndex = 0;
 			
-			while (screenIndex < screens.length) {
+			//while (screenIndex < screens.length) {
 				MovieClip(screens[screenIndex][taskIndex].clip).init(screens[screenIndex][taskIndex].data);
-				taskIndex++;
-				if (taskIndex >= screens[screenIndex].length) {
-					taskIndex = 0;
-					screenIndex++;
-				}
-			}			
+				//taskIndex++;
+				//if (taskIndex >= screens[screenIndex].length) {
+					//taskIndex = 0;
+					//screenIndex++;
+				//}
+			//}			
 			
-			screenIndex = 0;
-			taskIndex = 0;
+			//screenIndex = 0;
+			//taskIndex = 0;
 			
-			taskCheckTimer = new Timer(1000);
-			taskCheckTimer.addEventListener(TimerEvent.TIMER, checkFirstTask);
+			//taskCheckTimer = new Timer(1000);
+			//taskCheckTimer.addEventListener(TimerEvent.TIMER, checkFirstTask);
+			//taskCheckTimer.start();
+			
+			
 			taskCheckTimer.start();
 		}
 		
@@ -157,14 +163,25 @@ package com.gmrmarketing.sap.superbowl.gda.player
 		 */
 		private function checkFirstTask(e:TimerEvent):void
 		{
-			trace("checkFirstTask");
 			if (MovieClip(screens[screenIndex][taskIndex].clip).isReady()) {
-				taskCheckTimer.removeEventListener(TimerEvent.TIMER, checkFirstTask);
+				//taskCheckTimer.removeEventListener(TimerEvent.TIMER, checkFirstTask);
 				taskCheckTimer.reset();
-				//here we go
 				
-				screenIndex = -1;//showNextScreen() will increment to 0				
-				showNextScreen();
+				taskIndex++;
+				if (taskIndex >= screens[screenIndex].length) {
+					taskIndex = 0;
+					screenIndex++;
+					if (screenIndex < screens.length) {					
+						initTasks();
+					}else {
+						screenIndex = -1;
+						showNextScreen();
+					}
+				}else {
+					initTasks();
+				}
+				//screenIndex = -1;//showNextScreen() will increment to 0				
+				//showNextScreen();
 			}
 		}
 		
@@ -177,23 +194,50 @@ package com.gmrmarketing.sap.superbowl.gda.player
 			}
 			
 			topTask = MovieClip(screens[screenIndex][0].clip);
-			topTask.x = 0;
-			topTask.y = 0;
+			topTask.x = 640;
+			topTask.y = screens[screenIndex][0].y;
 			//topTask.alpha = 0;
 			if (!taskContainer.contains(topTask)) {
 				taskContainer.addChild(topTask);
-			}			
+			}
 			
-			//TweenMax.to(topTask, .5, { alpha:1 } );
 			topTask.addEventListener("finished", taskComplete, false, 0, true);
-			topTask.show();//starts task timer
+			//topTask.show();//starts task timer
+			TweenMax.to(topTask, .5, { x:0, ease:Linear.easeNone, onComplete:showTop } );
+			
+			//bottom task
+			if (screens[screenIndex].length > 1) {
+				botTask = MovieClip(screens[screenIndex][1].clip);
+				botTask.x = 640;
+				botTask.y = screens[screenIndex][1].y;
+				//botTask.alpha = 0;
+				if (!taskContainer.contains(botTask)) {
+					taskContainer.addChild(botTask);
+				}
+				TweenMax.to(botTask, .5, { x:0, ease:Linear.easeNone, delay:.2, onComplete:showBot } );
+				//botTask.show();
+			}
+		}
+		private function showTop():void
+		{
+			topTask.show();			
+		}
+		private function showBot():void
+		{
+			botTask.show();			
 		}
 		
 		
 		private function taskComplete(e:Event):void
 		{
 			topTask.removeEventListener("finished", taskComplete);
-			topTask.cleanup();			
+			topTask.cleanup();
+			
+			if (botTask) {
+				botTask.cleanup();
+				botTask.y = -1500;
+				//botTask = null;
+			}
 			
 			topTask.y = -1500;
 			showNextScreen();

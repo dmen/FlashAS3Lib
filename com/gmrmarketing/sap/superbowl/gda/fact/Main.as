@@ -13,7 +13,7 @@ package com.gmrmarketing.sap.superbowl.gda.fact
 	
 	public class Main extends MovieClip implements IModuleMethods
 	{
-		private const DISPLAY_TIME:Number = 10; //seconds this screen is shown for
+		private const DISPLAY_TIME:Number = 12; //seconds this screen is shown for
 		
 		public static const FINISHED:String = "finished";//dispatched when the task is complete. Player will call cleanup() now
 		
@@ -23,9 +23,9 @@ package com.gmrmarketing.sap.superbowl.gda.fact
 		private var animValue:Object;
 		private var animCharIndexes:Array;
 		private var tf:TextFormat;
-		
-		private var TESTING:Boolean = true;
-		
+		private var displayAnother:Boolean = false;
+		private var TESTING:Boolean = false;
+		private var theStat:MovieClip;//lib clip
 		
 		public function Main()
 		{
@@ -33,6 +33,7 @@ package com.gmrmarketing.sap.superbowl.gda.fact
 			animCharIndexes = new Array();
 			bgCircle = new Sprite();
 			colorCircle = new Sprite();
+			theStat = new mcStat();
 			if (TESTING) {
 				init();
 			}			
@@ -45,30 +46,45 @@ package com.gmrmarketing.sap.superbowl.gda.fact
 		 */
 		public function init(initValue:String = ""):void
 		{
+				if(!contains(theStat)){
+				addChild(theStat);
+			}
+			theStat.x = 56;
+			theStat.y = 244;
+			
 			if(!contains(bgCircle)){
 				addChild(bgCircle);
 			}
 			bgCircle.x = 139;
 			bgCircle.y = 274;
+			bgCircle.cacheAsBitmap = true;
 			
 			if(!contains(colorCircle)){
 				addChild(colorCircle);
 			}
 			colorCircle.x = 139;
 			colorCircle.y = 274;
+			colorCircle.cacheAsBitmap = true;
+			
+		
 			
 			if(TESTING){
 				localCache = { Body:"The coldest Super Bowl game on record: Super Bowl VI - Tulane Stadium  - New Orleans, LA", Stat:"36°" };				
 			}
+			//anim elements off screen
+			slider.y = 448;
+			theTitle.x = 640;
+			theText.x = 640;
+			theStat.alpha = 0;
+			
 			refreshData();
-			//show();	
 		}
 		
 		
 		private function refreshData():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetDidYouKnow?topic=superbowl" + "&abc=" + String(new Date().valueOf()));
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetDidYouKnow?topic=superbowl");
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -84,7 +100,7 @@ package com.gmrmarketing.sap.superbowl.gda.fact
 		private function dataLoaded(e:Event):void
 		{
 			localCache = JSON.parse(e.currentTarget.data);
-			if (TESTING) {
+			if (TESTING || displayAnother) {
 				show();
 			}
 		}
@@ -92,7 +108,7 @@ package com.gmrmarketing.sap.superbowl.gda.fact
 		
 		private function dataError(e:IOErrorEvent):void	
 		{
-			if (TESTING) {
+			if (TESTING || displayAnother) {
 				show();
 			}
 		}
@@ -109,10 +125,15 @@ package com.gmrmarketing.sap.superbowl.gda.fact
 		 */
 		public function show():void
 		{	
+			colorCircle.alpha = 1;
+			bgCircle.alpha = 1;
+			
 			//anim elements off screen
 			slider.y = 448;
 			theTitle.x = 640;
+			theTitle.alpha = 1;
 			theText.x = 640;
+			theText.alpha = 1;
 			theStat.alpha = 0;
 			
 			//clip on stage	
@@ -140,7 +161,7 @@ package com.gmrmarketing.sap.superbowl.gda.fact
 			theStat.theValue.text = val; //val like $4.5, 109,385 etc - mark number positions
 			//make sure text fits in circle nicely			
 			
-			var fSize:int = 36;
+			var fSize:int = 50;
 			tf.size = fSize;
 			theStat.theValue.setTextFormat(tf);
 			while(theStat.theValue.textWidth > 100){
@@ -170,7 +191,7 @@ package com.gmrmarketing.sap.superbowl.gda.fact
 			
 			theText.theText.text = localCache.Body;
 			
-			TweenMax.to(slider, .5, { y:94, ease:Back.easeOut } );//pop the slider up from bottom - white bg
+			TweenMax.to(slider, .5, { y:94, ease:Linear.easeNone } );//pop the slider up from bottom - white bg
 			TweenMax.to(theTitle, .75, { x:231, ease:Back.easeOut, delay:.5 } );
 			TweenMax.to(theText, .75, { x:234, ease:Back.easeOut, delay:.6 } );
 			
@@ -180,13 +201,22 @@ package com.gmrmarketing.sap.superbowl.gda.fact
 			TweenMax.to(theStat, 1, { alpha:1, delay:1 } );//fade stat in
 				
 			//animate the arc and the numbers
-			TweenMax.to(animValue, DISPLAY_TIME - 1, { angle:360, onUpdate:fillArc, delay:1, ease:Linear.easeNone } );
+			TweenMax.to(animValue, DISPLAY_TIME - 1, { angle:360, onUpdate:fillArc, delay:1, ease:Linear.easeNone, onComplete:nextFact } );
 			TweenMax.to(animValue, 3, { dummy:100, onUpdate:animateText, onComplete:showActualText } );
 			
 			//call complete when finished
-			TweenMax.delayedCall(DISPLAY_TIME, complete);
+			//TweenMax.delayedCall(DISPLAY_TIME, complete);
 		}
 		
+		private function nextFact():void
+		{
+			displayAnother = true;
+			TweenMax.to(colorCircle, .5, { alpha:0 } );
+			TweenMax.to(bgCircle, .5, { alpha:0 } );
+			TweenMax.to(theTitle, .5, { alpha:0 } );
+			TweenMax.to(theText, .5, { alpha:0 } );
+			TweenMax.to(theStat, .5, { alpha:0, onComplete:removeSlider } );
+		}
 		
 		private function fillArc():void
 		{
@@ -226,11 +256,26 @@ package com.gmrmarketing.sap.superbowl.gda.fact
 		
 		public function cleanup():void
 		{		
-			colorCircle.graphics.clear();
-			bgCircle.graphics.clear();
-			refreshData(); //preload next trivia			
+			displayAnother = false;
+			TweenMax.killTweensOf(animValue);
+			TweenMax.to(theTitle, .5, { alpha:0 } );
+			TweenMax.to(theText, .5, { alpha:0 } );
+			TweenMax.to(theStat, .5, { alpha:0, onComplete:removeSlider } );
 		}
 		
+		
+		private function removeSlider():void
+		{
+			TweenMax.to(slider, .5, { y:448, ease:Linear.easeNone, onComplete:kill } );//pop the slider up from bottom - white bg
+		}
+		
+		
+		private function kill():void
+		{
+			colorCircle.graphics.clear();
+			bgCircle.graphics.clear();
+			refreshData(); //preload next trivia	
+		}
 	}
 	
 }

@@ -20,10 +20,11 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		private var isRunning:Boolean;
 		private var needsRefreshing:Boolean;//set to true in displayTweets() once the list of tweets has been displayed
 		private var tweetX:int; //starts at 660
+		private var tweetCount:int; //used to know when all tweets have been displayed
 		
 		public function TweetManager()
 		{			
-			needsRefreshing = true;
+			needsRefreshing = true;			
 		}
 	
 		
@@ -38,8 +39,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		public function start():void
 		{
 			tweetX = 660; //starting x pos for tweets - off screen right
-			isRunning = true;
-			cacheIndex = 0;
+			isRunning = true;			
 			displayTweets();
 		}
 		
@@ -68,7 +68,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		{
 			if(needsRefreshing){
 				var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-				var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=UsMapTweets"+"&abc="+String(new Date().valueOf()));
+				var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetUSMapTweets");
 				r.requestHeaders.push(hdr);
 				var l:URLLoader = new URLLoader();
 				l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -118,7 +118,8 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			var a:Tweet;
 			if (localCache && localCache.length) {
 				
-				for (var i:int = 0; i < 3; i++) {
+				tweetCount = 5;
+				for (var i:int = 0; i < 5; i++) {
 					
 					var tw:Object = localCache[cacheIndex];
 					cacheIndex++;
@@ -132,7 +133,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 					a.addEventListener(Tweet.COMPLETE, tweetComplete);
 					a.show(tw.user, tw.message, tw.theX, tw.theY, tweetX);
 					
-					tweetX += a.getWidth() + 15;
+					tweetX += a.getWidth() + 60;
 				}
 			}
 		}		
@@ -143,6 +144,11 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			var a:Tweet = Tweet(e.target);
 			a.removeEventListener(Tweet.COMPLETE, tweetComplete);
 			a.dispose();
+			
+			tweetCount--;
+			if (tweetCount == 0) {
+				dispatchEvent(new Event(FINISHED));
+			}
 		}
 		
 		

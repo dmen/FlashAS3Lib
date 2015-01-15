@@ -165,7 +165,7 @@ package com.gmrmarketing.sap.superbowl.gda.countdown
 		public function refreshData():void
 		{
 			//get kickoff time from the web service
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetKickOffTime"+"?abc="+String(new Date().valueOf()));
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetKickOffTime");
 			//r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);

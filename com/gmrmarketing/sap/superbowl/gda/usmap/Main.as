@@ -35,14 +35,13 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		
 		private var isMapLoaded:Boolean = false;
 		
-		private var localCache:Array;
+		private var localCache:Array; //array of objects
 		
 		private var sceneContainer:Sprite;
 		private var sceneBMD:BitmapData;
 		private var sceneImage:Bitmap;
 		private var shadow:Bitmap;
 		private var TESTING:Boolean = false;
-		
 		
 		public function Main()
 		{
@@ -94,7 +93,36 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		private function refreshData():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sap49ersapi.thesocialtab.net/api/netbase/GameDayAnalytics?data=USMapSentiment"+"&abc="+String(new Date().valueOf()));
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetUSMapVolume?topic=nfc");
+			r.requestHeaders.push(hdr);
+			var l:URLLoader = new URLLoader();
+			l.addEventListener(Event.COMPLETE, nfcLoaded, false, 0, true);
+			l.addEventListener(IOErrorEvent.IO_ERROR, dataError, false, 0, true);
+			try{
+				l.load(r);
+			}catch (e:Error) {
+				
+			}
+		}
+		
+		private function nfcLoaded(e:Event):void
+		{
+			resetLocalCache();
+			
+			var json:Object = JSON.parse(e.currentTarget.data);			
+			
+			for (var i:int = 0; i < json.length; i++) {
+				for (var j:int = 0; j < localCache.length; j++) {
+					if (localCache[j].abbr == json[i].StateCode) {
+						localCache[j].pos = json[i].Total;
+						localCache[j].side = "nfc";
+						break;
+					}
+				}								
+			}
+			
+			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetUSMapVolume?topic=afc");
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -114,15 +142,17 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		private function dataLoaded(e:Event):void
 		{
 			var json:Object = JSON.parse(e.currentTarget.data);
-			localCache = new Array();
 			
-			//switch names to match 3d map versions
 			for (var i:int = 0; i < json.length; i++) {
-				if (String(json[i].name).indexOf(" ") != -1) {					
-					json[i].name = String(json[i].name).replace(" ", "_");
-				}
-				localCache.push( { name:json[i].name, pos:json[i].pos } );
-				
+				for (var j:int = 0; j < localCache.length; j++) {
+					if (localCache[j].abbr == json[i].StateCode) {
+						if(json[i].Total > localCache[j].pos){
+							localCache[j].side = "afc";
+							localCache[j].pos = json[i].Total;
+						}
+						break;
+					}
+				}								
 			}
 			
 			normalize();
@@ -135,7 +165,10 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		}
 		
 		
-		private function dataError(e:IOErrorEvent):void{}		
+		private function dataError(e:IOErrorEvent):void
+		{
+			resetLocalCache();
+		}		
 		
 		
 		public function isReady():Boolean
@@ -189,6 +222,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		/**
 		 * Uses Math.log to first smooth the data, then does a linear
 		 * distrbution between newRangeMin and newRangeMax
+		 * adds a normalized key to each localCache object
 		 */
 		private function normalize():void
 		{
@@ -244,34 +278,39 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			team2.x = 600;
 			
 			//reset map to default rotation
+			trace("usa", usa);
 			usa.setRotation(rotOb.ox, rotOb.oy, rotOb.oz);
 			
 			_scene.addEventListener( Scene3D.POSTRENDER_EVENT, renderEvent );			
 			for (var i:int = 0; i < localCache.length; i++) {
 				
-				var t:Pivot3D = _scene.getChildByName(localCache[i].name);
+				var t:Pivot3D = _scene.getChildByName(localCache[i].long);
 				if (t) {					
-					TweenMax.to(t, 2, { scaleZ:localCache[i].normalized * .6, delay:3+i*.35, ease:Elastic.easeOut } );
+					TweenMax.to(t, 2, { scaleZ:localCache[i].normalized * .5, delay:2+i*.025, ease:Elastic.easeOut } );
 				}
 				
 				//normalized value is 1.5 - 15
-				materialRef = _scene.getMaterialByName( String(localCache[i].name).toLowerCase() ) as Shader3D;
+				materialRef = _scene.getMaterialByName( String(localCache[i].long).toLowerCase() ) as Shader3D;
 				if (materialRef) {					
-					if(localCache[i].normalized < 8){
-						materialRef.filters[0].color = 0xff2e5033;
+					if(localCache[i].side == "nfc"){
+						materialRef.filters[0].color = 0x2f5d36;
 					}else {
-						materialRef.filters[0].color = 0xff1b3257;
+						materialRef.filters[0].color = 0x0d254c;
 					}
 				}
 			}
 			
 			TweenMax.to(team1, .5, { x:343, delay:2, alpha:1, ease:Back.easeOut } );
 			TweenMax.to(team2, .5, { x:437, delay:2.1, alpha:1, ease:Back.easeOut } );
-			
+			TweenMax.delayedCall(4.5, pauseScene);
+			//_scene.pause();
 			rotOb.rotX = rotOb.ox;
-			TweenMax.to(rotOb, 29, { rotX: -84, onUpdate:setMapRotation } );// , onComplete:complete } );	
+			//TweenMax.to(rotOb, 29, { rotX: -84, onUpdate:setMapRotation } );// , onComplete:complete } );	
 		}
-		
+		private function pauseScene():void
+		{
+			_scene.pause();
+		}
 		
 		private function setMapRotation():void
 		{
@@ -303,7 +342,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		 * Callback for tweetManager finished listener
 		 * added in show()
 		 */
-		private function complete():void
+		private function complete(e:Event):void
 		{
 			tweetManager.removeEventListener(TweetManager.FINISHED, complete);
 			dispatchEvent(new Event(FINISHED));//to player
@@ -312,13 +351,28 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		
 		public function cleanup():void
 		{
-			_scene.pause();
-
 			tweetManager.stop();
 			tweetManager.refresh();
 			
 			_scene.removeEventListener( Scene3D.POSTRENDER_EVENT, renderEvent );
 			_scene.pause();
+			
+			team1.alpha = 0;
+			team1.x = 200;
+			team2.alpha = 0;
+			team2.x = 600;
+			
+			shadow.alpha = 0;
+			
+			sceneBMD.fillRect(sceneBMD.rect, 0);
+		}
+		
+		
+		private function resetLocalCache():void
+		{
+			//reset localCache
+			//abbr for data from service, long matches name in 3d map, side is for afc or nfc whichever has the max value
+			localCache = new Array( { abbr:"AL", long:"Alabama", pos:0, side:"" }, { abbr:"AK", long:"Alaska", pos:0, side:"" }, { abbr:"AZ", long:"Arizona", pos:0, side:"" }, { abbr:"AR", long:"Arkansas", pos:0, side:"" }, { abbr:"CA", long:"California", pos:0, side:"" }, { abbr:"CO", long:"Colorado", pos:0, side:"" }, { abbr:"CT", long:"Connecticut", pos:0, side:"" }, { abbr:"DE", long:"Delaware", pos:0, side:"" }, { abbr:"FL", long:"Florida", pos:0, side:"" }, { abbr:"GA", long:"Georgia", pos:0, side:"" }, { abbr:"HI", long:"Hawaii", pos:0, side:"" }, { abbr:"ID", long:"Idaho", pos:0, side:"" }, { abbr:"IL", long:"Illinois", pos:0, side:"" }, { abbr:"IN", long:"Indiana", pos:0, side:"" }, { abbr:"IA", long:"Iowa", pos:0, side:"" }, { abbr:"KS", long:"Kansas", pos:0, side:"" }, { abbr:"KY", long:"Kentucky", pos:0, side:"" }, { abbr:"LA", long:"Lousiana", pos:0, side:"" }, { abbr:"ME", long:"Maine", pos:0, side:"" }, { abbr:"MD", long:"Maryland", pos:0, side:"" }, { abbr:"MA", long:"Massachusetts", pos:0, side:"" }, { abbr:"MI", long:"Michigan", pos:0, side:"" }, { abbr:"MN", long:"Minnesota", pos:0, side:"" }, { abbr:"MS", long:"Mississippi", pos:0, side:"" }, { abbr:"MO", long:"Missouri", pos:0, side:"" }, { abbr:"MT", long:"Montana", pos:0, side:"" }, { abbr:"NE", long:"Nebraska", pos:0, side:"" }, { abbr:"NV", long:"Nevada", pos:0, side:"" }, { abbr:"NH", long:"New_Hampshire", pos:0, side:"" }, { abbr:"NJ", long:"New_Jersey", pos:0, side:"" }, { abbr:"NM", long:"New_Mexico", pos:0, side:"" }, { abbr:"NY", long:"New_York", pos:0, side:"" }, { abbr:"NC", long:"North_Carolina", pos:0, side:"" }, { abbr:"ND", long:"North_Dakota", pos:0, side:"" }, { abbr:"OH", long:"Ohio", pos:0, side:"" }, { abbr:"OK", long:"Oklahoma", pos:0, side:"" }, { abbr:"OR", long:"Oregon", pos:0, side:"" }, { abbr:"PA", long:"Pennsylvania", pos:0, side:"" }, { abbr:"RI", long:"Rhode_Island", pos:0, side:"" }, { abbr:"SC", long:"South_Carolina", pos:0, side:"" }, { abbr:"SD", long:"South_Dakota", pos:0, side:"" }, { abbr:"TN", long:"Tennessee", pos:0, side:"" }, { abbr:"TX", long:"Texas", pos:0, side:"" }, { abbr:"UT", long:"Utah", pos:0, side:"" }, { abbr:"VT", long:"Vermont", pos:0, side:"" }, { abbr:"VA", long:"Virginia", pos:0, side:"" }, { abbr:"WA", long:"Washington", pos:0, side:"" }, { abbr:"WV", long:"West_Virginia", pos:0, side:"" }, { abbr:"WI", long:"Wisconsin", pos:0, side:"" }, { abbr:"WY", long:"Wyoming", pos:0, side:"" } );
 		}
 	}	
 }

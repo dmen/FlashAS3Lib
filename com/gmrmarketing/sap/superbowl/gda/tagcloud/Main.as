@@ -13,8 +13,10 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 	
 	
 	public class Main extends MovieClip implements IModuleMethods
-	{
+	{		
 		public static const FINISHED:String = "finished";//dispatched when the task is complete. Player will call cleanup() now
+		private const DISPLAY_TIME:Number = 20000;//ms
+		private var startTime:Number;
 		
 		private var dict:TagCloud;//tags from the service
 		private var ra:RectFinder;
@@ -28,30 +30,36 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		private var myDate:String; //from xml
 		private var myColors:Array; //from xml
 		
-		private var TESTING:Boolean = true;
+		private var TESTING:Boolean = false;
 		private var single:Boolean = true;
+		
+		private var cloud1Done:Boolean = false;
+		private var cloud2Done:Boolean = false;
+		private var grays:Array;
 		
 		public function Main()
 		{			
 			ra = new RectFinder(4);
 			ra2 = new RectFinder(4);
 			
-			dict = new TagCloud(4, 40, 10);
+			dict = new TagCloud(4, 30, 8);
 			dict.addEventListener(TagCloud.TAGS_READY, tagsLoaded, false, 0, true);
+			
+			grays = new Array(0xffffff, 0xdddddd, 0xbbbbbb, 0x999999, 0x777777);
 			
 			tagContainer = new Sprite();
 			tagContainer2 = new Sprite();
 			tagContainer3 = new Sprite();
 			
-			tagContainer.x = 10;
+			tagContainer.x = 20;
 			tagContainer.y = 170;
 			tagContainer2.y = 170;
-			tagContainer2.x = 325;
+			tagContainer2.x = 332;
 			tagContainer3.x = 52;
 			tagContainer3.y = 120;
 			
 			if (TESTING) {
-				init("single");
+				init("double");
 			}
 		}		
 		
@@ -65,15 +73,13 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 				addChild(tagContainer3);
 			}else {
 				single = false;
-				team1.visible = true;
-				team2.visible = true;
-				team1.x = -250;
-				team2.x = 640;
+				team1.visible = false;
+				team2.visible = false;
 				addChild(tagContainer);
 				addChild(tagContainer2);
 			}
 			
-			dict.refreshTags([0xffffff], "12/28/14");//TagCloud calls tagsLoaded when ready - this loads all the tags
+			dict.refreshTags(grays, single);//TagCloud calls tagsLoaded when ready - this loads all the tags
 		}			
 		
 		
@@ -98,19 +104,25 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		
 	
 		public function show():void
-		{			
+		{		
+			startTime = new Date().valueOf();//now
 			if (single) {				
-				ra.create(tagContainer3, new cloudBig(), dict.getTags("sb49"), true, false, 8000, 0, new DropShadowFilter(4, 45, 0, .8, 6, 6, 1, 2));
+				//drop shadow:, new DropShadowFilter(4, 45, 0, .8, 6, 6, 1, 2)
+				ra.create(tagContainer3, new cloudBig(), dict.getTags("sb49"), true, false, 8000, 0);
 				ra.addEventListener(RectFinder.FINISHED, tagsComplete, false, 0, true);
-			}else {				
+			}else {	
+				team1.visible = true;
+				team2.visible = true;				
 				team1.x = -250;
 				team2.x = 640;
-				TweenMax.to(team1, .5, { x:66, ease:Back.easeOut } );
-				TweenMax.to(team2, .5, { x:353, delay:.1, ease:Back.easeOut } );
-				ra.create(tagContainer, new cloudSmall(), dict.getTags("nfc"), true, false, 8000, 0, new DropShadowFilter(4,45,0,.8,6,6,1,2));
-				ra2.create(tagContainer2, new cloudSmall(), dict.getTags("afc"), true, false, 8000, 0, new DropShadowFilter(4, 45, 0, .8, 6, 6, 1, 2));
+				TweenMax.to(team1, .5, { x:106, ease:Back.easeOut } );
+				TweenMax.to(team2, .5, { x:408, delay:.1, ease:Back.easeOut } );
+				ra.create(tagContainer, new cloudSmall(), dict.getTags("nfc"), true, false, 8000, 0);
+				ra2.create(tagContainer2, new cloudSmall(), dict.getTags("afc"), true, false, 8000, 0);
 				ra.addEventListener(RectFinder.FINISHED, tagsComplete, false, 0, true);
 				ra2.addEventListener(RectFinder.FINISHED, tagsComplete2, false, 0, true);				
+				cloud1Done = false;
+				cloud2Done = false;
 			}				
 		}
 		
@@ -123,15 +135,34 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		{
 			ra.removeEventListener(RectFinder.FINISHED, tagsComplete);
 			//transitionLevel or done
+			cloud1Done = true;
+			if (single) {
+				done();
+			}else{
+				if (cloud1Done && cloud2Done) {
+					done();
+				}
+			}
 		}
+		
 		private function tagsComplete2(e:Event):void
 		{
 			ra2.removeEventListener(RectFinder.FINISHED, tagsComplete);
 			//transitionLevel or done
+			cloud2Done = true;
+			if (cloud1Done && cloud2Done) {
+				done();
+			}			
 		}
 		
 		
 		private function done(e:TimerEvent = null):void
+		{
+			var remTime:Number = (DISPLAY_TIME - (new Date().valueOf() - startTime)) / 1000;//seconds for TweenMax
+			trace(remTime);
+			TweenMax.delayedCall(remTime, doDispatch);
+		}
+		private function doDispatch():void
 		{
 			dispatchEvent(new Event(FINISHED));//will call cleanup
 		}
@@ -156,14 +187,22 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		{
 			while (tagContainer.numChildren) {
 				tagContainer.removeChildAt(0);
-			}			
+			}
+			while (tagContainer2.numChildren) {
+				tagContainer2.removeChildAt(0);
+			}
+			while (tagContainer3.numChildren) {
+				tagContainer3.removeChildAt(0);
+			}
 		}		
 		
 		
 		public function cleanup():void
 		{	
+			team1.visible = false;
+			team2.visible = false;
 			clearLevel();
-			dict.refreshTags(myColors, myDate);//calls tagsLoaded when ready
+			dict.refreshTags(grays, single);//calls tagsLoaded when ready
 		}		
 		
 	}

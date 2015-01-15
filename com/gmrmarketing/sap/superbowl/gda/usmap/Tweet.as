@@ -31,7 +31,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		private var lineAlpha:Number;
 		private var myWidth:int;
 		private var dotDrawn:Boolean;
-		
+		private var angleX:int;
 		
 		//lib clip - 'clip' contains rectContainer on layer 0 - behind text already in the clip
 		//rectContainer contains outlineContainer
@@ -62,8 +62,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		
 		public function getWidth():int
 		{
-			return clip.width;
-			//return clip.theText.textWidth;
+			return clip.theText.textWidth;
 		}
 		
 		
@@ -82,7 +81,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			}			
 			
 			clip.x = startX;
-			clip.y = 115;
+			clip.y = 105;
 			
 			message = message.replace(/&lt;/g, "<");
 			message = message.replace(/&gt;/g, "<");
@@ -110,17 +109,29 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			g.beginFill(0x0d254c, 1);
 			g.moveTo(0, 22);
 			g.lineTo(clip.theUser.textWidth + 30, 22);
-			g.lineTo(clip.theUser.textWidth + 50, 0);
-			g.lineTo(20, 0);
+			g.lineTo(clip.theUser.textWidth + 45, 0);
+			g.lineTo(15, 0);
 			g.lineTo(0, 22);
 			g.endFill();
 			
-			var yPos:int = 25;
+			var yPos:int = 25;//under the user text
 			g.beginFill(0x6c5d8d, 1);
 			g.moveTo(0, yPos);
-			g.lineTo(clip.theText.textWidth + 30, yPos);
-			g.lineTo(clip.theText.textWidth + 10, yPos + clip.theText.textHeight + 10);
-			g.lineTo(-20, yPos + clip.theText.textHeight + 10);
+			
+			if (clip.theText.textHeight > 20) {
+				//two lines
+				g.lineTo(clip.theText.textWidth + 38, yPos);
+				g.lineTo(clip.theText.textWidth + 10, yPos + clip.theText.textHeight + 10);
+				g.lineTo( -28, yPos + clip.theText.textHeight + 10);
+				angleX = -28;
+			}else {
+				//one line
+				g.lineTo(clip.theText.textWidth + 27, yPos);
+				g.lineTo(clip.theText.textWidth + 10, yPos + clip.theText.textHeight + 10);
+				g.lineTo( -17, yPos + clip.theText.textHeight + 10);
+				angleX = -17;
+			}			
+			
 			g.lineTo(0, yPos);
 			g.endFill();
 			
@@ -136,21 +147,30 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			var g:Graphics = lineContainer.graphics;
 			g.clear();
 			g.beginFill(0xFFFFFF, lineAlpha);
-			g.moveTo(-20, 0);
-			g.lineTo(10, 0);
+			g.moveTo(angleX, 0);
+			g.lineTo(angleX + 40, 0);
 			g.lineTo(dtx, dty);
-			g.lineTo(-20, 0);
+			g.lineTo(angleX, 0);
 		}
 		
 		
 		private function update(e:Event):void
 		{
-			clip.x -= 1.5;
+			clip.x -= 2;
 			
 			if (clip.x < 80) {
 				lineAlpha -= .05;
 				if (lineAlpha < 0) {
 					lineAlpha = 0;
+				}
+			}
+			if (clip.x < -(getWidth() * .5)) {
+				//fade the clip out
+				clip.alpha -= .01;
+				if (clip.alpha <= 0) {
+					container.removeEventListener(Event.ENTER_FRAME, update);
+					dispatchEvent(new Event(COMPLETE));
+					return;
 				}
 			}
 			
@@ -171,11 +191,12 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 					dotDrawn = true;
 				}
 			}
-			
+			/*
 			if (clip.x < -clip.theText.textWidth - 20) {
 				container.removeEventListener(Event.ENTER_FRAME, update);
 				dispatchEvent(new Event(COMPLETE));
 			}
+			*/
 		}		
 		
 		

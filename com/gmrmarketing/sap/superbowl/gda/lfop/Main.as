@@ -32,9 +32,14 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		
 		private var TESTING:Boolean = false;
 		
+		private var initValues:Array;
+		private var valueIndex:int;
+		
 		
 		public function Main()
 		{
+			initValues = new Array("fanbase", "scorefirst", "mvpunit", "runningvspassing");
+			
 			maskContainer = new Sprite();
 			maskContainer.cacheAsBitmap = true;
 			addChild(maskContainer);
@@ -57,7 +62,13 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		 */
 		public function init(initValue:String = ""):void
 		{
-			sentimentType = initValue == "" ? "Blowout" : initValue;
+			pieBG.alpha = 0;			
+			theMask.scaleX = 0;
+			pie.scaleX = pie.scaleY = 0;			
+			question.alpha = 0;
+			
+			sentimentType = initValues[valueIndex];
+			
 			refreshData();
 		}		
 		
@@ -65,7 +76,7 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		private function refreshData():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetOpinionPoll?data=" + sentimentType + "&abc=" + String(new Date().valueOf()));
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetOpinionPoll?poll=" + sentimentType);
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -82,6 +93,12 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		{
 			if(e){
 				localCache = JSON.parse(e.currentTarget.data);
+				
+				if (localCache.PollValues[0].Weight < localCache.PollValues[1].Weight) {
+					var temp:Object = localCache.PollValues[0];
+					localCache.PollValues[0] = localCache.PollValues[1];
+					localCache.PollValues[1] = temp;
+				}
 			}
 			if (TESTING) {
 				show();
@@ -117,7 +134,7 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 			
 			TweenMax.to(pie, .5, { scaleX:1, scaleY:1, ease:Back.easeOut } );			
 			TweenMax.to(theMask, 1, { scaleX:1, delay:.3, onComplete:showPie } );
-			TweenMax.to(question, 1, { y:67, alpha:1, delay:.3, ease:Back.easeOut } );
+			TweenMax.to(question, 1, { y:62, alpha:1, delay:.3, ease:Back.easeOut } );
 			
 			TweenMax.delayedCall(DISPLAY_TIME, complete);
 		}
@@ -131,8 +148,18 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		
 		public function cleanup():void
 		{			
+			pieBG.alpha = 0;			
+			theMask.scaleX = 0;
+			pie.scaleX = pie.scaleY = 0;			
+			question.alpha = 0;
+			
 			maskContainer.graphics.clear();
 			lineContainer.graphics.clear();
+			
+			valueIndex++;
+			if (valueIndex > initValues.length) {
+				valueIndex = 0;
+			}
 			refreshData(); //preload next
 		}
 		

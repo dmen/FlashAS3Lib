@@ -35,7 +35,7 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 		{
 			var sentimentType:String = "Tailgating";
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetOpinionPoll?data=" + sentimentType + "&abc=" + String(new Date().valueOf()));
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetOpinionPoll?data=" + sentimentType);
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);

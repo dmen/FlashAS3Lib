@@ -39,8 +39,7 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		
 		private var localCache:Array;
 		private var tagLevel:int; //current tag level 1-3 used when refreshing tags
-		private var myDate:String;
-		
+		private var single:Boolean;
 		
 		/**
 		 * Constructor
@@ -95,14 +94,17 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		/**
 		 * Refreshes the tags object from the web service
 		 * @param	colors
-		 * @param	date
 		 */
-		public function refreshTags(colors:Array, date:String):void
+		public function refreshTags(colors:Array, $single:Boolean = true):void
 		{
 			tags = new Object();
-			tagLevel = 1;//1 or 2 for sb49 or 
+			single = $single;
+			if (single) {
+				tagLevel = 1; //sb49
+			}else {
+				tagLevel = 2; //start at afc
+			}
 			tagColors = colors;
-			myDate = date;
 			getTagsByLevel();
 		}
 		
@@ -120,7 +122,7 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 				whichTags = "nfc";
 			}
 			
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetWordCloud?data=" + whichTags + "&abc=" + String(new Date().valueOf()));					
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetWordCloud?data=" + whichTags);					
 			
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
@@ -193,11 +195,16 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 				measure(localTags[i]);//passed by reference so tag in array is modified by measure()
 			}
 			
-			tagLevel++;
-			if (tagLevel < 4) {
-				getTagsByLevel();
-			}else {				
-				//trace("tags processed", tags.level1.length, tags.level2.length, tags.level3.length);
+			if(!single){
+				tagLevel++;
+				if (tagLevel < 4) {
+					getTagsByLevel();
+				}else {				
+					//trace("tags processed", tags.level1.length, tags.level2.length, tags.level3.length);
+					dispatchEvent(new Event(TAGS_READY));
+				}
+			}else {
+				//single
 				dispatchEvent(new Event(TAGS_READY));
 			}
 			
