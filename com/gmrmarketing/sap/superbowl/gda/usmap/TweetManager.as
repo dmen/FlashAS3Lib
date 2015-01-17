@@ -6,6 +6,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 	import flash.events.*;
 	import flash.geom.Point;
 	import com.gmrmarketing.sap.superbowl.gda.usmap.Tweet;
+	import com.gmrmarketing.sap.superbowl.gda.usmap.Data;
 	import com.gmrmarketing.utilities.Strings;
 	import com.greensock.TweenMax;
 	
@@ -21,9 +22,11 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		private var needsRefreshing:Boolean;//set to true in displayTweets() once the list of tweets has been displayed
 		private var tweetX:int; //starts at 660
 		private var tweetCount:int; //used to know when all tweets have been displayed
+		private var data:Data;
 		
 		public function TweetManager()
-		{			
+		{
+			data = new Data();
 			needsRefreshing = true;			
 		}
 	
@@ -89,7 +92,8 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			localCache = new Array();
 			needsRefreshing = false;
 			cacheIndex = 0;
-			var p:Point;
+			//var p:Point;
+			var p:Array;
 			var m:String;
 			
 			//limit the number of tweets displayed before refreshing
@@ -97,11 +101,12 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			var maxTweets:int = Math.min(20, json.length);
 			
 			for (var i:int = 0; i < maxTweets; i++) {
-				p = latLonToXY(json[i].latitude, Math.abs(json[i].longitude));	
+				//p = latLonToXY(json[i].latitude, Math.abs(json[i].longitude));
+				p = data.getClosest(Math.abs(json[i].latitude), Math.abs(json[i].longitude));
 				m = Strings.removeLineBreaks(json[i].text);
 				m = Strings.removeChunk(m, "http://");
 				m = Strings.removeChunk(m, "https://");
-				localCache.push( { user:"@" + json[i].authorname, message:m, theY:p.y, theX:p.x, pic:json[i].profilepicURL } );				
+				localCache.push( { user:"@" + json[i].authorname, message:m, theY:p[1], theX:p[0], pic:json[i].profilepicURL } );				
 			}			
 			dispatchEvent(new Event(READY));
 		}
@@ -162,19 +167,19 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		 */
 		private function latLonToXY(lat:Number, lon:Number):Point
 		{
-			//latitude: northern extent of wash is 48.0º - 180 pixels - southern is 25º - 493 pixels
-			//longitude: western extent is 124.5º - 227 pixels - eastern is 66º - 776 pixels
+			//latitude: northern extent of wash is 48.0º - 164 pixels - southern is 25º - 494 pixels
+			//longitude: western extent is 124.5º - 40 pixels - eastern is 66º - 595 pixels
 			
-			lat = lat < 25 ? 25 : lat;
-			lat = lat > 48 ? 48 : lat;
-			lon = lon > 124.5 ? 124.5 : lon;
-			lon = lon < 66 ? 66 : lon;
+			//lat = lat < 25 ? 25 : lat;
+			//lat = lat > 48 ? 48 : lat;
+			//lon = lon > 124.5 ? 124.5 : lon;
+			//lon = lon < 66 ? 66 : lon;
 			
 			var latDelta:Number = 48.0 - lat;
 			var lonDelta:Number = 124.5 - lon;
 			
-			var latMultiplier:Number = 13.4; //pixel extents / degree extents (515 - 207)/(48 - 25) = 308 / 23   - NORTH
-			var lonMultiplier:Number = 9.3; // (580 - 50) / (124.5 - 66) = 530 / 58.5     - WEST
+			var latMultiplier:Number = 14.3478; //pixel extents / degree extents (494 - 164)/(48 - 25) = 330 / 23   - NORTH
+			var lonMultiplier:Number = 9.4871; // (595 - 40) / (124.5 - 66) = 555 / 58.5     - WEST
 			
 			var lonAdd:int;
 			if (lon > 80) {
@@ -185,11 +190,14 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 				lonAdd = 75;
 			}
 			
-			var tx:Number = lonAdd + lonDelta * lonMultiplier;
-			var ty:Number = 185 + latDelta * latMultiplier;
+			var tx:Number = 40 + lonDelta * lonMultiplier;
+			var ty:Number = 164 + latDelta * latMultiplier;
+			
+			//trace(lat,"N",lon,"W",latDelta,lonDelta
 			
 			return new Point(tx,ty);
-		}
+		}		
+		
 		
 	}
 	

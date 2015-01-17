@@ -26,8 +26,6 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		private var limit:Number;
 		private var deg2rad:Number;
 		
-		private var sentimentType:String //passed from config.xm in init()
-		
 		private var initPoint:Point;
 		
 		private var TESTING:Boolean = false;
@@ -66,8 +64,7 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 			theMask.scaleX = 0;
 			pie.scaleX = pie.scaleY = 0;			
 			question.alpha = 0;
-			
-			sentimentType = initValues[valueIndex];
+			valueIndex = 0;
 			
 			refreshData();
 		}		
@@ -76,7 +73,7 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		private function refreshData():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetOpinionPoll?poll=" + sentimentType);
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetOpinionPoll?poll=" + initValues[valueIndex]);
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);

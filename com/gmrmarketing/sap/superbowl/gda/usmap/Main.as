@@ -41,7 +41,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		private var sceneBMD:BitmapData;
 		private var sceneImage:Bitmap;
 		private var shadow:Bitmap;
-		private var TESTING:Boolean = false;
+		private var TESTING:Boolean = true;
 		
 		public function Main()
 		{
@@ -211,6 +211,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			
 			if (materialRef) {
 				materialRef.filters[0].color = defaultColors[defaultIndex];
+				//trace(materialRef.filters[0].level);
 				defaultIndex++;
 				if (defaultIndex >= defaultColors.length) {
 					defaultIndex = 0;
@@ -285,15 +286,17 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			for (var i:int = 0; i < localCache.length; i++) {
 				
 				var t:Pivot3D = _scene.getChildByName(localCache[i].long);
-				if (t) {					
-					TweenMax.to(t, 2, { scaleZ:localCache[i].normalized * .5, delay:2+i*.025, ease:Elastic.easeOut } );
+				if (t) {	
+					if(localCache[i].normalized > 8){
+						TweenMax.to(t, 2, { scaleZ:localCache[i].normalized * .6, delay:2 + i * .025, ease:Elastic.easeOut } );
+					}
 				}
 				
 				//normalized value is 1.5 - 15
 				materialRef = _scene.getMaterialByName( String(localCache[i].long).toLowerCase() ) as Shader3D;
 				if (materialRef) {					
 					if(localCache[i].side == "nfc"){
-						materialRef.filters[0].color = 0x2f5d36;
+						materialRef.filters[0].color = 0x11360f;
 					}else {
 						materialRef.filters[0].color = 0x0d254c;
 					}

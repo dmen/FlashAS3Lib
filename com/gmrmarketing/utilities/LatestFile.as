@@ -32,7 +32,7 @@ package com.gmrmarketing.utilities
 			var files:Array = _folder.getDirectoryListing();
 			
 			if (files.length) {
-				files.sortOn("creationDate", Array.DESCENDING);
+				files.sortOn("creationDate", Array.NUMERIC | Array.DESCENDING);
 				return files[0];
 			}
 			
@@ -49,13 +49,30 @@ package com.gmrmarketing.utilities
 			var files:Array = _folder.getDirectoryListing();
 			
 			if (files.length) {
-				files.sortOn("creationDate", Array.DESCENDING);
+				files.sortOn("creationDate", Array.NUMERIC | Array.DESCENDING);
 				return files[0].nativePath;
 			}
 			
 			return "";
 		}
 		
+		
+		//test method
+		public function listFiles():void
+		{
+			var files:Array = _folder.getDirectoryListing();
+			
+			for (var i:int = 0; i < files.length; i++){
+				//
+				trace(files[i].nativePath);
+			}
+			trace("sort");
+			files.sortOn("creationDate", Array.NUMERIC | Array.DESCENDING);
+			for (i = 0; i < files.length; i++){
+				//files.sortOn("creationDate", Array.DESCENDING);
+				trace(files[i].nativePath);
+			}
+		}
 	}
 	
 }

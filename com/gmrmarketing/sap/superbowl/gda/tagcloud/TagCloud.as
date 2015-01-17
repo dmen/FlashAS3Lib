@@ -18,7 +18,7 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		public static const TAGS_READY:String = "tagsLoaded";//dispatched from tagsLoaded() after a call to refreshTags()
 		public static const ERROR:String = "tagError";//dispatched from tagsLoaded() after a call to refreshTags()
 		
-		private var tags:Object; //contains arrays of tags by level1, level2, level3 keys
+		private var tags:Object; //contains arrays of tags by key - one of sb49, afc, nfc
 		
 		private var tagIndex:int = 0; //index of current tag in tags
 		private var totalTagCount:int; //total of all value properties in the tags array
@@ -32,7 +32,7 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		private var colorIndex:int;
 		private var currColor:int;
 		
-		private var loopCount:int;//used to force successive calls to getNextTag() further down the tag list
+		//private var loopCount:int;//used to force successive calls to getNextTag() further down the tag list
 		//so that smaller fonts are used
 		private var maxFont:int;
 		private var minFont:int;
@@ -56,9 +56,9 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 			minFont = minFontSize;	
 					
 			hText = new mcHText();//lib			
-			vText = new mcVText();//lib	
-				
-			loopCount = 0;			
+			vText = new mcVText();//lib
+			
+			tags = new Object();
 		}
 		
 		
@@ -67,6 +67,7 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		 * 
 		 * tags have name,value,fontSize,imageh,imagev,widthh,heighth,widthv,heightv properties
 		 */
+		/*
 		public function getNextTag():Object
 		{
 			var tag:Object = tags[tagIndex];
@@ -78,7 +79,7 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 			}			
 			return tag;
 		}
-		
+		*/
 		
 		/**
 		 * Returns the tags for the specified key
@@ -96,8 +97,7 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		 * @param	colors
 		 */
 		public function refreshTags(colors:Array, $single:Boolean = true):void
-		{
-			tags = new Object();
+		{			
 			single = $single;
 			if (single) {
 				tagLevel = 1; //sb49
@@ -214,15 +214,7 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		}
 		
 		
-		private function tagError(e:IOErrorEvent):void
-		{			
-			if (localCache) {
-				tags = localCache.concat();
-				dispatchEvent(new Event(TAGS_READY));
-			}else {
-				
-			}
-		}
+		private function tagError(e:IOErrorEvent):void{}
 		
 		
 		/**

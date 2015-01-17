@@ -194,14 +194,15 @@ package com.gmrmarketing.sap.superbowl.gda.player
 			}
 			
 			topTask = MovieClip(screens[screenIndex][0].clip);
-			topTask.x = 640;
+			topTask.x = 640;//off screen right
 			topTask.y = screens[screenIndex][0].y;
+			topTask.addEventListener("finished", taskComplete, false, 0, true);//only listen on the top task
 			//topTask.alpha = 0;
 			if (!taskContainer.contains(topTask)) {
 				taskContainer.addChild(topTask);
 			}
 			
-			topTask.addEventListener("finished", taskComplete, false, 0, true);
+			
 			//topTask.show();//starts task timer
 			TweenMax.to(topTask, .5, { x:0, ease:Linear.easeNone, onComplete:showTop } );
 			
@@ -228,6 +229,10 @@ package com.gmrmarketing.sap.superbowl.gda.player
 		}
 		
 		
+		/**
+		 * callback for complete listener on the top task
+		 * @param	e FINISHED event
+		 */
 		private function taskComplete(e:Event):void
 		{
 			topTask.removeEventListener("finished", taskComplete);

@@ -48,7 +48,7 @@ package com.gmrmarketing.sap.superbowl.gda.video
 		
 		public function show():void
 		{
-			video = new VideoLoader(latest.latestFileName, { width:550, height:310, x:45, y:114, autoPlay:true, container:this } );
+			video = new VideoLoader(latest.latestFileName, { width:550, height:310, x:45, y:117, autoPlay:true, container:this } );
 			video.load();
 			video.content.alpha = 0;
 			
