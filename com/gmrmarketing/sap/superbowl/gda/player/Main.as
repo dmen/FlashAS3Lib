@@ -73,7 +73,6 @@ package com.gmrmarketing.sap.superbowl.gda.player
 					thisTask.data = thisScreen[j].@initData;
 					thisTask.y = parseInt(thisScreen[j].@y);
 					aScreen.push(thisTask);
-					trace( i, j, thisScreen[j].@file, thisScreen[j].@initData, thisScreen[j].@y);
 				}
 				
 				screens.push(aScreen);

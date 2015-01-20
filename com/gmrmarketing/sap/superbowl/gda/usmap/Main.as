@@ -41,7 +41,8 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		private var sceneBMD:BitmapData;
 		private var sceneImage:Bitmap;
 		private var shadow:Bitmap;
-		private var TESTING:Boolean = true;
+		private var TESTING:Boolean = false;
+		
 		
 		public function Main()
 		{
@@ -93,7 +94,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		private function refreshData():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetUSMapVolume?topic=nfc");
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetCachedFeed?feed=USMapVolumeNFC");
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, nfcLoaded, false, 0, true);
@@ -122,7 +123,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			}
 			
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetUSMapVolume?topic=afc");
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetCachedFeed?feed=USMapVolumeAFC");
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -265,12 +266,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			sceneImage.alpha = 0;
 			shadow.alpha = 0;
 			
-			if(tweetManager.isReady()){
-				tweetManager.start();
-			}else {
-				tweetManager.addEventListener(TweetManager.READY, startTweets, false, 0, true);
-			}
-			tweetManager.addEventListener(TweetManager.FINISHED, complete);
+			
 			
 			//logo clips on stage
 			team1.alpha = 0;
@@ -278,8 +274,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			team2.alpha = 0;
 			team2.x = 600;
 			
-			//reset map to default rotation
-			trace("usa", usa);
+			//reset map to default rotation			
 			usa.setRotation(rotOb.ox, rotOb.oy, rotOb.oz);
 			
 			_scene.addEventListener( Scene3D.POSTRENDER_EVENT, renderEvent );			
@@ -296,9 +291,9 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 				materialRef = _scene.getMaterialByName( String(localCache[i].long).toLowerCase() ) as Shader3D;
 				if (materialRef) {					
 					if(localCache[i].side == "nfc"){
-						materialRef.filters[0].color = 0x11360f;
+						materialRef.filters[0].color = 0x497428;//seahawksgreen
 					}else {
-						materialRef.filters[0].color = 0x0d254c;
+						materialRef.filters[0].color = 0x001b3c;//patriots blue
 					}
 				}
 			}
@@ -312,6 +307,12 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		}
 		private function pauseScene():void
 		{
+			if(tweetManager.isReady()){
+				tweetManager.start();
+			}else {
+				tweetManager.addEventListener(TweetManager.READY, startTweets, false, 0, true);
+			}
+			tweetManager.addEventListener(TweetManager.FINISHED, complete);
 			_scene.pause();
 		}
 		
@@ -375,7 +376,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		{
 			//reset localCache
 			//abbr for data from service, long matches name in 3d map, side is for afc or nfc whichever has the max value
-			localCache = new Array( { abbr:"AL", long:"Alabama", pos:0, side:"" }, { abbr:"AK", long:"Alaska", pos:0, side:"" }, { abbr:"AZ", long:"Arizona", pos:0, side:"" }, { abbr:"AR", long:"Arkansas", pos:0, side:"" }, { abbr:"CA", long:"California", pos:0, side:"" }, { abbr:"CO", long:"Colorado", pos:0, side:"" }, { abbr:"CT", long:"Connecticut", pos:0, side:"" }, { abbr:"DE", long:"Delaware", pos:0, side:"" }, { abbr:"FL", long:"Florida", pos:0, side:"" }, { abbr:"GA", long:"Georgia", pos:0, side:"" }, { abbr:"HI", long:"Hawaii", pos:0, side:"" }, { abbr:"ID", long:"Idaho", pos:0, side:"" }, { abbr:"IL", long:"Illinois", pos:0, side:"" }, { abbr:"IN", long:"Indiana", pos:0, side:"" }, { abbr:"IA", long:"Iowa", pos:0, side:"" }, { abbr:"KS", long:"Kansas", pos:0, side:"" }, { abbr:"KY", long:"Kentucky", pos:0, side:"" }, { abbr:"LA", long:"Lousiana", pos:0, side:"" }, { abbr:"ME", long:"Maine", pos:0, side:"" }, { abbr:"MD", long:"Maryland", pos:0, side:"" }, { abbr:"MA", long:"Massachusetts", pos:0, side:"" }, { abbr:"MI", long:"Michigan", pos:0, side:"" }, { abbr:"MN", long:"Minnesota", pos:0, side:"" }, { abbr:"MS", long:"Mississippi", pos:0, side:"" }, { abbr:"MO", long:"Missouri", pos:0, side:"" }, { abbr:"MT", long:"Montana", pos:0, side:"" }, { abbr:"NE", long:"Nebraska", pos:0, side:"" }, { abbr:"NV", long:"Nevada", pos:0, side:"" }, { abbr:"NH", long:"New_Hampshire", pos:0, side:"" }, { abbr:"NJ", long:"New_Jersey", pos:0, side:"" }, { abbr:"NM", long:"New_Mexico", pos:0, side:"" }, { abbr:"NY", long:"New_York", pos:0, side:"" }, { abbr:"NC", long:"North_Carolina", pos:0, side:"" }, { abbr:"ND", long:"North_Dakota", pos:0, side:"" }, { abbr:"OH", long:"Ohio", pos:0, side:"" }, { abbr:"OK", long:"Oklahoma", pos:0, side:"" }, { abbr:"OR", long:"Oregon", pos:0, side:"" }, { abbr:"PA", long:"Pennsylvania", pos:0, side:"" }, { abbr:"RI", long:"Rhode_Island", pos:0, side:"" }, { abbr:"SC", long:"South_Carolina", pos:0, side:"" }, { abbr:"SD", long:"South_Dakota", pos:0, side:"" }, { abbr:"TN", long:"Tennessee", pos:0, side:"" }, { abbr:"TX", long:"Texas", pos:0, side:"" }, { abbr:"UT", long:"Utah", pos:0, side:"" }, { abbr:"VT", long:"Vermont", pos:0, side:"" }, { abbr:"VA", long:"Virginia", pos:0, side:"" }, { abbr:"WA", long:"Washington", pos:0, side:"" }, { abbr:"WV", long:"West_Virginia", pos:0, side:"" }, { abbr:"WI", long:"Wisconsin", pos:0, side:"" }, { abbr:"WY", long:"Wyoming", pos:0, side:"" } );
+			localCache = new Array( { abbr:"AL", long:"Alabama", pos:0, side:"" }, { abbr:"AK", long:"Alaska", pos:0, side:"" }, { abbr:"AZ", long:"Arizona", pos:0, side:"" }, { abbr:"AR", long:"Arkansas", pos:0, side:"" }, { abbr:"CA", long:"California", pos:0, side:"" }, { abbr:"CO", long:"Colorado", pos:0, side:"" }, { abbr:"CT", long:"Connecticut", pos:0, side:"" }, { abbr:"DE", long:"Delaware", pos:0, side:"" }, { abbr:"FL", long:"Florida", pos:0, side:"" }, { abbr:"GA", long:"Georgia", pos:0, side:"" }, { abbr:"HI", long:"Hawaii", pos:0, side:"" }, { abbr:"ID", long:"Idaho", pos:0, side:"" }, { abbr:"IL", long:"Illinois", pos:0, side:"" }, { abbr:"IN", long:"Indiana", pos:0, side:"" }, { abbr:"IA", long:"Iowa", pos:0, side:"" }, { abbr:"KS", long:"Kansas", pos:0, side:"" }, { abbr:"KY", long:"Kentucky", pos:0, side:"" }, { abbr:"LA", long:"Louisiana", pos:0, side:"" }, { abbr:"ME", long:"Maine", pos:0, side:"" }, { abbr:"MD", long:"Maryland", pos:0, side:"" }, { abbr:"MA", long:"Massachusetts", pos:0, side:"" }, { abbr:"MI", long:"Michigan", pos:0, side:"" }, { abbr:"MN", long:"Minnesota", pos:0, side:"" }, { abbr:"MS", long:"Mississippi", pos:0, side:"" }, { abbr:"MO", long:"Missouri", pos:0, side:"" }, { abbr:"MT", long:"Montana", pos:0, side:"" }, { abbr:"NE", long:"Nebraska", pos:0, side:"" }, { abbr:"NV", long:"Nevada", pos:0, side:"" }, { abbr:"NH", long:"New_Hampshire", pos:0, side:"" }, { abbr:"NJ", long:"New_Jersey", pos:0, side:"" }, { abbr:"NM", long:"New_Mexico", pos:0, side:"" }, { abbr:"NY", long:"New_York", pos:0, side:"" }, { abbr:"NC", long:"North_Carolina", pos:0, side:"" }, { abbr:"ND", long:"North_Dakota", pos:0, side:"" }, { abbr:"OH", long:"Ohio", pos:0, side:"" }, { abbr:"OK", long:"Oklahoma", pos:0, side:"" }, { abbr:"OR", long:"Oregon", pos:0, side:"" }, { abbr:"PA", long:"Pennsylvania", pos:0, side:"" }, { abbr:"RI", long:"Rhode_Island", pos:0, side:"" }, { abbr:"SC", long:"South_Carolina", pos:0, side:"" }, { abbr:"SD", long:"South_Dakota", pos:0, side:"" }, { abbr:"TN", long:"Tennessee", pos:0, side:"" }, { abbr:"TX", long:"Texas", pos:0, side:"" }, { abbr:"UT", long:"Utah", pos:0, side:"" }, { abbr:"VT", long:"Vermont", pos:0, side:"" }, { abbr:"VA", long:"Virginia", pos:0, side:"" }, { abbr:"WA", long:"Washington", pos:0, side:"" }, { abbr:"WV", long:"West_Virginia", pos:0, side:"" }, { abbr:"WI", long:"Wisconsin", pos:0, side:"" }, { abbr:"WY", long:"Wyoming", pos:0, side:"" } );
 		}
 	}	
 }

@@ -115,14 +115,14 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 			var whichTags:String;
 			
 			if (tagLevel == 1) {
-				whichTags = "sb49";
+				whichTags = "WordCloudSB49";
 			}else if(tagLevel == 2) {
-				whichTags = "afc";
+				whichTags = "WordCloudAFC";
 			}else {
-				whichTags = "nfc";
+				whichTags = "WordCloudNFC";
 			}
 			
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetWordCloud?data=" + whichTags);					
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetCachedFeed?feed=" + whichTags);					
 			
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();

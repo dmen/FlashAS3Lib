@@ -71,7 +71,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		{
 			if(needsRefreshing){
 				var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-				var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetUSMapTweets");
+				var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetCachedFeed?feed=USMapTweets");
 				r.requestHeaders.push(hdr);
 				var l:URLLoader = new URLLoader();
 				l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -106,7 +106,11 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 				m = Strings.removeLineBreaks(json[i].text);
 				m = Strings.removeChunk(m, "http://");
 				m = Strings.removeChunk(m, "https://");
-				localCache.push( { user:"@" + json[i].authorname, message:m, theY:p[1], theX:p[0], pic:json[i].profilepicURL } );				
+				if(p[0] !=0){
+					localCache.push( { user:"@" + json[i].authorname, message:m, theY:p[1], theX:p[0], pic:json[i].profilepicURL } );
+				}else {
+					//trace("not in lower 48:", Math.abs(json[i].latitude), Math.abs(json[i].longitude));
+				}
 			}			
 			dispatchEvent(new Event(READY));
 		}

@@ -15,7 +15,7 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 	public class Main extends MovieClip implements IModuleMethods
 	{		
 		public static const FINISHED:String = "finished";//dispatched when the task is complete. Player will call cleanup() now
-		private const DISPLAY_TIME:Number = 20000;//ms
+		private const DISPLAY_TIME:Number = 15000;//ms
 		private var startTime:Number;
 		
 		private var dict:TagCloud;//tags from the service
@@ -158,8 +158,7 @@ package com.gmrmarketing.sap.superbowl.gda.tagcloud
 		
 		private function done(e:TimerEvent = null):void
 		{
-			var remTime:Number = (DISPLAY_TIME - (new Date().valueOf() - startTime)) / 1000;//seconds for TweenMax
-			trace(remTime);
+			var remTime:Number = (DISPLAY_TIME - (new Date().valueOf() - startTime)) / 1000;//seconds for TweenMax			
 			TweenMax.delayedCall(remTime, doDispatch);
 		}
 		private function doDispatch():void

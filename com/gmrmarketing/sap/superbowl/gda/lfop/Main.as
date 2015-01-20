@@ -36,7 +36,7 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		
 		public function Main()
 		{
-			initValues = new Array("fanbase", "scorefirst", "mvpunit", "runningvspassing");
+			initValues = new Array("OpinionPollFanbase", "OpinionPollScoreFirst", "OpinionPollMVPUnit", "OpinionPollRunningVsPassing");
 			
 			maskContainer = new Sprite();
 			maskContainer.cacheAsBitmap = true;
@@ -73,7 +73,7 @@ package com.gmrmarketing.sap.superbowl.gda.lfop
 		private function refreshData():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetOpinionPoll?poll=" + initValues[valueIndex]);
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetCachedFeed?feed=" + initValues[valueIndex]);
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
