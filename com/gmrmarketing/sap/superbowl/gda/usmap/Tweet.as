@@ -81,7 +81,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			}			
 			
 			clip.x = startX;
-			clip.y = 105;
+			clip.y = 75;
 			
 			message = message.replace(/&lt;/g, "<");
 			message = message.replace(/&gt;/g, "<");

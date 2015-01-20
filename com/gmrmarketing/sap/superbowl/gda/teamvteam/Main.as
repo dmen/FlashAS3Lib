@@ -4,6 +4,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 	import flash.display.*;
 	import flash.events.*;
 	import flash.net.*;
+	import flash.text.TextFieldAutoSize;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import com.greensock.loading.*;
@@ -33,7 +34,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 			tvtCircle = new Sprite();
 			
 			//milestone videos - nfc,afc,nfc,afc - first four are for set 1, second four are for set 2
-			allVids = ["test.mp4","test.mp4","test.mp4","test.mp4","test.mp4","test.mp4","test.mp4","test.mp4"];					
+			allVids = ["SeahawksWeek1.mp4","PatriotsWeek5_1.mp4","SeahawksWeek10_1.mp4","PatriotsWeek8_1.mp4","SeahawksWeek13_1.mp4","PatriotsWeek9_1.mp4","SeahawksWeek17.mp4","PatriotsWeek15_1.mp4"];					
 			
 			if(TESTING){
 				init();
@@ -45,7 +46,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 		 * Only called once
 		 * @param	initValue String 1 or 2 for the video set - first set of 4 or second set of 4
 		 */
-		public function init(initValue:String = "1"):void
+		public function init(initValue:String = "2"):void
 		{			
 			setIndex = parseInt(initValue);
 			
@@ -116,7 +117,8 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 		//sets the stats per week
 		private function setStats():void
 		{
-			if(curStat % 2 == 0){
+			if (curStat % 2 == 0) {
+				//nfc current
 				t1s1.wing.theLabel.text = "WINS";
 				t1s1.theStat.text = localCache.stats[curStat].MilestoneWins;
 				t1s2.wing.theLabel.text = "LOSSES";
@@ -129,15 +131,38 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 				t1s5.theStat.text = localCache.stats[curStat].MilestoneTDs;
 				
 				t2s1.wing.theLabel.text = "WINS";
-				t2s1.theStat.text = localCache.stats[curStat + 1].MilestoneWins;
+				t2s1.theStat.text = localCache.stats[curStat].AltTeamWins;
 				t2s2.wing.theLabel.text = "LOSSES";
-				t2s2.theStat.text = localCache.stats[curStat + 1].MilestoneLosses;
+				t2s2.theStat.text = localCache.stats[curStat].AltTeamLosses;
 				t2s3.wing.theLabel.text = "RUSHING YARDS";
-				t2s3.theStat.text = localCache.stats[curStat + 1].MilestoneRushingYds;
+				t2s3.theStat.text = localCache.stats[curStat].AltTeamRushingYds;
 				t2s4.wing.theLabel.text = "PASSING YARDS";
-				t2s4.theStat.text = localCache.stats[curStat + 1].MilestonePassingYds;
+				t2s4.theStat.text = localCache.stats[curStat].AltTeamPassingYds;
 				t2s5.wing.theLabel.text = "TOUCHDOWNS";
-				t2s5.theStat.text = localCache.stats[curStat + 1].MilestoneTDs;
+				t2s5.theStat.text = localCache.stats[curStat].AltTeamTDs;
+			}else {
+				//afc current
+				t1s1.wing.theLabel.text = "WINS";
+				t1s1.theStat.text = localCache.stats[curStat].AltTeamWins;
+				t1s2.wing.theLabel.text = "LOSSES";
+				t1s2.theStat.text = localCache.stats[curStat].AltTeamLosses;
+				t1s3.wing.theLabel.text = "RUSHING YARDS";
+				t1s3.theStat.text = localCache.stats[curStat].AltTeamRushingYds;
+				t1s4.wing.theLabel.text = "PASSING YARDS";
+				t1s4.theStat.text = localCache.stats[curStat].AltTeamPassingYds;
+				t1s5.wing.theLabel.text = "TOUCHDOWNS";
+				t1s5.theStat.text = localCache.stats[curStat].AltTeamTDs;
+				
+				t2s1.wing.theLabel.text = "WINS";
+				t2s1.theStat.text = localCache.stats[curStat].MilestoneWins;
+				t2s2.wing.theLabel.text = "LOSSES";
+				t2s2.theStat.text = localCache.stats[curStat].MilestoneLosses;
+				t2s3.wing.theLabel.text = "RUSHING YARDS";
+				t2s3.theStat.text = localCache.stats[curStat].MilestoneRushingYds;
+				t2s4.wing.theLabel.text = "PASSING YARDS";
+				t2s4.theStat.text = localCache.stats[curStat].MilestonePassingYds;
+				t2s5.wing.theLabel.text = "TOUCHDOWNS";
+				t2s5.theStat.text = localCache.stats[curStat].MilestoneTDs;
 			}
 		}
 		
@@ -230,6 +255,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 		
 		public function show():void
 		{
+			//set the start position within localCache stats
 			if (setIndex == 1) {
 				curStat = 0; //play 0,1,2,3 - nfc1,afc1,nfc2,afc2
 			}else {
@@ -261,6 +287,14 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 			TweenMax.to(team2, 1, { scaleX:1, scaleY:1, alpha:1, ease:Back.easeOut, delay:.5 } );
 			
 			week15.theText.text = localCache.stats[curStat].MilestoneWeek;
+			
+			
+			if (curStat % 2 == 0) {
+				//nfc stat
+				TweenMax.to(week15.bg, .25, { colorTransform: { tint:0x69a639, tintAmount:1 }} );
+			}else {
+				TweenMax.to(week15.bg, .25, { colorTransform: { tint:0x0d254c, tintAmount:1 }} );
+			}
 			
 			TweenMax.to(week15, .5, { y:275, delay:1, onComplete:animStats, ease:Back.easeOut } );
 		}
@@ -300,20 +334,27 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 			}
 		}
 		
-		
+		//milestone text
 		private function showFact():void
 		{
+			theFact.theText.autoSize = TextFieldAutoSize.CENTER;
 			theFact.theText.text = localCache.stats[curStat].MilestoneDescription;
 			
 			var tf:TextFormat = theFact.theText.getTextFormat();
 
-			while(theFact.theText.textHeight > 124){	
+			while(theFact.theText.textHeight > 110){	
 				 tf.size = int(tf.size) - 1;
 				theFact.theText.setTextFormat(tf);
 			}
 			
 			theFact.theText.y = (125 - theFact.theText.textHeight) * .5;
 			
+			if (curStat % 2 == 0) {
+				//nfc stat
+				TweenMax.to(theFact.bg, .5, { colorTransform: { tint:0x69a639, tintAmount:1 }} );
+			}else {
+				TweenMax.to(theFact.bg, .5, { colorTransform: { tint:0x0d254c, tintAmount:1 }} );
+			}
 			TweenMax.to(theFact, .5, { alpha:1 } );
 			TweenMax.to(theFact, 1, { alpha:0, delay:5, onComplete:playVid } );
 		}
@@ -414,7 +455,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 			curStat++;
 			if ((setIndex == 1 && curStat < 4) || (setIndex == 2 && curStat < 8)) {
 				//tween out current week indicator and stats
-				TweenMax.to(week15, .5, { y:236 } );
+				TweenMax.to(week15, .5, { y:236, onComplete:swapWeek } );
 				//stats
 				TweenMax.to(t1s5.wing, .5, { x:182 } );
 				TweenMax.to(t1s4.wing, .5, { x:182, delay:.1 } );
@@ -442,15 +483,22 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 				
 				//TweenMax.to(video.content, .5, { alpha:0 } );
 				TweenMax.to(vidBar, .5, { alpha:0 } );
-			
-				TweenMax.delayedCall(.9, setStats);
 				
-				week15.theText.text = localCache.stats[curStat].MilestoneWeek;
-				
-				TweenMax.to(week15, .5, { y:275, delay:1, onComplete:animStats, ease:Back.easeOut } );
+				TweenMax.to(week15, .5, { y:275, delay:1.5, onStart:setStats, onComplete:animStats, ease:Back.easeOut } );
 			}else {
 				dispatchEvent(new Event(FINISHED));
 			}
+		}
+		private function swapWeek():void
+		{
+			week15.theText.text = localCache.stats[curStat].MilestoneWeek;
+				
+				if (curStat % 2 == 0) {
+					//nfc stat
+					TweenMax.to(week15.bg, .25, { colorTransform: { tint:0x69a639, tintAmount:1 }} );
+				}else {
+					TweenMax.to(week15.bg, .25, { colorTransform: { tint:0x0d254c, tintAmount:1 }} );
+				}
 		}
 		
 		

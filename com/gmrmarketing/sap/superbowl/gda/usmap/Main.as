@@ -289,11 +289,35 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 				
 				//normalized value is 1.5 - 15
 				materialRef = _scene.getMaterialByName( String(localCache[i].long).toLowerCase() ) as Shader3D;
+				var color:Number;
 				if (materialRef) {					
-					if(localCache[i].side == "nfc"){
-						materialRef.filters[0].color = 0x497428;//seahawksgreen
+					if (localCache[i].side == "nfc") {
+						color = 0x2f4a19;//dark seahawksgreen for high volume
+						if (localCache[i].normalized < 3) {
+							color = 0x68a539;
+						}else if (localCache[i].normalized < 6) {
+							color = 0x5e9533;
+						}else if (localCache[i].normalized < 9) {
+							color = 0x51802c;
+						}else if (localCache[i].normalized < 12) {
+							color = 0x416623;
+						}
+						materialRef.filters[0].color = color
 					}else {
-						materialRef.filters[0].color = 0x001b3c;//patriots blue
+						
+						color = 0x001630;
+						if (localCache[i].normalized < 3) {
+							color = 0x00377a;
+						}else if (localCache[i].normalized < 6) {
+							color = 0x002f68;
+						}else if (localCache[i].normalized < 9) {
+							color = 0x002757;
+						}else if (localCache[i].normalized < 12) {
+							color = 0x001b3d;
+						}
+
+						
+						materialRef.filters[0].color = color;//patriots blue
 					}
 				}
 			}

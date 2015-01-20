@@ -23,12 +23,13 @@ package com.gmrmarketing.sap.superbowl.gda.lockup
 		private var lines:Array;
 		private var lineIndex:int;
 		
+		
 		public function Main()
 		{
-			bmd = new BitmapData(530, 67, true, 0x00000000);
+			bmd = new BitmapData(640, 70, true, 0x00000000);
 			bmp = new Bitmap(bmd);
-			bmp.x = 55;
-			bmp.y = 115;
+			bmp.x = 0;
+			bmp.y = 117;
 			addChild(bmp);
 			
 			statsZone.cacheAsBitmap = true;
@@ -54,7 +55,7 @@ package com.gmrmarketing.sap.superbowl.gda.lockup
 		public function show():void
 		{
 			lines = new Array();
-			for (var i:int = 0; i < 67; i++) {
+			for (var i:int = 0; i < 70; i++) {
 				lines.push(i);
 			}
 			lines = Utility.randomizeArray(lines);
@@ -67,18 +68,21 @@ package com.gmrmarketing.sap.superbowl.gda.lockup
 		
 		private function update(e:TimerEvent):void
 		{
-			bmd.fillRect(new Rectangle(0, lines[lineIndex], 530, 1), 0xffffffff);
-			lineIndex++;
+			bmd.fillRect(new Rectangle(0, lines[lineIndex], 640, 1), 0xffffffff);
+			bmd.fillRect(new Rectangle(0, lines[lineIndex+1], 640, 1), 0xffffffff);
+			lineIndex+=2;
 			if (lineIndex >= lines.length) {
 				updateTimer.reset();
 				doneTimer();
 			}
 		}
 		
+		
 		private function doneTimer():void
 		{
 			TweenMax.delayedCall(DISPLAY_TIME, done);
 		}
+		
 		
 		private function done():void
 		{

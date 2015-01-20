@@ -1,4 +1,4 @@
-package com.gmrmarketing.sap.superbowl.gda.fpoy
+package com.gmrmarketing.sap.superbowl.gda.fotd
 {	
 	import flash.display.*;
 	import flash.net.*;
@@ -15,24 +15,32 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 	{
 		public static const FINISHED:String = "finished";
 		private var localCache:Object;
-		private var TESTING:Boolean = false;
+		private var TESTING:Boolean = true;
 		
 		private var animOb:Object;
-		private var leftArc:Array;
+		private var leftArc:Array;//circle clips on each arc
 		private var rightArc:Array;
 		
 		private var players:Array; //players with stats
-		private var playersIndex:int; //current index in players
 		private var circObject:Object;
 		
 		
 		public function Main()
 		{	
 			//hides the two arcs
-			arcL.rotation = -140;//to 0
-			arcR.rotation = 40;//to 180
+			arcL.rotation = 320;//to 180
+			arcR.rotation = -140;//to 0
 			arcL.visible = false;
 			arcR.visible = false;
+			
+			//put 5 clips into each array then just modify pics and text in them as needed
+			//clips in each arc arc copies of each other - only 5 users taken at a time
+			leftArc = [];//put 5 on each arc - only show 2 on left arc at once
+			rightArc = [];//only show 3 on right arc
+			for (var i:int = 0; i < 5; i++){
+				leftArc.push(new UserArc());
+				rightArc.push(new UserArc());
+			}
 			
 			if (TESTING) {
 				init();
@@ -49,7 +57,7 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 		private function refreshData():void
 		{			
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetCachedFeed?feed=PlayerSentiment");
+			var r:URLRequest = new URLRequest("http://sapsb49api.thesocialtab.net/api/GameDay/GetCachedFeed?feed=FeaturedFans");
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, dataLoaded, false, 0, true);
@@ -63,49 +71,29 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 		
 		
 		private function dataLoaded(e:Event):void
-		{			
-			leftArc = [];
-			rightArc = [];
-			players = [];
-			
-			var arcPlayer:PlayerArc;
-			var statsPlayer:PlayerStats;
+		{
 			var i:int;
 			
-			if(e){
+			if (e) {
+				//array of objects with authorname,text,mediumresURL
 				localCache = JSON.parse(e.currentTarget.data);
 				
-				//populate player arrays
-				for (i = 0; i < localCache.length; i++) {
+				//populate player arc arrays
+				var n:int = Math.min(5, localCache.length);
+				for (i = 0; i < n; i++) {
 					
-					arcPlayer = new PlayerArc(localCache[i].PlayerLastName, i < 4);
-					arcPlayer.number = "#" + String(i + 1); //#1 - #8
+					leftArc[i].clip.nameRight.text = localCache[i].authorname;
+					leftArc[i].clip.message.text = localCache[i].text;
+					leftArc[i].container = this;
+					leftArc[i].hideStats();
 					
-					statsPlayer = new PlayerStats(localCache[i].PlayerLastName);
-					statsPlayer.sentiment(localCache[i].NetSentiment);
-					statsPlayer.number = "#" + String(i + 1); //#1 - #8
-					
-					if (i < 4) {
-						leftArc.push(arcPlayer);
-					}else {
-						rightArc.push(arcPlayer);
-					}
-					players.push(statsPlayer);
+					rightArc[i].clip.nameRight.text = localCache[i].authorname;
+					rightArc[i].clip.message.text = localCache[i].text;
+					rightArc[i].container = this;
+					rightArc[i].hideStats();
 				}
 			}
 			
-			for (i = 0; i < 4; i++) {
-				leftArc[i].container = this;
-				leftArc[i].hideStats();
-				
-				rightArc[i].container = this;
-				rightArc[i].hideStats();
-			}
-			for (i = 0; i < 8; i++) {
-				players[i].container = this;
-				players[i].hideStats();
-			}
-			localCache = 1;
 			if (TESTING) {
 				show();
 			}
@@ -126,21 +114,18 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 		
 		public function show():void
 		{			
-			arcL.rotation = -140;//to 0
-			arcR.rotation = 40;//to 180
+			arcL.rotation = 320;//to 180
+			arcR.rotation = -140;//to 0
 			arcL.visible = true;
 			arcR.visible = true;			
 			
-			var i:int;
-			for (i = 0; i < 4; i++) {
-				leftArc[i].clip.scaleX = leftArc[i].clip.scaleY = .5;
-				leftArc[i].clip.alpha = .5;
+			for (var i:int = 0; i < 5; i++) {
+				leftArc[i].clip.scaleX = leftArc[i].clip.scaleY = .5;				
 				rightArc[i].clip.scaleX = rightArc[i].clip.scaleY = .5;
-				rightArc[i].clip.alpha = .5;
 			}
 			
-			TweenMax.to(arcL, .5, { rotation:0, ease:Linear.easeNone } );
-			TweenMax.to(arcR, .5, { rotation:180, delay:.2, ease:Linear.easeNone, onComplete:animTest} );
+			TweenMax.to(arcL, .5, { rotation:180, ease:Linear.easeNone } );
+			TweenMax.to(arcR, .5, { rotation:0, delay:.2, ease:Linear.easeNone, onComplete:animTest} );
 		}
 		
 		
@@ -154,9 +139,7 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 				rightArc[i].clip.x = 800;//off stage right
 			}			
 				
-			animOb = { angL: -100, angR: -100 };
-			
-			playersIndex = -1;//incremented in showNextPlayer()
+			animOb = { angL: -100, angR: -100 };			
 			
 			//TweenMax.to(animOb, 1, { angL:36, angR:36, onUpdate:cur, onComplete:openTest } );
 			TweenMax.to(animOb, 1, { angL:36, angR:36, onUpdate:cur, onComplete:showNextPlayer } );
@@ -165,13 +148,13 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 		
 		private function cur():void
 		{
-			for (var i:int = 0; i < 4; i++) {
+			for (var i:int = 0; i < 5; i++) {
 				//animate in reverse (3-i) so #1 is last - ie at the top of the arc
-				leftArc[3 - i].clip.x = arcL.x + Math.cos((animOb.angL - (26 * i)) / 57.296) * 236;
-				leftArc[3 - i].clip.y = arcL.y + Math.sin((animOb.angL - (26 * i)) / 57.296) * 236;
+				leftArc[i].clip.x = arcL.x + Math.cos((animOb.angL - (26 * i)) / 57.296) * 233;
+				leftArc[i].clip.y = arcL.y + Math.sin((animOb.angL - (26 * i)) / 57.296) * 233;
 				
-				rightArc[i].clip.x = arcR.x - Math.cos((animOb.angR - (26 * i)) / 57.296) * 236;
-				rightArc[i].clip.y = arcR.y - Math.sin((animOb.angR - (26 * i)) / 57.296) * 236;
+				rightArc[i].clip.x = arcR.x - Math.cos((animOb.angR - (26 * i)) / 57.296) * 233;
+				rightArc[i].clip.y = arcR.y - Math.sin((animOb.angR - (26 * i)) / 57.296) * 233;
 			}
 		}
 		/*
@@ -194,7 +177,7 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 		 */
 		private function showNextPlayer():void
 		{			
-			playersIndex++;	
+			/*
 			if(playersIndex < 8){
 				if (playersIndex < 4) {
 					leftArc[playersIndex].showNameNumber();
@@ -206,11 +189,13 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 			}else {
 				dispatchEvent(new Event(FINISHED));//player will call cleanup()
 			}
+			*/
 		}
 		
 		
 		private function showNextPlayerStats():void
 		{
+			/*
 			//move player off position so it can move while fading in
 			if (playersIndex < 4) {
 				//coming from left arc
@@ -224,12 +209,12 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 			players[playersIndex].clip.alpha = 0;
 			
 			TweenMax.to(players[playersIndex].clip, .5, { alpha:1, x:185, onComplete:showThePlayerStats } );
+			*/
 		}
 		
 		
 		private function showThePlayerStats():void
 		{			
-			players[playersIndex].showStats();
 			
 			circObject = { ang:0 };
 			TweenMax.to(circObject, 8, { ang:360, onUpdate:drawCircles, onComplete:showStatsComplete } );
@@ -238,38 +223,35 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 		
 		//called by TweenMax.onUpdate from showPlayerStats()
 		private function drawCircles():void
-		{
+		{/*
 			Utility.drawArc(players[playersIndex].circ, 0, 0, 72, 0, circObject.ang, 17, 0xedb01a);
 			if (playersIndex < 4){
 				Utility.drawArc(leftArc[playersIndex].circ, 0, 0, 72, 0, circObject.ang, 17, 0xedb01a);
 			}else {
 				Utility.drawArc(rightArc[playersIndex - 4].circ, 0, 0, 72, 0, circObject.ang, 17, 0xedb01a);
-			}
+			}*/
 		}
 		
 		private function showStatsComplete():void
-		{			
+		{	/*		
 			players[playersIndex].hide();
-			showNextPlayer();
+			showNextPlayer();*/
 		}
 		
 		
 		public function cleanup():void
 		{
 			//hides the two arcs
-			arcL.rotation = -140;//to 0
-			arcR.rotation = 40;//to 180
+			arcL.rotation = 320;//to 180
+			arcR.rotation = -140;//to 0
 			arcL.visible = false;
 			arcR.visible = false;
 			
 			//remove players from arc lines
-			for (var i:int = 0; i < 4; i++) {
+			for (var i:int = 0; i < 5; i++) {
 				leftArc[i].hide();
 				rightArc[i].hide();
-			}
-			for (i = 0; i < 8; i++) {
-				players[i].remove();
-			}
+			}			
 			refreshData();
 		}
 		
