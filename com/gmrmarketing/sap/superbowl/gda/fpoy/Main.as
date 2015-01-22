@@ -232,7 +232,7 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 			players[playersIndex].showStats();
 			
 			circObject = { ang:0 };
-			TweenMax.to(circObject, 8, { ang:360, onUpdate:drawCircles, onComplete:showStatsComplete } );
+			TweenMax.to(circObject, 8, { ang:360, onUpdate:drawCircles, ease:Linear.easeNone, onComplete:showStatsComplete } );
 		}
 		
 		

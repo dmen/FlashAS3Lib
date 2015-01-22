@@ -10,6 +10,7 @@ package com.gmrmarketing.sap.superbowl.gda.player
 	import flash.display.StageDisplayState;
 	import flash.display.StageScaleMode;
 	import flash.ui.Mouse;
+	import com.gmrmarketing.utilities.AIRXML;
 	
 	
 	public class Main extends MovieClip
@@ -24,7 +25,7 @@ package com.gmrmarketing.sap.superbowl.gda.player
 		private var taskCheckTimer:Timer;
 		
 		private var taskContainer:Sprite;
-		
+		private var airXML:AIRXML;
 		
 		public function Main()
 		{
@@ -33,15 +34,13 @@ package com.gmrmarketing.sap.superbowl.gda.player
 			taskContainer = new Sprite();
 			addChildAt(taskContainer, numChildren - 1);//behind nfl logo
 			
-			var req:URLRequest = new URLRequest("http://design.gmrstage.com/sap/SuperBowl49/gda/config.xml?abc=" + String(new Date().valueOf()));
-			var configLoader:URLLoader = new URLLoader();
-			configLoader.addEventListener(Event.COMPLETE, configLoaded, false, 0, true);
-			configLoader.addEventListener(IOErrorEvent.IO_ERROR, configError, false, 0, true);
-			configLoader.load(req);
-			
 			taskCheckTimer = new Timer(1000);
 			taskCheckTimer.addEventListener(TimerEvent.TIMER, checkFirstTask);
 			addEventListener(Event.ENTER_FRAME, update);
+			
+			airXML = new AIRXML();
+			airXML.addEventListener(Event.COMPLETE, configLoaded);
+			airXML.readXML();			
 		}		
 		
 		
@@ -56,7 +55,8 @@ package com.gmrmarketing.sap.superbowl.gda.player
 		
 		private function configLoaded(e:Event):void
 		{			
-			var xm:XML = XML(URLLoader(e.currentTarget).data);
+			var xm:XML = airXML.getXML();
+			//var xm:XML = XML(URLLoader(e.currentTarget).data);
 			
 			var theScreens:XMLList = xm.screens.screen;
 			screens = new Array();
@@ -75,6 +75,7 @@ package com.gmrmarketing.sap.superbowl.gda.player
 					aScreen.push(thisTask);
 				}
 				
+				aScreen[0].waitForTop = theScreens[i].@waitForTop == "true" ? true : false;			
 				screens.push(aScreen);
 			}			
 			
@@ -195,7 +196,9 @@ package com.gmrmarketing.sap.superbowl.gda.player
 			topTask = MovieClip(screens[screenIndex][0].clip);
 			topTask.x = 640;//off screen right
 			topTask.y = screens[screenIndex][0].y;
-			topTask.addEventListener("finished", taskComplete, false, 0, true);//only listen on the top task
+			if(screens[screenIndex][0].waitForTop){
+				topTask.addEventListener("finished", taskComplete, false, 0, true);//only listen on the top task
+			}
 			//topTask.alpha = 0;
 			if (!taskContainer.contains(topTask)) {
 				taskContainer.addChild(topTask);
@@ -210,6 +213,9 @@ package com.gmrmarketing.sap.superbowl.gda.player
 				botTask = MovieClip(screens[screenIndex][1].clip);
 				botTask.x = 640;
 				botTask.y = screens[screenIndex][1].y;
+				if(!screens[screenIndex][0].waitForTop){
+					botTask.addEventListener("finished", taskComplete, false, 0, true);//only listen on the top task
+				}
 				//botTask.alpha = 0;
 				if (!taskContainer.contains(botTask)) {
 					taskContainer.addChild(botTask);

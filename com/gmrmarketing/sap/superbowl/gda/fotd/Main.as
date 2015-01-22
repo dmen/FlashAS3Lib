@@ -3,6 +3,7 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 	import flash.display.*;
 	import flash.net.*;
 	import flash.events.*;
+	import flash.text.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import com.gmrmarketing.utilities.Utility;
@@ -15,7 +16,7 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 	{
 		public static const FINISHED:String = "finished";
 		private var localCache:Object;
-		private var TESTING:Boolean = true;
+		private var TESTING:Boolean = false;
 		
 		private var animOb:Object;
 		private var leftArc:Array;//circle clips on each arc
@@ -25,6 +26,7 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 		private var circObject:Object;
 		private var currentPlayer:int; //0-4 - current user being highlighted in the right arc
 		private var leftOrder:Array = [3, 4, 0, 1, 2];
+		
 		
 		public function Main()
 		{	
@@ -85,19 +87,27 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 				for (i = 0; i < n; i++) {					
 					rightArc[i].clip.nameRight.theText.text = "@" + localCache[i].authorname;
 					rightArc[i].clip.nameLeft.theText.text = "@" + localCache[i].authorname;
+					rightArc[i].clip.message.theText.autoSize = TextFieldAutoSize.LEFT;
 					rightArc[i].clip.message.theText.text = localCache[i].text;
-					rightArc[i].image = localCache[i].mediumresURL;
+					rightArc[i].clip.message.theText.y = 5;
+					rightArc[i].image = localCache[i].mediumresURL;//removes old image automatically
 					rightArc[i].container = this;
 					rightArc[i].hideStats();
+					rightArc[i].circ.clear();
+					rightArc[i].clip.alpha = 1;
 				}				
 				
 				for (i = 0; i < 5; i++){
 					leftArc[i].clip.nameRight.theText.text = "@" + localCache[leftOrder[i]].authorname;
-					leftArc[i].clip.nameLeft.theText.text = "@" + localCache[leftOrder[i]].authorname;
-					leftArc[i].clip.message.theText.text = localCache[leftOrder[i]].text;
+					//leftArc[i].clip.nameLeft.theText.text = "@" + localCache[leftOrder[i]].authorname;
+					//leftArc[i].clip.message.theText.text = localCache[leftOrder[i]].text;
 					leftArc[i].image = localCache[leftOrder[i]].mediumresURL;
 					leftArc[i].container = this;
 					leftArc[i].hideStats();
+					leftArc[i].circ.clear();
+					if (i > 1) {
+						leftArc[i].clip.alpha = 0; //hide so labels aren't seen at screen edge
+					}
 				}
 			}
 			
@@ -127,16 +137,16 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 			arcR.visible = true;			
 			
 			for (var i:int = 0; i < 5; i++) {
-				leftArc[i].clip.scaleX = leftArc[i].clip.scaleY = .5;				
-				rightArc[i].clip.scaleX = rightArc[i].clip.scaleY = .5;
+				leftArc[i].clip.scaleX = leftArc[i].clip.scaleY = .45;				
+				rightArc[i].clip.scaleX = rightArc[i].clip.scaleY = .45;
 			}
 			
 			TweenMax.to(arcL, .5, { rotation:180, ease:Linear.easeNone } );
-			TweenMax.to(arcR, .5, { rotation:0, delay:.2, ease:Linear.easeNone, onComplete:animTest} );
+			TweenMax.to(arcR, .5, { rotation:0, delay:.2, ease:Linear.easeNone, onComplete:animStart} );
 		}
 		
 		
-		private function animTest():void
+		private function animStart():void
 		{
 			for (var i:int = 0; i < 5; i++) {
 				leftArc[i].show();
@@ -158,6 +168,9 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 			for (var i:int = 0; i < 5; i++) {
 				leftArc[i].clip.x = arcL.x + Math.cos((animOb.angL - (35 * i)) / 57.296) * 233;
 				leftArc[i].clip.y = arcL.y + Math.sin((animOb.angL - (35 * i)) / 57.296) * 233;
+				if (leftArc[i].clip.x > 0) {
+					leftArc[i].clip.alpha = 1;
+				}
 				
 				rightArc[i].clip.x = arcR.x - Math.cos((animOb.angR - (35 * i)) / 57.296) * 233;
 				rightArc[i].clip.y = arcR.y - Math.sin((animOb.angR - (35 * i)) / 57.296) * 233;
@@ -188,7 +201,6 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 				circObject = { ang:0 };
 				TweenMax.to(circObject, 10, { ang:360, onUpdate:drawCircle, ease:Linear.easeNone,  onComplete:circleComplete } );
 			}else {
-				trace("done");
 				dispatchEvent(new Event(FINISHED));//player will call cleanup()
 			}
 		}
@@ -197,8 +209,16 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 		//called by TweenMax.onUpdate from showNextPlayer()
 		private function drawCircle():void
 		{
-			Utility.drawArc(rightArc[currentPlayer].circ, 0, 0, 72, 0, circObject.ang, 16, 0xedb01a);	
-			Utility.drawArc(leftArc[leftOrder[currentPlayer]].circ, 0, 0, 72, 0, circObject.ang, 16, 0xedb01a);				
+			
+			Utility.drawArc(rightArc[currentPlayer].circ, 0, 0, 73, 0, circObject.ang, 16, 0xedb01a);
+			var cp:int;
+			if (currentPlayer > 2) {
+				cp = currentPlayer - 3;
+			}else {
+				cp = currentPlayer + 2;
+			}
+			Utility.drawArc(leftArc[cp].circ, 0, 0, 73, 0, circObject.ang, 16, 0xedb01a);		
+			
 		}
 		
 		private function circleComplete():void

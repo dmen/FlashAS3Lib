@@ -15,6 +15,7 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 		private var myLoader:Loader;
 		private var fanImage:Bitmap;
 		
+		
 		public function UserArc():void
 		{			
 			myClip = new userClip(); //lib clip			
@@ -96,8 +97,10 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 		
 		public function hide():void
 		{
-			if (myClip.contains(pic)) {
-				myClip.removeChild(pic);
+			if(pic){
+				if (myClip.contains(pic)) {
+					myClip.removeChild(pic);
+				}
 			}
 			if (myContainer.contains(myClip)) {
 				myContainer.removeChild(myClip);
@@ -131,18 +134,28 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 		
 		public function showMessage():void
 		{
-			TweenMax.to(clip, .5, { scaleX:.8, scaleY:.8, ease:Back.easeOut } );
+			TweenMax.to(myClip, .5, { scaleX:1, scaleY:1, ease:Back.easeOut } );
 			
 			var tx:int = -35 - myClip.nameLeft.theText.textWidth - 65;
-			TweenMax.to(clip.nameLeft, .5, { x:tx, ease:Back.easeOut, delay:.5 } ); 
-			TweenMax.to(clip.message, .5, { x: -283, ease:Back.easeOut, delay:.5 } );			
+			TweenMax.to(myClip.nameLeft, .5, { x:tx, ease:Back.easeOut, delay:.5 } ); 
+			TweenMax.to(myClip.message, .5, { x: -298, ease:Back.easeOut, delay:.5 } );	
+			
+			//displayed for 8 seconds
+			//scroll text if necessary
+			var mh:Number = myClip.message.theMask.height;
+			var delt:Number = myClip.message.theText.textHeight - mh;
+			
+			if(delt > 0){
+				TweenMax.to(myClip.message.theText, 7, {y:myClip.message.theMask.y - delt - 5, ease:Linear.easeNone, delay:2});
+			}
 		}
 		
 		public function smallAgain():void
 		{
-			TweenMax.to(clip, .5, { scaleX:.5, scaleY:.5, ease:Back.easeIn, delay:.25 } );
-			TweenMax.to(clip.nameLeft, .5, { x:-35, ease:Back.easeIn } ); 
-			TweenMax.to(clip.message, .5, { x:-23, ease:Back.easeIn } );
+			TweenMax.to(myClip, .5, { scaleX:.5, scaleY:.5, ease:Back.easeIn, delay:.25 } );
+			TweenMax.to(myClip.nameLeft, .5, { x:-35, ease:Back.easeIn } ); 
+			TweenMax.to(myClip.message, .5, { x: -23, ease:Back.easeIn } );
+			TweenMax.to(myClip, .5, { alpha:0, delay:.6 } );
 		}
 		
 	}

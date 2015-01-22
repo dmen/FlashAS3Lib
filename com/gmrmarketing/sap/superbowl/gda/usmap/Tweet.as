@@ -86,7 +86,12 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			message = message.replace(/&lt;/g, "<");
 			message = message.replace(/&gt;/g, "<");
 			message = message.replace(/&amp;/g, "&");
-			message = Strings.removeChunk(message, "http://");
+			while (message.indexOf("http://") != -1){
+				message = Strings.removeChunk(message, "http://");
+			}
+			while (message.indexOf("https://") != -1){
+				message = Strings.removeChunk(message, "https://");
+			}
 			message = SwearFilter.cleanString(message); //remove any major swears			
 			
 			clip.theUser.text = userName;

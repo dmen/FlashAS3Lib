@@ -109,7 +109,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 			
 			theFact.alpha = 0;
 			
-			vidBar.alpha = 0;
+			//vidBar.alpha = 0;
 			week15.y = 236;	
 		}
 		
@@ -435,7 +435,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 		 */
 		private function playVid():void
 		{			
-			video = new VideoLoader(allVids[curStat], { width:432, height:244, x:104, y:495, autoPlay:false, container:this } );
+			video = new VideoLoader(allVids[curStat], { width:432, height:244, x:104, y:507, autoPlay:false, container:this } );
 			video.load();
 			video.content.alpha = 0;			
 			
@@ -443,7 +443,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 			video.addEventListener(VideoLoader.VIDEO_COMPLETE, nextVideo);
 
 			TweenMax.to(video.content, .5, { alpha:1 } );
-			TweenMax.to(vidBar, .5, { alpha:1 } );			
+			//TweenMax.to(vidBar, .5, { alpha:1 } );			
 		}
 		
 		
@@ -482,7 +482,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 				TweenMax.to(t2s1, .25, { alpha:0, delay:.9 } );
 				
 				//TweenMax.to(video.content, .5, { alpha:0 } );
-				TweenMax.to(vidBar, .5, { alpha:0 } );
+				//TweenMax.to(vidBar, .5, { alpha:0 } );
 				
 				TweenMax.to(week15, .5, { y:275, delay:1.5, onStart:setStats, onComplete:animStats, ease:Back.easeOut } );
 			}else {
