@@ -108,7 +108,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		
 		private function nfcLoaded(e:Event):void
 		{
-			resetLocalCache();
+			resetLocalCache();//resets the localCache
 			
 			var json:Object = JSON.parse(e.currentTarget.data);			
 			
@@ -380,7 +380,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		public function cleanup():void
 		{
 			tweetManager.stop();
-			tweetManager.refresh();
+			//tweetManager.refresh();
 			
 			_scene.removeEventListener( Scene3D.POSTRENDER_EVENT, renderEvent );
 			_scene.pause();
@@ -393,6 +393,8 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			shadow.alpha = 0;
 			
 			sceneBMD.fillRect(sceneBMD.rect, 0);
+			
+			refreshData();
 		}
 		
 		

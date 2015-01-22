@@ -34,7 +34,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 			tvtCircle = new Sprite();
 			
 			//milestone videos - nfc,afc,nfc,afc - first four are for set 1, second four are for set 2
-			allVids = ["SeahawksWeek1.mp4","PatriotsWeek5_1.mp4","SeahawksWeek10_1.mp4","PatriotsWeek8_1.mp4","SeahawksWeek13_1.mp4","PatriotsWeek9_1.mp4","SeahawksWeek17.mp4","PatriotsWeek15_1.mp4"];					
+			allVids = ["SeahawksWeek1.mp4","PatriotsWeek5.mp4","SeahawksWeek10.mp4","PatriotsWeek8.mp4","SeahawksWeek13.mp4","PatriotsWeek9.mp4","SeahawksWeek17.mp4","PatriotsWeek15.mp4"];					
 			
 			if(TESTING){
 				init();
@@ -46,7 +46,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 		 * Only called once
 		 * @param	initValue String 1 or 2 for the video set - first set of 4 or second set of 4
 		 */
-		public function init(initValue:String = "2"):void
+		public function init(initValue:String = "1"):void
 		{			
 			setIndex = parseInt(initValue);
 			

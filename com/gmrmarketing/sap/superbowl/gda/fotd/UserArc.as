@@ -2,7 +2,9 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 {
 	import flash.display.*;
 	import flash.events.*;
+	import flash.net.*;
 	import com.greensock.TweenMax;
+	import com.greensock.easing.*;
 	
 	public class UserArc extends EventDispatcher
 	{
@@ -10,7 +12,8 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 		private var myContainer:DisplayObjectContainer;
 		private var left:Boolean;
 		private var pic:MovieClip; //player image from lib
-		
+		private var myLoader:Loader;
+		private var fanImage:Bitmap;
 		
 		public function UserArc():void
 		{			
@@ -24,12 +27,46 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 		}
 		
 		
-		public function set name(n:String):void
+		public function set image(url:String):void
 		{
-			myClip.nameLeft.theText.text = n;					
-			myClip.nameRight.theText.text = n;					
+			var myLoader:Loader = new Loader();
+			myLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, imLoaded, false, 0, true);			
+			myLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, imError, false, 0, true);			
+			myLoader.load(new URLRequest(url));
 		}
 		
+		private function imLoaded(e:Event):void
+		{	
+			//remove old image from clip
+			if(fanImage){
+				if (myClip.contains(fanImage)) {
+					myClip.removeChild(fanImage);
+				}
+			}			
+			
+			fanImage = Bitmap(e.target.content);
+			fanImage.smoothing = true;
+			fanImage.width = fanImage.height = 140;
+			fanImage.x = -70; fanImage.y = -70;
+			myClip.addChildAt(fanImage, myClip.numChildren-1); //adds image to the fan clip	
+			fanImage.mask = myClip.picMask;
+		}
+		
+		private function imError(e:IOErrorEvent = null):void
+		{
+			//remove old image from clip
+			if(fanImage){
+				if (myClip.contains(fanImage)) {
+					myClip.removeChild(fanImage);
+				}
+			}
+			
+			fanImage = new Bitmap(new noPic());
+			fanImage.smoothing = true;
+			fanImage.x = -60; fanImage.y = -60;
+			myClip.addChildAt(fanImage, myClip.numChildren-1); //adds image to the fan clip	
+			fanImage.mask = myClip.picMask;	
+		}
 		
 		/**
 		 * use for setting x,y
@@ -41,11 +78,11 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 		
 		
 		/**
-		 * used for drawing into
+		 * used for drawing arc into
 		 */
 		public function get circ():Graphics
 		{
-			return pic.circ.graphics;
+			return myClip.circ.graphics;
 		}
 		
 		
@@ -80,19 +117,32 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 		}		
 		
 		
-		public function showNameNumber():void
+		public function showHandle():void
+		{					
+			var tx:int = -260 + myClip.nameRight.theText.textWidth + 58;
+			TweenMax.to(myClip.nameRight, .25, { x:tx } );			
+		}
+		
+		public function hideHandle():void
 		{
-			var tx:int;
+			TweenMax.to(myClip.nameRight, .25, { x:-260} );
+		}
+		
+		
+		public function showMessage():void
+		{
+			TweenMax.to(clip, .5, { scaleX:.8, scaleY:.8, ease:Back.easeOut } );
 			
-			if (left) {
-				TweenMax.to(myClip.theNumber, .25, { x:-160 } );				
-				tx = -76 - (myClip.theName.theText.textWidth + 55);
-				TweenMax.to(myClip.theName, .25, { x:tx } );
-			}else{
-				TweenMax.to(myClip.theNumber, .25, { x:32 } );				
-				tx = -256 + myClip.theName.theText.textWidth + 35;
-				TweenMax.to(myClip.theName, .25, { x:tx } );
-			}
+			var tx:int = -35 - myClip.nameLeft.theText.textWidth - 65;
+			TweenMax.to(clip.nameLeft, .5, { x:tx, ease:Back.easeOut, delay:.5 } ); 
+			TweenMax.to(clip.message, .5, { x: -283, ease:Back.easeOut, delay:.5 } );			
+		}
+		
+		public function smallAgain():void
+		{
+			TweenMax.to(clip, .5, { scaleX:.5, scaleY:.5, ease:Back.easeIn, delay:.25 } );
+			TweenMax.to(clip.nameLeft, .5, { x:-35, ease:Back.easeIn } ); 
+			TweenMax.to(clip.message, .5, { x:-23, ease:Back.easeIn } );
 		}
 		
 	}

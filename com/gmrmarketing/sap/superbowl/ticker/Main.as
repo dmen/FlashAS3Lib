@@ -9,6 +9,7 @@ package com.gmrmarketing.sap.superbowl.ticker
 	import com.gmrmarketing.utilities.SwearFilter;
 	import flash.utils.Timer;
 	
+	
 	public class Main extends MovieClip
 	{		
 		private var localCache:Object; //copy of last good json get from the web service
@@ -170,47 +171,57 @@ package com.gmrmarketing.sap.superbowl.ticker
 			//every 5th tweet add a cta or an event
 			if (tweetCount % 3 == 0) {
 				if (lastWasCTA) {
-					//add an event
-					tw = new eventText();//lib clip
-					tw.theText.autoSize = TextFieldAutoSize.LEFT;
 					
-					tw.theText.text = localCache.events[eventsIndex].text;
-					
-					tw.theText.cacheAsBitmap = true;
-					tw.x = 2300;//2080 wide - add a little gap
-					tw.y = 60;
-					
-					eventsIndex++;
-					if (eventsIndex >= localCache.events.length) {
-						eventsIndex = 0;
+					//add an event - if there are events
+					if(localCache.events.length > 0){
+						tw = new eventText();//lib clip
+						tw.theText.autoSize = TextFieldAutoSize.LEFT;
+						
+						var mess:String = localCache.events[eventsIndex].text;
+						var dotInd:int = mess.indexOf("com ");
+						if (dotInd != -1) {
+							//found com space
+							mess = mess.substr(0, dotInd) + "." + mess.substr(dotInd);
+						}
+						tw.theText.text = mess;
+						
+						tw.theText.cacheAsBitmap = true;
+						tw.x = 2300;//2080 wide - add a little gap
+						tw.y = 60;
+						
+						eventsIndex++;
+						if (eventsIndex >= localCache.events.length) {
+							eventsIndex = 0;
+						}
+						lastWasCTA = false;
 					}
-					
-					lastWasCTA = false;
 					
 				}else {
+					
 					//add a call to action
-					tw = new ctaText();//lib clip
-					tw.headline1.autoSize = TextFieldAutoSize.LEFT;
-					tw.headline2.autoSize = TextFieldAutoSize.LEFT;
-					tw.disclaimer.autoSize = TextFieldAutoSize.LEFT;
-					
-					tw.headline1.text = localCache.cta[ctaIndex].Headline1;
-					tw.headline2.text = localCache.cta[ctaIndex].Headline2;
-					tw.disclaimer.text = localCache.cta[ctaIndex].Disclaimer;
-					
-					tw.headline1.cacheAsBitmap = true;
-					tw.headline2.cacheAsBitmap = true;				
-					tw.disclaimer.cacheAsBitmap = true;
-					
-					tw.x = 2300;//2080 wide - add a little gap
-					tw.y = 50;
-					
-					ctaIndex++;
-					if (ctaIndex >= localCache.cta.length) {
-						ctaIndex = 0;
+					if(localCache.cta.length > 0){
+						tw = new ctaText();//lib clip
+						tw.headline1.autoSize = TextFieldAutoSize.LEFT;
+						tw.headline2.autoSize = TextFieldAutoSize.LEFT;
+						tw.disclaimer.autoSize = TextFieldAutoSize.LEFT;
+						
+						tw.headline1.text = localCache.cta[ctaIndex].Headline1;
+						tw.headline2.text = localCache.cta[ctaIndex].Headline2;
+						tw.disclaimer.text = localCache.cta[ctaIndex].Disclaimer;
+						
+						tw.headline1.cacheAsBitmap = true;
+						tw.headline2.cacheAsBitmap = true;				
+						tw.disclaimer.cacheAsBitmap = true;
+						
+						tw.x = 2300;//2080 wide - add a little gap
+						tw.y = 50;
+						
+						ctaIndex++;
+						if (ctaIndex >= localCache.cta.length) {
+							ctaIndex = 0;
+						}						
+						lastWasCTA = true;
 					}
-					
-					lastWasCTA = true;
 				}
 			}else {
 				tw = new tickerText(); //lib clip
@@ -222,8 +233,12 @@ package com.gmrmarketing.sap.superbowl.ticker
 				message = message.replace(/&lt;/g, "<");
 				message = message.replace(/&gt;/g, "<");
 				message = message.replace(/&amp;/g, "&");
-				message = Strings.removeChunk(message, "http://");
-				message = Strings.removeChunk(message, "https://");
+				while (message.indexOf("http://") != -1){
+					message = Strings.removeChunk(message, "http://");
+				}
+				while (message.indexOf("https://") != -1){
+					message = Strings.removeChunk(message, "https://");
+				}
 				message = SwearFilter.cleanString(message); //remove any major swears
 				
 				tw.theText.text = message;

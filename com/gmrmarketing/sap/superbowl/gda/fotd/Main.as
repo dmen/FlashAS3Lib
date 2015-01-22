@@ -23,7 +23,8 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 		
 		private var players:Array; //players with stats
 		private var circObject:Object;
-		
+		private var currentPlayer:int; //0-4 - current user being highlighted in the right arc
+		private var leftOrder:Array = [3, 4, 0, 1, 2];
 		
 		public function Main()
 		{	
@@ -37,6 +38,7 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 			//clips in each arc arc copies of each other - only 5 users taken at a time
 			leftArc = [];//put 5 on each arc - only show 2 on left arc at once
 			rightArc = [];//only show 3 on right arc
+			
 			for (var i:int = 0; i < 5; i++){
 				leftArc.push(new UserArc());
 				rightArc.push(new UserArc());
@@ -80,17 +82,22 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 				
 				//populate player arc arrays
 				var n:int = Math.min(5, localCache.length);
-				for (i = 0; i < n; i++) {
-					
-					leftArc[i].clip.nameRight.text = localCache[i].authorname;
-					leftArc[i].clip.message.text = localCache[i].text;
-					leftArc[i].container = this;
-					leftArc[i].hideStats();
-					
-					rightArc[i].clip.nameRight.text = localCache[i].authorname;
-					rightArc[i].clip.message.text = localCache[i].text;
+				for (i = 0; i < n; i++) {					
+					rightArc[i].clip.nameRight.theText.text = "@" + localCache[i].authorname;
+					rightArc[i].clip.nameLeft.theText.text = "@" + localCache[i].authorname;
+					rightArc[i].clip.message.theText.text = localCache[i].text;
+					rightArc[i].image = localCache[i].mediumresURL;
 					rightArc[i].container = this;
 					rightArc[i].hideStats();
+				}				
+				
+				for (i = 0; i < 5; i++){
+					leftArc[i].clip.nameRight.theText.text = "@" + localCache[leftOrder[i]].authorname;
+					leftArc[i].clip.nameLeft.theText.text = "@" + localCache[leftOrder[i]].authorname;
+					leftArc[i].clip.message.theText.text = localCache[leftOrder[i]].text;
+					leftArc[i].image = localCache[leftOrder[i]].mediumresURL;
+					leftArc[i].container = this;
+					leftArc[i].hideStats();
 				}
 			}
 			
@@ -131,7 +138,7 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 		
 		private function animTest():void
 		{
-			for (var i:int = 0; i < 4; i++) {
+			for (var i:int = 0; i < 5; i++) {
 				leftArc[i].show();
 				leftArc[i].clip.x = -100;//off stage left
 				
@@ -141,101 +148,69 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 				
 			animOb = { angL: -100, angR: -100 };			
 			
-			//TweenMax.to(animOb, 1, { angL:36, angR:36, onUpdate:cur, onComplete:openTest } );
-			TweenMax.to(animOb, 1, { angL:36, angR:36, onUpdate:cur, onComplete:showNextPlayer } );
+			TweenMax.to(animOb, 1, { angL:-5, angR:48, onUpdate:cur, onComplete:showHandles } );
+			//TweenMax.to(animOb, 1, { angL:36, angR:36, onUpdate:cur, onComplete:showNextPlayer } );
 		}
 		
 		
 		private function cur():void
 		{
 			for (var i:int = 0; i < 5; i++) {
-				//animate in reverse (3-i) so #1 is last - ie at the top of the arc
-				leftArc[i].clip.x = arcL.x + Math.cos((animOb.angL - (26 * i)) / 57.296) * 233;
-				leftArc[i].clip.y = arcL.y + Math.sin((animOb.angL - (26 * i)) / 57.296) * 233;
+				leftArc[i].clip.x = arcL.x + Math.cos((animOb.angL - (35 * i)) / 57.296) * 233;
+				leftArc[i].clip.y = arcL.y + Math.sin((animOb.angL - (35 * i)) / 57.296) * 233;
 				
-				rightArc[i].clip.x = arcR.x - Math.cos((animOb.angR - (26 * i)) / 57.296) * 233;
-				rightArc[i].clip.y = arcR.y - Math.sin((animOb.angR - (26 * i)) / 57.296) * 233;
-			}
+				rightArc[i].clip.x = arcR.x - Math.cos((animOb.angR - (35 * i)) / 57.296) * 233;
+				rightArc[i].clip.y = arcR.y - Math.sin((animOb.angR - (35 * i)) / 57.296) * 233;
+			}			
 		}
-		/*
-		private function openTest():void
+		
+		
+		private function showHandles():void
 		{
-			for (var i:int = 0; i < 4; i++) {
-				TweenMax.delayedCall(i * .1, leftArc[i].showNameNumber);
-				TweenMax.delayedCall(i * .2, rightArc[i].showNameNumber);
-			}
-			playersIndex = 0;
-			
-			showNextPlayer();
+			for (var i:int = 0; i < 5; i++) {				
+				TweenMax.delayedCall(i * .1, leftArc[i].showHandle);
+				TweenMax.delayedCall(i * .2, rightArc[i].showHandle);
+			}			
+			currentPlayer = 0;
+			TweenMax.delayedCall(1.5, showNextPlayer);
 		}
-	*/
+	
 		
 		/**
-		 * Called by Tweenmax once players are animated onto the arcs
-		 * shows player stats at top
-		 * First, highlight the player below being shown above
+		 * called from showHandles()
 		 */
 		private function showNextPlayer():void
 		{			
-			/*
-			if(playersIndex < 8){
-				if (playersIndex < 4) {
-					leftArc[playersIndex].showNameNumber();
-					TweenMax.to(leftArc[playersIndex].clip, .5, { alpha:1, onComplete:showNextPlayerStats } );
-				}else {				
-					rightArc[playersIndex - 4].showNameNumber();
-					TweenMax.to(rightArc[playersIndex - 4].clip, .5, { alpha:1, onComplete:showNextPlayerStats } );
-				}
+			if (currentPlayer < 5) {
+				rightArc[currentPlayer].hideHandle();
+				rightArc[currentPlayer].showMessage();
+				
+				circObject = { ang:0 };
+				TweenMax.to(circObject, 10, { ang:360, onUpdate:drawCircle, ease:Linear.easeNone,  onComplete:circleComplete } );
 			}else {
+				trace("done");
 				dispatchEvent(new Event(FINISHED));//player will call cleanup()
 			}
-			*/
 		}
 		
 		
-		private function showNextPlayerStats():void
+		//called by TweenMax.onUpdate from showNextPlayer()
+		private function drawCircle():void
 		{
-			/*
-			//move player off position so it can move while fading in
-			if (playersIndex < 4) {
-				//coming from left arc
-				players[playersIndex].clip.x = 50;
-			}else {
-				//coming from right arc
-				players[playersIndex].clip.x = 320;
-			}
-			players[playersIndex].show();
-			players[playersIndex].clip.y = 280;
-			players[playersIndex].clip.alpha = 0;
+			Utility.drawArc(rightArc[currentPlayer].circ, 0, 0, 72, 0, circObject.ang, 16, 0xedb01a);	
+			Utility.drawArc(leftArc[leftOrder[currentPlayer]].circ, 0, 0, 72, 0, circObject.ang, 16, 0xedb01a);				
+		}
+		
+		private function circleComplete():void
+		{	
+			rightArc[currentPlayer].smallAgain();
 			
-			TweenMax.to(players[playersIndex].clip, .5, { alpha:1, x:185, onComplete:showThePlayerStats } );
-			*/
-		}
-		
-		
-		private function showThePlayerStats():void
-		{			
+			currentPlayer++;
 			
-			circObject = { ang:0 };
-			TweenMax.to(circObject, 8, { ang:360, onUpdate:drawCircles, onComplete:showStatsComplete } );
-		}
-		
-		
-		//called by TweenMax.onUpdate from showPlayerStats()
-		private function drawCircles():void
-		{/*
-			Utility.drawArc(players[playersIndex].circ, 0, 0, 72, 0, circObject.ang, 17, 0xedb01a);
-			if (playersIndex < 4){
-				Utility.drawArc(leftArc[playersIndex].circ, 0, 0, 72, 0, circObject.ang, 17, 0xedb01a);
-			}else {
-				Utility.drawArc(rightArc[playersIndex - 4].circ, 0, 0, 72, 0, circObject.ang, 17, 0xedb01a);
-			}*/
-		}
-		
-		private function showStatsComplete():void
-		{	/*		
-			players[playersIndex].hide();
-			showNextPlayer();*/
+			var nextL:Number = animOb.angL + 35;	
+			var nextR:Number = animOb.angR + 35;	
+			
+			TweenMax.to(animOb, 1, { angL:nextL, angR:nextR, delay:.75, onUpdate:cur, onComplete:showNextPlayer } );
 		}
 		
 		
