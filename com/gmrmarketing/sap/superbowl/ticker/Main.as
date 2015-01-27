@@ -21,24 +21,24 @@ package com.gmrmarketing.sap.superbowl.ticker
 		private var tweets:Array; //references to scrolling clips(tweets) on screen
 		private var refreshing:Boolean;
 		private var raySprite:Sprite;
-		private var raySprite2:Sprite;
+		//private var raySprite2:Sprite;
 		
 		
 		public function Main()
 		{		
 			raySprite = new Sprite();
-			raySprite2 = new Sprite();
+			//raySprite2 = new Sprite();
 			addChildAt(raySprite, 0);
-			addChildAt(raySprite2, 0);
+			//addChildAt(raySprite2, 0);
 			raySprite.x = 1040;
-			raySprite2.x = 1040;
+			//raySprite2.x = 1040;
 			raySprite.y = 1200;
-			raySprite2.y = 1200;
+			//raySprite2.y = 1200;
 			
 			var g:Graphics = raySprite.graphics;
-			var g2:Graphics = raySprite2.graphics;
-			g.lineStyle(1, 0x53468d, .6);
-			g2.lineStyle(1, 0x53468d, .6);
+			//var g2:Graphics = raySprite2.graphics;
+			g.lineStyle(1, 0x53468d, .3);
+			//g2.lineStyle(1, 0x53468d, .2);
 			
 			var x:Number;
 			var y:Number;
@@ -49,12 +49,13 @@ package com.gmrmarketing.sap.superbowl.ticker
 					g.moveTo(0,0);
 					g.lineTo(x, y);
 				}
+				/*
 				if(Math.random() < .35){
 					x = Math.cos(i / 57.29577) * 3000;
 					y = Math.sin(i / 57.29577) * 3000;
 					g2.moveTo(0,0);
 					g2.lineTo(x, y);
-				}
+				}*/
 			}
 			
 			tweetCount = 0;
@@ -164,12 +165,13 @@ package com.gmrmarketing.sap.superbowl.ticker
 		
 		private function addTweet():void
 		{	
-			tweetCount++;
+			
 			
 			var tw:MovieClip;
+			var lastLen:int;
 			
-			//every 5th tweet add a cta or an event
-			if (tweetCount % 3 == 0) {
+			//every Nth tweet add a cta or an event
+			if (tweetCount % 4 == 0) {
 				if (lastWasCTA) {
 					
 					//add an event - if there are events
@@ -184,6 +186,7 @@ package com.gmrmarketing.sap.superbowl.ticker
 							mess = mess.substr(0, dotInd) + "." + mess.substr(dotInd);
 						}
 						tw.theText.text = mess;
+						lastLen = tw.width + 130;
 						
 						tw.theText.cacheAsBitmap = true;
 						tw.x = 2300;//2080 wide - add a little gap
@@ -194,6 +197,12 @@ package com.gmrmarketing.sap.superbowl.ticker
 							eventsIndex = 0;
 						}
 						lastWasCTA = false;
+						
+						addChildAt(tw, 1);//add behind stats zone logo and in front of raySprites
+						tweets.push(tw);
+					}else {
+						lastWasCTA = false;
+						lastLen = 0;
 					}
 					
 				}else {
@@ -215,14 +224,26 @@ package com.gmrmarketing.sap.superbowl.ticker
 						
 						tw.x = 2300;//2080 wide - add a little gap
 						tw.y = 50;
+						lastLen = tw.width + 130;						
 						
 						ctaIndex++;
 						if (ctaIndex >= localCache.cta.length) {
 							ctaIndex = 0;
 						}						
 						lastWasCTA = true;
+						
+						addChildAt(tw, 1);//add behind stats zone logo and in front of raySprites
+						tweets.push(tw);
 					}
 				}
+				
+				//var nx:int = tw.x + tw.width + 100;
+				//add logo into scroller after each cta or event
+				tw = new logoScroll();//lib clip
+				tw.x = 2300 + lastLen;
+				addChildAt(tw, 1);//add behind stats zone logo and in front of raySprites
+				tweets.push(tw);
+				
 			}else {
 				tw = new tickerText(); //lib clip
 				tw.theText.autoSize = TextFieldAutoSize.LEFT;
@@ -247,10 +268,13 @@ package com.gmrmarketing.sap.superbowl.ticker
 				tw.theAuthor.cacheAsBitmap = true;				
 				tw.x = 2300;//2080 wide - add a little gap
 				tw.y = 60;
+				lastLen = 0;
+				addChildAt(tw, 1);//add behind stats zone logo and in front of raySprites
+				tweets.push(tw);
 			}
-			
-			addChildAt(tw, 2);//add behind stats zone logo and in front of raySprites
-			tweets.push(tw);
+			tweetCount++;
+			//addChildAt(tw, 1);//add behind stats zone logo and in front of raySprites
+			//tweets.push(tw);
 		}
 		
 		
@@ -262,7 +286,7 @@ package com.gmrmarketing.sap.superbowl.ticker
 		private function move(e:Event):void
 		{		
 			raySprite.rotation += .06;
-			raySprite2.rotation -= .001;
+			//raySprite2.rotation -= .03;
 			
 			//move all tweets
 			for (var i:int = 0; i < tweets.length; i++){

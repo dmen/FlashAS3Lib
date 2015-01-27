@@ -10,6 +10,8 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 		private var myClip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		private var pic:MovieClip;//player pic from library
+		private var animCharIndexes:Array;
+		private var animValue:Object;
 		
 		public function PlayerStats(which:String):void
 		{	
@@ -28,7 +30,7 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 				case "luck":					
 					pic = new mcLuck();
 					myClip.theName.theText.text = "ANDREW LUCK";					
-					myClip.thePosition.theText.text = "QB/INDIANA";
+					myClip.thePosition.theText.text = "QB/INDIANAPOLIS";
 					myClip.stat1.label.text = "PTS:";
 					myClip.stat1.value.text = "351.74";
 					myClip.stat2.label.text = "YDS:";
@@ -140,6 +142,12 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 		public function sentiment(s:String):void
 		{
 			myClip.theSentiment.value.text = s;
+			initCalc(s);
+		}
+		
+		public function getSentiment():int 
+		{
+			return parseInt(myClip.theSentiment.value.text);
 		}
 		
 		public function set number(n:String):void
@@ -233,7 +241,45 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 			tx = tx + myClip.stat2.width - 14;
 			TweenMax.to(myClip.stat3, .25, { x: tx, delay:.5 } );
 			
-			
+			TweenMax.to(animValue, 1.5, { dummy:100, onUpdate:animateText, onComplete:showOriginal } );
+		}
+		
+		
+		private function initCalc(val:String):void
+		{
+			animValue = { orig:val, dummy:0 };
+			animCharIndexes = [];
+			for (var i:int = 0; i < val.length; i++) {
+				var n:int = val.charCodeAt(i);
+				if (n >= 48 && n <= 57) {
+					//number
+					animCharIndexes[i] = 1;//mark this character for animation
+				}else {
+					animCharIndexes[i] = 0;//don't animate this char - it's not a number
+				}
+			}
+		}
+		
+		private function animateText():void
+		{
+			var modString:String = animValue.orig;//unmodified
+			var newString:String = "";
+			for (var i:int = 0; i < modString.length; i++) {
+				var n:int = 47 + Math.ceil(Math.random() * 10); //48 to 57
+				if (animCharIndexes[i] == 1) {
+					newString += String.fromCharCode(n);
+				}else {
+					newString += modString.charAt(i);
+				}
+			}
+			myClip.theSentiment.value.text = newString;
+			//theStat.theValue.setTextFormat(tf);
+		}
+		
+		
+		private function showOriginal():void
+		{
+			myClip.theSentiment.value.text = animValue.orig;
 		}
 		
 	}

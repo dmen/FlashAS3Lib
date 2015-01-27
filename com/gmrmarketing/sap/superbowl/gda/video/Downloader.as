@@ -16,14 +16,34 @@ package com.gmrmarketing.sap.superbowl.gda.video
 		private var fileData:ByteArray;
 		private var lastFileName:String;//name of last loaded video - used to the same video isn't loaded twice
 		private var checkTimer:Timer;
+		private var refreshTime:int;//number of minutes between calls
+		private var so:SharedObject;
 		
 		public function Downloader()
 		{
-			checkTimer = new Timer(60000, 10);
+			so = SharedObject.getLocal("downloaderTime");
+			if (so.data.time == null) {
+				so.data.time = "5";
+			}
+			numSet.text = so.data.time;
+			
+			lastFileName = "";
+			btn.addEventListener(MouseEvent.CLICK, setTime);
+			setTime();
+		}
+		
+		
+		private function setTime(e:MouseEvent = null):void
+		{
+			refreshTime = parseInt(numSet.text);
+			
+			so.data.time = numSet.text;
+			so.flush();
+			
+			checkTimer = new Timer(60000, refreshTime);
 			checkTimer.addEventListener(TimerEvent.TIMER, checkTime);
 			checkTimer.start();
 			
-			lastFileName = "";
 			getLatestVideo();
 		}
 		
@@ -31,8 +51,8 @@ package com.gmrmarketing.sap.superbowl.gda.video
 		private function checkTime(e:TimerEvent):void
 		{
 			var r:int = checkTimer.currentCount;
-			min.text = String(10 - r);
-			if (r == 10) {
+			min.text = String(refreshTime - r);
+			if (r == refreshTime) {
 				checkTimer.reset();
 				getLatestVideo();
 			}
@@ -82,12 +102,12 @@ package com.gmrmarketing.sap.superbowl.gda.video
 					urlStream.load(urlReq);
 				}else {					
 					status.text = "video already downloaded. waiting";
-					min.text = "10";
+					min.text = String(refreshTime);
 					checkTimer.start();
 				}
 			}else {
 				status.text = "service returned empty. waiting";
-				min.text = "10";
+				min.text = String(refreshTime);
 				checkTimer.start();
 			}
 		}
@@ -96,7 +116,7 @@ package com.gmrmarketing.sap.superbowl.gda.video
 		private function dataError(e:IOErrorEvent):void	
 		{
 			status.text = "error calling service";
-			min.text = "10";
+			min.text = String(refreshTime);
 			checkTimer.start();
 		}
 		
@@ -108,7 +128,7 @@ package com.gmrmarketing.sap.superbowl.gda.video
 			urlStream.removeEventListener(ProgressEvent.PROGRESS, dlProgress);
 			
 			status.text = "complete. waiting...";
-			min.text = "10";
+			min.text = String(refreshTime);
 			checkTimer.start();
 			
 			var fName:String = GUID.create();

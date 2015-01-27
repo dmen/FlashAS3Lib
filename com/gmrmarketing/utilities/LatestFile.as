@@ -23,20 +23,19 @@ package com.gmrmarketing.utilities
 		}
 		
 		
-		/**
-		 * Returns the latest file in the watched folder
-		 * @return File object
-		 */
-		public function get latestFile():File
+		
+		public function getLatestFiles(num:int):Array
 		{
 			var files:Array = _folder.getDirectoryListing();
+			var ret:Array = [];
 			
-			if (files.length) {
-				files.sortOn("creationDate", Array.NUMERIC | Array.DESCENDING);
-				return files[0];
-			}
-			
-			return new File();
+			if (files.length >= num) {
+				files.sortOn("creationDate", Array.NUMERIC | Array.DESCENDING);	
+				for (var i:int = 0; i < num; i++) {
+					ret.push(files[i].nativePath);
+				}				
+			}			
+			return ret;
 		}
 		
 		
@@ -44,7 +43,7 @@ package com.gmrmarketing.utilities
 		 * Returns the full native path of the latest file in the watched folder
 		 * @return String full path and file name
 		 */
-		public function get latestFileName():String
+		public function get latestFile():String
 		{
 			var files:Array = _folder.getDirectoryListing();
 			

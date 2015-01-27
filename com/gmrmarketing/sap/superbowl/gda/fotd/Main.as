@@ -90,6 +90,9 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 					rightArc[i].clip.message.theText.autoSize = TextFieldAutoSize.LEFT;
 					rightArc[i].clip.message.theText.text = localCache[i].text;
 					rightArc[i].clip.message.theText.y = 5;
+					if (rightArc[i].clip.message.theText.textHeight < rightArc[i].clip.message.theMask.height) {
+						rightArc[i].clip.message.theText.y = Math.floor((rightArc[i].clip.message.theMask.height - rightArc[i].clip.message.theText.textHeight) * .5);
+					}
 					rightArc[i].image = localCache[i].mediumresURL;//removes old image automatically
 					rightArc[i].container = this;
 					rightArc[i].hideStats();

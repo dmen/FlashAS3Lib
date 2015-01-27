@@ -232,7 +232,8 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 			players[playersIndex].showStats();
 			
 			circObject = { ang:0 };
-			TweenMax.to(circObject, 8, { ang:360, onUpdate:drawCircles, ease:Linear.easeNone, onComplete:showStatsComplete } );
+			circObject.lowerAng = 0; 
+			TweenMax.to(circObject, 8, { ang:360, lowerAng:players[playersIndex].getSentiment() * 3.6, onUpdate:drawCircles, ease:Linear.easeNone, onComplete:showStatsComplete } );
 		}
 		
 		
@@ -241,9 +242,9 @@ package com.gmrmarketing.sap.superbowl.gda.fpoy
 		{
 			Utility.drawArc(players[playersIndex].circ, 0, 0, 72, 0, circObject.ang, 17, 0xedb01a);
 			if (playersIndex < 4){
-				Utility.drawArc(leftArc[playersIndex].circ, 0, 0, 72, 0, circObject.ang, 17, 0xedb01a);
+				Utility.drawArc(leftArc[playersIndex].circ, 0, 0, 72, 0, circObject.lowerAng, 17, 0xedb01a);
 			}else {
-				Utility.drawArc(rightArc[playersIndex - 4].circ, 0, 0, 72, 0, circObject.ang, 17, 0xedb01a);
+				Utility.drawArc(rightArc[playersIndex - 4].circ, 0, 0, 72, 0, circObject.lowerAng, 17, 0xedb01a);
 			}
 		}
 		

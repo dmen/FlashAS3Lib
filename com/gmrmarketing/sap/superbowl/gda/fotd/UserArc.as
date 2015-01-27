@@ -126,6 +126,7 @@ package com.gmrmarketing.sap.superbowl.gda.fotd
 			TweenMax.to(myClip.nameRight, .25, { x:tx } );			
 		}
 		
+		
 		public function hideHandle():void
 		{
 			TweenMax.to(myClip.nameRight, .25, { x:-260} );

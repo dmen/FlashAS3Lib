@@ -62,7 +62,7 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 		
 		public function getWidth():int
 		{
-			return clip.theText.textWidth;
+			return Math.max(clip.theText.textWidth, clip.theUser.textWidth);
 		}
 		
 		
@@ -92,8 +92,9 @@ package com.gmrmarketing.sap.superbowl.gda.usmap
 			while (message.indexOf("https://") != -1){
 				message = Strings.removeChunk(message, "https://");
 			}
-			message = SwearFilter.cleanString(message); //remove any major swears			
+			message = SwearFilter.cleanString(message); //remove any major swears	
 			
+			clip.theUser.autoSize = TextFieldAutoSize.LEFT;
 			clip.theUser.text = userName;
 			clip.theText.autoSize = TextFieldAutoSize.LEFT;
 			clip.theText.text = message;

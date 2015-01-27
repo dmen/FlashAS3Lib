@@ -21,11 +21,12 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 		private var localCache:Object;
 		private var video:VideoLoader;
 		private var tvtCircle:Sprite;//gray circle in the title		
-		private var animValue:Object;
+		private var animValue:Object;//for animating sentiment
 		private var animChars:Array;
 		private var allVids:Array;		
 		private var setIndex:int; //1 or 2 - set in init() - for showing the first four milestones, or the second four
 		private var curStat:int//
+		private var animValues:Array//for animating stats
 		private var TESTING:Boolean = false;
 		
 		
@@ -117,6 +118,8 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 		//sets the stats per week
 		private function setStats():void
 		{
+			var o:Object;
+			
 			if (curStat % 2 == 0) {
 				//nfc current
 				t1s1.wing.theLabel.text = "WINS";
@@ -140,6 +143,10 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 				t2s4.theStat.text = localCache.stats[curStat].AltTeamPassingYds;
 				t2s5.wing.theLabel.text = "TOUCHDOWNS";
 				t2s5.theStat.text = localCache.stats[curStat].AltTeamTDs;
+				
+				o = localCache.stats[curStat];
+				animValues = [o.MilestoneWins, o.MilestoneLosses, o.MilestoneRushingYds, o.MilestonePassingYds, o.MilestoneTDs, o.AltTeamWins, o.AltTeamLosses, o.AltTeamRushingYds, o.AltTeamPassingYds, o.AltTeamTDs];
+				
 			}else {
 				//afc current
 				t1s1.wing.theLabel.text = "WINS";
@@ -163,6 +170,10 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 				t2s4.theStat.text = localCache.stats[curStat].MilestonePassingYds;
 				t2s5.wing.theLabel.text = "TOUCHDOWNS";
 				t2s5.theStat.text = localCache.stats[curStat].MilestoneTDs;
+				
+				o = localCache.stats[curStat];
+				animValues = [o.AltTeamWins, o.AltTeamLosses, o.AltTeamRushingYds, o.AltTeamPassingYds, o.AltTeamTDs, o.MilestoneWins, o.MilestoneLosses, o.MilestoneRushingYds, o.MilestonePassingYds, o.MilestoneTDs];
+				
 			}
 		}
 		
@@ -299,6 +310,7 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 			TweenMax.to(week15, .5, { y:275, delay:1, onComplete:animStats, ease:Back.easeOut } );
 		}
 			
+		
 		private function animStats():void
 		{
 			TweenMax.to(t1s1, .25, { alpha:1 } );			
@@ -332,6 +344,9 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 				animValue.dummy = 0;
 				TweenMax.to(animValue, 3, { dummy:3, onUpdate:animateText, onComplete:showActualText } );
 			}
+			animValue.dummy2 = 5;
+			TweenMax.to(animValue, 1, { dummy2:3, onUpdate:animateStats, onComplete:showActualStats } );
+			
 		}
 		
 		//milestone text
@@ -387,6 +402,51 @@ package com.gmrmarketing.sap.superbowl.gda.teamvteam
 					animChars[1][i] = 0;//don't animate this char - it's not a number
 				}
 			}
+		}
+		
+		private function animateStats():void
+		{
+			var thisVal:String;
+			var newStrings:Array = [];
+			var newString:String;
+			var n:int;
+			
+			for (var i:int = 0; i < 10; i++) {
+				thisVal = animValues[i];
+				newString = "";
+				for (var j:int = 0; j < thisVal.length; j++) {
+					n = 47 + Math.ceil(Math.random() * 10); //48 to 57
+					newString += String.fromCharCode(n);
+				}
+				newStrings.push(newString);
+			}
+			t1s1.theStat.text = newStrings[0];
+			t1s2.theStat.text = newStrings[1];
+			t1s3.theStat.text = newStrings[2];
+			t1s4.theStat.text = newStrings[3];
+			t1s5.theStat.text = newStrings[4];
+			
+			t2s1.theStat.text = newStrings[5];
+			t2s2.theStat.text = newStrings[6];
+			t2s3.theStat.text = newStrings[7];
+			t2s4.theStat.text = newStrings[8];
+			t2s5.theStat.text = newStrings[9];
+		}
+		
+		
+		private function showActualStats():void
+		{
+			t1s1.theStat.text = animValues[0];
+			t1s2.theStat.text = animValues[1];
+			t1s3.theStat.text = animValues[2];
+			t1s4.theStat.text = animValues[3];
+			t1s5.theStat.text = animValues[4];
+			
+			t2s1.theStat.text = animValues[5];
+			t2s2.theStat.text = animValues[6];
+			t2s3.theStat.text = animValues[7];
+			t2s4.theStat.text = animValues[8];
+			t2s5.theStat.text = animValues[9];
 		}
 		
 		
