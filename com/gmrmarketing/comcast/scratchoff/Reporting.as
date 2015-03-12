@@ -21,12 +21,14 @@ package com.gmrmarketing.comcast.scratchoff
 			var fs:FileStream = getFileStream(false); 
 			if (fs) {
 				try { 
-					data = fs.readObject();					
+					data = fs.readObject();		
+					//trace("gotData", data.punch);
 					fs.close();
 				} 
 				catch (e:Error)
 				{					
 					data.error = e.toString();
+					//trace("Error", data.error);
 				}				
 			}else {
 				//file did not exist				
@@ -109,7 +111,7 @@ package com.gmrmarketing.comcast.scratchoff
 		{ 
 			// The data file lives in the app storage directory, per iPhone guidelines. 
 			var f:File = File.applicationStorageDirectory.resolvePath("reporting.dat");	
-			
+			trace(f.nativePath);
 			// Try creating and opening the stream.
 			var fs:FileStream = new FileStream(); 
 			try {

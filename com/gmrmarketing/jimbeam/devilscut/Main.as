@@ -20,7 +20,9 @@ package com.gmrmarketing.jimbeam.devilscut
 	import com.gmrmarketing.jimbeam.devilscut.Dialog;
 	import com.gmrmarketing.jimbeam.devilscut.Recap;
 	import com.gmrmarketing.utilities.CornerQuit;
-	
+	import flash.display.StageDisplayState;
+import flash.display.StageScaleMode;
+import flash.ui.Mouse;
 	
 	
 	public class Main extends MovieClip
@@ -63,7 +65,11 @@ package com.gmrmarketing.jimbeam.devilscut
 		
 		
 		public function Main()
-		{			
+		{	
+			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+stage.scaleMode = StageScaleMode.EXACT_FIT;
+Mouse.hide();
+
 			pactText = new TextOptions();
 			dialog = new Dialog(this);
 			
@@ -147,6 +153,7 @@ package com.gmrmarketing.jimbeam.devilscut
 		
 		private function init(e:Event = null):void
 		{
+			trace("init");
 			intro.removeEventListener(MouseEvent.CLICK, init);
 			removeEventListener(Event.ADDED_TO_STAGE, init);			
 			
@@ -604,7 +611,7 @@ package com.gmrmarketing.jimbeam.devilscut
 		private function saveUserLocal():void
 		{
 			//trace("saving local",userData.name);
-			so.addObject(userData);
+			//so.addObject(userData);
 		}
 		
 	}

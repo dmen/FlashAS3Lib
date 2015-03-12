@@ -25,7 +25,6 @@ package com.gmrmarketing.humana.rrbighead
 		private var cam:Camera;
 		private var vid:Video;
 		private var camTimer:Timer;
-		private var displayMatrix:Matrix;
 		private var displayData:BitmapData;
 		private var displayBMP:Bitmap;
 		
@@ -46,7 +45,11 @@ package com.gmrmarketing.humana.rrbighead
 			cam.setMode(1405, 800, 24, false);//width, height, fps, favorArea
 			displayData = new BitmapData(1405, 800);
 			displayBMP = new Bitmap(displayData, "auto", true);
-			displayMatrix = new Matrix( -1, 0, 0, 1, 1405, 0);	//for mirroring camera
+			
+			var vMatrix:Matrix = new Matrix();
+			vMatrix.a = -1;
+			vMatrix.tx = 1405;
+			vid.transform.matrix = vMatrix;			
 			vid.attachCamera(cam);
 			
 			displayBMP.x = -20;
@@ -106,7 +109,7 @@ package com.gmrmarketing.humana.rrbighead
 		//called at 24fps
 		private function camUpdate(e:TimerEvent):void
 		{
-			displayData.draw(vid, displayMatrix, null, null, null, true);			
+			displayData.draw(vid, null, null, null, null, true);			
 		}
 		
 		

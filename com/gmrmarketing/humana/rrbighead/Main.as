@@ -32,7 +32,7 @@ package com.gmrmarketing.humana.rrbighead
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			Mouse.hide();
+			//Mouse.hide();
 			
 			so = SharedObject.getLocal("rrbh_pc", "/");
 			numPrints = so.data.prints;
@@ -58,6 +58,7 @@ package com.gmrmarketing.humana.rrbighead
 			
 			thanks = new ThankYou();
 			thanks.container = mainContainer;
+			thanks.printCopy = new pCopy();//lib clip
 			
 			dialog = new Dialog();
 			dialog.container = mainContainer;	

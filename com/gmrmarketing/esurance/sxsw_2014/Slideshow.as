@@ -11,8 +11,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 	{
 		private var clip:MovieClip;//lib clip
 		private var container:DisplayObjectContainer;		
-		private var nsVideo:NetStream;		
-		private var nsAudio:NetStream;		
+		private var nsVideo:NetStream;	
 		
 		private var file:File; //FMS folder containing videos
 		private var vids:Array;
@@ -40,7 +39,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 		{
 			container = $container;
 			file = new File();
-			file.nativePath = "C:\\Program Files\\Adobe\\Flash Media Server 4.5\\applications\\esurance\\streams\\_definst_\\";
+			file.nativePath = "C:\\Program Files\\Adobe\\Adobe Media Server 5\\applications\\esurance\\streams\\_definst_\\";
 			currIndex = 0;
 			checkFolder();//populate vids array
 		}
@@ -49,14 +48,11 @@ package com.gmrmarketing.esurance.sxsw_2014
 		public function init(nc:NetConnection):void
 		{
 			nsVideo = new NetStream(nc);	
+			nsVideo.bufferTime = 1;			
 			nsVideo.bufferTime = 1;
-			nsAudio = new NetStream(nc);
-			nsVideo.bufferTime = 1;
-			nsVideo.client = {onMetaData:metaDataHandler, onPlayStatus:statusHandler};
-			nsAudio.client = { onMetaData:audioMetaDataHandler, onPlayStatus:audioStatusHandler };
+			nsVideo.client = {onMetaData:metaDataHandler, onPlayStatus:statusHandler}
 			clip.vid.smoothing = true;
 			clip.vid.attachNetStream(nsVideo);
-			clip.audio.attachNetStream(nsAudio);
 			paused = false;
 		}
 		
@@ -100,10 +96,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 					container.removeChild(clip);
 				}
 			}
-			nsVideo.pause();
-			if(playAudio){
-				nsAudio.pause();
-			}
+			nsVideo.pause();			
 			paused = true;
 		}
 		
@@ -141,19 +134,8 @@ package com.gmrmarketing.esurance.sxsw_2014
 		private function playVid():void
 		{
 			var n:String = vids[currIndex].name;
-			var a:Array = n.split(".");	
-			
-			if(playAudio){
-				nsAudio.play("mp4:" + a[0] + "_audio.f4v");
-				TweenMax.delayedCall(1.4, startVideo, ["mp4:" + n]);
-			}else{
-				nsVideo.play("mp4:" + n);
-			}
-			//}else{				
-								
-						
-				//		
-			//}
+			var a:Array = n.split(".");		
+			nsVideo.play("mp4:" + n);
 		}
 		
 		

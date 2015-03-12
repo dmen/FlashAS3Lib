@@ -10,7 +10,6 @@ package com.gmrmarketing.esurance.sxsw_2014
 	public class H264Recorder extends EventDispatcher
 	{	
 		private var nsVideo:NetStream;//stream going _to_ FMS
-		private var nsAudio:NetStream;//stream going _to_ FMS
 		private var cam:Camera;
 		private var mic:Microphone;
 		
@@ -18,12 +17,11 @@ package com.gmrmarketing.esurance.sxsw_2014
 		public function H264Recorder()
 		{
 			cam = Camera.getCamera();
-			mic = Microphone.getMicrophone();
-			
-			cam.setQuality(0, 94);
-			cam.setMode(800, 450, 24, false);
+			cam.setQuality(0, 100);
+			cam.setMode(640, 352, 29.97, false);
 			cam.setKeyFrameInterval(12);
 			
+			mic = Microphone.getMicrophone();
 			mic.setSilenceLevel(0);
 			mic.rate = 22; //KHz
 		}		
@@ -37,22 +35,19 @@ package com.gmrmarketing.esurance.sxsw_2014
 		public function startRecording(nc:NetConnection, fName:String):void
 		{ 
 			nsVideo = new NetStream(nc);
-			nsAudio = new NetStream(nc);
+			nsVideo.client = { onMetaData:metaDataHandler, onCuePoint:cuePointHandler };
 			
 			nsVideo.attachCamera(cam);
-			nsAudio.attachAudio(mic);
+			nsVideo.attachAudio(mic);
 					
 			var h264Settings:H264VideoStreamSettings = new H264VideoStreamSettings();
-			//h264Settings.setProfileLevel(H264Profile.BASELINE, H264Level.LEVEL_3_1);
 			h264Settings.setProfileLevel(H264Profile.BASELINE, H264Level.LEVEL_3_1);
-			//h264Settings.setProfileLevel(H264Profile.BASELINE, H264Level.LEVEL_2);
-			//h264Settings.setProfileLevel(H264Profile.BASELINE, H264Level.LEVEL_1_2);		
+			h264Settings.setMode(640, 352, 29.97);	
 					
-			nsVideo.videoStreamSettings = h264Settings;
-			//nsVideo.publish("mp4:webCam.f4v", "live");
-			nsVideo.publish("mp4:" + fName + ".f4v", "record");
-			nsAudio.publish("mp4:" + fName + "_audio.f4v", "record");
-					
+			//nsVideo.videoStreamSettings = h264Settings;			
+			//nsVideo.publish("mp4:" + fName + ".f4v", "record");
+			nsVideo.publish(fName, "record");//flv
+				/*	
 			var metaData:Object = new Object();
 			metaData.codec = nsVideo.videoStreamSettings.codec;
 			metaData.profile = h264Settings.profile;
@@ -63,7 +58,8 @@ package com.gmrmarketing.esurance.sxsw_2014
 			metaData.width = cam.width;
 			metaData.keyFrameInterval = cam.keyFrameInterval;
 			
-			nsVideo.send("@setDataFrame", "onMetaData", metaData);			
+			nsVideo.send("@setDataFrame", "onMetaData", metaData);		
+			*/
 		}
 		
 		
@@ -73,10 +69,8 @@ package com.gmrmarketing.esurance.sxsw_2014
 		public function stopRecording():void
 		{
 			nsVideo.attachCamera(null);
-			nsAudio.attachAudio(null);
-			
-			nsVideo.close();	
-			nsAudio.close();	
+			nsVideo.attachAudio(null);
+			nsVideo.close();
 		}
 		
 		
@@ -88,7 +82,15 @@ package com.gmrmarketing.esurance.sxsw_2014
 		public function getCamera():Camera
 		{
 			return cam;
-		}		
+		}
+		
+		
+		private function metaDataHandler(infoObject:Object):void
+		{}
+
+		
+		private function cuePointHandler(infoObject:Object):void
+		{}
 		
 	}
 	

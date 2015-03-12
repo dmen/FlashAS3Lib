@@ -199,7 +199,7 @@ package com.gmrmarketing.utilities
 		
 		public static function drawArc(g:Graphics, center_x:int, center_y:int, radius:int, angle_from:int, angle_to:int, lineThickness:Number, lineColor:Number, alph:Number = 1):void
 		{
-			g.clear();
+			//g.clear();
 			//g.lineStyle(1, lineColor, alph, false, LineScaleMode.NORMAL, CapsStyle.NONE);
 			
 			var angle_diff:Number = angle_to - angle_from;

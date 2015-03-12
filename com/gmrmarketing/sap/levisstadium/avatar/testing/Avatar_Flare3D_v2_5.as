@@ -186,6 +186,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 		
 		/** Sets the model, which will be cached and reused. */
 		override public function set model(model : String) : void {
+			trace("modelset", model);
 			_scene.pause();
 			if(_model != null) {				
 				_baseNode.removeChild(_holder);
@@ -223,6 +224,9 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing {
 		
 		//loading is complete
 		override protected function onCompleteLoading(e : Event) : void {
+			trace("model complete loading");
+			trace(_holder.x, _holder.y, _holder.z);
+			
 			_scene.removeEventListener(Scene3D.COMPLETE_EVENT, onCompleteLoading);
 			_scene.camera = _camera;
 			_scene.resume();

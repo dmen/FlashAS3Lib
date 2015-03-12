@@ -343,6 +343,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		{
 			MovieClip(eraArray[eraIndex][0]).gotoAndPlay(2);//open the default 2014
 			_container3D.model = eraArray[eraIndex][1];
+			
 			loadJersey();
 			introAnimStarted = false;
 			introAnimFinished = false;
@@ -469,6 +470,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		
 		private function loadJersey():void
 		{
+			trace("loadJersey:", jerseyPath + "jersey" + String(eraArray[eraIndex][1]).substr(4, 4) + ".png");
 			var l:Loader = new Loader();
 			l.contentLoaderInfo.addEventListener(Event.COMPLETE, jerseyLoaded, false, 0, true);			
 			l.load(new URLRequest(jerseyPath + "jersey" + String(eraArray[eraIndex][1]).substr(4,4) + ".png"));			
@@ -481,6 +483,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 		 */
 		private function jerseyLoaded(e:Event = null):void
 		{
+			trace("jersey loaded");
 			var b:Bitmap = Bitmap(e.target.content);
 			b.smoothing = true;
 			jerseyBMD = b.bitmapData;

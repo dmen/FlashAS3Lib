@@ -22,10 +22,10 @@ package com.gmrmarketing.esurance.sxsw_2014
 	public class Main extends MovieClip
 	{
 		private var fmsConnector:FMSConnector;//persistent netConnection object
-		private var server:SocketServer;//small server for receiving start/stop messages
+		private var server:SocketServer;//small server for receiving start/stop messages from BB
 		
 		private var recorder:H264Recorder;
-		private var videoDisplay:VideoDisplay;
+		private var videoDisplay:VideoDisplay;//for showing the live camera
 		
 		private var slideshow:StaticSlideshow;
 		private var maxTimer:Timer;//keeps recording length to a max time (1 min)
@@ -39,7 +39,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
 			Mouse.hide();
 			
-			maxTimer = new Timer(60000);
+			maxTimer = new Timer(45000);
 			maxTimer.addEventListener(TimerEvent.TIMER, stopRecording);			
 			
 			recorder = new H264Recorder();			
@@ -53,7 +53,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 			dialog = new Dialog();
 			dialog.setContainer(this);
 			
-			config = new AIRXML();
+			config = new AIRXML();//gets the image list for the slideshow
 			config.addEventListener(Event.COMPLETE, init, false, 0, true);
 			config.addEventListener(AIRXML.NOT_FOUND, noXML, false, 0, true);
 			config.readXML();			
@@ -63,8 +63,6 @@ package com.gmrmarketing.esurance.sxsw_2014
 		private function init(e:Event):void
 		{
 			var params:XML = config.getXML();
-			
-			//slideshow.setAudio(params.playAudioInSlideshow);
 			slideshow.setXML(params.slideshow.image);
 			
 			server = new SocketServer(parseInt(params.port));

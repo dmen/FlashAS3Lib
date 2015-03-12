@@ -22,7 +22,7 @@ package com.gmrmarketing.utilities
 			clients = new Array();			
 			
 			server = new ServerSocket();
-			server.bind( 1080 );
+			server.bind(1080);
 			server.addEventListener( ServerSocketConnectEvent.CONNECT, onClientConnect );
 			server.listen();
 			
@@ -31,6 +31,7 @@ package com.gmrmarketing.utilities
 			
 			btnLoad.addEventListener(MouseEvent.MOUSE_DOWN, chooseFile);
 		}
+		
 		
 		private function chooseFile(e:MouseEvent):void
 		{
@@ -46,13 +47,19 @@ package com.gmrmarketing.utilities
 		}
 		
 		
+		/**
+		 * writes the video byteArray to videoBytes
+		 * the first four bytes of video bytes contain the videos length in an unsigned int
+		 * @param	e
+		 */
 		private function videoLoaded(e:Event):void
 		{
 			vLoader.removeEventListener(FLVtoBA.VID_LOADED, videoLoaded);
 			
 			videoBytes = new ByteArray();
 			var ba:ByteArray = vLoader.getVid();
-			videoBytes.writeInt(ba.length);//32bit unsigned int - 4 bytes
+			
+			videoBytes.writeInt(ba.length);//4 bytes
 			videoBytes.writeBytes(ba);
 			
 			theText.text = "Video Bytes:" + String(ba.length);
@@ -68,7 +75,7 @@ package com.gmrmarketing.utilities
 			clients.push( { socket:s, id:clients.length, hasVideo:false } );
 			updateText();
 			
-			btn.addEventListener(MouseEvent.MOUSE_DOWN, pushVideo);
+			btnPush.addEventListener(MouseEvent.MOUSE_DOWN, pushVideo);
 		}
 		
 		
@@ -132,7 +139,7 @@ package com.gmrmarketing.utilities
 		private function sendInit(e:MouseEvent):void
 		{		
 			for (var i:int = 0; i < clients.length; i++) {				
-				clients[i].socket.writeObject({ type:1, id:i+1, vw:3840, vh:2160, cellw:1920, cellh:1080});
+				clients[i].socket.writeObject({ type:1, id:i+1, vw:1920, vh:1080, cellw:960, cellh:540});
 				clients[i].socket.flush();
 				
 			}

@@ -4,6 +4,7 @@ package com.gmrmarketing.humana.rrbighead
 	import flash.events.*;
 	import com.greensock.TweenMax;
 	import flash.geom.Matrix;
+	import flash.geom.Point;
 	import flash.utils.Timer;
 	import com.gmrmarketing.nissan.rodale2013.Print;
 	//for saving images to the local filesystem
@@ -24,6 +25,7 @@ package com.gmrmarketing.humana.rrbighead
 		private var print:Print;
 		private var im:Bitmap;
 		private var oPic:BitmapData;
+		private var pCopy:BitmapData;
 		
 		public function ThankYou()
 		{
@@ -38,6 +40,10 @@ package com.gmrmarketing.humana.rrbighead
 			myContainer = c;
 		}
 		
+		public function set printCopy(im:BitmapData):void
+		{
+			pCopy = im;//lib clip
+		}
 		
 		//pic comes in at 800x800
 		public function setPic(pic:BitmapData):void
@@ -45,7 +51,9 @@ package com.gmrmarketing.humana.rrbighead
 			oPic = pic;//sent to writeImage() in showing()
 			
 			var m:Matrix = new Matrix();
-			m.scale(.8125, .8125); //to scale 800x800 to 650x650
+			m.scale(.8125, .8125); //to scale 800x800 to 650x650			
+			
+			oPic.copyPixels(pCopy, pCopy.rect, new Point(oPic.width - pCopy.width, oPic.height - pCopy.height), null, null, true);
 			
 			var bmd:BitmapData = new BitmapData(650, 650);
 			bmd.draw(pic, m, null, null, null, true);
@@ -101,7 +109,7 @@ package com.gmrmarketing.humana.rrbighead
 			
 			print.addEventListener(Print.ADD_ERROR, printError, false, 0, true);//removed in resetApp()
 			print.addEventListener(Print.SEND_ERROR, printError, false, 0, true);
-			print.beginPrint(im.bitmapData);//800x800
+			print.beginPrint(oPic);//800x800
 			
 			theTimer.addEventListener(TimerEvent.TIMER, timedOut);
 			theTimer.start();

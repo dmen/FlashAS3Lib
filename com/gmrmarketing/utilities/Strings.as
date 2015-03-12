@@ -129,7 +129,7 @@ package com.gmrmarketing.utilities
 		
 		
 		/**
-		 * Returns the first character in the string
+		 * Returns the first character in the input string
 		 * @param	s
 		 * @return
 		 */
@@ -140,7 +140,7 @@ package com.gmrmarketing.utilities
 		
 		
 		/**
-		 * Returns the last character in the string
+		 * Returns the last character in the input string
 		 * @param	s
 		 * @return
 		 */
@@ -151,7 +151,7 @@ package com.gmrmarketing.utilities
 		
 		
 		/**
-		 * Removes all punctuation from a string and returns the compacted version
+		 * Removes all punctuation from the input string and returns the compacted version
 		 * @param	s String like 39º, or F/U\C.K
 		 * @return String like 39 or FUCK
 		 */
@@ -168,6 +168,17 @@ package com.gmrmarketing.utilities
 			}
 			
 			return compacted;
+		}
+		
+		
+		/**
+		 * returns the number of words in the input string
+		 * @param	s
+		 * @return
+		 */
+		public static function numWords(s:String):int
+		{
+			return s.split(" ").length;
 		}
 	}
 	

@@ -74,13 +74,13 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 			addChild(mainContainer);
 			addChild(cornerContainer);
 			
-			log = new Logger();
+			log = Logger.getInstance();
 			log.setLogger(new LoggerAIR());
 			log.log("Application Start");
 			
 			ser = new SerProxy_Connector();
 			ser.addEventListener(SerProxy_Connector.SER_LOG, logSerProxy);
-			ser.connect();
+			//ser.connect();
 			
 			servoTimer = new Timer(50);
 			servoTimer.addEventListener(TimerEvent.TIMER, setServoAngle);
@@ -156,7 +156,7 @@ package com.gmrmarketing.sap.levisstadium.avatar.testing
 				preview.removeEventListener(Webcam3D_1280x960.FACE_FOUND, autoStart);
 				intro.removeEventListener(Intro.MANUAL_START, gotRFID);
 				
-				registerStart();
+				//registerStart();
 				intro.hide();
 				showPreview();
 			}			

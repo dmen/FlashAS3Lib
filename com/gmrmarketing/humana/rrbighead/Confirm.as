@@ -37,9 +37,11 @@ package com.gmrmarketing.humana.rrbighead
 		private var whiteAlpha:BitmapData;
 		
 		private var maniph:Manipulator;//headband and moustache
+		//private var maniphg:Manipulator;
 		private var manipm:Manipulator;
 		
-		private var headband:MovieClip;//two overlay clips
+		private var headband:MovieClip;//overlay clips
+		//private var headbandHG:MovieClip;
 		private var moustache:MovieClip;
 		
 		private var shad:DropShadowFilter;
@@ -52,8 +54,10 @@ package com.gmrmarketing.humana.rrbighead
 			shad = new DropShadowFilter(4, 90, 0, 1, 5, 5, .5, 2);
 			
 			headband = new mcHeadband();
+			//headbandHG = new mcHeadbandHG();
 			moustache = new mcMoustache();			
 			headband.filters = [shad];
+			//headbandHG.filters = [shad];
 			moustache.filters = [shad];
 			
 			butt = new sndButton();//sound			
@@ -66,6 +70,10 @@ package com.gmrmarketing.humana.rrbighead
 			maniph = new Manipulator();
 			maniph.setObject(headband);
 			maniph.limitScale(.3, 1.75);
+			
+			//maniphg = new Manipulator();
+			//maniphg.setObject(headbandHG);
+			//maniphg.limitScale(.3, 1.75);
 			
 			manipm = new Manipulator();
 			manipm.setObject(moustache);
@@ -111,9 +119,11 @@ package com.gmrmarketing.humana.rrbighead
 			clip.btnPrint.addEventListener(MouseEvent.MOUSE_DOWN, print, false, 0, true);			
 			
 			clip.btnHeadband.addEventListener(MouseEvent.MOUSE_DOWN, addHeadband, false, 0, true);
+			//clip.btnHeadbandHG.addEventListener(MouseEvent.MOUSE_DOWN, addHeadbandHG, false, 0, true);
 			clip.btnMoustache.addEventListener(MouseEvent.MOUSE_DOWN, addMoustache, false, 0, true);
 			
 			clip.outlineHeadband.gotoAndStop(1);//gray outlines
+			//clip.outlineHeadbandHG.gotoAndStop(1);
 			clip.outlineMoustache.gotoAndStop(1);
 			
 			clip.btnRetake.x = 1300;
@@ -136,12 +146,14 @@ package com.gmrmarketing.humana.rrbighead
 		public function hide():void
 		{
 			maniph.hide();
+			//maniphg.hide();
 			manipm.hide();
 			
 			clip.btnRetake.removeEventListener(MouseEvent.MOUSE_DOWN, retake);
 			clip.btnPrint.removeEventListener(MouseEvent.MOUSE_DOWN, print);
 			
 			clip.btnHeadband.removeEventListener(MouseEvent.MOUSE_DOWN, addHeadband);
+			//clip.btnHeadbandHG.removeEventListener(MouseEvent.MOUSE_DOWN, addHeadbandHG);
 			clip.btnMoustache.removeEventListener(MouseEvent.MOUSE_DOWN, addMoustache);
 			
 			myContainer.removeEventListener(MouseEvent.MOUSE_DOWN, removeManip);
@@ -164,6 +176,7 @@ package com.gmrmarketing.humana.rrbighead
 		public function getPic(withWhite:Boolean = true):BitmapData
 		{		
 			maniph.hide();
+			//maniphg.hide();
 			manipm.hide();
 			
 			var bmd:BitmapData = new BitmapData(1920, 1080);
@@ -196,14 +209,20 @@ package com.gmrmarketing.humana.rrbighead
 		
 		
 		private function addHeadband(e:MouseEvent):void
-		{			
+		{		
+			//maniphg.hide();
 			tim.buttonClicked();
+			
+			//if (overlayContainer.contains(headbandHG)) {
+				//overlayContainer.removeChild(headbandHG);
+			//}
 			
 			if (!overlayContainer.contains(headband)) {
 				overlayContainer.addChild(headband);			
 			
-				butt.play();
+				butt.play();//button sound
 				
+				//clip.outlineHeadbandHG.gotoAndStop(1);//gray outline
 				clip.outlineHeadband.gotoAndStop(2);//red outline
 				
 				headband.x = 425;
@@ -217,6 +236,35 @@ package com.gmrmarketing.humana.rrbighead
 				myContainer.addEventListener(MouseEvent.MOUSE_DOWN, removeManip, false, 0, true);
 			}
 		}
+		/*
+		private function addHeadbandHG(e:MouseEvent):void
+		{
+			maniph.hide();
+			tim.buttonClicked();
+			
+			if (overlayContainer.contains(headband)) {
+				overlayContainer.removeChild(headband);
+			}
+			
+			if (!overlayContainer.contains(headbandHG)) {
+				overlayContainer.addChild(headbandHG);			
+			
+				butt.play();//button sound
+				
+				clip.outlineHeadband.gotoAndStop(1);//gray outline
+				clip.outlineHeadbandHG.gotoAndStop(2);//red outline
+				
+				headbandHG.x = 425;
+				headbandHG.y = 290;
+				headbandHG.scaleX = headbandHG.scaleY = 1;
+				headbandHG.rotation = 0;
+				
+				manipHeadbandHG();
+				
+				headbandHG.addEventListener(MouseEvent.MOUSE_DOWN, manipHeadbandHG, false, 0, true);
+				myContainer.addEventListener(MouseEvent.MOUSE_DOWN, removeManip, false, 0, true);
+			}
+		}*/
 		
 		
 		private function manipHeadband(e:MouseEvent = null):void
@@ -235,7 +283,24 @@ package com.gmrmarketing.humana.rrbighead
 				maniph.startMove();
 			}
 		}
-		
+		/*
+		private function manipHeadbandHG(e:MouseEvent = null):void
+		{
+			//manipm.removeEventListener(Manipulator.DELETE, removeMoustache);
+			
+			if(e){
+				e.stopImmediatePropagation();//prevent stage from receiving and removing the manip
+			}			
+			
+			maniphg.hide();
+			maniphg.show();
+			maniphg.addEventListener(Manipulator.DELETE, removeHeadbandHG, false, 0, true);
+			
+			if (e) {
+				maniphg.startMove();
+			}
+		}
+		*/
 		
 		private function removeHeadband(e:Event):void
 		{
@@ -247,7 +312,18 @@ package com.gmrmarketing.humana.rrbighead
 				overlayContainer.removeChild(headband);
 			}			
 		}
-		
+		/*
+		private function removeHeadbandHG(e:Event):void
+		{
+			e.stopImmediatePropagation();
+			clip.outlineHeadbandHG.gotoAndStop(1);//gray			
+			headbandHG.removeEventListener(MouseEvent.MOUSE_DOWN, manipHeadbandHG);
+			maniphg.hide();
+			if (overlayContainer.contains(headbandHG)) {
+				overlayContainer.removeChild(headbandHG);
+			}			
+		}
+		*/
 		
 		private function addMoustache(e:MouseEvent):void
 		{			
@@ -288,6 +364,7 @@ package com.gmrmarketing.humana.rrbighead
 		private function removeManip(e:MouseEvent = null):void
 		{
 			maniph.hide();
+			//maniphg.hide();
 			manipm.hide();
 		}
 		

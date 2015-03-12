@@ -25,12 +25,12 @@ package com.tastenkunst.as3.brf.container {
 		
 		protected const _tmpRawData : Vector.<Number> = new Vector.<Number>(16, true);
 
-		public function BRFContainerFP11(container : Sprite) {			
+		public function BRFContainerFP11(container : Sprite) {	
+			trace("initbrfc");
 			super(container);
 		}
 		
-		override public function init(rect : Rectangle) : void {
-			rect; //just to avoid a warning in eclipse
+		override public function init(rect : Rectangle) : void {			
 			_initialized = true;
 			resetPose();
 		}
@@ -64,12 +64,11 @@ package com.tastenkunst.as3.brf.container {
 		protected function onUpdateMatrix(vec : Vector.<Number>) : void {
 		}
 		//here you can set bound the 3d objects may not exceed. Might be usefull is some cases. 
-		override public function isValidPose() : Boolean {
-			var validPose : Boolean = true;
-			return validPose;
+		override public function isValidPose() : Boolean {			
+			return true;
 		}
 		//Add a model to the scene and remove previous ones
-		public function set model(model : String) : void {
+		public function set model(model : String) : void {			
 		}
 		//get the current model as URL
 		public function get model() : String {

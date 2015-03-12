@@ -36,7 +36,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 		
 		public function VidRecorder()
 		{
-			clip = new mcVideo();
+			clip = new mcVideo();//contains vid
 			cam = Camera.getCamera();
 			cam.setQuality(75000, 88);//bandwidth, quality
 			cam.setMode(800, 450, 24, false);//width, height, fps, favorArea

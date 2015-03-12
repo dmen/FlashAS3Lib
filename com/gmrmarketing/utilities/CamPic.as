@@ -48,7 +48,6 @@ package com.gmrmarketing.utilities
 	{
 		//dispatched whenever update() is called - dependent on FPS
 		public static const CAMERA_UPDATE:String = "cameraUpdate";
-		public static const CAMERA_READY:String = "cameraReady";
 		
 		private var cam:Camera;
 		private var captureWidth:int;
@@ -64,8 +63,7 @@ package com.gmrmarketing.utilities
 		private var displayBMP:Bitmap;
 		private var displayMatrix:Matrix; //for scaling capture size to display size
 		
-		private var camAvailable:Boolean;
-		
+		private var camAvailable:Boolean;		
 		private var filters:Array; //array of filters from the CamPicFilters class
 		
 		
@@ -76,10 +74,7 @@ package com.gmrmarketing.utilities
 		public function CamPic() 
 		{			
 			cam = Camera.getCamera();
-			camAvailable = cam == null ? false : true;			
-			if (camAvailable) {					
-				dispatchEvent(new Event(CAMERA_READY));
-			}		
+			camAvailable = cam == null ? false : true;				
 			clearFilters();			
 		}
 		
@@ -376,7 +371,7 @@ package com.gmrmarketing.utilities
 		 */
 		private function update(e:TimerEvent):void
 		{			
-			displayData.draw(theVideo, displayMatrix, null, null, null, true);			
+			displayData.draw(theVideo, displayMatrix, null, null, null, true);		
 			
 			var p:Point = new Point(0, 0);
 			var r:Rectangle = displayData.rect;
