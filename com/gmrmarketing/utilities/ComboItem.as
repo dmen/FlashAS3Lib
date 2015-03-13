@@ -1,5 +1,5 @@
 /**
- * Represents one item in a comboBox drop down
+ * Represents one item in a ComboBox drop down
  * Instantiated by com.gmrmarketing.utilities.ComboBox
  */
 package com.gmrmarketing.utilities
@@ -26,7 +26,7 @@ package com.gmrmarketing.utilities
 		
 		
 		/**
-		 * 
+		 * Constructor - called from ComboBox.addItems()
 		 * @param	$item
 		 * @param	$w
 		 * @param	$h
@@ -46,7 +46,6 @@ package com.gmrmarketing.utilities
 			txtOverCol = $txtOverCol;
 			bgCol = $bgCol;
 			bgOverCol = $bgOverCol;
-			
 			theText = new TextField();
 			theText.autoSize = TextFieldAutoSize.LEFT;
 			theText.antiAliasType = AntiAliasType.ADVANCED;
@@ -62,10 +61,10 @@ package com.gmrmarketing.utilities
 			}
 			textFormat.leftMargin = 10;
 			textFormat.size = fs;
-			theText.defaultTextFormat = textFormat;
 			
 			theText.text = item.label;
 			theText.textColor = txtCol;
+			theText.setTextFormat(textFormat);
 			
 			graphics.beginFill(bgCol, 1);
 			graphics.drawRect(0, 0, w, h);
@@ -82,37 +81,20 @@ package com.gmrmarketing.utilities
 		
 		
 		/**
-		 * Returns the items label property
-		 * @return
-		 */
-		public function getLabel():String
-		{
-			return item.label;
-		}
-		
-		
-		/**
-		 * Returns the items data property
-		 * @return
-		 */
-		public function getData():*
-		{
-			return item.data;
-		}
-		
-		
-		/**
 		 * Returns an object containing the items label and data properties
 		 * @return
 		 */
 		public function getProps():Object
-		{
-			var label:String = getLabel();
-			var data:* = getData();
-			return { label:label, data:data };
+		{			
+			return { label:item.label, data:item.data };
 		}
 		
 		
+		/**
+		 * Shows the highlight on the item before calling sendClick
+		 * Called from ComboBox.clicked()
+		 * @param	e
+		 */
 		private function itemClicked(e:MouseEvent):void
 		{
 			mouseOver();
@@ -120,6 +102,11 @@ package com.gmrmarketing.utilities
 		}
 		
 		
+		/**
+		 * Called from TweenMax.delayed call to allow the highlighted item to show
+		 * the highlight for 1/10 second. This for touch systems when the item is
+		 * simply clicked and not moused over first
+		 */
 		private function sendClick():void
 		{
 			dispatchEvent(new Event(CLICKED));

@@ -11,8 +11,7 @@ package com.gmrmarketing.utilities
 	{
 		public static const DRAGGING:String = "sliderBeingDragged";
 		public static const BEGIN_DRAG:String = "sliderStartedDragging";
-		public static const END_DRAG:String = "sliderEndedDragging";
-		
+		public static const END_DRAG:String = "sliderEndedDragging";		
 		private var slide:Sprite;
 		private var track:Sprite;
 		private var clickOffset:int; //prevents snapping of slide to mouse pos when initially clicked
@@ -26,7 +25,7 @@ package com.gmrmarketing.utilities
 		
 		
 		public function init(w:int, h:int):void
-		{
+		{			
 			var g:Graphics = track.graphics;
 			g.beginFill(0x333333, 1);
 			g.drawRect(0, 0, w, h);
@@ -34,12 +33,37 @@ package com.gmrmarketing.utilities
 			
 			g = slide.graphics;
 			g.beginFill(0x777777, 1);
-			g.drawRect(0, 0, w, Math.floor(h * .45));
+			var slideHeight:int = Math.floor(h * .45);
+			g.drawRect(0, 0, w, slideHeight);
+			g.endFill();
+			
+			//draw horizontal lines in the slider
+			var linesPercentV:Number = .33; //lines take up 1/3 of the vertical space of the slider
+			var linesPercentH:Number = .5; //lines take up 1/2 of the horizontal space of the slider
+			g.lineStyle(1, 0xaaaaaa);			
+			var startY:int = Math.floor((slideHeight - (slideHeight * linesPercentV)) * .5);
+			var endY:int = startY + slideHeight * linesPercentV;
+			var startX:int = Math.floor((w - (w * linesPercentH)) * .5);
+			var endX:int = startX + w * linesPercentH;
+			while(startY <= endY){
+				g.moveTo(startX, startY);
+				g.lineTo(endX, startY);
+				startY += 3;
+			}
 			
 			addChild(track);
 			addChild(slide);
 			
 			slide.addEventListener(MouseEvent.MOUSE_DOWN, beginDrag, false, 0, true);
+		}
+		
+		
+		/**
+		 * Resets the slide to the top of the track
+		 */
+		public function reset():void
+		{
+			slide.y = 0;
 		}
 		
 		
