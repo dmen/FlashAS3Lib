@@ -1,8 +1,9 @@
 /**
- * Represents one item in a ComboBox drop down
- * Instantiated by com.gmrmarketing.utilities.ComboBox
+ * Used by ComboBox.as
+ * Represents one item in the ComboBox
  */
-package com.gmrmarketing.utilities
+
+package com.gmrmarketing.utilities.components
 {
 	import flash.display.*;
 	import flash.events.*;
@@ -33,11 +34,12 @@ package com.gmrmarketing.utilities
 		 * @param	$txtCol
 		 * @param	$txtOverCol
 		 * @param	$bgCol
-		 * @param	$bgOverCol
-		 * @param	fs
-		 * @param	fr
+		 * @param	$bgOverCol	
+		 * @param	fs Font size
+		 * @param	fr Font Reference
+		 * @param	leftMargin Left margin
 		 */
-		public function ComboItem($item:Object, $w:int, $h:int, $txtCol:Number, $txtOverCol:Number, $bgCol:Number, $bgOverCol:Number, fs:int = 14, fr:Font = null)		
+		public function ComboItem($item:Object, $w:int, $h:int, $txtCol:Number, $txtOverCol:Number, $bgCol:Number, $bgOverCol:Number, fs:int = 14, fr:Font = null, leftMarg:int = 6 )		
 		{
 			item = $item;			
 			w = $w;
@@ -59,13 +61,15 @@ package com.gmrmarketing.utilities
 				theText.embedFonts = true;
 				textFormat.font = fr.fontName;				
 			}
-			textFormat.leftMargin = 10;
+			textFormat.leftMargin = leftMarg;
 			textFormat.size = fs;
 			
 			theText.text = item.label;
 			theText.textColor = txtCol;
 			theText.setTextFormat(textFormat);
 			
+			//background with border
+			graphics.lineStyle(1, 0x000000, .2);
 			graphics.beginFill(bgCol, 1);
 			graphics.drawRect(0, 0, w, h);
 			graphics.endFill();
@@ -119,6 +123,8 @@ package com.gmrmarketing.utilities
 		 */
 		private function mouseOver(e:MouseEvent = null):void
 		{
+			graphics.clear();
+			graphics.lineStyle(1, 0x000000, .2);
 			graphics.beginFill(bgOverCol, 1);
 			graphics.drawRect(0, 0, w, h);
 			graphics.endFill();
@@ -132,6 +138,8 @@ package com.gmrmarketing.utilities
 		 */
 		private function mouseOut(e:MouseEvent):void
 		{
+			graphics.clear();
+			graphics.lineStyle(1, 0x000000, .2);
 			graphics.beginFill(bgCol, 1);
 			graphics.drawRect(0, 0, w, h);
 			graphics.endFill();

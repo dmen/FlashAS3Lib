@@ -53,7 +53,7 @@ package com.gmrmarketing.humana.rrbighead
 			var m:Matrix = new Matrix();
 			m.scale(.8125, .8125); //to scale 800x800 to 650x650			
 			
-			oPic.copyPixels(pCopy, pCopy.rect, new Point(oPic.width - pCopy.width, oPic.height - pCopy.height), null, null, true);
+			//oPic.copyPixels(pCopy, pCopy.rect, new Point(oPic.width - pCopy.width, oPic.height - pCopy.height), null, null, true);
 			
 			var bmd:BitmapData = new BitmapData(650, 650);
 			bmd.draw(pic, m, null, null, null, true);

@@ -1,10 +1,11 @@
 /**
- * Slider
+ * General slider component
+ * uses pre-built movie clips
  * Horizontal or Vertical
  * 
  * Usage:
 	 
-	 import com.gmrmarketing.utilities.Slider;
+	 import com.gmrmarketing.utilities.components.Slider;
 	 
 	 var slider:Slider = new Slider(slide, track, "h"); //horizontal slider "v" for vertical
 	 slider.addEventListener(Slider.DRAGGING, doSomethingWhileDragging, false, 0, true);
@@ -13,7 +14,7 @@
  * Slider and Track clips must have top left reg points
  */
 
-package com.gmrmarketing.utilities
+package com.gmrmarketing.utilities.components
 {
 	import flash.display.*;	
 	import flash.events.*;

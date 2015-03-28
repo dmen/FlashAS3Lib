@@ -11,7 +11,7 @@ package com.gmrmarketing.nissan.rodale2013
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import flash.events.*;
-	import com.gmrmarketing.utilities.Slider;
+	import com.gmrmarketing.utilities.components.Slider;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;

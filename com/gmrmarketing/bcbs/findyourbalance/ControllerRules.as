@@ -3,7 +3,7 @@ package com.gmrmarketing.bcbs.findyourbalance
 	import flash.display.*;
 	import flash.net.*;
 	import flash.events.*;
-	import com.gmrmarketing.utilities.Slider;
+	import com.gmrmarketing.utilities.components.Slider;
 	
 	
 	public class ControllerRules extends EventDispatcher

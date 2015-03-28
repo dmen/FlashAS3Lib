@@ -59,15 +59,19 @@ package com.gmrmarketing.esurance.sxsw_2015.photobooth
 		 * Adds a user data object to the csv file
 		 * Called from Main.removeForm() - once form is complete and Thanks is showing
 		 * Data object contains these keys {rfid, image}
+		 * 
+		 * Data object is only added if the appropriate keys != null
 		 */
 		public function add(data:Object):void
-		{			
-			users.push(data);//add to queue
-			//log.log("Queue.add() - users.length after users.push: " + users.length);
-			rewriteQueue();
-			users = getAllUsers();
-			//log.log("Queue.add() - users.length after rewrite/get: " + users.length);
-			uploadNext();			
+		{	
+			if(data.rfid && data.image){
+				users.push(data);//add to queue
+				//log.log("Queue.add() - users.length after users.push: " + users.length);
+				rewriteQueue();
+				users = getAllUsers();
+				//log.log("Queue.add() - users.length after rewrite/get: " + users.length);
+				uploadNext();
+			}
 		}
 		
 		

@@ -15,7 +15,7 @@ package com.gmrmarketing.testing
 		{
 			r = Math.round(3 + (Math.random() * 5));
 			var alph:Number = debug == true ? 1 : 0;
-			graphics.lineStyle(1, 0xffffff, alph);
+			graphics.lineStyle(1, 0x58595B, alph);
 			graphics.drawCircle(0, 0, r);
 			
 			xVel = .5 + Math.random() * 2;

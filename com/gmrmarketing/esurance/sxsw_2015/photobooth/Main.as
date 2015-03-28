@@ -44,10 +44,10 @@
 			
 			cb = new CornerQuit();
 			cb.init(topContainer, "ur");
-			cb.addEventListener(CornerQuit.CORNER_QUIT, doReset, false, 0, true);			
+			cb.addEventListener(CornerQuit.CORNER_QUIT, doReset2, false, 0, true);			
 			
 			timeoutHelper = TimeoutHelper.getInstance();
-			timeoutHelper.addEventListener(TimeoutHelper.TIMED_OUT, doReset, false, 0, true);
+			timeoutHelper.addEventListener(TimeoutHelper.TIMED_OUT, doReset2, false, 0, true);
 			timeoutHelper.init(120000);//2 min		
 			
 			queue = new Queue();			
@@ -78,8 +78,7 @@
 		
 		
 		/**
-		 * called by timeoutHelper if the app times out
-		 * or by four taps at upper right
+		 * called when photo is doen
 		 * @param	e
 		 */
 		private function doReset(e:Event):void
@@ -92,6 +91,16 @@
 			intro.show();
 		}
 		
+		//called from 4 taps ur
+		private function doReset2(e:Event):void
+		{
+			//queue.add( { rfid:intro.getRFID(), image:takePhoto.getPhotoString() } );
+			
+			takePhoto.hide();
+			intro.addEventListener(Intro.RFID, showTakePhoto, false, 0, true);
+			timeoutHelper.stopMonitoring(); //don't monitor the intro screen
+			intro.show();
+		}
 		
 		private function quitApplication(e:Event):void
 		{
