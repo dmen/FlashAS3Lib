@@ -8,12 +8,15 @@ package com.gmrmarketing.toyota.witw
 	
 	public class Social extends EventDispatcher
 	{
-		public static const READY:String = "dataLoadedFromServices";
+		public static const READY:String = "dataLoadedFromServices";		
+		public static const FINISHED_HIDING:String = "finishedHiding";
+		
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		private var web:Web;//loads images and messages
 		private var images:Array; //array of DisplayImage objects
 		private var texts:Array;//array of DisplayText objects
+		
 		
 		public function Social()
 		{
@@ -23,16 +26,17 @@ package com.gmrmarketing.toyota.witw
 			images.push(new DisplayImage(842, 704),new DisplayImage(1107, 704),new DisplayImage(1372, 704),new DisplayImage(1635, 704));
 			
 			texts = [];
+			texts.push(new DisplayText(1103, 168, 509, 245, 0xD71B23, 0xD71B23));//big red one
+			texts.push(new DisplayText(43, 704, 509, 245, 0x58595B, 0x58595B)); //big gray one
+			
 			texts.push(new DisplayText(839, 168, 245, 114, 0x58595B, 0xffffff));
-			texts.push(new DisplayText(839, 299, 245, 114, 0xD71B23, 0xffffff));
-			texts.push(new DisplayText(1103, 168, 509, 245, 0xD71B23, 0xD71B23));
+			texts.push(new DisplayText(839, 299, 245, 114, 0xD71B23, 0xffffff));			
 			
 			texts.push(new DisplayText(43, 434, 114, 245, 0xD71B23, 0xffffff));
 			texts.push(new DisplayText(174, 434, 114, 245, 0x58595B, 0xffffff));
 			texts.push(new DisplayText(1370, 434, 114, 245, 0xD71B23, 0xffffff));
-			texts.push(new DisplayText(1764, 434, 114, 245, 0x58595B, 0xffffff));
+			texts.push(new DisplayText(1764, 434, 114, 245, 0x58595B, 0xffffff));			
 			
-			texts.push(new DisplayText(43, 704, 509, 245, 0x58595B, 0x58595B));
 			texts.push(new DisplayText(574, 704, 245, 114, 0x58595B, 0xffffff));
 			texts.push(new DisplayText(574, 834, 245, 114, 0xD71B23, 0xffffff));
 			
@@ -43,11 +47,13 @@ package com.gmrmarketing.toyota.witw
 			clip = new social();
 		}
 		
+		
 		private function socialReady(e:Event):void
 		{
 			web.removeEventListener(Web.REFRESH_COMPLETE, socialReady);
 			dispatchEvent(new Event(READY));
 		}
+		
 		
 		public function set container(c:DisplayObjectContainer):void
 		{
@@ -100,16 +106,50 @@ package com.gmrmarketing.toyota.witw
 		}
 		
 		
+		public function hide():void
+		{
+			web.refresh();
+			
+			TweenMax.killAll();
+			
+			var i:int;
+			for (i = 0; i < images.length; i++) {				
+				images[i].hide();
+			}
+			for (i = 0; i < texts.length; i++) {				
+				texts[i].hide();
+			}
+			
+			TweenMax.to(clip.header, 1, { alpha:0, delay:2 } );
+			TweenMax.to(clip.logo, 1, { alpha:0, delay:2.2 } );
+			TweenMax.to(clip.visit, 1, { alpha:0, delay:2.3 } );
+			
+			TweenMax.to(clip.bgLines, 1, { alpha:0, scaleY:0, delay:2.5, ease:Back.easeIn, onComplete:finished } );
+		}
+		
+		
+		private function finished():void
+		{
+			dispatchEvent(new Event(FINISHED_HIDING));
+		}
+		
+		
 		private function showImages():void
 		{
 			var i:int;
 			//add all images to myContainer
 			for (i = 0; i < images.length; i++) {
-				myContainer.addChild(images[i]);
-				images[i].doTransition();
+				if(!myContainer.contains(images[i])){
+					myContainer.addChild(images[i]);
+				}
+				TweenMax.delayedCall(i * .2, images[i].doTransition);
+				//images[i].doTransition();
 			}
 			for (i = 0; i < texts.length; i++) {
-				myContainer.addChild(texts[i]);
+				if(!myContainer.contains(texts[i])){
+					myContainer.addChild(texts[i]);
+				}
+				TweenMax.delayedCall(1 + i * .2, texts[i].doTransition);
 				//texts[i].doTransition();
 			}
 		}

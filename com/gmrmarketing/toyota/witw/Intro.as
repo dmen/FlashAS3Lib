@@ -8,7 +8,7 @@ package com.gmrmarketing.toyota.witw
 	
 	public class Intro extends EventDispatcher
 	{
-		public static const FINISHED:String = "finished";//dispatched when the hide sequence is done
+		public static const FINISHED_HIDING:String = "finishedHiding";//dispatched when the hide sequence is done
 		private var myContainer:DisplayObjectContainer;
 		private var clip:MovieClip;
 		private var pics:Array;
@@ -102,7 +102,7 @@ package com.gmrmarketing.toyota.witw
 				clip.addChild(picContainer);
 			}
 			
-			clip.legal.alpha = 1;
+			clip.legal.alpha = 0;
 			clip.bgLines.alpha = 0; //red/gray line at top/bottom
 			clip.bgLines.scaleY = .1;
 			clip.logo.alpha = 0;//witw logo @ upper right
@@ -110,8 +110,16 @@ package com.gmrmarketing.toyota.witw
 			clip.border.alpha = 0;//hLines above and below the images
 			clip.border.scaleY = .1;
 			clip.visit.y = 700;//lands at 760
-			clip.header.x = 1920;
 			
+			clip.header.x = 1920;
+			clip.header.alpha = 1;
+			
+			clip.discover.alpha = 1;
+			clip.give.alpha = 1;
+			clip.optin.alpha = 1;
+			clip.discover.scaleX = clip.discover.scaleY = 1;
+			clip.give.scaleX = clip.give.scaleY = 1;
+			clip.optin.scaleX = clip.optin.scaleY = 1;
 			clip.discover.x = 2120;			
 			clip.give.x = 2120;
 			clip.optin.x = 2120;
@@ -124,7 +132,7 @@ package com.gmrmarketing.toyota.witw
 			clip.optin.icon.alpha = 0;
 			
 			TweenMax.to(clip.header, .6, { x:57, delay:.3, ease:Back.easeOut } );
-			TweenMax.to(clip.logo, .5, { alpha:1, delay:1.2 } );
+			TweenMax.to(clip.logo, 1, { alpha:1, delay:1.2 } );
 			
 			TweenMax.to(clip.visit, .75, { y:760, alpha:1, delay:1.8, ease:Back.easeOut } );
 			
@@ -135,10 +143,11 @@ package com.gmrmarketing.toyota.witw
 			TweenMax.to(clip.give.icon, .4, { scaleX:1, scaleY:1, alpha:1, delay:2.9, ease:Bounce.easeOut } );
 			
 			TweenMax.to(clip.optin, .3, { x:1470, delay:3.2, ease:Back.easeOut } );			
-			TweenMax.to(clip.optin.icon, .4, { scaleX:1, scaleY:1, alpha:1, delay:3.4, ease:Bounce.easeOut, onComplete:addPic } );
+			TweenMax.to(clip.optin.icon, .4, { scaleX:1, scaleY:1, alpha:1, delay:3.6, ease:Bounce.easeOut, onComplete:addPic } );
 			
 			TweenMax.to(clip.border, 1, { alpha:1, scaleY:1, delay:3.5, ease:Back.easeOut } );
 			TweenMax.to(clip.bgLines, 1, { alpha:1, scaleY:1, delay:3.7, ease:Back.easeOut } );
+			TweenMax.to(clip.legal, 1, { alpha:1, delay:3.8 } );
 		}
 		
 		
@@ -218,7 +227,7 @@ package com.gmrmarketing.toyota.witw
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
 			}
-			dispatchEvent(new Event(FINISHED));
+			dispatchEvent(new Event(FINISHED_HIDING));
 		}
 		
 	}

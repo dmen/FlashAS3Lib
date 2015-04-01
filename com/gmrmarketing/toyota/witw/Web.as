@@ -3,13 +3,18 @@ package com.gmrmarketing.toyota.witw
 	import flash.events.*;
 	import flash.geom.Matrix;
 	import flash.net.*;
-	import flash.display.*;
+	import flash.display.*;	
+	import com.gmrmarketing.utilities.Strings;
+	import com.gmrmarketing.utilities.SwearFilter;
 	
 	
 	public class Web extends EventDispatcher
 	{
 		public static const REFRESH_COMPLETE:String = "refreshComplete";
-		private const MAX_ITEMS:int = 44;//max number of images or messages loaded each refresh
+		
+		private const MAX_IMAGES:int = 44;//max number of images loaded each refresh (11 image areas)
+		private const MAX_MESSAGES:int = 50;//max number of messages per refresh (10 image areas)
+		
 		private var loadList:Array;//list of images being loaded
 		private var allImages:Array;//array of Bitmaps
 		private var allMessages:Array;//array of objects containing message,user properties
@@ -43,13 +48,14 @@ package com.gmrmarketing.toyota.witw
 		
 		
 		/**
-		 * Refeshes the messages and images 
+		 * Refeshes the messages and images
+		 * called from constructor and Social.hide()
 		 * Dispatches REFRESH_COMPLETE when finished
 		 */
 		public function refresh():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://wall.thesocialtab.net/SocialPosts/GetPosts?ProgramID=66");
+			var r:URLRequest = new URLRequest("http://wall.thesocialtab.net/SocialPosts/GetPosts?ProgramID=66&count=50");
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, messagesLoaded, false, 0, true);
@@ -66,29 +72,59 @@ package com.gmrmarketing.toyota.witw
 		{
 			var o:Object = JSON.parse(e.currentTarget.data);
 			var posts:Array = o.SocialPosts;
-			var n:int = Math.min(MAX_ITEMS, posts.length);			
+			var n:int = Math.min(MAX_MESSAGES, posts.length);			
 			
+			var m:String;
 			for (var i:int = 0; i < n; i++) {
-				allMessages.push({message:posts[i].Text, user:posts[i].AuthorName});
-				if (allMessages.length > MAX_ITEMS) {
+				
+				m = posts[i].Text;
+				
+				m = m.replace(/&lt;/g, "<");
+				m = m.replace(/&gt;/g, "<");
+				m = m.replace(/&amp;/g, "&");
+				while (m.indexOf("http://") != -1){
+					m = Strings.removeChunk(m, "http://");
+				}
+				while (m.indexOf("https://") != -1){
+					m = Strings.removeChunk(m, "https://");
+				}
+				m = SwearFilter.cleanString(m); //remove any major swears	
+				
+				allMessages.push({message:m, user:posts[i].AuthorName});
+				if (allMessages.length > MAX_MESSAGES) {
 					allMessages.shift();
 				}
 			}
 			
+			allMessages.sort(aSort);//sort by message length	
 			refreshImageList();
 		}
 		
 		
-		/////// IMAGES
-			
+		//custom sort function used in array.sort above
+		private function aSort(a:Object, b:Object):int
+		{
+			if (a.message.length > b.message.length) {
+				return -1;
+			}else {
+				return 1;
+			}
+		}
+		
+		
+		
+		/////// IMAGES		
+		/**
+		 * called from messagesLoaded() starts the newest list of images downloading
+		 */
 		public function refreshImageList():void
 		{
 			var hdr:URLRequestHeader = new URLRequestHeader("Accept", "application/json");
-			var r:URLRequest = new URLRequest("http://wall.thesocialtab.net/SocialPosts/GetPosts?ProgramID=66&onlyimages=true");
+			var r:URLRequest = new URLRequest("http://wall.thesocialtab.net/SocialPosts/GetPosts?ProgramID=66&onlyimages=true&count=50");
 			r.requestHeaders.push(hdr);
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, imageListLoaded, false, 0, true);
-			l.addEventListener(IOErrorEvent.IO_ERROR, dataError, false, 0, true);
+			l.addEventListener(IOErrorEvent.IO_ERROR, imageDataError, false, 0, true);
 			try{
 				l.load(r);
 			}catch (e:Error) {
@@ -102,7 +138,7 @@ package com.gmrmarketing.toyota.witw
 			var o:Object = JSON.parse(e.currentTarget.data);
 			var posts:Array = o.SocialPosts;
 			loadList = [];		
-			var n:int = Math.min(MAX_ITEMS, posts.length);	
+			var n:int = Math.min(MAX_IMAGES, posts.length);	
 			for (var i:int = 0; i < n; i++) {
 				loadList.push({url:posts[i].MediumResURL, user:posts[i].AuthorName, source:posts[i].Source});
 			}			
@@ -128,7 +164,8 @@ package com.gmrmarketing.toyota.witw
 		
 		private function imageLoaded(e:Event):void
 		{	
-			var bmp:Bitmap = Bitmap(e.target.content);		
+			var bmp:Bitmap = Bitmap(e.target.content);
+			bmp.smoothing = true;
 			var bmd:BitmapData = new BitmapData(245, 245, false, 0x000000);	
 			
 			var r:Number = Math.min(245 / bmp.width, 245 / bmp.height);			
@@ -151,7 +188,7 @@ package com.gmrmarketing.toyota.witw
 			allImages.push(bit);
 			
 			//trim image list to max length
-			if (allImages.length > MAX_ITEMS) {
+			if (allImages.length > MAX_IMAGES) {
 				allImages.shift();
 			}
 			
@@ -159,14 +196,32 @@ package com.gmrmarketing.toyota.witw
 		}
 		
 		
+		/**
+		 * Called if an error occurs downloading the image
+		 * @param	e
+		 */
 		private function imageError(e:IOErrorEvent):void
 		{
 			loadNextImage();
 		}
 		
 		
+		/**
+		 * Called if an IO error occurs getting the message list
+		 * @param	e
+		 */
 		private function dataError(e:IOErrorEvent):void	
 		{
+			refreshImageList();
+		}
+		
+		/**
+		 * Called if an IO error occurs getting the image list
+		 * @param	e
+		 */
+		private function imageDataError(e:IOErrorEvent):void
+		{
+			
 		}
 		
 	}

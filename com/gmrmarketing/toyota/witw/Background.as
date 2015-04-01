@@ -1,3 +1,7 @@
+/**
+ * Circles moving in the background
+ * with distance-based connecting lines
+ */
 package com.gmrmarketing.toyota.witw
 {
 	import com.gmrmarketing.testing.Circle;

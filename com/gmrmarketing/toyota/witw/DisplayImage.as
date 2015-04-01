@@ -3,6 +3,7 @@ package com.gmrmarketing.toyota.witw
 	import flash.display.*;
 	import flash.events.*;	
 	import com.greensock.TweenMax;
+	import com.greensock.easing.*;
 	
 	
 	public class DisplayImage extends Sprite 
@@ -30,10 +31,34 @@ package com.gmrmarketing.toyota.witw
 		}
 		
 		
-		
 		public function addImage(i:Bitmap):void
 		{
 			myImages.push(i);
+		}
+		
+		
+		public function hide():void
+		{		
+			if (numChildren > 2) {
+				removeChildAt(0);
+			}
+			getChildAt(0).x = 0;
+			getChildAt(0).y = 0;
+			
+			if(numChildren > 1){			
+				TweenMax.to(getChildAt(0), 1, { alpha:0, delay:Math.random(), onComplete:reset } );
+			}
+		}
+		
+		
+		private function reset():void
+		{
+			myImages = [];
+			currentIndex = 0;
+			
+			while (numChildren > 1) {
+				removeChildAt(0);
+			}
 		}
 		
 		
