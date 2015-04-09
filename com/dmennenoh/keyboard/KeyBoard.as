@@ -47,6 +47,7 @@ package com.dmennenoh.keyboard
 		public static const KBD:String = "KBD_KEY_PRESSED"; //Dispatched anytime any key is pressed
 		public static const SUBMIT:String = "SUBMIT_PRESSED"; //Special - dispatched only when a key with the value Submit or Send is pressed
 		public static const KEYFILE_LOADED:String = "keyFileLoaded"; //Dispatched when keyFileLoaded() is called, ie when loadKeyFile() is used
+		public static const FOCUS_CHANGE:String = "focusChanged";
 		
 		private const IS_ANDROID:Boolean = false; //if true hacks are employed to deselect the text fields...
 		
@@ -60,7 +61,7 @@ package com.dmennenoh.keyboard
 		
 		private var numbers:Array;//for checking restrict
 		private var focusFields:Array; //array of fields to keep focus on - set in setFocusFields()		
-		private var focusTimer:Timer; //calls autoFocus every 100ms
+		//private var focusTimer:Timer; //calls autoFocus every 100ms
 		
 		private var num:int; //just a predefined int for use in for loops
 		private var keyboardFont:Font; //Font object for using embedded fonts
@@ -71,14 +72,16 @@ package com.dmennenoh.keyboard
 		private var enabled:Boolean; //true if the kbd is enabled - true by default - checked in keypress()
 		
 		private var lastKey:Key; //reference to the last Key object pressed
+		private var programmaticTab:Boolean = false;
+		
 		/**
 		 * Constructor
 		 */
 		public function KeyBoard()
 		{
 			numbers = new Array("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-			focusTimer = new Timer(100);
-			focusTimer.addEventListener(TimerEvent.TIMER, autoFocus, false, 0, true);
+			//focusTimer = new Timer(100);
+			//focusTimer.addEventListener(TimerEvent.TIMER, autoFocus, false, 0, true);
 			keyContainer = new Sprite();
 			bgContainer = new Sprite();			
 			enabled = true;
@@ -138,18 +141,45 @@ package com.dmennenoh.keyboard
 		 * 
 		 * @param	fields Array of TextField objects
 		 */
-		public function setFocusFields(fields:Array):void
+		public function setFocusFields(fields:Array, setFocus:Boolean = true):void
 		{
-			focusFields = fields;
-			targetField = focusFields[0];
-			if(stage){
-				stage.focus = targetField;
-			}
+			focusFields = fields;			
 			
-			focusTimer.start();
+			targetField = focusFields[0];
+			
+			if(setFocus){
+				if(stage){
+					stage.focus = targetField;
+					//focusTimer.start();
+				}
+			}
+			for (var i:int = 0; i < focusFields.length; i++) {
+				targetField = focusFields[i];
+				targetField.addEventListener(FocusEvent.FOCUS_IN, changeFocusFromPress, false, 0, true);
+			}
+		}
+		
+		/**
+		 * Called anytime one of the focus fields gets a FOCUS_IN event
+		 * This can be from press, or from just setting the focus programmatically
+		 * via tabToNextField()
+		 * @param	e
+		 */
+		private function changeFocusFromPress(e:FocusEvent):void
+		{
+			targetField = TextField(e.currentTarget);
+			if(!programmaticTab){
+				dispatchEvent(new Event(FOCUS_CHANGE));
+			}
+			programmaticTab = false;
 		}
 		
 		
+		public function getFocus():TextField
+		{
+			return targetField;
+		}
+		/*
 		public function setFocus(ind:int, tx:int, ty:int):void
 		{
 			
@@ -163,37 +193,9 @@ package com.dmennenoh.keyboard
 			}else {
 				targetField.setSelection(i, i);
 			}
-		}
-		
-		
-		/**
-		 * Shows the keyboard sprite and starts the focus timer
-		 */
-		public function show():void
-		{			
-			if (parent) {
-				if (!parent.contains(this)) {					
-					parent.addChild(this);
-				}
-			}
-			focusTimer.start();
-		}
-		
-		
-		/**
-		 * Hides the keyboard sprite and stops the focus timer
-		 */
-		public function hide():void
-		{			
-			if (parent) {
-				if (parent.contains(this)) {
-					parent.removeChild(this);
-				}
-			}
-			focusTimer.stop();
 		}		
-		
-		
+
+		*/
 		/**
 		 * Returns the string of the last key pressed
 		 * Dependent on the shift value
@@ -270,6 +272,7 @@ package com.dmennenoh.keyboard
 		 * last targetField then targetField is set to stage.focus
 		 * @param	e
 		 */
+		/*
 		private function autoFocus(e:TimerEvent):void
 		{
 			if(stage){
@@ -289,17 +292,18 @@ package com.dmennenoh.keyboard
 				}
 			}
 		}		
+		*/
 		
-		
-		private function tabToNextField():void
+		public function tabToNextField():void
 		{
+			programmaticTab = true;
 			var curInd:int = focusFields.indexOf(targetField);
 			curInd++;
 			if (curInd >= focusFields.length) {
 				curInd = 0;
 			}
 			targetField = focusFields[curInd];
-			stage.focus = targetField;
+			stage.focus = targetField;//field will dispatch a focusIn - caught by changeFocusFromPress()
 		}
 		
 		

@@ -18,6 +18,8 @@ package com.gmrmarketing.toyota.witw
 		private var social:Social;
 		private var startTime:Number;//epoch time when intro starts
 		
+		private var handleManager:HandleManager;//the grouping of handles in the middle of the social wall
+		
 		
 		public function Main()
 		{
@@ -35,6 +37,10 @@ package com.gmrmarketing.toyota.witw
 			
 			intro = new Intro();
 			intro.container = this;
+			
+			handleManager = new HandleManager();
+			handleManager.container = this;
+			handleManager.defaults();
 			
 			init();
 		}
@@ -73,6 +79,7 @@ package com.gmrmarketing.toyota.witw
 		{
 			intro.removeEventListener(Intro.FINISHED_HIDING, showWall);
 			social.show();
+			handleManager.show();
 			TweenMax.delayedCall(WALL_TIME, hideWall);
 		}
 		

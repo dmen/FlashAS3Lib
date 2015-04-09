@@ -1,3 +1,7 @@
+/**
+ * Single image on the social wall
+ * Instantiated by Social.as
+ */
 package com.gmrmarketing.toyota.witw
 {
 	import flash.display.*;
