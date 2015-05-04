@@ -23,6 +23,9 @@ package com.gmrmarketing.miller.stc
 		private var results:Results; //win-no win screen
 		private var tapToBegin:TapToBegin;//very first screen
 		
+		private var dataPost:DataPost;//for sending data to the service
+		
+		
 		public function Main()
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
@@ -63,6 +66,8 @@ package com.gmrmarketing.miller.stc
 			tapToBegin = new TapToBegin();
 			tapToBegin.container = mainContainer;
 			
+			dataPost = new DataPost();
+			
 			init();
 		}
 		
@@ -90,7 +95,7 @@ package com.gmrmarketing.miller.stc
 		private function showDataEntry(e:Event):void
 		{
 			introLogo.removeEventListener(Intro.FINISHED, showDataEntry);
-			TweenMax.to(logoContainer, 1, { scaleX:.485, scaleY:.485, x:555, y:20, delay:.5 } );
+			TweenMax.to(logoContainer, 1, { scaleX:.475, scaleY:.475, x:555, y:-55, delay:.5 } );
 			
 			TweenMax.delayedCall(1, data.show);
 			data.addEventListener(DataEntry.COMPLETE, choosePassion);
@@ -142,6 +147,7 @@ package com.gmrmarketing.miller.stc
 			challenge.hide();
 			
 			results.show(challenge.clicked, passionSelect.passion);//l or r, sports or music
+			dataPost.post(challenge.clicked, passionSelect.passion, data.entryData);
 			TweenMax.delayedCall(1, showLogoOnPhone);
 		}
 		

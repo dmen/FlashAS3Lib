@@ -1,7 +1,11 @@
+/**
+ * used by Social.as
+ */
 package com.gmrmarketing.toyota.witw
 {
 	import flash.events.*;
 	import flash.geom.Matrix;
+	import flash.geom.Rectangle;
 	import flash.net.*;
 	import flash.display.*;	
 	import com.gmrmarketing.utilities.Strings;
@@ -166,11 +170,18 @@ package com.gmrmarketing.toyota.witw
 		{	
 			var bmp:Bitmap = Bitmap(e.target.content);
 			bmp.smoothing = true;
-			var bmd:BitmapData = new BitmapData(245, 245, false, 0x000000);	
+			
+			var bmd:BitmapData = new BitmapData(245, 245, false, 0x58595B);	
 			
 			var r:Number = Math.min(245 / bmp.width, 245 / bmp.height);			
 			var mat:Matrix = new Matrix();
 			mat.scale(r, r);
+			
+			//get final image size to use for centering
+			//var bmpw:int = Math.floor(bmp.width * r);
+			//var bmph:int = Math.floor(bmp.height * r);
+			//center image in the space
+			//mat.translate(Math.floor((245 - bmpw) * .5), Math.floor((245 - bmph) * .5));
 			
 			bmd.draw(bmp, mat, null, null, null, true);			
 			
@@ -191,7 +202,6 @@ package com.gmrmarketing.toyota.witw
 			if (allImages.length > MAX_IMAGES) {
 				allImages.shift();
 			}
-			
 			loadNextImage();
 		}
 		

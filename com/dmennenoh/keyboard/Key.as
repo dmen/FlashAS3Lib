@@ -206,7 +206,9 @@ package com.dmennenoh.keyboard
 		 * @param	e
 		 */
 		private function keyPressed(e:MouseEvent):void
-		{			
+		{		
+		//e.stopPropagation();
+			
 			highlight.alpha = highlightAlpha;
 			if(val != "Shift"){
 				TweenLite.to(highlight, .5, { alpha:0 } );

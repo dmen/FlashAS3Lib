@@ -21,7 +21,7 @@ package com.gmrmarketing.toyota.witw
 		public function Background()
 		{			
 			circles = [];			
-			for(var i:int = 0; i < 100; i++){
+			for(var i:int = 0; i < 70; i++){
 				var c:Circle = new Circle(true);//debug - show circle
 				circles.push(c);
 				c.x = Math.random() * 1920;
@@ -37,15 +37,16 @@ package com.gmrmarketing.toyota.witw
 
 		private function updateBG(e:Event):void
 		{
-			g.clear();	
-			for(var i:int = 0; i < circles.length; i++){
+			g.clear();
+			
+			for(var i:int = 0; i < 70; i++){
 				c = circles[i];
-				for(var j:int = 0; j < circles.length; j++){
+				for(var j:int = 0; j< 70; j++){
 					d = circles[j];
-					dist = Math.sqrt(((c.x - d.x)*(c.x - d.x)) + ((c.y - d.y)*(c.y - d.y)));			
+					dist = ((c.x - d.x)*(c.x - d.x)) + ((c.y - d.y)*(c.y - d.y));	//distance squared - remove Math.sqrt() for speed ~20% faster
 								
-					if(dist < 200){
-						g.lineStyle(1, 0xD71B23, (200 - dist)/200);
+					if(dist < 40000){
+						g.lineStyle(1, 0xD71B23, (40000 - dist)/40000);
 						g.moveTo(c.x, c.y);
 						g.lineTo(d.x, d.y);
 					}					

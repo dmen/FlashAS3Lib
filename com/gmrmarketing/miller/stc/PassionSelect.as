@@ -61,6 +61,10 @@ package com.gmrmarketing.miller.stc
 			}
 		}
 		
+		
+		/**
+		 * returns music or sports
+		 */
 		public function get passion():String
 		{
 			return myPassion;

@@ -44,10 +44,10 @@ package com.gmrmarketing.testing
 			x += xVel;
 			y += yVel;
 			
-			if (x < 0 || x > stage.stageWidth) {
+			if (x < 0 || x > 1920) {
 				xVel *= -1;
 			}
-			if (y < 0 || y > stage.stageHeight) {
+			if (y < 0 || y > 1080) {
 				yVel *= -1;
 			}
 		}

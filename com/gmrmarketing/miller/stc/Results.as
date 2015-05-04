@@ -45,11 +45,7 @@ package com.gmrmarketing.miller.stc
 			}else {
 				//win
 				clip.theTitle.gotoAndStop(1);
-				if (passion == "sports") {
-					clip.theTitle.theText.text = "10 MORE ENTRIES FOR\nFANTASY FOOTBALL SUITE";
-				}else {
-					clip.theTitle.theText.text = "10 MORE ENTRIES FOR\nLUKE BRYAN ALL ACCESS";
-				}
+				//clip.theTitle.theText.text = "You have great taste. Have one on us.";
 			}
 			
 			TweenMax.to(clip.miller, .5, { scaleY:1, ease:Back.easeOut } );

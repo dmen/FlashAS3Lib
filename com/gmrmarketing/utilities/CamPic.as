@@ -65,7 +65,7 @@ package com.gmrmarketing.utilities
 		
 		private var camAvailable:Boolean;		
 		private var filters:Array; //array of filters from the CamPicFilters class
-		
+		private var overlays:Array;//array of arrays - containing bitmapData and point to draw at
 		
 		
 		/**
@@ -75,7 +75,8 @@ package com.gmrmarketing.utilities
 		{			
 			cam = Camera.getCamera();
 			camAvailable = cam == null ? false : true;				
-			clearFilters();			
+			clearFilters();
+			clearOverlays();
 		}
 		
 		
@@ -191,7 +192,31 @@ package com.gmrmarketing.utilities
 		public function clearFilters():void
 		{
 			filters = new Array();
-		}		
+		}
+		
+		
+		/**
+		 * Adds a new overlay that will be overlayed onto the camera image in update()
+		 * @param	overlay
+		 */
+		public function addOverlay(overlay:BitmapData, loc:Point):void
+		{
+			overlays.push([overlay, loc]);
+		}
+		public function removeOverlay(index:int):void
+		{
+			if (overlays.length >= index) {
+				index--;
+				overlays.splice(index, 1);
+			}
+		}
+		/**
+		 * Removes all overlays
+		 */
+		public function clearOverlays():void
+		{
+			overlays = new Array();
+		}
 		
 		
 		/**
@@ -216,7 +241,7 @@ package com.gmrmarketing.utilities
 		
 		
 		/**
-		 * Starts the timer so that CAMERA_UPDATE events are dispatched
+		 * Starts the timer to call update()
 		 */
 		public function beginUpdating():void
 		{
@@ -365,6 +390,7 @@ package com.gmrmarketing.utilities
 		/**
 		 * Called by Timer event
 		 * Draws the video onto the displayData bitmap object
+		 * 
 		 * Update speed is determined by fps set in init()
 		 * 
 		 * @param	e TIMER TimerEvent
@@ -378,7 +404,9 @@ package com.gmrmarketing.utilities
 			for (var i:int = 0; i < filters.length; i++) {
 				displayData.applyFilter(displayData, r, p, filters[i]);
 			}
-			
+			for (i = 0; i < overlays.length; i++) {
+				displayData.copyPixels(overlays[i][0], new Rectangle(0, 0, BitmapData(overlays[i][0]).width, BitmapData(overlays[i][0]).height), overlays[i][1], null, null, true);
+			}
 			dispatchEvent(new Event(CAMERA_UPDATE));
 		}		
 		

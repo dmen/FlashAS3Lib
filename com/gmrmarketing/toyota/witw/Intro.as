@@ -24,7 +24,7 @@ package com.gmrmarketing.toyota.witw
 			picContainer.y = 249;
 			
 			clip = new intro();//lib
-			picOrder = [0, 2, 1, 3, 4, 6, 5, 7];
+			picOrder = [0, 2, 1, 3, 4, 6, 5, 7, 8, 10, 9, 11];
 			picIndex = 0;
 			
 			pics = [];
@@ -68,6 +68,26 @@ package com.gmrmarketing.toyota.witw
 			a.x = 1470;
 			a.alpha = 0;
 			pics.push(a);
+			
+			//
+			a = new Bitmap(new p9());			
+			a.alpha = 0;
+			pics.push(a);
+			
+			a = new Bitmap(new p10());
+			a.x = 490;
+			a.alpha = 0;
+			pics.push(a);
+			
+			a = new Bitmap(new p11());
+			a.x = 980;
+			a.alpha = 0;
+			pics.push(a);
+			
+			a = new Bitmap(new p12());
+			a.x = 1470;
+			a.alpha = 0;
+			pics.push(a);
 		}
 		
 		
@@ -90,6 +110,7 @@ package com.gmrmarketing.toyota.witw
 		public function show():void
 		{
 			finished = false;
+			picIndex = 0;
 			
 			while (picContainer.numChildren) {
 				picContainer.removeChildAt(0);
@@ -136,14 +157,14 @@ package com.gmrmarketing.toyota.witw
 			
 			TweenMax.to(clip.visit, .75, { y:760, alpha:1, delay:1.8, ease:Back.easeOut } );
 			
-			TweenMax.to(clip.discover, .5, { x:319, delay:2, ease:Back.easeOut } );
+			TweenMax.to(clip.discover, .5, { x:302, delay:2, ease:Back.easeOut } );
 			TweenMax.to(clip.discover.icon, .4, { scaleX:1, scaleY:1, alpha:1, delay:2.4, ease:Bounce.easeOut } );
 			
-			TweenMax.to(clip.give, .4, { x:879, delay:2.6, ease:Back.easeOut } );
+			TweenMax.to(clip.give, .4, { x:915, delay:2.6, ease:Back.easeOut } );
 			TweenMax.to(clip.give.icon, .4, { scaleX:1, scaleY:1, alpha:1, delay:2.9, ease:Bounce.easeOut } );
 			
-			TweenMax.to(clip.optin, .3, { x:1470, delay:3.2, ease:Back.easeOut } );			
-			TweenMax.to(clip.optin.icon, .4, { scaleX:1, scaleY:1, alpha:1, delay:3.6, ease:Bounce.easeOut, onComplete:addPic } );
+			TweenMax.to(clip.optin, .3, { x:1453, delay:3.2, ease:Back.easeOut } );			
+			TweenMax.to(clip.optin.icon, .4, { scaleX:1, scaleY:1, alpha:1, delay:3.5, ease:Bounce.easeOut, onComplete:addPic } );
 			
 			TweenMax.to(clip.border, 1, { alpha:1, scaleY:1, delay:3.5, ease:Back.easeOut } );
 			TweenMax.to(clip.bgLines, 1, { alpha:1, scaleY:1, delay:3.7, ease:Back.easeOut } );
@@ -158,14 +179,14 @@ package com.gmrmarketing.toyota.witw
 			if(!finished){
 				
 				if (picIndex > 3) {
-					//in the second group of images
+					//in the second group of images					
 					p =  pics[picOrder[picIndex - 4]];
 					if (picContainer.contains(p)) {
 						picContainer.removeChild(p);
 					}
 				}else {
 					//picIndex < 3 - first set
-					p = pics[picOrder[picIndex + 4]];
+					p = pics[picOrder[picIndex + 8]];
 					if (picContainer.contains(p)) {
 						picContainer.removeChild(p);
 					}
@@ -184,7 +205,12 @@ package com.gmrmarketing.toyota.witw
 				
 				p.x += 50;
 				p.alpha = 0;
-				TweenMax.to(p, 1, { alpha:1, x:"-50", onComplete:addPic } );
+				if (picIndex == 4 || picIndex == 8 || picIndex == 0) {
+					//just finished a full set
+					TweenMax.to(p, 1, { alpha:1, x:"-50", onComplete:setWait } );
+				}else {
+					TweenMax.to(p, 1, { alpha:1, x:"-50", onComplete:addPic } );
+				}
 				
 			}else {
 				
@@ -192,6 +218,12 @@ package com.gmrmarketing.toyota.witw
 				hideIt();
 				
 			}
+		}
+		
+		
+		private function setWait():void
+		{
+			TweenMax.delayedCall(5, addPic);
 		}
 		
 		

@@ -22,24 +22,30 @@ package com.gmrmarketing.toyota.witw
 		{
 			images = [];
 			images.push(new DisplayImage(43, 168),new DisplayImage(311, 168),new DisplayImage(573, 168),new DisplayImage(1634, 168));
-			images.push(new DisplayImage(308, 434),new DisplayImage(1105, 434),new DisplayImage(1504, 434));
+			images.push(new DisplayImage(308, 434), new DisplayImage(1105, 434), new DisplayImage(1634, 434));
+			//images.push(new DisplayImage(308, 434),new DisplayImage(1105, 434),new DisplayImage(1504, 434));
 			images.push(new DisplayImage(842, 704),new DisplayImage(1107, 704),new DisplayImage(1372, 704),new DisplayImage(1635, 704));
 			
 			texts = [];
 			texts.push(new DisplayText(1103, 168, 509, 245, 0xD71B23, 0xD71B23));//big red one
 			texts.push(new DisplayText(43, 704, 509, 245, 0x58595B, 0x58595B)); //big gray one
 			
+			texts.push(new DisplayText(43, 434, 245, 245, 0xD71B23, 0xffffff));
+			//texts.push(new DisplayText(43, 434, 114, 245, 0xD71B23, 0xffffff));
+			//texts.push(new DisplayText(174, 434, 114, 245, 0x58595B, 0xffffff));
+			texts.push(new DisplayText(1370, 434, 245, 245, 0xD71B23, 0xffffff));
+			//texts.push(new DisplayText(1370, 434, 114, 245, 0xD71B23, 0xffffff));
+			//texts.push(new DisplayText(1764, 434, 114, 245, 0x58595B, 0xffffff));			
+			
+			//texts.push(new DisplayText(839, 168, 245, 245, 0x58595B, 0xffffff));
 			texts.push(new DisplayText(839, 168, 245, 114, 0x58595B, 0xffffff));
 			texts.push(new DisplayText(839, 299, 245, 114, 0xD71B23, 0xffffff));			
 			
-			texts.push(new DisplayText(43, 434, 114, 245, 0xD71B23, 0xffffff));
-			texts.push(new DisplayText(174, 434, 114, 245, 0x58595B, 0xffffff));
-			texts.push(new DisplayText(1370, 434, 114, 245, 0xD71B23, 0xffffff));
-			texts.push(new DisplayText(1764, 434, 114, 245, 0x58595B, 0xffffff));			
 			
+			
+			//texts.push(new DisplayText(574, 704, 245, 245, 0x58595B, 0xffffff));
 			texts.push(new DisplayText(574, 704, 245, 114, 0x58595B, 0xffffff));
 			texts.push(new DisplayText(574, 834, 245, 114, 0xD71B23, 0xffffff));
-			
 			
 			web = new Web();
 			web.addEventListener(Web.REFRESH_COMPLETE, socialReady);
@@ -71,7 +77,8 @@ package com.gmrmarketing.toyota.witw
 			clip.bgLines.scaleY = .1;
 			clip.logo.alpha = 0;
 			clip.visit.alpha = 0;
-			clip.header.alpha = 0;	
+			clip.header.alpha = 0;
+			clip.follow.scaleX = 0;
 			
 			var i:int;
 			var displayIndex:int;
@@ -96,7 +103,7 @@ package com.gmrmarketing.toyota.witw
 					displayIndex = 0;
 				}
 			}
-			
+			TweenMax.to(clip.follow, .5, { scaleX:1, alpha:1, ease:Back.easeOut, delay:1 } );
 			TweenMax.to(clip.bgLines, 1, { alpha:1, scaleY:1, ease:Back.easeOut } );
 			TweenMax.to(clip.logo, 1, { alpha:1, delay:1} );
 			clip.visit.x += 100;
@@ -116,11 +123,12 @@ package com.gmrmarketing.toyota.witw
 			for (i = 0; i < images.length; i++) {				
 				images[i].hide();
 			}
-			for (i = 0; i < texts.length; i++) {				
+			for (i = 0; i < texts.length; i++) {
 				texts[i].hide();
 			}
 			
 			TweenMax.to(clip.header, 1, { alpha:0, delay:2 } );
+			TweenMax.to(clip.follow, 1, { alpha:0, delay:.5 } );
 			TweenMax.to(clip.logo, 1, { alpha:0, delay:2.2 } );
 			TweenMax.to(clip.visit, 1, { alpha:0, delay:2.3 } );
 			
@@ -130,6 +138,9 @@ package com.gmrmarketing.toyota.witw
 		
 		private function finished():void
 		{
+			if (myContainer.contains(clip)) {
+				myContainer.removeChild(clip);
+			}
 			dispatchEvent(new Event(FINISHED_HIDING));
 		}
 		

@@ -102,6 +102,23 @@ package com.gmrmarketing.utilities
 			}
 		}
 		
+		/**
+		 * Sends the String to SerProxy
+		 *
+		 * //writes "Hello World!" with a carriage return at the end
+		 * var b:String = "Hello World!" + String.fromCharCode(13);  
+		 * 
+		 * @param	str String
+		 */
+		public function sendUtf(str:String):void
+		{
+			try{
+				socket.writeUTFBytes(str);
+				socket.flush();  
+			}catch (e:Error) {
+				log("Serproxy.sendUtf - Catch error - cannot send: " + e.errorID);
+			}
+		}
 		
 		public function getLogMessage():String
 		{

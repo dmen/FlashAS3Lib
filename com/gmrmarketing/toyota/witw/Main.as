@@ -19,7 +19,7 @@ package com.gmrmarketing.toyota.witw
 		private var startTime:Number;//epoch time when intro starts
 		
 		private var handleManager:HandleManager;//the grouping of handles in the middle of the social wall
-		
+		private var handleContainer:Sprite;
 		
 		public function Main()
 		{
@@ -29,7 +29,7 @@ package com.gmrmarketing.toyota.witw
 			
 			bg = new Background();
 			addChild(bg);
-			bg.alpha = .2;
+			bg.alpha = .35;
 			
 			social = new Social();
 			social.addEventListener(Social.READY, socialReady);
@@ -38,8 +38,10 @@ package com.gmrmarketing.toyota.witw
 			intro = new Intro();
 			intro.container = this;
 			
+			handleContainer = new Sprite();
+			addChild(handleContainer);
 			handleManager = new HandleManager();
-			handleManager.container = this;
+			handleManager.container = handleContainer;
 			handleManager.defaults();
 			
 			init();
@@ -79,7 +81,7 @@ package com.gmrmarketing.toyota.witw
 		{
 			intro.removeEventListener(Intro.FINISHED_HIDING, showWall);
 			social.show();
-			handleManager.show();
+			TweenMax.delayedCall(1, handleManager.show);
 			TweenMax.delayedCall(WALL_TIME, hideWall);
 		}
 		
@@ -87,7 +89,8 @@ package com.gmrmarketing.toyota.witw
 		private function hideWall():void
 		{
 			social.addEventListener(Social.FINISHED_HIDING, restart);
-			social.hide();
+			social.hide();//does a TweenMax.killAll()
+			handleManager.hide();
 		}
 		
 		
