@@ -30,14 +30,15 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			if (!myContainer.contains(clip)) {
 				myContainer.addChildAt(clip,2);//add in front of camPic
 			}
-			clip.alpha = 0;
-			clip.c3.alpha = .3;
+			//clip.alpha = 1;
+			clip.c3.alpha = 0;
 			clip.c2.alpha = 0;
 			clip.c1.alpha = 0;
 			clip.x = 960;
 			clip.y = 626;
-			clip.scaleX = clip.scaleY = 0;
-			TweenMax.to(clip, .75, { alpha:1, scaleX:1, scaleY:1, ease:Back.easeOut, onComplete:startCountdown } );
+			//clip.scaleX = clip.scaleY = 0;
+			//TweenMax.to(clip, .75, { alpha:1, scaleX:1, scaleY:1, ease:Back.easeOut, onComplete:startCountdown } );
+			startCountdown();
 		}
 		
 		
