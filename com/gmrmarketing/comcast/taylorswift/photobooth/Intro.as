@@ -32,8 +32,11 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			}			
 			clip.addEventListener(Event.ENTER_FRAME, updateGlow);
 			clip.addEventListener(MouseEvent.MOUSE_DOWN, touched);
-			
-			clip.alpha = 0;
+			/*
+			clip.circ.alpha = 1;
+			clip.circ.scaleX = clip.circ.scaleY = .5;
+			*/
+			clip.alpha = 0;			
 			TweenMax.to(clip, 1, { alpha:1, onComplete:showing } );
 		}
 		
@@ -62,6 +65,16 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		
 		private function updateGlow(e:Event):void
 		{
+			/*
+			clip.circ.scaleX += .05;
+			clip.circ.scaleY += .05;
+			clip.circ.alpha -= .03;
+			
+			if (clip.circ.alpha <= 0) {
+				clip.circ.alpha = 1;
+				clip.circ.scaleX = clip.circ.scaleY = .5;
+			}
+			*/
 			TweenMax.to(clip.xfin, 0, { glowFilter: { color:0x33ccff, alpha:.2 + Math.random()*.8, blurX:5, blurY:5 } } );
 			TweenMax.to(clip.year, 0, { glowFilter: { color:0xff9999, alpha:.2 + Math.random()*.8, blurX:5, blurY:5 } } );
 		}

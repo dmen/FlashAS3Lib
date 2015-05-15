@@ -4,6 +4,8 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 	import flash.events.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
+	import com.gmrmarketing.utilities.TimeoutHelper;
+	
 	
 	public class Thanks extends EventDispatcher
 	{
@@ -11,11 +13,12 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		public static const COMPLETE:String = "thanksComplete";
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
-		
+		private var tim:TimeoutHelper;
 		
 		public function Thanks()
 		{
 			clip = new mcThanks();
+			tim = TimeoutHelper.getInstance();
 		}
 		
 		
@@ -33,8 +36,10 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			
 			if (email) {
 				clip.theText.text = "Your photo has printed and will be\nemailed to you shortly!";
+				clip.exit.y = 612;
 			}else {
-				clip.theText.text = "Your photo has printed";
+				clip.theText.text = "Your photo has printed.";
+				clip.exit.y = 532;
 			}
 			
 			clip.alpha = 0;
@@ -53,15 +58,15 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		
 		private function showing():void
 		{
-			clip.addEventListener(Event.ENTER_FRAME, updateGlow);
-			clip.addEventListener(MouseEvent.MOUSE_DOWN, thanksComplete);
+			clip.addEventListener(Event.ENTER_FRAME, updateGlow);			
 			dispatchEvent(new Event(SHOWING));
+			TweenMax.delayedCall(10, thanksComplete);
 		}
 		
 		
-		private function thanksComplete(e:MouseEvent):void
+		private function thanksComplete():void
 		{
-			clip.removeEventListener(MouseEvent.MOUSE_DOWN, thanksComplete);
+			tim.buttonClicked();			
 			dispatchEvent(new Event(COMPLETE));
 		}
 		

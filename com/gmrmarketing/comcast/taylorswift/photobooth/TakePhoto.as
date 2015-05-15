@@ -7,7 +7,8 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 	import com.gmrmarketing.utilities.CamPic;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
-	import com.gmrmarketing.esurance.sxsw_2015.photobooth.WhiteFlash;	
+	import com.gmrmarketing.esurance.sxsw_2015.photobooth.WhiteFlash;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	
 	public class TakePhoto extends EventDispatcher
@@ -26,6 +27,8 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		private var preview:Bitmap;
 		private var previewShadow:DropShadowFilter;
 		
+		private var tim:TimeoutHelper;
+		
 		
 		
 		public function TakePhoto():void
@@ -41,6 +44,8 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			
 			countdown = new Countdown();
 			countdown.container = clip;
+			
+			tim = TimeoutHelper.getInstance();
 			
 			previewData = new previewHolders();//library bmd
 			previewShadow = new DropShadowFilter(0, 0, 0, 1, 5, 5, 1, 2);
@@ -70,7 +75,10 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			clip.picNum.alpha = 0;
 			clip.picNum.p1.gotoAndStop(1);
 			clip.picNum.p2.gotoAndStop(1);
-			clip.picNum.p3.gotoAndStop(1);
+			clip.picNum.p3.gotoAndStop(1);			
+			
+			clip.roundRect.y = 828;
+			clip.roundRect.theText.text = "";
 			
 			clip.alpha = 0;
 			TweenMax.to(clip, 1, { alpha:1, onComplete:showing } );
@@ -106,6 +114,10 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			clip.addEventListener(Event.ENTER_FRAME, updateGlow);
 			TweenMax.to(clip.btnTake, .6, { scaleX:1, scaleY:1, ease:Back.easeOut } );
 			TweenMax.to(clip.picNum, .6, { alpha:1, delay:.6 } );
+			
+			clip.roundRect.theText.text = "POSE FOR PHOTO";
+			TweenMax.to(clip.roundRect, .5, { y:888 } );//pose for photo
+			
 			clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, takePressed);
 			threePhotos = [];
 			dispatchEvent(new Event(SHOWING));
@@ -121,6 +133,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		
 		private function takePressed(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, takePressed);
 			clip.btnTake.alpha = .3;
 			clip.picNum.p1.gotoAndStop(2);//show pink circle in pos 1
@@ -184,7 +197,14 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 				clip.btnCancel.addEventListener(MouseEvent.MOUSE_DOWN, cancelPressed);
 				clip.btnRetake.addEventListener(MouseEvent.MOUSE_DOWN, retakePressed);
 				clip.btnPrint.addEventListener(MouseEvent.MOUSE_DOWN, printPressed);
+				
+				TweenMax.to(clip.roundRect, .5, { y:828, onComplete:showReviewText } );
 			}
+		}
+		private function showReviewText():void
+		{
+			clip.roundRect.theText.text = "REVIEW PHOTOS";
+			TweenMax.to(clip.roundRect, .5, { y:888 } );
 		}
 		
 		
@@ -196,6 +216,8 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		
 		private function retakePressed(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			clip.btnCancel.removeEventListener(MouseEvent.MOUSE_DOWN, cancelPressed);
 			clip.btnRetake.removeEventListener(MouseEvent.MOUSE_DOWN, retakePressed);
 			clip.btnPrint.removeEventListener(MouseEvent.MOUSE_DOWN, printPressed);
@@ -210,6 +232,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		
 		private function printPressed(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			dispatchEvent(new Event(PRINT));
 		}
 		

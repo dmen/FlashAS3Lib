@@ -7,22 +7,14 @@ package com.gmrmarketing.empirestate.ilny
 	public class Intro extends EventDispatcher
 	{
 		public static const COMPLETE:String = "introComplete";
-		private var clip:MovieClip;
+		private var myClip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		private var imageContainer:Sprite;
-		private var kenBurns:KenBurns;
 		
 		
 		public function Intro()
 		{
-			clip = new mcIntro();
-			
-			imageContainer = new Sprite();
-			clip.addChildAt(imageContainer, 0);//behind the logo
-			
-			kenBurns = new KenBurns();
-			kenBurns.container = imageContainer;
-			kenBurns.images = [new introLoop1(), new introLoop2(), new introLoop3()];
+			myClip = new mcIntro();
 		}
 		
 		
@@ -31,29 +23,32 @@ package com.gmrmarketing.empirestate.ilny
 			myContainer = c;
 		}
 		
+		public function get clip():MovieClip
+		{
+			return myClip;
+		}
 		
 		public function show():void
 		{
-			if (!myContainer.contains(clip)) {
-				myContainer.addChild(clip);
+			if (!myContainer.contains(myClip)) {
+				myContainer.addChild(myClip);
 			}
-			kenBurns.show();
-			clip.redBar.addEventListener(MouseEvent.MOUSE_DOWN, introClicked);
+			
+			myClip.addEventListener(MouseEvent.MOUSE_DOWN, introClicked);
 		}
 		
 		
 		public function hide():void
 		{
-			kenBurns.stop();
-			if (myContainer.contains(clip)) {
-				myContainer.removeChild(clip);
+			if (myContainer.contains(myClip)) {
+				myContainer.removeChild(myClip);
 			}
 		}
 		
 		
 		private function introClicked(e:MouseEvent):void
 		{
-			clip.redBar.removeEventListener(MouseEvent.MOUSE_DOWN, introClicked);
+			myClip.removeEventListener(MouseEvent.MOUSE_DOWN, introClicked);
 			dispatchEvent(new Event(COMPLETE));
 		}
 	}
