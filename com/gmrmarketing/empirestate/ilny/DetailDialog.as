@@ -3,13 +3,16 @@ package com.gmrmarketing.empirestate.ilny
 	import com.adobe.air.logging.FileTarget;
 	import flash.events.*;
 	import flash.display.*;
+	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.text.*;
 	import flash.filesystem.*;
 	import flash.net.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
-	
+	import org.gestouch.gestures.TransformGesture;
+	import org.gestouch.events.GestureEvent;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	public class DetailDialog extends EventDispatcher
 	{
@@ -20,6 +23,9 @@ package com.gmrmarketing.empirestate.ilny
 		private var sourceFolder:File;
 		private var detailImage:Bitmap;
 		private var theInterest:Object;
+		private var tranGes:TransformGesture;
+		private var tim:TimeoutHelper;
+		private var userMoved:Boolean;
 		
 		
 		public function DetailDialog()
@@ -27,6 +33,10 @@ package com.gmrmarketing.empirestate.ilny
 			sourceFolder = File.applicationDirectory;
 			sourceFolder = sourceFolder.resolvePath("detailImages/");
 			clip = new mcDetailDialog();
+			
+			userMoved = false;
+			tranGes = new TransformGesture(clip.dragger);
+			tim = TimeoutHelper.getInstance();
 		}
 		
 		
@@ -40,9 +50,9 @@ package com.gmrmarketing.empirestate.ilny
 		 * 
 		 * @param	interest
 		 * @param	inList
-		 * @param	clickY Mouse Y click position
+		 * @param	clickPoint the mouse x,y when the icon was clicked
 		 */
-		public function show(interest:Object, inList:Boolean, clickY:int):void
+		public function show(interest:Object, inList:Boolean, clickPoint:Point):void
 		{
 			theInterest = interest;
 			
@@ -58,14 +68,18 @@ package com.gmrmarketing.empirestate.ilny
 			
 			clip.theName.autoSize = TextFieldAutoSize.LEFT;
 			clip.theName.text = theInterest.name;
-			clip.theName.y = Math.floor((82 - clip.theName.textHeight) * .5);
+			clip.theName.y = Math.floor((82 - clip.theName.textHeight) * .5);//center name verticallyin the red bar at top
 			
-			clip.x = 410;
-			if (clickY > 500) {
-				clip.y = 255;
-			}else {
-				clip.y = 550;
-			}			
+			//move the dialog north or south of the click loc
+			//if the user hasn't positioned it somewhere...
+			if(!userMoved){
+				clip.x = 410;
+				if (clickPoint.y > 500) {
+					clip.y = clickPoint.y - clip.height - 50;
+				}else {
+					clip.y = clickPoint.y + 50;
+				}
+			}
 			
 			var info:String = theInterest.city + ", " + theInterest.region + "\n";
 			info += theInterest.phone + "\n";
@@ -103,13 +117,84 @@ package com.gmrmarketing.empirestate.ilny
 			
 			//load image
 			var f:File = File.applicationDirectory.resolvePath("detailImages/" + theInterest.name + ".jpg");
-			if (f.exists) {
-				var l:Loader = new Loader();
+			var l:Loader = new Loader();
 				l.contentLoaderInfo.addEventListener(Event.COMPLETE, imageLoaded, false, 0, true);
+			if (f.exists) {				
 				l.load(new URLRequest(f.nativePath));
 			}else {
 				//show default
-				
+				switch(theInterest.cat1) {
+					case "Must See":
+						l.load(new URLRequest("detailImages/Default_MustSee.png"));
+						break;
+					case "History":
+						l.load(new URLRequest("detailImages/Default_History.png"));
+						break;
+					case "Family Fun":
+						l.load(new URLRequest("detailImages/Default_FamilyFun.png"));
+						break;
+					case "Family Fun":
+						l.load(new URLRequest("detailImages/Default_FamilyFun.png"));
+						break;
+					case "Wineries":
+						l.load(new URLRequest("detailImages/Default_Wineries.png"));
+						break;
+					case "Breweries":
+						l.load(new URLRequest("detailImages/Default_Breweries.png"));
+						break;
+					case "Wineries":
+						l.load(new URLRequest("detailImages/Default_Wineries.png"));
+						break;
+					case "Art & Culture":
+						l.load(new URLRequest("detailImages/Default_Culture.png"));
+						break;
+					case "Parks and Beaches":
+						l.load(new URLRequest("detailImages/Default_Parks.png"));
+						break;
+				}
+			}
+			
+			tranGes.addEventListener(org.gestouch.events.GestureEvent.GESTURE_BEGAN, onGesture);
+			tranGes.addEventListener(org.gestouch.events.GestureEvent.GESTURE_CHANGED, onGesture);
+			tranGes.addEventListener(org.gestouch.events.GestureEvent.GESTURE_ENDED, onGestureEnded);
+			tranGes.addEventListener(org.gestouch.events.GestureEvent.GESTURE_CANCELLED, onGestureEnded);
+		}
+		
+		
+		private function onGesture(e:org.gestouch.events.GestureEvent):void
+		{			
+			tim.buttonClicked();
+			var matrix:Matrix = clip.transform.matrix;
+			matrix.translate(tranGes.offsetX, tranGes.offsetY);
+			clip.transform.matrix = matrix;
+		}
+		
+		
+		private function onGestureEnded(e:org.gestouch.events.GestureEvent):void
+		{
+			userMoved = true;
+			//clip is 1063x388
+			if (clip.x < -800) {
+				TweenMax.to(clip, .3, { x: -800 } );
+			}
+			if (clip.x > 1800) {
+				TweenMax.to(clip, .3, { x:1800 } );
+			}
+			if (clip.y < -50) {
+				TweenMax.to(clip, .3, { y: -50 } );
+			}
+			if (clip.y > 1000) {
+				TweenMax.to(clip, .3, { y:1000 } );
+			}
+		}
+		
+		
+		public function hide():void
+		{
+			clip.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, closeDialog);
+			clip.btnAdd.removeEventListener(MouseEvent.MOUSE_DOWN, addInterest);
+			if (myContainer.contains(clip)) {
+				myContainer.removeChild(clip);
 			}
 		}
 		
@@ -124,13 +209,15 @@ package com.gmrmarketing.empirestate.ilny
 		}
 		
 		
+		public function resetMove():void
+		{
+			userMoved = false;
+		}
+		
+		
 		private function closeDialog(e:MouseEvent):void
 		{
-			clip.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, closeDialog);
-			clip.btnAdd.removeEventListener(MouseEvent.MOUSE_DOWN, addInterest);
-			if (myContainer.contains(clip)) {
-				myContainer.removeChild(clip);
-			}
+			hide();
 		}
 		
 		

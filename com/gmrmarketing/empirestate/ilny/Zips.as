@@ -1,24 +1,18 @@
-/**
- * Loads the mapdata.json file and parses it into the allData array
- * Dispatches READY once the data has been parsed
- * Used by Map.as
- */
 package com.gmrmarketing.empirestate.ilny
 {
+	import flash.geom.Point;
 	import flash.net.*;
-	import flash.events.*;	
-
-	public class MapData extends EventDispatcher
+	import flash.events.*;
+	
+	public class Zips
 	{
-		public static const READY:String = "JSONLoaded";
 		private var allData:Object; //loaded JSON
-		
 		//coords maps latitude / longitude intersections to screen coords - each row is a latitude
 		private var coords:Array;
 		
 		
-		public function MapData()
-		{			
+		public function Zips()
+		{
 			coords = [];
 			//45 lat - lon 80 to 72
 			coords.push([[0,0], [0,0], [0,0], [0,0], [335, 0], [418, 0], [511, 0], [601, 0], [685,0]]);
@@ -33,61 +27,42 @@ package com.gmrmarketing.empirestate.ilny
 			//40 lat - lon 80 to 72
 			coords.push([[0,0],[0,0],[0,0],[0,0],[0,0],[418, 595], [511, 595], [601, 595], [685,595]]);
 			
+			
 			var lo:URLLoader = new URLLoader();
 			lo.addEventListener(Event.COMPLETE, loaded, false, 0, true);
-			lo.load(new URLRequest("mapdata.json"));
+			lo.load(new URLRequest("nyzipcodes.json"));
 		}
 		
 		
 		private function loaded(e:Event):void
 		{
-			allData = JSON.parse(e.currentTarget.data);	
-			for (var i:int = 0; i < allData.length; i++) {
-				getClosest(allData[i]);//adds x,y keys to each object based on lat/lon
-			}
-			dispatchEvent(new Event(READY));
+			allData = JSON.parse(e.currentTarget.data);
 		}
 		
 		
-		/**
-		 * @param	category String one of: "Must See", "Historical Sites", "Family Fun", "Wineries & Breweries", "Art & Culture", "Parks and Beaches"
-		 * @return Array of selected interest objects
-		 */
-		public function getInterests(category:String):Array
+		public function getZip(zip:String):Point
 		{
-			var ret:Array = [];
-			var indexes:Array = [];//used to avoid adding duplicates
-			var i:int;
-			if(category != ""){
-				if (category == "Wineries and Breweries") {
-					for (i = 0; i < allData.length; i++) {
-						if ((allData[i].cat1 == "Wineries" || allData[i].cat2 == "Wineries" || allData[i].cat3 == "Wineries" || allData[i].cat1 == "Breweries" || allData[i].cat2 == "Breweries" || allData[i].cat3 == "Breweries") && indexes.indexOf(i) == -1) {						
-							ret.push(allData[i]);
-							indexes.push(i);						
-						}
+			if (allData) {
+				for (var i:int = 0; i < allData.length; i++) {
+					if (allData[i].zip_code == zip) {
+						return getClosest(allData[i]);
 					}
-				}else{
-				//for (var j:int = 0; j < categories.length; j++){
-					for (i = 0; i < allData.length; i++) {
-						if ((allData[i].cat1 == category || allData[i].cat2 == category || allData[i].cat3 == category) && indexes.indexOf(i) == -1) {						
-							ret.push(allData[i]);
-							indexes.push(i);						
-						}
-					}
-				//}
 				}
+				return new Point(0, 0);
+			}else {
+				return new Point(0, 0);
 			}
-			return ret;
-		}		
-		
+		}
 		
 		/**
 		 * calculates the x,y position of an interest based on its lat/lon
 		 * injects x,y keys and values into the object
 		 * @param	o The object - the object is modified in place
 		 */
-		private function getClosest(o:Object):void
+		private function getClosest(o:Object):Point
 		{
+			var p:Point = new Point();
+			
 			var latIndex:int = Math.round(45 - o.latitude);//index in coords array
 			var latClosest:int = 45 - latIndex;//actual lat of closest intersection
 			var latDiff:Number = o.latitude - latClosest;//if negative, actual lat is south of latClosest
@@ -112,14 +87,15 @@ package com.gmrmarketing.empirestate.ilny
 				var yRatio:Number = 117; //about 117 pix per 1º of latitude
 				var yMod:Number = latDiff * yRatio;				
 				
-				o.x = closestScreen[0] - xMod;
-				o.y = closestScreen[1] - yMod;
+				p.x = closestScreen[0] - xMod;
+				p.y = closestScreen[1] - yMod;
 			}else {
-				o.x = 0;
-				o.y = 0;
-			}			
+				p.x = 0;
+				p.y = 0;
+			}
+			
+			return p;
 		}
-		
 	}
 	
 }

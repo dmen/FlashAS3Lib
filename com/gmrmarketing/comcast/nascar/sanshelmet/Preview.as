@@ -24,14 +24,12 @@ package com.gmrmarketing.comcast.nascar.sanshelmet
 		private var currPhoto:BitmapData;
 		private var countDown:Countdown;
 		private var overlay:BitmapData;
-		private var circ:Circley;
 		private var chaseShowing:Boolean;
 		
 		
 		public function Preview()
 		{
 			clip = new mcPreview();
-			circ = new Circley();
 			cam = new CamPic();
 		}
 		
@@ -50,24 +48,14 @@ package com.gmrmarketing.comcast.nascar.sanshelmet
 			
 			chaseShowing = false;
 			
-			clip.instructions.x = -clip.instructions.width;				
+			clip.instructions.alpha = 0;			
 				
 			clip.btnTake.y = 1100;
-			clip.opt1.x = 1920;
-			clip.opt2.x = 1920;
-			clip.opt3.x = 1920;
-			clip.opt4.x = 1920;
-			clip.opt1.theText.text = "Red Fire Suit"
-			clip.opt2.theText.text = "Gray Fire Suit"			
-			clip.opt3.theText.text = "Blue Fire Suit"			
-			clip.opt4.theText.text = "Chase Elliot"			
 			
-			TweenMax.to(clip.instructions, .5, { x:180, delay:.5, ease:Back.easeOut } );
+			TweenMax.to(clip.instructions, .5, { alpha:1, delay:.5 } );
 			TweenMax.to(clip.btnTake, .5, { y:847, delay:.6, ease:Back.easeOut } );
-			TweenMax.to(clip.opt1, .5, { x:1394, delay:.7, ease:Back.easeOut} );
-			TweenMax.to(clip.opt2, .5, { x:1394, delay:.8, ease:Back.easeOut} );			
-			TweenMax.to(clip.opt3, .5, { x:1394, delay:.9, ease:Back.easeOut} );			
-			TweenMax.to(clip.opt4, .5, { x:1394, delay:1, ease:Back.easeOut} );			
+			TweenMax.to(clip.suits, .5, { x:1411, delay:.7, ease:Back.easeOut} );
+			TweenMax.to(clip.drivers, .5, { x:1450, delay:.8, ease:Back.easeOut} );	
 			
 			redJersey();//default
 			
@@ -75,10 +63,12 @@ package com.gmrmarketing.comcast.nascar.sanshelmet
 			clip.btnRed.addEventListener(MouseEvent.MOUSE_DOWN, redJersey, false, 0, true);
 			clip.btnGray.addEventListener(MouseEvent.MOUSE_DOWN, grayJersey, false, 0, true);
 			clip.btnBlue.addEventListener(MouseEvent.MOUSE_DOWN, blueJersey, false, 0, true);
+			clip.btnBrendan.addEventListener(MouseEvent.MOUSE_DOWN, brendanOverlay, false, 0, true);
+			clip.btnTy.addEventListener(MouseEvent.MOUSE_DOWN, tyOverlay, false, 0, true);
+			clip.btnBrian.addEventListener(MouseEvent.MOUSE_DOWN, brianOverlay, false, 0, true);
 			clip.btnChase.addEventListener(MouseEvent.MOUSE_DOWN, chaseOverlay, false, 0, true);
 			clip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, doClose, false, 0, true);
 			
-			//set camera and capture res to 1920x1080 and display at 1093x615	
 			cam.init(1280, 960, 0, 0, 992, 744, 30);
 			cam.show(clip.camImage);//black box behind bg image	- 1093x615
 				
@@ -90,31 +80,70 @@ package com.gmrmarketing.comcast.nascar.sanshelmet
 		
 		private function redJersey(e:MouseEvent = null):void
 		{
-			circ.setButton(clip.opt1);
+			clip.suitCircle.visible = true;
+			clip.suitCircle.x = 1561;
+			clip.suitCircle.y = 292;
+			clip.driverCircle.visible = false;
 			cam.clearOverlays();
 			cam.addOverlay(new suitRed(), new Point(213, 317));			
 		}		
 		
 		
 		private function grayJersey(e:MouseEvent = null):void
-		{		
-			circ.setButton(clip.opt2);
+		{	
+			clip.suitCircle.visible = true;
+			clip.suitCircle.x = 1707;
+			clip.suitCircle.y = 292;
+			clip.driverCircle.visible = false;
 			cam.clearOverlays();
 			cam.addOverlay(new suitGray(), new Point(213, 317));
 		}
 		
 		
 		private function blueJersey(e:MouseEvent = null):void
-		{		
-			circ.setButton(clip.opt3);
+		{
+			clip.suitCircle.visible = true;
+			clip.suitCircle.x = 1412;
+			clip.suitCircle.y = 292;
+			clip.driverCircle.visible = false;
 			cam.clearOverlays();
 			cam.addOverlay(new suitBlue(), new Point(213, 317));
 		}
 		
 		
+		private function brendanOverlay(e:MouseEvent = null):void
+		{
+			clip.suitCircle.visible = false;
+			clip.driverCircle.x = 1454;
+			clip.driverCircle.y = 495;
+			clip.driverCircle.visible = true;
+			cam.clearOverlays();			
+			cam.addOverlay(new brendan(), new Point(213, 30));
+		}
+		private function tyOverlay(e:MouseEvent = null):void
+		{
+			clip.suitCircle.visible = false;
+			clip.driverCircle.x = 1635;
+			clip.driverCircle.y = 495;
+			clip.driverCircle.visible = true;
+			cam.clearOverlays();
+			cam.addOverlay(new ty(), new Point(213, 30));
+		}
+		private function brianOverlay(e:MouseEvent = null):void
+		{
+			clip.suitCircle.visible = false;
+			clip.driverCircle.x = 1451;
+			clip.driverCircle.y = 676;
+			clip.driverCircle.visible = true;
+			cam.clearOverlays();
+			cam.addOverlay(new brian(), new Point(213, 30));
+		}
 		private function chaseOverlay(e:MouseEvent = null):void
 		{
-			circ.setButton(clip.opt4);
+			clip.suitCircle.visible = false;
+			clip.driverCircle.x = 1639;
+			clip.driverCircle.y = 674;
+			clip.driverCircle.visible = true;
 			cam.clearOverlays();
 			cam.addOverlay(new chase(), new Point(213, 30));
 		}

@@ -2,6 +2,7 @@ package com.gmrmarketing.empirestate.ilny
 {
 	import flash.events.*;
 	import flash.display.*;
+	import com.greensock.TweenMax;
 	
 	
 	public class Intro extends EventDispatcher
@@ -33,13 +34,16 @@ package com.gmrmarketing.empirestate.ilny
 			if (!myContainer.contains(myClip)) {
 				myContainer.addChild(myClip);
 			}
-			
+			myClip.alpha = 0;
+			TweenMax.to(myClip, .5, { alpha:1 } );
+			TweenMax.to(myClip.heart, .75, {scaleX:1.15, scaleY:1.15, yoyo:true, repeat:-1});
 			myClip.addEventListener(MouseEvent.MOUSE_DOWN, introClicked);
 		}
 		
 		
 		public function hide():void
 		{
+			TweenMax.killTweensOf(clip.heart);
 			if (myContainer.contains(myClip)) {
 				myContainer.removeChild(myClip);
 			}

@@ -22,8 +22,7 @@ package com.gmrmarketing.empirestate.ilny
 		
 		public function Background()
 		{
-			kb = new KenBurns();
-			kb.addEventListener(KenBurns.CHANGE, nameChange);
+			kb = new KenBurns();			
 			
 			sourceFolder = File.applicationDirectory;
 			sourceFolder = sourceFolder.resolvePath("bgimages/");
@@ -52,10 +51,17 @@ package com.gmrmarketing.empirestate.ilny
 			kb.container = myContainer;
 		}
 		
+		
 		public function set tField(t:TextField):void
 		{
 			myTextField = t;
+			
+			kb.addEventListener(KenBurns.CHANGE, nameChange);
+			//}else {
+				//kb.removeEventListener(KenBurns.CHANGE, nameChange);
+			//}
 		}
+		
 		
 		public function show():void
 		{
@@ -65,6 +71,7 @@ package com.gmrmarketing.empirestate.ilny
 				play();
 			}
 		}
+		
 		
 		public function stop():void
 		{
@@ -108,7 +115,9 @@ package com.gmrmarketing.empirestate.ilny
 		 */
 		private function nameChange(e:Event):void
 		{
-			myTextField.text = names[nameIndex];
+			if(myTextField != null){
+				myTextField.text = names[nameIndex];
+			}
 			nameIndex++;
 			if (nameIndex >= names.length) {
 				nameIndex = 0;

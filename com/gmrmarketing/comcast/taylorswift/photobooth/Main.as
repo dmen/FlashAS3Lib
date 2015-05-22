@@ -14,7 +14,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 	{
 		private var intro:Intro;
 		private var takePhoto:TakePhoto;
-		private var print:Print;
+		//private var print:Print;
 		private var thanks:Thanks;
 		private var mainContainer:Sprite;
 		private var dustContainer:Sprite;
@@ -26,7 +26,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			Mouse.hide();
+			//Mouse.hide();
 			
 			tim = TimeoutHelper.getInstance();
 			tim.addEventListener(TimeoutHelper.TIMED_OUT, doReset, false, 0, true);
@@ -45,8 +45,8 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			takePhoto = new TakePhoto();
 			takePhoto.container = mainContainer;
 			
-			print = new Print();
-			print.container = mainContainer;
+			//print = new Print();
+			//print.container = mainContainer;
 			
 			thanks = new Thanks();
 			thanks.container = mainContainer;
@@ -79,7 +79,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			takePhoto.show();
 			takePhoto.addEventListener(TakePhoto.SHOWING, hideIntro);
 			takePhoto.addEventListener(TakePhoto.CANCEL, cancelPhoto);
-			takePhoto.addEventListener(TakePhoto.PRINT, printPhoto);
+			takePhoto.addEventListener(TakePhoto.PRINT, showThanks);// printPhoto);
 			
 			tim.startMonitoring();
 		}
@@ -96,12 +96,12 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		{
 			takePhoto.removeEventListener(TakePhoto.SHOWING, hideIntro);
 			takePhoto.removeEventListener(TakePhoto.CANCEL, cancelPhoto);
-			takePhoto.removeEventListener(TakePhoto.PRINT, printPhoto);
+			takePhoto.removeEventListener(TakePhoto.PRINT, showThanks);// printPhoto);
 			takePhoto.hide();
 			init();
 		}
 		
-		
+		/*
 		private function printPhoto(e:Event):void
 		{
 			var pics:Array = takePhoto.getPhotos();//three 750x750 BMD's
@@ -111,26 +111,31 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			print.addEventListener(Print.COMPLETE, showThanks);
 			print.show(pics);
 		}
+		*/
 		
 		
 		private function hideTakePhoto(e:Event):void
 		{
-			print.removeEventListener(Print.SHOWING, hideTakePhoto);
+			//print.removeEventListener(Print.SHOWING, hideTakePhoto);
+			thanks.removeEventListener(Thanks.SHOWING, hideTakePhoto);
 			takePhoto.hide();
 		}
 		
 		
 		private function showThanks(e:Event):void
 		{
-			print.removeEventListener(Print.COMPLETE, showThanks);
-			print.removeEventListener(Print.COMPLETE_EMAIL, showThanksEmail);
+			var pics:Array = takePhoto.getPhotos();//three 750x750 BMD's
 			
-			thanks.addEventListener(Thanks.SHOWING, hidePrint);
+			//print.removeEventListener(Print.COMPLETE, showThanks);
+			//print.removeEventListener(Print.COMPLETE_EMAIL, showThanksEmail);
+			
+			//thanks.addEventListener(Thanks.SHOWING, hidePrint);
+			thanks.addEventListener(Thanks.SHOWING, hideTakePhoto);
 			thanks.addEventListener(Thanks.COMPLETE, thanksComplete);	
-			thanks.show(false);
+			thanks.show(pics);
 		}
 		
-		
+		/*
 		private function showThanksEmail(e:Event):void
 		{
 			print.removeEventListener(Print.COMPLETE, showThanks);
@@ -141,6 +146,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			
 			TweenMax.delayedCall(1, processImage);//allow thanks to show
 		}
+		
 		private function processImage():void
 		{
 			print.addEventListener(Print.PROCESS, processComplete);
@@ -159,7 +165,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			thanks.removeEventListener(Thanks.SHOWING, hidePrint);
 			print.hide();
 		}
-		
+		*/
 		
 		private function thanksComplete(e:Event):void
 		{
@@ -190,18 +196,18 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		{
 			takePhoto.removeEventListener(TakePhoto.SHOWING, hideIntro);
 			takePhoto.removeEventListener(TakePhoto.CANCEL, cancelPhoto);
-			takePhoto.removeEventListener(TakePhoto.PRINT, printPhoto);
-			
+			takePhoto.removeEventListener(TakePhoto.PRINT, showThanks);// printPhoto);
+			/*
 			print.removeEventListener(Print.SHOWING, hideTakePhoto);
 			print.removeEventListener(Print.COMPLETE, showThanks);
 			print.removeEventListener(Print.COMPLETE_EMAIL, showThanksEmail);
 			print.removeEventListener(Print.PROCESS, processComplete);
-			
-			thanks.removeEventListener(Thanks.SHOWING, hidePrint);
+			*/
+			thanks.removeEventListener(Thanks.SHOWING, hideTakePhoto);// hidePrint);
 			thanks.removeEventListener(Thanks.COMPLETE, thanksComplete);			
 			
 			takePhoto.hide();
-			print.hide();
+			//print.hide();
 			thanks.hide();
 			
 			init();

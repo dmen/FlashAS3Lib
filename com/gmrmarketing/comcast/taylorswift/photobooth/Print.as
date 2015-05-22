@@ -60,6 +60,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			myContainer = c;
 		}
 		
+		
 		/**
 		 * 
 		 * @param	pics Array of 750x750 images
@@ -83,6 +84,8 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			clip.emailText.visible = false;
 			clip.emailText.email.text = "";
 			clip.emailText.notValid.alpha = 0;
+			clip.emailText.theCheck.gotoAndStop(1);//unchecked
+			clip.emailText.optGlow.alpha = 0;
 			
 			var pic:BitmapData;
 			var m:Matrix = new Matrix();			
@@ -145,6 +148,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			
 			clip.btnNo.addEventListener(MouseEvent.MOUSE_DOWN, noClicked, false, 0, true);			
 			clip.btnYes.addEventListener(MouseEvent.MOUSE_DOWN, yesClicked, false, 0, true);
+			clip.emailText.btnCheck.addEventListener(MouseEvent.MOUSE_DOWN, optInClicked, false, 0, true);
 			
 			dispatchEvent(new Event(SHOWING));
 		}
@@ -155,10 +159,21 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			clip.removeEventListener(Event.ENTER_FRAME, updateGlow);
 			clip.btnNo.removeEventListener(MouseEvent.MOUSE_DOWN, noClicked);			
 			clip.btnYes.removeEventListener(MouseEvent.MOUSE_DOWN, yesClicked);
+			clip.emailText.btnCheck.removeEventListener(MouseEvent.MOUSE_DOWN, optInClicked);
 			kbd.removeEventListener(KeyBoard.SUBMIT, emailSubmitted);
 			kbd.removeEventListener(KeyBoard.KBD, resetTim);
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
+			}
+		}
+		
+		
+		private function optInClicked(e:MouseEvent):void
+		{
+			if (clip.emailText.theCheck.currentFrame == 1) {
+				clip.emailText.theCheck.gotoAndStop(2);
+			}else {
+				clip.emailText.theCheck.gotoAndStop(1);
 			}
 		}
 		
@@ -225,11 +240,17 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		
 		private function emailSubmitted(e:Event):void
 		{
-			if (Validator.isValidEmail(clip.emailText.email.text)) {
-				dispatchEvent(new Event(COMPLETE_EMAIL));
+			if(clip.emailText.theCheck.currentFrame == 2){
+				if (Validator.isValidEmail(clip.emailText.email.text)) {
+					dispatchEvent(new Event(COMPLETE_EMAIL));
+				}else {
+					clip.emailText.notValid.theText.text = "please enter a valid email address";
+					clip.emailText.notValid.alpha = 1;
+					TweenMax.to(clip.emailText.notValid, 1, { alpha:0, delay:2 } );
+				}
 			}else {
-				clip.emailText.notValid.alpha = 1;
-				TweenMax.to(clip.emailText.notValid, 1, { alpha:0, delay:2 } );
+				clip.emailText.optGlow.alpha = 1;
+				TweenMax.to(clip.emailText.optGlow, 1, { alpha:0, delay:1 } );
 			}
 		}
 		

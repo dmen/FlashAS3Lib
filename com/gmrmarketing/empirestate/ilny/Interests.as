@@ -1,7 +1,7 @@
 /**
  * Manages the interests selector for the Map
  * Dispatches CHANGED any time a selection changes
- * call the interests getter to retrieve the list of selected items
+ * call the interests getter to retrieve the list of selected categories/interests
  * used by Map.as
  */
 package com.gmrmarketing.empirestate.ilny
@@ -10,6 +10,7 @@ package com.gmrmarketing.empirestate.ilny
 	import flash.display.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	
 	public class Interests extends EventDispatcher 
@@ -17,11 +18,15 @@ package com.gmrmarketing.empirestate.ilny
 		public static const CHANGED:String = "interestChanged";
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
-		private var selectedInterests:Array;
+		private var selectedInterest:String;//one at a time
+		//private var selectedInterests:Array;
+		private var tim:TimeoutHelper;
+		
 		
 		public function Interests()
 		{
 			clip = new mcInterests();
+			tim = TimeoutHelper.getInstance();
 		}		
 		
 		
@@ -37,7 +42,8 @@ package com.gmrmarketing.empirestate.ilny
 				myContainer.addChild(clip);
 			}
 			
-			selectedInterests = [];
+			//selectedInterests = [];
+			selectedInterest = "";
 			
 			clip.x = -clip.width;
 			clip.y = 224;//bottom aligned
@@ -69,130 +75,234 @@ package com.gmrmarketing.empirestate.ilny
 		}		
 		
 		
+		public function hide():void
+		{
+			if (myContainer.contains(clip)) {
+				myContainer.removeChild(clip);
+			}
+			clip.btnMust.removeEventListener(MouseEvent.MOUSE_DOWN, mustSelected);
+			clip.btnHistorical.removeEventListener(MouseEvent.MOUSE_DOWN, historicalSelected);
+			clip.btnCultural.removeEventListener(MouseEvent.MOUSE_DOWN, culturalSelected);
+			clip.btnParks.removeEventListener(MouseEvent.MOUSE_DOWN, parksSelected);
+			clip.btnWineries.removeEventListener(MouseEvent.MOUSE_DOWN, wineriesSelected);
+			clip.btnFamily.removeEventListener(MouseEvent.MOUSE_DOWN, familySelected);
+		}
+		
 		/**
 		 * Returns the array of selected interests:
 			Must See, History, Art & Culture, Wineries, Breweries, Parks and Beaches, Family Fun
 		 */
+			/*
 		public function get interests():Array
 		{
 			return selectedInterests;
 		}
-		
-		
-		private function mustSelected(e:MouseEvent):void
+		*/
+		public function get interest():String
 		{
-			if (clip.redMust.alpha == 1) {
-				if (selectedInterests.indexOf("Must See") != -1) {
-					selectedInterests.splice(selectedInterests.indexOf("Must See"), 1);
-				}
-				TweenMax.to(clip.redMust, .3, { alpha:0 } );
-				TweenMax.to(clip.checkMust, .25, { colorMatrixFilter:{ saturation:0 }} );
-			}else {
-				if (selectedInterests.indexOf("Must See") == -1) {
-					selectedInterests.push("Must See");
-				}
-				TweenMax.to(clip.redMust, .3, { alpha:1 } );
-				TweenMax.to(clip.checkMust, .25, { colorMatrixFilter:{ saturation:1 }} );
-			}
-			dispatchEvent(new Event(CHANGED));
+			return selectedInterest;
 		}
 		
+
+		private function mustSelected(e:MouseEvent):void
+		{
+			tim.buttonClicked();
+			
+			if (clip.redMust.alpha == 1) {
+				TweenMax.to(clip.redMust, .3, { alpha:0 } );
+				TweenMax.to(clip.checkMust, .25, { colorMatrixFilter: { saturation:0 }} );
+				selectedInterest = "";
+			}else {
+				TweenMax.to(clip.redMust, .3, { alpha:1 } );
+				TweenMax.to(clip.checkMust, .25, { colorMatrixFilter: { saturation:1 }} );
+				selectedInterest = "Must See";
+			}
+			
+			//turn off other buttons
+			TweenMax.to(clip.redHistorical, .3, { alpha:0 } );				
+			TweenMax.to(clip.checkHistorical, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redCultural, .3, { alpha:0 } );
+			TweenMax.to(clip.checkCultural, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redParks, .3, { alpha:0 } );
+			TweenMax.to(clip.checkParks, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redWineries, .3, { alpha:0 } );
+			TweenMax.to(clip.checkWineries, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redFamily, .3, { alpha:0 } );
+			TweenMax.to(clip.checkFamily, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			dispatchEvent(new Event(CHANGED));
+		}
 		
 		private function historicalSelected(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			if (clip.redHistorical.alpha == 1) {
-				if (selectedInterests.indexOf("History") != -1) {
-					selectedInterests.splice(selectedInterests.indexOf("History"), 1);
-				}
-				TweenMax.to(clip.redHistorical, .3, { alpha:0 } );				
-				TweenMax.to(clip.checkHistorical, .25, { colorMatrixFilter:{ saturation:0 }} );
+				TweenMax.to(clip.redHistorical, .3, { alpha:0 } );
+				TweenMax.to(clip.checkHistorical, .25, { colorMatrixFilter: { saturation:0 }} );
+				selectedInterest = "";
 			}else {
-				if (selectedInterests.indexOf("History") == -1) {
-					selectedInterests.push("History");
-				}
 				TweenMax.to(clip.redHistorical, .3, { alpha:1 } );
-				TweenMax.to(clip.checkHistorical, .25, { colorMatrixFilter:{ saturation:1 }} );
+				TweenMax.to(clip.checkHistorical, .25, { colorMatrixFilter: { saturation:1 }} );
+				selectedInterest = "History";
 			}
+			
+			//turn off other buttons
+			TweenMax.to(clip.redMust, .3, { alpha:0 } );				
+			TweenMax.to(clip.checkMust, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redCultural, .3, { alpha:0 } );
+			TweenMax.to(clip.checkCultural, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redParks, .3, { alpha:0 } );
+			TweenMax.to(clip.checkParks, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redWineries, .3, { alpha:0 } );
+			TweenMax.to(clip.checkWineries, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redFamily, .3, { alpha:0 } );
+			TweenMax.to(clip.checkFamily, .25, { colorMatrixFilter: { saturation:0 }} );
+			
 			dispatchEvent(new Event(CHANGED));
 		}
-		
 		
 		private function culturalSelected(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			if (clip.redCultural.alpha == 1) {
-				if (selectedInterests.indexOf("Art & Culture") != -1) {
-					selectedInterests.splice(selectedInterests.indexOf("Art & Culture"), 1);
-				}
 				TweenMax.to(clip.redCultural, .3, { alpha:0 } );
-				TweenMax.to(clip.checkCultural, .25, { colorMatrixFilter:{ saturation:0 }} );
+				TweenMax.to(clip.checkCultural, .25, { colorMatrixFilter: { saturation:0 }} );
+				selectedInterest = "";
 			}else {
-				if (selectedInterests.indexOf("Art & Culture") == -1) {
-					selectedInterests.push("Art & Culture");
-				}
 				TweenMax.to(clip.redCultural, .3, { alpha:1 } );
-				TweenMax.to(clip.checkCultural, .25, { colorMatrixFilter:{ saturation:1 }} );
+				TweenMax.to(clip.checkCultural, .25, { colorMatrixFilter: { saturation:1 }} );
+				selectedInterest = "Art & Culture";
 			}
+			
+			//turn off other buttons
+			TweenMax.to(clip.redMust, .3, { alpha:0 } );				
+			TweenMax.to(clip.checkMust, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redHistorical, .3, { alpha:0 } );
+			TweenMax.to(clip.checkHistorical, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redParks, .3, { alpha:0 } );
+			TweenMax.to(clip.checkParks, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redWineries, .3, { alpha:0 } );
+			TweenMax.to(clip.checkWineries, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redFamily, .3, { alpha:0 } );
+			TweenMax.to(clip.checkFamily, .25, { colorMatrixFilter: { saturation:0 }} );
+			
 			dispatchEvent(new Event(CHANGED));
 		}
-		
 		
 		private function parksSelected(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			if (clip.redParks.alpha == 1) {
-				if (selectedInterests.indexOf("Parks and Beaches") != -1) {
-					selectedInterests.splice(selectedInterests.indexOf("Parks and Beaches"), 1);
-				}
 				TweenMax.to(clip.redParks, .3, { alpha:0 } );
-				TweenMax.to(clip.checkParks, .25, { colorMatrixFilter:{ saturation:0 }} );
+				TweenMax.to(clip.checkParks, .25, { colorMatrixFilter: { saturation:0 }} );
+				selectedInterest = "";
 			}else {
-				if (selectedInterests.indexOf("Parks and Beaches") == -1) {
-					selectedInterests.push("Parks and Beaches");
-				}
 				TweenMax.to(clip.redParks, .3, { alpha:1 } );
-				TweenMax.to(clip.checkParks, .25, { colorMatrixFilter:{ saturation:1 }} );
+				TweenMax.to(clip.checkParks, .25, { colorMatrixFilter: { saturation:1 }} );
+				selectedInterest = "Parks and Beaches";
 			}
+			
+			//turn off other buttons
+			TweenMax.to(clip.redMust, .3, { alpha:0 } );				
+			TweenMax.to(clip.checkMust, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redHistorical, .3, { alpha:0 } );
+			TweenMax.to(clip.checkHistorical, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redCultural, .3, { alpha:0 } );
+			TweenMax.to(clip.checkCultural, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redWineries, .3, { alpha:0 } );
+			TweenMax.to(clip.checkWineries, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redFamily, .3, { alpha:0 } );
+			TweenMax.to(clip.checkFamily, .25, { colorMatrixFilter: { saturation:0 }} );
+			
 			dispatchEvent(new Event(CHANGED));
 		}
 		
-		
 		private function wineriesSelected(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			if (clip.redWineries.alpha == 1) {
-				if (selectedInterests.indexOf("Wineries") != -1) {
-					selectedInterests.splice(selectedInterests.indexOf("Wineries"), 1);
-					selectedInterests.splice(selectedInterests.indexOf("Breweries"), 1);
-				}
 				TweenMax.to(clip.redWineries, .3, { alpha:0 } );
-				TweenMax.to(clip.checkWineries, .25, { colorMatrixFilter:{ saturation:0 }} );
+				TweenMax.to(clip.checkWineries, .25, { colorMatrixFilter: { saturation:0 }} );
+				selectedInterest = "";
 			}else {
-				if (selectedInterests.indexOf("Wineries") == -1) {
-					selectedInterests.push("Wineries");
-					selectedInterests.push("Breweries");
-				}
 				TweenMax.to(clip.redWineries, .3, { alpha:1 } );
-				TweenMax.to(clip.checkWineries, .25, { colorMatrixFilter:{ saturation:1 }} );
+				TweenMax.to(clip.checkWineries, .25, { colorMatrixFilter: { saturation:1 }} );
+				selectedInterest = "Wineries and Breweries";
 			}
+			
+			//turn off other buttons
+			TweenMax.to(clip.redMust, .3, { alpha:0 } );				
+			TweenMax.to(clip.checkMust, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redHistorical, .3, { alpha:0 } );
+			TweenMax.to(clip.checkHistorical, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redCultural, .3, { alpha:0 } );
+			TweenMax.to(clip.checkCultural, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redParks, .3, { alpha:0 } );
+			TweenMax.to(clip.checkParks, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redFamily, .3, { alpha:0 } );
+			TweenMax.to(clip.checkFamily, .25, { colorMatrixFilter: { saturation:0 }} );
+			
 			dispatchEvent(new Event(CHANGED));
 		}
 		
 		
 		private function familySelected(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			if (clip.redFamily.alpha == 1) {
-				if (selectedInterests.indexOf("Family Fun") != -1) {
-					selectedInterests.splice(selectedInterests.indexOf("Family Fun"), 1);
-				}
 				TweenMax.to(clip.redFamily, .3, { alpha:0 } );
 				TweenMax.to(clip.checkFamily, .25, { colorMatrixFilter: { saturation:0 }} );
+				selectedInterest = "";
 			}else {
-				if (selectedInterests.indexOf("Family Fun") == -1) {
-					selectedInterests.push("Family Fun");
-				}
 				TweenMax.to(clip.redFamily, .3, { alpha:1 } );
 				TweenMax.to(clip.checkFamily, .25, { colorMatrixFilter: { saturation:1 }} );
+				selectedInterest = "Family Fun";
 			}
+			
+			//turn off other buttons
+			TweenMax.to(clip.redMust, .3, { alpha:0 } );				
+			TweenMax.to(clip.checkMust, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redHistorical, .3, { alpha:0 } );
+			TweenMax.to(clip.checkHistorical, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redCultural, .3, { alpha:0 } );
+			TweenMax.to(clip.checkCultural, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redParks, .3, { alpha:0 } );
+			TweenMax.to(clip.checkParks, .25, { colorMatrixFilter: { saturation:0 }} );
+			
+			TweenMax.to(clip.redWineries, .3, { alpha:0 } );
+			TweenMax.to(clip.checkWineries, .25, { colorMatrixFilter: { saturation:0 }} );
+			
 			dispatchEvent(new Event(CHANGED));
-		}		
+		}
+			
 		
 	}
 	
