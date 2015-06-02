@@ -6,7 +6,8 @@ package com.gmrmarketing.miller.stc
 	import flash.display.StageDisplayState;
 	import flash.display.StageScaleMode;
 	import flash.ui.Mouse;
-	
+	import com.gmrmarketing.utilities.CornerQuit;
+	import flash.desktop.NativeApplication;
 	
 	public class Main extends MovieClip
 	{
@@ -15,6 +16,8 @@ package com.gmrmarketing.miller.stc
 		private var introLogo:Intro;//initial build that scales down and remains on screen
 		private var mainContainer:Sprite;
 		private var topContainer:Sprite;
+		private var cornerContainer:Sprite;
+		private var cq:CornerQuit;
 		
 		private var data:DataEntry;//dataEntry screen with birthday,phone,gender
 		private var passionSelect:PassionSelect;//right now this is just choose music or sports
@@ -30,7 +33,7 @@ package com.gmrmarketing.miller.stc
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			//Mouse.hide();
+			Mouse.hide();
 			
 			data = new DataEntry()
 			data.container = this;
@@ -43,10 +46,14 @@ package com.gmrmarketing.miller.stc
 			addChild(logoContainer);
 			
 			mainContainer = new Sprite();
+			mainContainer.cacheAsBitmap = true;
 			addChild(mainContainer);
 			
 			topContainer = new Sprite();
 			addChild(topContainer);
+			
+			cornerContainer = new Sprite();
+			addChild(cornerContainer);
 			
 			introLogo = new Intro();
 			introLogo.container = logoContainer;
@@ -68,18 +75,23 @@ package com.gmrmarketing.miller.stc
 			
 			dataPost = new DataPost();
 			
+			cq = new CornerQuit();			
+			
 			init();
 		}
 		
 		
 		private function init():void
 		{
+			cq.init(cornerContainer, "ul");
+			cq.addEventListener(CornerQuit.CORNER_QUIT, quitApp);
+			
 			tapToBegin.show();
 			tapToBegin.addEventListener(TapToBegin.COMPLETE, buildLogo);
 		}
 		
 		
-		private function buildLogo(e:Event):void
+		private function buildLogo(e:Event = null):void
 		{
 			tapToBegin.removeEventListener(TapToBegin.COMPLETE, buildLogo);
 			tapToBegin.hide();
@@ -92,6 +104,7 @@ package com.gmrmarketing.miller.stc
 			introLogo.show();//initial logo build
 		}
 		
+		
 		private function showDataEntry(e:Event):void
 		{
 			introLogo.removeEventListener(Intro.FINISHED, showDataEntry);
@@ -99,27 +112,59 @@ package com.gmrmarketing.miller.stc
 			
 			TweenMax.delayedCall(1, data.show);
 			data.addEventListener(DataEntry.COMPLETE, choosePassion);
+			data.addEventListener(DataEntry.BACK, backToDOB);
 		}
 		
 		
-		private function choosePassion(e:Event):void
+		private function backToDOB(e:Event):void
+		{
+			e.stopImmediatePropagation();
+			data.removeEventListener(DataEntry.COMPLETE, choosePassion);
+			data.removeEventListener(DataEntry.BACK, backToDOB);
+			data.hide();
+			introLogo.hide();
+			init();
+		}
+		
+		
+		private function choosePassion(e:Event = null):void
 		{
 			data.removeEventListener(DataEntry.COMPLETE, choosePassion);
+			data.removeEventListener(DataEntry.BACK, backToDOB);
 			data.hide();			
 			introLogo.hide();//fades out
 			
 			passionSelect.show();
 			passionSelect.addEventListener(PassionSelect.COMPLETE, showColorSelect);
+			passionSelect.addEventListener(PassionSelect.BACK, backToForm);
 		}
 		
 		
-		private function showColorSelect(e:Event):void
+		private function backToForm(e:Event):void
+		{
+			passionSelect.removeEventListener(PassionSelect.BACK, backToForm);
+			passionSelect.hide();
+			buildLogo();
+		}
+		
+		
+		private function showColorSelect(e:Event = null):void
 		{
 			passionSelect.removeEventListener(PassionSelect.COMPLETE, showColorSelect);
 			passionSelect.hide();
 			
 			colorSelect.show();
 			colorSelect.addEventListener(ColorSelect.COMPLETE, showGlasses);
+			colorSelect.addEventListener(ColorSelect.BACK, backToPassion);
+		}
+		
+		
+		private function backToPassion(e:Event):void
+		{
+			colorSelect.removeEventListener(ColorSelect.COMPLETE, showGlasses);
+			colorSelect.removeEventListener(ColorSelect.BACK, backToPassion);
+			colorSelect.hide();
+			choosePassion();
 		}
 		
 		
@@ -130,6 +175,7 @@ package com.gmrmarketing.miller.stc
 			
 			challenge.show(bg.getBG());
 			challenge.addEventListener(Challenge.COMPLETE, showResults);
+			challenge.addEventListener(Challenge.BACK, backToColor);
 			
 			topContainer.scaleX = topContainer.scaleY = .485;
 			topContainer.x = 565;
@@ -139,15 +185,27 @@ package com.gmrmarketing.miller.stc
 			introLogo.show();
 		}
 		
+		private function backToColor(e:Event):void
+		{
+			introLogo.hide();
+			challenge.hide();
+			challenge.removeEventListener(Challenge.COMPLETE, showResults);
+			challenge.removeEventListener(Challenge.BACK, backToColor);
+			showColorSelect();
+		}
 		
 		private function showResults(e:Event):void
 		{
 			challenge.removeEventListener(Challenge.COMPLETE, showResults);
+			challenge.removeEventListener(Challenge.BACK, backToColor);
 			introLogo.hide();
 			challenge.hide();
 			
+			var userData:Object = data.entryData; //Object with Gender,MobilePhone,FirstName keys
+			userData.DOB = tapToBegin.dob;
+			
 			results.show(challenge.clicked, passionSelect.passion);//l or r, sports or music
-			dataPost.post(challenge.clicked, passionSelect.passion, data.entryData);
+			dataPost.post(challenge.clicked, passionSelect.passion, userData);
 			TweenMax.delayedCall(1, showLogoOnPhone);
 		}
 		
@@ -168,6 +226,12 @@ package com.gmrmarketing.miller.stc
 			results.hide();
 			introLogo.hide();
 			init();
+		}
+		
+		
+		private function quitApp(e:Event):void
+		{
+			NativeApplication.nativeApplication.exit();
 		}
 	}
 	

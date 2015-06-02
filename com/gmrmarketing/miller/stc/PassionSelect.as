@@ -9,6 +9,7 @@ package com.gmrmarketing.miller.stc
 	public class PassionSelect extends EventDispatcher
 	{
 		public static const COMPLETE:String = "complete";
+		public static const BACK:String = "passionBack";
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		private var myPassion:String;//user selection - sports,music
@@ -48,13 +49,21 @@ package com.gmrmarketing.miller.stc
 			
 			clip.sports.addEventListener(MouseEvent.MOUSE_DOWN, sportsSelect);
 			clip.music.addEventListener(MouseEvent.MOUSE_DOWN, musicSelect);
+			clip.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, passionBack);
 			
 			myContainer.addEventListener(Event.ENTER_FRAME, rotateCap);
 		}
 		
 		
+		private function passionBack(e:MouseEvent):void
+		{
+			dispatchEvent(new Event(BACK));//back to form in main
+		}
+		
+		
 		public function hide():void
 		{
+			clip.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, passionBack);
 			myContainer.removeEventListener(Event.ENTER_FRAME, rotateCap);
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
@@ -111,7 +120,19 @@ package com.gmrmarketing.miller.stc
 			clip.titleText.scaleX = 0;
 			TweenMax.to(clip.titleText, .5, { scaleX:1, ease:Back.easeOut } );
 			
+			clip.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, passionBack);			
+			clip.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, backToPassion);
+			
 			myContainer.stage.addEventListener(MouseEvent.MOUSE_DOWN, capClicked);
+		}
+		
+		
+		private function backToPassion(e:MouseEvent):void
+		{
+			e.stopImmediatePropagation();
+			myContainer.stage.removeEventListener(MouseEvent.MOUSE_DOWN, capClicked);
+			clip.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, backToPassion);
+			show();
 		}
 		
 		

@@ -36,11 +36,13 @@ package com.gmrmarketing.empirestate.ilny
 			nameIndex = 0;
 			var fName:String;
 			for (var i:int = 0; i < files.length; i++) {
-				images.push(files[i].nativePath);
-				
-				fName = files[i].name;
-				fName = fName.substr(0, fName.length - 4);				
-				names.push(fName);
+				if(String(files[i].name).indexOf(".jpg") != -1){
+					images.push(files[i].nativePath);
+					
+					fName = files[i].name;
+					fName = fName.substr(0, fName.length - 4);				
+					names.push(fName);
+				}
 			}
 		}
 		
@@ -86,6 +88,7 @@ package com.gmrmarketing.empirestate.ilny
 				var im:String = images.shift();
 				var l:Loader = new Loader();
 				l.contentLoaderInfo.addEventListener(Event.COMPLETE, imageLoaded, false, 0, true);
+				l.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, imageError, false, 0, true);
 				l.load(new URLRequest(im));
 			}else {
 				loaded = true;
@@ -102,7 +105,10 @@ package com.gmrmarketing.empirestate.ilny
 			loadNextImage();
 		}
 		
-		
+		private function imageError(e:IOErrorEvent):void
+		{
+			trace("image error",e.toString());
+		}
 		private function play():void
 		{			
 			kb.show();

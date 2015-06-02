@@ -16,47 +16,50 @@
  * fs01\IT\GMRdigital\FlashClasses\FlashSource\AgeGateSpinner.fla
  */
 
-package com.gmrmarketing.utilities
-{
-	import flash.display.DisplayObjectContainer;
-	import flash.display.MovieClip;
-	import flash.display.Sprite;
-	import flash.events.Event;
-	import flash.events.MouseEvent;
-	import flash.geom.Matrix;
-	import flash.geom.Rectangle;
+package com.gmrmarketing.miller.stc
+{	
+	import flash.display.*;
+	import flash.events.*;
+	import flash.geom.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	
 	
 	public class Spinner
 	{
-		private const CENTER_Y:Number = 59; //vertical center of the spinner - ie where the marker is
-		private const CHOICE_TEXT_FIELD_HEIGHT:int = 25; //height of each choice in the list - with any buffer
+		private const CENTER_Y:Number = 145; //vertical center of the spinner - ie where the marker is
+		private const CHOICE_TEXT_FIELD_HEIGHT:int = 60; //height of each choice in the list - with any buffer
 		
 		private var myChoices:Array;
 		private var spinner:MovieClip;
 		private var choicesContainer:Sprite;//contains the text fields for the array of choices
-		private var container:DisplayObjectContainer; //user specified container for the spinner
+		private var myContainer:DisplayObjectContainer; //user specified container for the spinner
 		private var offsetY:Number;
 		private var choicesOffset:Number;		
-		private var lastMousePos:Number;
-		private var mouseDelta:Number;		
-		private var target:Sprite;
-		
+		private var lastMousePos:Number;//used for calculating mouseDelta
+		private var mouseDelta:Number;	//the between frame mouse speed	
+		private var target:Sprite;		
 		
 		
 		public function Spinner():void
 		{
+			
 			choicesContainer = new Sprite();
 			spinner = new spinClip();
 			//places choiceContainer above the spinners background
-			spinner.addChildAt(choicesContainer, 1);				
+			spinner.addChildAt(choicesContainer, 1);
+		}
+		
+		
+		public function set container(c:DisplayObjectContainer):void
+		{
+			myContainer = c;
 		}
 		
 		
 		/**
 		 * Sets the choices available in the spinner window
+		 * adds each item to the choicesContainer
 		 * @param	choices Array of Strings
 		 */
 		public function setChoices(choices:Array):void
@@ -68,10 +71,13 @@ package com.gmrmarketing.utilities
 				//must contain a dynamic text field with an instance name of theText
 				var ch:MovieClip = new spinChoice();
 				ch.theText.text = choices[i];
-				ch.x = 24;//dependent on the spinClip asset
+				ch.x = 35;//dependent on the spinClip asset
 				ch.y = i * CHOICE_TEXT_FIELD_HEIGHT;
+				ch.cacheAsBitmap = true;
 				choicesContainer.addChild(ch);			
 			}
+			choicesContainer.cacheAsBitmap = true;
+			spinner.theMask.cacheAsBitmap = true;
 			choicesContainer.mask = spinner.theMask;			
 		}
 		
@@ -93,15 +99,15 @@ package com.gmrmarketing.utilities
 		 * @param	xLoc
 		 * @param	yLoc
 		 */
-		public function show($container:DisplayObjectContainer = null, xLoc:int = 0, yLoc:int = 0):void
+		public function show(xLoc:int = 0, yLoc:int = 0):void
 		{
-			if($container != null){
-				container = $container;
-				spinner.x = xLoc;
-				spinner.y = yLoc;
+			spinner.x = xLoc;
+			spinner.y = yLoc;
+			
+			if (!myContainer.contains(spinner)) {
+				myContainer.addChild(spinner);
 			}
-			container.addChild(spinner);			
-			enable();
+			spinner.addEventListener(MouseEvent.MOUSE_DOWN, beginDrag, false, 0, true);
 		}
 		
 		
@@ -110,30 +116,12 @@ package com.gmrmarketing.utilities
 		 */
 		public function hide():void
 		{
-			if(container.contains(spinner)){
-				container.removeChild(spinner);
+			if(myContainer.contains(spinner)){
+				myContainer.removeChild(spinner);
 			}
-			disable();
-		}
-		
-		
-		/**
-		 * Enables the spinner
-		 */
-		public function enable():void
-		{
-			spinner.addEventListener(MouseEvent.MOUSE_DOWN, beginDrag, false, 0, true);
-		}
-		
-		
-		/**
-		 * Disables the spinner
-		 */
-		public function disable():void
-		{
 			spinner.removeEventListener(MouseEvent.MOUSE_DOWN, beginDrag);
-		}		
-		
+		}
+	
 		
 		/**
 		 * Returns the string of the chosen item
@@ -159,26 +147,34 @@ package com.gmrmarketing.utilities
 		}
 		
 		
-		
-		
-		
-		
-		// PRIVATE
-		
 		/**
-		 * Called on MouseDown
+		 * Sets the spinner to the indicated choice
+		 * @param	choice
+		 */
+		public function setStringChoice(choice:String):void
+		{
+			var ind:int = myChoices.indexOf(choice);
+			if (ind != -1) {
+				choicesContainer.y = CENTER_Y - (ind * CHOICE_TEXT_FIELD_HEIGHT) - (CHOICE_TEXT_FIELD_HEIGHT * .5);
+			}
+		}
+		
+		
+		
+		// PRIVATE		
+		/**
+		 * Called on MouseDown on the Spinner
 		 * @param	e
 		 */
 		private function beginDrag(e:MouseEvent):void
-		{			
-			//target is the choices container (Sprite) in the clicked on spinner
-			target = Sprite(MovieClip(e.currentTarget).getChildAt(1));
+		{
+			mouseDelta = 0;
+			lastMousePos = myContainer.mouseY;
+			offsetY = myContainer.mouseY;
+			choicesOffset = choicesContainer.y;
 			
-			lastMousePos = container.mouseY;
-			offsetY = container.mouseY;
-			choicesOffset = target.y;
-			target.addEventListener(Event.ENTER_FRAME, mouseMove, false, 0, true);			
-			target.stage.addEventListener(MouseEvent.MOUSE_UP, endDrag, false, 0, true);
+			myContainer.addEventListener(Event.ENTER_FRAME, mouseMove, false, 0, true);			
+			myContainer.stage.addEventListener(MouseEvent.MOUSE_UP, endDrag, false, 0, true);
 		}
 		
 		
@@ -188,11 +184,11 @@ package com.gmrmarketing.utilities
 		 * @param	e
 		 */
 		private function mouseMove(e:Event):void
-		{			
-			target.y = container.mouseY - offsetY + choicesOffset;			
+		{
+			choicesContainer.y = myContainer.mouseY - offsetY + choicesOffset;			
 			checkPos();			
-			mouseDelta = container.mouseY - lastMousePos;
-			lastMousePos = container.mouseY;
+			mouseDelta = myContainer.mouseY - lastMousePos;//per frame mouse speed
+			lastMousePos = myContainer.mouseY;
 		}
 		
 		
@@ -202,13 +198,18 @@ package com.gmrmarketing.utilities
 		 * @param	e
 		 */
 		private function endDrag(e:MouseEvent):void
-		{	
-			if (target != null) {
-				target.removeEventListener(Event.ENTER_FRAME, mouseMove);
-				target.stage.removeEventListener(MouseEvent.MOUSE_UP, endDrag);
-				var scrollDist:Number = Math.round((target.y + (mouseDelta * 8)) / CHOICE_TEXT_FIELD_HEIGHT) * CHOICE_TEXT_FIELD_HEIGHT;			
-				TweenMax.to(target, 1, { y:scrollDist, onUpdate:checkPos } );			
-			}
+		{
+			myContainer.removeEventListener(Event.ENTER_FRAME, mouseMove);
+			myContainer.stage.removeEventListener(MouseEvent.MOUSE_UP, endDrag);
+			
+			//if(Math.abs(mouseDelta) > 10){
+				var scrollDist:Number = Math.round((choicesContainer.y + (mouseDelta * 10)) / CHOICE_TEXT_FIELD_HEIGHT) * CHOICE_TEXT_FIELD_HEIGHT;			
+				//var scrollDist:Number = Math.round((mouseDelta * 10) / CHOICE_TEXT_FIELD_HEIGHT) * CHOICE_TEXT_FIELD_HEIGHT;			
+				TweenMax.to(choicesContainer, 1, { y:scrollDist, onUpdate:checkPos } );	
+				//TweenMax.to(choicesContainer, 1, { y:String(scrollDist), onUpdate:checkPos } );	
+			//}
+			
+			mouseDelta = 0;
 		}
 		
 		
@@ -216,15 +217,20 @@ package com.gmrmarketing.utilities
 		 * Limits dragging the vertical extents of the spinner past the midpoint marker
 		 */
 		private function checkPos():void
-		{			
-			if (target.y + target.height < CENTER_Y + 10) {
-				target.y = CENTER_Y - target.height + 10;
-				TweenMax.killTweensOf(target);
+		{	
+			var theY:int;
+			if (choicesContainer.y + choicesContainer.height < CENTER_Y + (CHOICE_TEXT_FIELD_HEIGHT * .5)) {				
+				theY = CENTER_Y - (CHOICE_TEXT_FIELD_HEIGHT * myChoices.length) + (CHOICE_TEXT_FIELD_HEIGHT * .5);
+				TweenMax.killTweensOf(choicesContainer);
+				TweenMax.to(choicesContainer, .5, { y:theY } );
+				//choicesContainer.y = theY;
 			}
 			
-			if (target.y > CENTER_Y - 10) {
-				target.y = CENTER_Y - 10;
-				TweenMax.killTweensOf(target);
+			if (choicesContainer.y > CENTER_Y - (CHOICE_TEXT_FIELD_HEIGHT * .5)) {
+				theY = CENTER_Y - (CHOICE_TEXT_FIELD_HEIGHT * .5);
+				TweenMax.killTweensOf(choicesContainer);
+				TweenMax.to(choicesContainer, .5, { y:theY } );
+				//choicesContainer.y = theY;
 			}
 		}
 	}

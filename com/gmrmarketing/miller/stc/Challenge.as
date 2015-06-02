@@ -14,6 +14,7 @@ package com.gmrmarketing.miller.stc
 	public class Challenge extends EventDispatcher
 	{	
 		public static const COMPLETE:String = "complete";
+		public static const BACK:String = "challenBack";
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		
@@ -77,6 +78,7 @@ package com.gmrmarketing.miller.stc
 			myContainer.addEventListener(Event.ENTER_FRAME, rotateCap);
 			clip.pintL.addEventListener(MouseEvent.MOUSE_DOWN, lPintClicked);
 			clip.pintR.addEventListener(MouseEvent.MOUSE_DOWN, rPintClicked);
+			clip.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, goBack);
 		}
 		
 		
@@ -98,12 +100,19 @@ package com.gmrmarketing.miller.stc
 		{
 			clip.pintL.removeEventListener(MouseEvent.MOUSE_DOWN, lPintClicked);
 			clip.pintR.removeEventListener(MouseEvent.MOUSE_DOWN, rPintClicked);
+			clip.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, goBack);
 			myContainer.removeEventListener(Event.ENTER_FRAME, rotateCap);
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
 			}
 			bgRight.filters = [];
 			bgLeft.filters = [];
+		}
+		
+		
+		private function goBack(e:MouseEvent):void
+		{
+			dispatchEvent(new Event(BACK));
 		}
 		
 		

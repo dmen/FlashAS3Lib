@@ -72,6 +72,8 @@ package com.dmennenoh.keyboard
 		private var enabled:Boolean; //true if the kbd is enabled - true by default - checked in keypress()
 		
 		private var lastKey:Key; //reference to the last Key object pressed
+		
+		
 		/**
 		 * Constructor
 		 */
@@ -137,7 +139,7 @@ package com.dmennenoh.keyboard
 		 * Sets the list of fields that can be edited
 		 * Turns on focus checking
 		 * 
-		 * @param	fields Array of TextField objects
+		 * @param	fields Array of arrays - sub arrays are [fieldReference, maxChars]
 		 */
 		public function setFocusFields(fields:Array):void
 		{
@@ -145,6 +147,7 @@ package com.dmennenoh.keyboard
 			for (var i:int = 0; i < fields.length; i++){
 				focusFields.push(fields[i][0]);
 				TextField(fields[i][0]).maxChars = fields[i][1];
+				TextField(fields[i][0]).addEventListener(MouseEvent.MOUSE_DOWN, focusChanged, false, 0, true);
 			}
 			targetField = focusFields[0];
 			/*
@@ -153,6 +156,19 @@ package com.dmennenoh.keyboard
 			}
 			*/
 			focusTimer.start();//calls autoFocus()
+		}
+		
+		
+		/**
+		 * Switches the focus to the field pressed by the user
+		 * @param	e
+		 */		
+		private function focusChanged(e:MouseEvent):void
+		{
+			var t:TextField = TextField(e.currentTarget);
+			var curInd:int = focusFields.indexOf(t);			
+			targetField = focusFields[curInd];
+			t.stage.focus = targetField;
 		}
 		
 		
@@ -408,10 +424,15 @@ package com.dmennenoh.keyboard
 							}
 						}
 					}
+					//autoTab?
+					if (targetField.length == targetField.maxChars) {
+						tabToNextField();
+					}
 				}
 				//targetField.setSelection(targetField.selectionEndIndex, targetField.selectionEndIndex);				
 				dispatchEvent(new Event(KBD));
-			}
+				
+			}//enabled
 		}
 		
 		

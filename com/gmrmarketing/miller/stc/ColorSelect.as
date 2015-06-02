@@ -9,6 +9,7 @@ package com.gmrmarketing.miller.stc
 	public class ColorSelect extends EventDispatcher
 	{	
 		public static const COMPLETE:String = "complete";
+		public static const BACK:String = "colorBack";
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		
@@ -63,6 +64,7 @@ package com.gmrmarketing.miller.stc
 			
 			clip.beerL.addEventListener(MouseEvent.MOUSE_DOWN, beerSelect);
 			clip.beerR.addEventListener(MouseEvent.MOUSE_DOWN, beerSelect);
+			clip.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, goBack);
 			
 			myContainer.addEventListener(Event.ENTER_FRAME, rotateCap);
 		}
@@ -70,12 +72,20 @@ package com.gmrmarketing.miller.stc
 		
 		public function hide():void
 		{
+			clip.beerL.removeEventListener(MouseEvent.MOUSE_DOWN, beerSelect);
+			clip.beerR.removeEventListener(MouseEvent.MOUSE_DOWN, beerSelect);
 			myContainer.removeEventListener(Event.ENTER_FRAME, rotateCap);
+			clip.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, goBack);
+			
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
 			}
 		}
 		
+		private function goBack(e:MouseEvent):void
+		{			
+			dispatchEvent(new Event(BACK));
+		}
 		
 		private function rotateCap(e:Event):void
 		{
@@ -84,9 +94,7 @@ package com.gmrmarketing.miller.stc
 		
 		
 		private function beerSelect(e:MouseEvent):void
-		{
-			clip.beerL.removeEventListener(MouseEvent.MOUSE_DOWN, beerSelect);
-			clip.beerR.removeEventListener(MouseEvent.MOUSE_DOWN, beerSelect);
+		{	
 			dispatchEvent(new Event(COMPLETE));
 		}
 		

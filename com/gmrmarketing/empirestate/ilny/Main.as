@@ -15,6 +15,7 @@ package com.gmrmarketing.empirestate.ilny
 		private var bgContainer:Sprite;
 		private var mainContainer:Sprite;
 		private var cornerContainer:Sprite;
+		//private var lbContainer:Sprite;//letterbox bars container - for on Surface
 		private var bg:Background;
 		private var intro:Intro;
 		private var map:Map;
@@ -59,6 +60,27 @@ package com.gmrmarketing.empirestate.ilny
 			
 			cornerContainer = new Sprite();
 			addChild(cornerContainer);
+			
+			/*
+			lbContainer = new Sprite();
+			addChild(lbContainer);
+			
+			//shapes to cover the letterbox areas
+			var b1:Sprite = new Sprite();
+			b1.graphics.beginFill(0x000000, 1);
+			b1.graphics.drawRect(0, 0, 1920, 400);
+			b1.graphics.endFill();
+			b1.y = -400;
+			
+			var b2:Sprite = new Sprite();
+			b2.graphics.beginFill(0x000000, 1);
+			b2.graphics.drawRect(0, 0, 1920, 400);
+			b2.graphics.endFill();
+			b2.y = 1080;
+			
+			lbContainer.addChild(b1);
+			lbContainer.addChild(b2);			
+			*/
 			
 			intro = new Intro();
 			intro.container = mainContainer;

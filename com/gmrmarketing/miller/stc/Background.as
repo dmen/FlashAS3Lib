@@ -45,6 +45,8 @@ package com.gmrmarketing.miller.stc
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
+			clip.cacheAsBitmap = true;
+			clip.light.cacheAsBitmap = true;
 			myContainer.addEventListener(Event.ENTER_FRAME, updateLight);
 		}
 		

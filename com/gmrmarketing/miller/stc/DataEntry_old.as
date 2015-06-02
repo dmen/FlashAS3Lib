@@ -12,7 +12,6 @@ package com.gmrmarketing.miller.stc
 	public class DataEntry extends EventDispatcher
 	{
 		public static const COMPLETE:String = "dataComplete";
-		public static const BACK:String = "dataBack";
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		private var kbd:KeyBoard;
@@ -25,7 +24,7 @@ package com.gmrmarketing.miller.stc
 			kbd.loadKeyFile("kbd3.xml");			
 			kbd.x = 320;
 			kbd.y = 500;
-			kbd.setFocusFields([[clip.phone.p1,3], [clip.phone.p2,3], [clip.phone.p3,4], [clip.fname.theName, 40]]);
+			kbd.setFocusFields([[clip.bDay.theMonth,2], [clip.bDay.theDay,2], [clip.bDay.theYear,4], [clip.phone.p1,3], [clip.phone.p2,3], [clip.phone.p3,4], [clip.fname.theName, 40]]);
 		}
 		
 		
@@ -59,12 +58,22 @@ package com.gmrmarketing.miller.stc
 			
 			clip.bars.scaleX = clip.bars.scaleY = 0;
 			clip.getYour.scaleY = 0;//text between the bars
-			clip.winOriginal.scaleX = 0;			
+			clip.winOriginal.scaleX = 0;
 			
+			clip.bDay.scaleX = 0;
 			clip.phone.scaleX = 0;
 			clip.gender.scaleX = 0;
 			clip.submit.scaleX = clip.submit.scaleY = 0;
 			clip.fname.scaleX = 0;
+			//clip.whiteLines.scaleY = 0;
+			//clip.whiteLines.alpha = 1;
+			
+			clip.bDay.theMonth.text = "";
+			clip.bDay.theDay.text = "";
+			clip.bDay.theYear.text = "";
+			clip.bDay.theMonth.restrict = "0-9";
+			clip.bDay.theDay.restrict = "0-9";
+			clip.bDay.theYear.restrict = "0-9";
 			
 			clip.phone.p1.text = "";
 			clip.phone.p2.text = "";
@@ -91,28 +100,31 @@ package com.gmrmarketing.miller.stc
 			TweenMax.to(clip.bars, .5, { scaleY:1, ease:Back.easeInOut, delay:.3 } );
 			
 			TweenMax.to(clip.getYour, .5, { scaleY:1, ease:Back.easeOut, delay:.8 } );
-			TweenMax.to(clip.winOriginal, .5, { scaleX:1, ease:Back.easeOut, delay:.9 } );			
+			TweenMax.to(clip.winOriginal, .5, { scaleX:1, ease:Back.easeOut, delay:.9 } );
 			
+			TweenMax.to(clip.bDay, .25, { scaleX:1, delay:1.4, ease:Back.easeOut } );
 			TweenMax.to(clip.phone, .25, { scaleX:1, delay:1.5, ease:Back.easeOut } );
 			TweenMax.to(clip.fname, .25, { scaleX:1, delay:1.6, ease:Back.easeOut } );
 			TweenMax.to(clip.gender, .25, { scaleX:1, delay:1.7, ease:Back.easeOut } );
-			TweenMax.to(clip.submit, .3, { scaleX:1, scaleY:1, delay:1.8, ease:Bounce.easeOut } );			
+			TweenMax.to(clip.submit, .3, { scaleX:1, scaleY:1, delay:1.8, ease:Bounce.easeOut } );
 			
-			clip.ac.visible = true;
+			clip.mm.mouseChildren = false;
+			clip.mm.mouseEnabled = false;
+			clip.dd.mouseChildren = false;
+			clip.dd.mouseEnabled = false;
+			clip.yyyy.mouseChildren = false;
+			clip.yyyy.mouseEnabled = false;
 			clip.ac.mouseChildren = false;
 			clip.ac.mouseEnabled = false;
-			clip.pref.visible = true;
 			clip.pref.mouseChildren = false;
 			clip.pref.mouseEnabled = false;
-			clip.four.visible = true;
 			clip.four.mouseChildren = false;
 			clip.four.mouseEnabled = false;
-			clip.nam.visible = true;
 			clip.nam.mouseChildren = false;
 			clip.nam.mouseEnabled = false;
 			
 			clip.addEventListener(MouseEvent.MOUSE_DOWN, showKBD);
-			clip.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, goBack);
+			
 			clip.addEventListener(Event.ENTER_FRAME, checkPreFilleds);
 		}
 		
@@ -121,7 +133,6 @@ package com.gmrmarketing.miller.stc
 		{			
 			clip.submit.removeEventListener(MouseEvent.MOUSE_DOWN, checkForm);
 			clip.removeEventListener(Event.ENTER_FRAME, checkPreFilleds);
-			clip.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, goBack);
 			
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
@@ -131,14 +142,21 @@ package com.gmrmarketing.miller.stc
 			}
 		}
 		
-		private function goBack(e:MouseEvent):void
-		{
-			e.stopImmediatePropagation();
-			dispatchEvent(new Event(BACK));
-		}
 		
 		private function checkPreFilleds(e:Event):void
-		{			
+		{
+			if (clip.stage.focus == clip.bDay.theMonth) {
+				clip.mm.visible = false;
+				checkOtherPreFilleds(clip.bDay.theMonth);
+			}
+			if (clip.stage.focus == clip.bDay.theDay) {
+				clip.dd.visible = false;
+				checkOtherPreFilleds(clip.bDay.theDay);
+			}
+			if (clip.stage.focus == clip.bDay.theYear) {
+				clip.yyyy.visible = false;
+				checkOtherPreFilleds(clip.bDay.theYear);
+			}
 			if (clip.stage.focus == clip.phone.p1) {
 				clip.ac.visible = false;
 				checkOtherPreFilleds(clip.phone.p1);
@@ -160,7 +178,7 @@ package com.gmrmarketing.miller.stc
 		
 		private function checkOtherPreFilleds(current:TextField = null):void
 		{
-			var a:Array = [[clip.ac, clip.phone.p1], [clip.pref, clip.phone.p2], [clip.four, clip.phone.p3], [clip.nam, clip.fname.theName]];
+			var a:Array = [[clip.mm, clip.bDay.theMonth], [clip.dd, clip.bDay.theDay], [clip.yyyy, clip.bDay.theYear], [clip.ac, clip.phone.p1], [clip.pref, clip.phone.p2], [clip.four, clip.phone.p3], [clip.nam, clip.fname.theName]];
 			for (var i:int = 0; i < a.length; i++) {
 				if (current != a[i][1]) {
 					if (TextField(a[i][1]).text == "") {
@@ -180,7 +198,7 @@ package com.gmrmarketing.miller.stc
 				myContainer.addChild(kbd);				
 			}
 			kbd.alpha = 0;
-			kbd.setFocus(0);//set focus to first field in the list
+			//kbd.setFocus(0);//set focus to first field in the list
 			TweenMax.to(kbd, .3, { alpha:1, scaleY:1, ease:Back.easeOut} );
 			TweenMax.to(clip.kbdBG, 1, { alpha:.9, delay:.2} );			
 			
@@ -207,7 +225,11 @@ package com.gmrmarketing.miller.stc
 		private function checkForm(e:MouseEvent):void
 		{			
 			TweenMax.to(clip.submit, 0, {colorTransform:{tint:0xffffff, tintAmount:.9}});
-			TweenMax.to(clip.submit, .75, {colorTransform:{tint:0xffffff, tintAmount:0}, delay:.2});			
+			TweenMax.to(clip.submit, .75, {colorTransform:{tint:0xffffff, tintAmount:0}, delay:.2});
+			
+			var m:int = parseInt(clip.bDay.theMonth.text);
+			var d:int = parseInt(clip.bDay.theDay.text);
+			var y:int = parseInt(clip.bDay.theYear.text);
 			
 			var p1:String = clip.phone.p1.text;
 			var p2:String = clip.phone.p2.text;
@@ -220,12 +242,32 @@ package com.gmrmarketing.miller.stc
 				sex = "F";
 			}
 			
-			if (p1.length != 3 || p2.length != 3 || p3.length != 4) {
+			var bday:Date = new Date(y, m-1, d);
+			var now:Date = new Date();
+			var age:int = now.fullYear - bday.fullYear;
+			if(now.month < bday.month){
+				age--;
+			}
+			if(now.month == bday.month){
+				if(now.date < bday.date){
+					age--;
+				}
+			}
+			
+			if (m < 1 || m > 12 || d < 1 || d > 31 || y < 1915 || y > 2015) {
+				clip.theError.text = "Please enter a\nvalid birthday.";
+				clip.theError.alpha = 1;
+				TweenMax.to(clip.theError, 1, { alpha:0, delay:2 } );
+			}else if (p1.length != 3 || p2.length != 3 || p3.length != 4) {
 				clip.theError.text = "Please enter a\nvalid phone number.";
 				clip.theError.alpha = 1;
 				TweenMax.to(clip.theError, 1, { alpha:0, delay:2 } );
 			}else if (sex == "") {
 				clip.theError.text = "Please select\nyour gender.";
+				clip.theError.alpha = 1;
+				TweenMax.to(clip.theError, 1, { alpha:0, delay:2 } );
+			}else if (age < 21) {
+				clip.theError.text = "You must be at least\n21 to participate.";
 				clip.theError.alpha = 1;
 				TweenMax.to(clip.theError, 1, { alpha:0, delay:2 } );
 			}else if (clip.fname.theName.text == "") {
@@ -241,7 +283,7 @@ package com.gmrmarketing.miller.stc
 		
 		public function get entryData():Object
 		{
-			var o:Object = {};
+			var o:Object = { DOB:clip.bDay.theYear.text + "-" + clip.bDay.theMonth.text + "-" + clip.bDay.theDay.text };
 			if (clip.gender.male.currentFrame == 2) {
 				o.Gender = "M";
 			}else {

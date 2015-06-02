@@ -49,13 +49,13 @@ package com.gmrmarketing.miller.stc
 		private function dataPosted(e:Event):void
 		{
 			var j:Object = JSON.parse(e.currentTarget.data);
-			trace("dataPosted", j);
+			//trace("dataPosted", j);
 		}
 		
 		
 		private function dataError(e:IOErrorEvent = null):void
 		{
-			trace("DataError:", e.toString());
+			//trace("DataError:", e.toString());
 		}
 	}
 	
