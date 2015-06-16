@@ -34,25 +34,25 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			myContainer = c;
 		}
 		
-		
-		public function show(pics:Array):void//email:Boolean
+		//pics:Array
+		public function show(email:Boolean):void
 		{
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
 			
-			//if (email) {
-				//clip.theText.text = "Your photo has printed and will be\nemailed to you shortly";
-				//clip.exit.y = 612;
-			//}else {
+			if (email) {
+				clip.theText.text = "Your photo has printed and will be\nemailed to you shortly";
+				clip.exit.y = 612;
+			}else {
 				clip.theText.text = "Your photo has printed";
 				clip.exit.y = 532;
-			//}
+			}
 			
 			/**
 			 * Start moved from Print.as
 			 */
-			var pic:BitmapData;
+			/*var pic:BitmapData;
 			var m:Matrix = new Matrix();
 			//600 x 1800 (2"x6") from library
 			printImage = new printHolder();
@@ -78,7 +78,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			//pic 3
 			pic.draw(pics[2], m, null, null, null, true);
 			printImage.copyPixels(pic, pic.rect, new Point(66, 1115));
-			
+			*/
 			/**
 			 * End Moved from Print.as
 			 */
@@ -100,7 +100,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		
 		private function showing():void
 		{
-			beginPrint();//was in Print.showing()
+			//beginPrint();//was in Print.showing()
 			
 			clip.addEventListener(Event.ENTER_FRAME, updateGlow);			
 			dispatchEvent(new Event(SHOWING));
@@ -121,7 +121,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			TweenMax.to(clip.year, 0, { glowFilter: { color:0xff9999, alpha:.2 + Math.random()*.8, blurX:5, blurY:5 } } );
 		}
 		
-		
+		/*
 		private function beginPrint():void 
 		{			
             var printJob:PrintJob = new PrintJob();           
@@ -154,7 +154,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 					dispatchEvent(new Event(SEND_ERROR));   
 				}				
 		   }
-		}
+		}*/
 	}
 	
 }

@@ -14,9 +14,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		private var ageGate:AgeGate;
 		private var takePhoto:TakePhoto;
 		private var review:Review;
-		private var receive:Receive;
-		private var emp:EmailPhone;
-		private var emReview:EmailReview;
+		private var email:Email;
 		private var thanks:Thanks;
 		
 		private var mainContainer:Sprite;
@@ -35,7 +33,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			//Mouse.hide();
+			Mouse.hide();
 			
 			mainContainer = new Sprite();
 			dripContainer = new Sprite();
@@ -56,14 +54,8 @@ package com.gmrmarketing.miller.gifphotobooth
 			review = new Review();
 			review.container = mainContainer;
 			
-			receive = new Receive();
-			receive.container = mainContainer;
-			
-			emp = new EmailPhone();
-			emp.container = mainContainer;
-			
-			emReview = new EmailReview();
-			emReview.container = mainContainer;
+			email = new Email();
+			email.container = mainContainer;
 			
 			thanks = new Thanks();
 			thanks.container = mainContainer;
@@ -87,13 +79,11 @@ package com.gmrmarketing.miller.gifphotobooth
 			addEventListener(Event.ADDED_TO_STAGE, init);
 		}
 		
-		
 		private function toggleAgeGate(e:Event):void
 		{
 			ageEnabled = !ageEnabled;
 			doReset();
 		}
-		
 		
 		private function init(e:Event = null):void
 		{			
@@ -101,7 +91,6 @@ package com.gmrmarketing.miller.gifphotobooth
 			intro.addEventListener(Intro.BEGIN, showAgeGate);
 			intro.show();
 		}
-		
 		
 		private function showAgeGate(e:Event):void
 		{
@@ -139,7 +128,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			
 			review.show(takePhoto.video);//array of bitmapData's
 			review.addEventListener(Review.RETAKE, retakePhotos, false, 0, true);
-			review.addEventListener(Review.NEXT, showReceive, false, 0, true);
+			review.addEventListener(Review.NEXT, showEmail, false, 0, true);
 			drips.bg = review.bg;
 		}
 		
@@ -147,158 +136,37 @@ package com.gmrmarketing.miller.gifphotobooth
 		private function retakePhotos(e:Event):void
 		{
 			review.removeEventListener(Review.RETAKE, retakePhotos);
-			review.removeEventListener(Review.NEXT, showReceive);
+			review.removeEventListener(Review.NEXT, showEmail);
 			review.hide();
 			ageGateComplete();
 		}
 		
 		
-		private function showReceive(e:Event):void
-		{			
+		private function showEmail(e:Event):void
+		{
 			review.removeEventListener(Review.RETAKE, retakePhotos);
-			review.removeEventListener(Review.NEXT, showReceive);
+			review.removeEventListener(Review.NEXT, showEmail);
 			
-			receive.addEventListener(Receive.SHOWING, hideReview, false, 0, true);
-			receive.addEventListener(Receive.COMPLETE, showReceiveChoice, false, 0, true);
-			receive.show();
-			drips.bg = receive.bg;
+			email.addEventListener(Email.SHOWING, hideReview, false, 0, true);
+			email.addEventListener(Email.COMPLETE, showThanks, false, 0, true);
+			email.show();
+			drips.bg = email.bg;
 		}
 		
 		
 		private function hideReview(e:Event):void
 		{
-			receive.removeEventListener(Receive.SHOWING, hideReview);
+			email.removeEventListener(Email.SHOWING, hideReview);
 			review.hide();
-			
-			emp.hide();//in case of back button in emp
-			emp.removeEventListener(EmailPhone.SHOWING, hideReceive);
-			emp.removeEventListener(EmailPhone.BACK, showReceive);
-			emp.removeEventListener(EmailPhone.COMPLETE, empComplete);
-		}
-
-		
-		/**
-		 * called when receive is complete - ie when used picked email,text or both
-		 * @param	e
-		 */
-		private function showReceiveChoice(e:Event = null):void
-		{
-			emReview.removeEventListener(EmailReview.ADD_PERSON, showReceiveChoice);
-			receive.removeEventListener(Receive.SHOWING, hideReview);
-			receive.removeEventListener(Receive.COMPLETE, showReceiveChoice);
-			
-			var c:Object = receive.choice;//object with email,text,both keys - one will be true
-			
-			var choice:String;
-			if (c.email) {
-				choice = "email";
-			}else if (c.text) {
-				choice = "text";
-			}else {
-				choice = "both";
-			}
-			
-			emp.addEventListener(EmailPhone.SHOWING, hideReceive, false, 0, true);
-			emp.addEventListener(EmailPhone.BACK, showReceive, false, 0, true);
-			emp.addEventListener(EmailPhone.COMPLETE, empComplete, false, 0, true);
-			emp.show(choice);
-			drips.bg = emp.bg;
-		}
-		
-		
-		private function hideReceive(e:Event):void
-		{
-			emp.removeEventListener(EmailPhone.SHOWING, hideReceive);
-			receive.hide();
-			emReview.hide();
-		}
-		
-		
-		private function empComplete(e:Event):void
-		{
-			emp.removeEventListener(EmailPhone.SHOWING, hideReceive);
-			emp.removeEventListener(EmailPhone.BACK, showReceive);
-			emp.removeEventListener(EmailPhone.COMPLETE, empComplete);
-			
-			emReview.addEventListener(EmailReview.SHOWING, hideEmp, false, 0, true);
-			emReview.addEventListener(EmailReview.ADD_PERSON, showReceiveChoice, false, 0, true);
-			emReview.addEventListener(EmailReview.COMPLETE, showThanks, false, 0, true);
-			emReview.show(emp.data);
-			drips.bg = emReview.bg;
-		}
-		
-		
-		private function hideEmp(e:Event):void
-		{
-			emReview.removeEventListener(EmailReview.SHOWING, hideEmp);
-			emp.hide();
-		}
-		
-		
-		private function reviewAdd(e:Event):void
-		{
-			emReview.removeEventListener(EmailReview.ADD_PERSON, reviewAdd);
-			emReview.addEventListener(EmailReview.SHOWING, hideEmp);
-			emReview.addEventListener(EmailReview.COMPLETE, showThanks);
-			showReceiveChoice();
 		}
 		
 		
 		private function showThanks(e:Event):void
-		{			
-			emReview.removeEventListener(EmailReview.COMPLETE, showThanks);
+		{
+			email.removeEventListener(Email.COMPLETE, showThanks);
 			thanks.addEventListener(Thanks.COMPLETE, finish, false, 0, true);
 			
-			var data:Array = emp.data; //array of objects
-			
-			var o:Object = { };//for sending to thanks
-			o.email = "";
-			o.phone = "";			
-			o.opt1 = data[0].opt;
-			o.opt2 = false;
-			o.opt3 = false;
-			o.opt4 = false;
-			o.opt5 = false;
-			
-			if (data.length > 1) {
-				o.opt2 = data[1].opt
-			}
-			if (data.length > 2) {
-				o.opt3 = data[2].opt
-			}
-			if (data.length > 3) {
-				o.opt4 = data[3].opt
-			}
-			if (data.length > 4) {
-				o.opt4 = data[4].opt
-			}
-			
-			var emails:Array = [];
-			var phones:Array = [];
-			
-			for (var i:int = 0; i < data.length; i++) {
-				if (data[i].email != "") {
-					emails.push(data[i].email);
-				}
-				if (data[i].phone != "") {
-					phones.push(data[i].phone);
-				}
-			}
-			
-			if (emails.length > 0) {
-				o.email = emails.shift();
-			}
-			while(emails.length) {
-				o.email += "," + emails.shift();
-			}
-			
-			if (phones.length > 0) {
-				o.phone = phones.shift();
-			}
-			while (phones.length) {
-				o.phone += "," + phones.shift();
-			}
-			
+			var o:Object = email.data; //email, phone, opt1, opt2, opt3 keys
 			if(ageEnabled){
 				o.dob = ageGate.dob;
 			}else {
@@ -315,7 +183,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			tim.stopMonitoring();
 			
 			thanks.removeEventListener(Thanks.COMPLETE, finish);
-			emReview.hide();
+			email.hide();
 			drips.pause();
 			
 			if(ageEnabled){
@@ -325,7 +193,6 @@ package com.gmrmarketing.miller.gifphotobooth
 				intro.addEventListener(Intro.BEGIN, ageGateComplete);
 				intro.removeEventListener(Intro.BEGIN, showAgeGate);
 			}
-			emp.clear();
 			intro.addEventListener(Intro.SHOWING, hideThanks, false, 0, true);
 			intro.show();			
 		}
@@ -348,19 +215,11 @@ package com.gmrmarketing.miller.gifphotobooth
 			takePhoto.removeEventListener(TakePhoto.COMPLETE, showReview);
 			takePhoto.hide();
 			review.removeEventListener(Review.RETAKE, retakePhotos);
-			
+			review.removeEventListener(Review.NEXT, showEmail);
 			review.hide();
-			emp.removeEventListener(EmailPhone.SHOWING, hideReceive);
-			emp.removeEventListener(EmailPhone.BACK, showReceive);
-			emp.removeEventListener(EmailPhone.COMPLETE, empComplete);
-			emp.clear();			
-			emp.hide();
-			
-			emReview.removeEventListener(EmailReview.SHOWING, hideEmp);
-			emReview.removeEventListener(EmailReview.ADD_PERSON, showReceiveChoice);
-			emReview.removeEventListener(EmailReview.COMPLETE, showThanks);
-			emReview.hide();
-			
+			email.removeEventListener(Email.SHOWING, hideReview);
+			email.removeEventListener(Email.COMPLETE, showThanks);
+			email.hide();
 			thanks.removeEventListener(Thanks.COMPLETE, finish);
 			thanks.hide();
 			drips.pause();
@@ -372,7 +231,6 @@ package com.gmrmarketing.miller.gifphotobooth
 				intro.addEventListener(Intro.BEGIN, ageGateComplete);
 				intro.removeEventListener(Intro.BEGIN, showAgeGate);
 			}
-			
 			intro.addEventListener(Intro.SHOWING, hideThanks, false, 0, true);
 			intro.show();
 		}

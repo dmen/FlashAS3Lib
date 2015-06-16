@@ -14,7 +14,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 	{
 		private var intro:Intro;
 		private var takePhoto:TakePhoto;
-		//private var print:Print;
+		private var print:Print;
 		private var thanks:Thanks;
 		private var mainContainer:Sprite;
 		private var dustContainer:Sprite;
@@ -45,8 +45,8 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			takePhoto = new TakePhoto();
 			takePhoto.container = mainContainer;
 			
-			//print = new Print();
-			//print.container = mainContainer;
+			print = new Print();
+			print.container = mainContainer;
 			
 			thanks = new Thanks();
 			thanks.container = mainContainer;
@@ -79,7 +79,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			takePhoto.show();
 			takePhoto.addEventListener(TakePhoto.SHOWING, hideIntro);
 			takePhoto.addEventListener(TakePhoto.CANCEL, cancelPhoto);
-			takePhoto.addEventListener(TakePhoto.PRINT, showThanks);// printPhoto);
+			takePhoto.addEventListener(TakePhoto.PRINT, printPhoto);// showThanks);// printPhoto);
 			
 			tim.startMonitoring();
 		}
@@ -96,12 +96,12 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		{
 			takePhoto.removeEventListener(TakePhoto.SHOWING, hideIntro);
 			takePhoto.removeEventListener(TakePhoto.CANCEL, cancelPhoto);
-			takePhoto.removeEventListener(TakePhoto.PRINT, showThanks);// printPhoto);
+			takePhoto.removeEventListener(TakePhoto.PRINT, printPhoto);// showThanks);// printPhoto);
 			takePhoto.hide();
 			init();
 		}
 		
-		/*
+		
 		private function printPhoto(e:Event):void
 		{
 			var pics:Array = takePhoto.getPhotos();//three 750x750 BMD's
@@ -110,13 +110,12 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			print.addEventListener(Print.COMPLETE_EMAIL, showThanksEmail);
 			print.addEventListener(Print.COMPLETE, showThanks);
 			print.show(pics);
-		}
-		*/
+		}		
 		
 		
 		private function hideTakePhoto(e:Event):void
 		{
-			//print.removeEventListener(Print.SHOWING, hideTakePhoto);
+			print.removeEventListener(Print.SHOWING, hideTakePhoto);
 			thanks.removeEventListener(Thanks.SHOWING, hideTakePhoto);
 			takePhoto.hide();
 		}
@@ -126,16 +125,16 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		{
 			var pics:Array = takePhoto.getPhotos();//three 750x750 BMD's
 			
-			//print.removeEventListener(Print.COMPLETE, showThanks);
-			//print.removeEventListener(Print.COMPLETE_EMAIL, showThanksEmail);
+			print.removeEventListener(Print.COMPLETE, showThanks);
+			print.removeEventListener(Print.COMPLETE_EMAIL, showThanksEmail);
 			
-			//thanks.addEventListener(Thanks.SHOWING, hidePrint);
-			thanks.addEventListener(Thanks.SHOWING, hideTakePhoto);
+			thanks.addEventListener(Thanks.SHOWING, hidePrint);
+			//thanks.addEventListener(Thanks.SHOWING, hideTakePhoto);
 			thanks.addEventListener(Thanks.COMPLETE, thanksComplete);	
-			thanks.show(pics);
+			thanks.show(false);
 		}
 		
-		/*
+		
 		private function showThanksEmail(e:Event):void
 		{
 			print.removeEventListener(Print.COMPLETE, showThanks);
@@ -165,7 +164,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 			thanks.removeEventListener(Thanks.SHOWING, hidePrint);
 			print.hide();
 		}
-		*/
+		
 		
 		private function thanksComplete(e:Event):void
 		{

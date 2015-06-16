@@ -1,6 +1,6 @@
 ﻿//used by Queue
 
-package com.gmrmarketing.comcast.taylorswift.photobooth
+package com.gmrmarketing.miller.gifphotobooth
 {
 	import flash.events.*;
 	import flash.net.*;
@@ -104,45 +104,17 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		
 		/**
 		 * Called from Queue.uploadNext()
-		 * @param	formData Array email, image		
+		 * @param	curUpload.dob, curUpload.email, curUpload.phone, gString, curUpload.opt1, curUpload.opt2, curUpload.opt3, curUpload.opt4, curUpload.opt4	
 		 */
 		public function submit(formData:Array):void
 		{	
 			if (hasToken()) {
 				
-				thePhoto = formData[1]; //used in submitPhoto
+				thePhoto = formData[3]; //used in submitPhoto
 				
 				busy = true;//true when submitting the user object
-					
-				//timestamp
-				var a:Date = new Date();//now
-				var m:String = String(a.month + 1);
-				if (m.length < 2) {
-					m = "0" + m;
-				}
-				var d:String = String(a.date);
-				if (d.length < 2) {
-					d = "0" + d;
-				}
-				var hor:String = String(a.hours);
-				if (hor.length < 2) {
-					hor = "0" + hor;
-				}
-				var min:String = String(a.minutes);
-				if (min.length < 2) {
-					min = "0" + min;
-				}
-				var sec:String = String(a.seconds);
-				if (sec.length < 2) {
-					sec = "0" + sec;
-				}
-				var ms:String = String( a.milliseconds);
-				while (ms.length < 3) {
-					ms = "0" + ms;
-				}
-				var now:String = a.fullYear + "-" +m + "-" +d + "T" + hor + ":" + min + ":" + sec + "." + ms + "Z";
 				
-				var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":195, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":now, "FieldResponses":[ { "FieldId":1366, "Response":formData[0] }], "Latitude":"0", "Longitude":"0" }};
+				var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":209, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":Strings.hubbleTimestamp(), "FieldResponses":[ { "FieldId":1484, "Response":formData[0] }, { "FieldId":1485, "Response":formData[1] },{ "FieldId":1486, "Response":formData[2] }, { "FieldId":1488, "Response":formData[4] }, { "FieldId":1489, "Response":true }, { "FieldId":1490, "Response":formData[5] }, { "FieldId":1491, "Response":formData[6] }, { "FieldId":1504, "Response":formData[7] }, { "FieldId":1505, "Response":formData[8] }], "Latitude":"0", "Longitude":"0" }};
 				
 				var js:String = JSON.stringify(resp);
 				var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionresponse");
@@ -185,7 +157,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		 */
 		private function submitPhoto():void
 		{
-			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":responseId, "FieldId":1367, "Response":thePhoto }};			
+			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":responseId, "FieldId":1487, "Response":thePhoto }};			
 			var js:String = JSON.stringify(resp);
 			
 			var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionfieldresponse");
@@ -245,15 +217,16 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 		private function followupsProcessed(e:Event):void
 		{	
 			var j:Object = JSON.parse(e.currentTarget.data);
-			//busy = false;
+			busy = false;
 			if (j.Status == 1) {
-				callPrintAPI();
+				dispatchEvent(new Event(COMPLETE));
+				//callPrintAPI();
 			}else {
 				followupError();
 			}
 		}
 		
-		
+		/*
 		private function callPrintAPI():void
 		{	
 			var ts:String = Strings.timestamp();
@@ -285,7 +258,7 @@ package com.gmrmarketing.comcast.taylorswift.photobooth
 				followupError();
 			}
 		}
-		
+		*/
 		
 		private function followupError(e:IOErrorEvent = null):void
 		{

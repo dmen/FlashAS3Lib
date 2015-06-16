@@ -15,7 +15,7 @@ package com.gmrmarketing.empirestate.ilny
 		private var bgContainer:Sprite;
 		private var mainContainer:Sprite;
 		private var cornerContainer:Sprite;
-		//private var lbContainer:Sprite;//letterbox bars container - for on Surface
+		private var lbContainer:Sprite;//letterbox bars container - for on Surface
 		private var bg:Background;
 		private var intro:Intro;
 		private var map:Map;
@@ -33,7 +33,7 @@ package com.gmrmarketing.empirestate.ilny
 		public function Main()
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-			stage.scaleMode = StageScaleMode.EXACT_FIT;
+			stage.scaleMode = StageScaleMode.SHOW_ALL;
 			Mouse.hide();
 			
 			cq = new CornerQuit();
@@ -61,7 +61,7 @@ package com.gmrmarketing.empirestate.ilny
 			cornerContainer = new Sprite();
 			addChild(cornerContainer);
 			
-			/*
+			
 			lbContainer = new Sprite();
 			addChild(lbContainer);
 			
@@ -79,8 +79,7 @@ package com.gmrmarketing.empirestate.ilny
 			b2.y = 1080;
 			
 			lbContainer.addChild(b1);
-			lbContainer.addChild(b2);			
-			*/
+			lbContainer.addChild(b2);
 			
 			intro = new Intro();
 			intro.container = mainContainer;
