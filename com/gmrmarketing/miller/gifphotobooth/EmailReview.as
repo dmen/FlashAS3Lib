@@ -3,7 +3,9 @@ package com.gmrmarketing.miller.gifphotobooth
 	import flash.events.*;
 	import flash.display.*;
 	import com.greensock.TweenMax;
-	import com.greensock.easing.*;
+	import com.greensock.easing.*;	
+	import com.gmrmarketing.utilities.TimeoutHelper;
+	
 	
 	public class EmailReview extends EventDispatcher
 	{
@@ -15,6 +17,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		private var myContainer:DisplayObjectContainer;
 		private var itemContainer:Sprite;
 		private var items:Array;
+		private var tim:TimeoutHelper;
 		
 		
 		public function EmailReview()
@@ -25,6 +28,8 @@ package com.gmrmarketing.miller.gifphotobooth
 			clip.addChild(itemContainer);
 			itemContainer.x = 370;
 			itemContainer.y = 355;
+			
+			tim = TimeoutHelper.getInstance();
 		}
 		
 		
@@ -46,6 +51,8 @@ package com.gmrmarketing.miller.gifphotobooth
 		 */
 		public function show(data:Array):void
 		{
+			tim.buttonClicked();
+			
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
@@ -95,6 +102,10 @@ package com.gmrmarketing.miller.gifphotobooth
 					myContainer.removeChild(clip);
 				}
 			}
+			while (itemContainer.numChildren) {
+				itemContainer.removeChildAt(0);
+			}
+			
 			clip.btnFinish.removeEventListener(MouseEvent.MOUSE_DOWN, doFinish);
 			clip.btnAdd.removeEventListener(MouseEvent.MOUSE_DOWN, doAdd);
 		}
@@ -102,6 +113,8 @@ package com.gmrmarketing.miller.gifphotobooth
 		
 		private function doFinish(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			if (items.length > 0) {
 				dispatchEvent(new Event(COMPLETE));
 			}else {
@@ -112,13 +125,16 @@ package com.gmrmarketing.miller.gifphotobooth
 		
 		private function doAdd(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			dispatchEvent(new Event(ADD_PERSON));
 		}
 		
 		
 		private function removeItem(e:MouseEvent):void
 		{
-			items.splice(MovieClip(e.currentTarget).arrayIndex, 1);
+			tim.buttonClicked();
+			//trace(MovieClip(e.currentTarget.parent).arrayIndex);
+			items.splice(MovieClip(e.currentTarget.parent).arrayIndex, 1);
 			addData();//redraw the items list
 		}
 		

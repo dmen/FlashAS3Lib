@@ -11,6 +11,7 @@ package com.gmrmarketing.miller.gifphotobooth
 	
 	public class Review extends EventDispatcher
 	{
+		public static const SHOWING:String = "reviewShowing";
 		public static const RETAKE:String = "reviewRetake";
 		public static const NEXT:String = "reviewNext";
 		
@@ -68,12 +69,12 @@ package com.gmrmarketing.miller.gifphotobooth
 			}
 			
 			clip.addChild(bmp);
-			clip.addChild(over);
+			//clip.addChild(over);
 			
 			frames = f;
 			
 			clip.alpha = 0;
-			TweenMax.to(clip, .5, { alpha:1 } );
+			TweenMax.to(clip, .5, { alpha:1, onComplete:showing } );
 			clip.addEventListener(Event.ENTER_FRAME, updateCaps);
 			
 			curFrame = 0;
@@ -83,6 +84,10 @@ package com.gmrmarketing.miller.gifphotobooth
 			clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, doNext, false, 0, true);
 		}
 		
+		private function showing():void
+		{
+			dispatchEvent(new Event(SHOWING));
+		}
 		
 		public function hide():void
 		{

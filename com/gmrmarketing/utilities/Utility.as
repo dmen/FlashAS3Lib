@@ -42,8 +42,8 @@ package com.gmrmarketing.utilities
 		
 		/**
 		 * Returns a unique alpha numeric id string
-		 * Uses the milliseconds since a given date - change the date to one
-		 * closer to the event start
+		 * Uses the milliseconds since a given date
+		 * change the d-date to one closer to the event start
 		 * 
 		 * Returns a string line A90B67U
 		 * 
@@ -53,7 +53,7 @@ package com.gmrmarketing.utilities
 		{
 			var charArray:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-			var d:Date = new Date(2013, 8, 4); //september 3rd - month is 0 based
+			var d:Date = new Date(2013, 8, 4);
 			var e:Date = new Date(); //now
 			
 			var m:String = String(e.valueOf() - d.valueOf()); //delta of now - then in milliseconds

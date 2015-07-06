@@ -32,7 +32,7 @@ package com.gmrmarketing.utilities
 		 * 
 		 * @param	aLogger Instance of an ILogger
 		 */
-		public function setLogger(aLogger:ILogger):void
+		public function set logger(aLogger:ILogger):void
 		{
 			myLogger = aLogger;
 			loggerAvailable = true;

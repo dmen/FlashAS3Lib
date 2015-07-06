@@ -90,6 +90,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		
 		public function hide():void
 		{
+			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, startCounting);
 			camPic.pause();
 			//camPic.removeEventListener(CamPic.CAMERA_UPDATE, updatePreview);
 			if(myContainer){
@@ -138,6 +139,8 @@ package com.gmrmarketing.miller.gifphotobooth
 		private function startCounting(e:MouseEvent):void
 		{
 			tim.buttonClicked();
+			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, startCounting);
+			
 			clip.theCount.visible = true;
 			clip.theCount.theText.text = "3";
 			clip.theCount.theText.alpha = 1;

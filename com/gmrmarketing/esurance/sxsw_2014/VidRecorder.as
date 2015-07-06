@@ -39,7 +39,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 			clip = new mcVideo();//contains vid
 			cam = Camera.getCamera();
 			cam.setQuality(75000, 88);//bandwidth, quality
-			cam.setMode(800, 450, 24, false);//width, height, fps, favorArea
+			cam.setMode(640, 480, 24, false);//width, height, fps, favorArea
 			cam.setKeyFrameInterval(12);
 			mic = Microphone.getMicrophone();	
 		}

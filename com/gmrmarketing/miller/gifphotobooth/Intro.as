@@ -24,14 +24,21 @@ package com.gmrmarketing.miller.gifphotobooth
 			myContainer = c;
 		}
 		
+		public function get bg():MovieClip
+		{
+			return clip;
+		}
 		
 		public function show():void
 		{
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
-			clip.alpha = 0;
-			TweenMax.to(clip, 1, { alpha:1, delay:.5, onComplete:showing } );
+			//clip.alpha = 0;
+			//TweenMax.to(clip, 1, { alpha:1, delay:.5, onComplete:showing } );
+			
+			clip.addEventListener(MouseEvent.MOUSE_DOWN, begin);
+			dispatchEvent(new Event(SHOWING));
 		}
 		
 		

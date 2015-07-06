@@ -62,8 +62,7 @@ package com.gmrmarketing.miller.gifphotobooth
 					clip.phone.visible = true;
 					clip.email.theCheck.visible = false;
 					clip.phone.theCheck.visible = false;
-					clip.email.theText.text = "";
-					clip.phone.theText.text = "";
+					
 					kbd.setFocusFields([[clip.email.theText, 0],[clip.phone.theText, 12]]);
 					break;
 				case "email":
@@ -72,7 +71,6 @@ package com.gmrmarketing.miller.gifphotobooth
 					clip.phone.visible = false;
 					clip.email.visible = true;
 					clip.email.theCheck.visible = false;
-					clip.email.theText.text = "";
 					kbd.setFocusFields([[clip.email.theText, 0]]);
 					break;
 				case "text":
@@ -81,7 +79,6 @@ package com.gmrmarketing.miller.gifphotobooth
 					clip.phone.visible = true;
 					clip.email.visible = false;
 					clip.phone.theCheck.visible = false;
-					clip.phone.theText.text = "";
 					kbd.setFocusFields([[clip.phone.theText, 12]]);
 					break;
 			}
@@ -90,6 +87,8 @@ package com.gmrmarketing.miller.gifphotobooth
 			kbd.y = 1080;
 			
 			clip.phone.theText.restrict = "-0-9";
+			clip.email.theText.text = "";
+			clip.phone.theText.text = "";
 			
 			clip.email.btnCheck.addEventListener(MouseEvent.MOUSE_DOWN, toggleEmailOptIn, false, 0, true);
 			clip.phone.btnCheck.addEventListener(MouseEvent.MOUSE_DOWN, togglePhoneOptIn, false, 0, true);
@@ -99,13 +98,16 @@ package com.gmrmarketing.miller.gifphotobooth
 			clip.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, doBack, false, 0, true);
 			
 			kbd.addEventListener(KeyBoard.KBD, keyPressed, false, 0, true);
+			clip.stage.addEventListener(KeyboardEvent.KEY_DOWN, physicalKeyPressed, false, 0, true);
+			
 			clip.alpha = 0;
 			TweenMax.to(clip, .5, { alpha:1, onComplete:showing } );
 		}
 		
 		
 		/**
-		 * returns an array of objects containing email:String, phone:String, opt:Boolean keys
+		 * returns an array of objects containing keys:
+		 * email:String, phone:String, opt:Boolean
 		 */
 		public function get data():Array
 		{
@@ -133,13 +135,13 @@ package com.gmrmarketing.miller.gifphotobooth
 		{
 			if (myContainer) {
 				if (myContainer.contains(clip)) {
+					clip.stage.removeEventListener(KeyboardEvent.KEY_DOWN, physicalKeyPressed);
 					myContainer.removeChild(clip);
 				}
 				if(myContainer.contains(kbd)){
 					myContainer.removeChild(kbd);
 				}
-			}
-			
+			}			
 			
 			kbd.removeEventListener(KeyBoard.KBD, keyPressed);
 			clip.btnAdd.removeEventListener(MouseEvent.MOUSE_DOWN, addPerson);
@@ -149,12 +151,21 @@ package com.gmrmarketing.miller.gifphotobooth
 			clip.phone.btnCheck.removeEventListener(MouseEvent.MOUSE_DOWN, togglePhoneOptIn);
 		}
 		
+		
+		//called from Main.finish()
 		public function clear():void
 		{
 			myData = [];
 		}
 		
+		
 		private function keyPressed(e:Event):void
+		{
+			tim.buttonClicked();
+		}
+		
+		
+		private function physicalKeyPressed(e:KeyboardEvent):void
 		{
 			tim.buttonClicked();
 		}
@@ -220,7 +231,10 @@ package com.gmrmarketing.miller.gifphotobooth
 			}
 		}
 		
-		
+		/**
+		 * Called when the next button is pressed by the user
+		 * @param	e
+		 */
 		private function doNext(e:MouseEvent):void
 		{
 			var good:int = 3;
@@ -256,14 +270,16 @@ package com.gmrmarketing.miller.gifphotobooth
 					dispatchEvent(new Event(COMPLETE));
 				}else {
 					//user has final data in fields but list alread has five items
-					message("Maximum entries reached");
+					message("Maximum of five entries reached");
 					clip.email.theText.text = "";
 					clip.phone.theText.text = "";
 				}
-			}else if(good == 3){
 				
+			}else if(good == 3){
+				//fields are blank
 				if (myData.length > 0) {
 					dispatchEvent(new Event(COMPLETE));
+					
 				}else{
 					if (myType == "email") {
 						message("Please enter at least one email");

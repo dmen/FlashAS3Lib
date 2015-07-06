@@ -9,13 +9,16 @@ package com.gmrmarketing.miller.gifphotobooth
 	import com.gmrmarketing.utilities.LoggerAIR;
 	import com.greensock.TweenMax;
 	import com.gmrmarketing.utilities.Strings;//for timestamp
+	import com.gmrmarketing.utilities.Logger;
 	
 	
 	public class Hubble extends EventDispatcher
 	{		
 		public static const GOT_TOKEN:String = "gotToken";
 		public static const FORM_POSTED:String = "formPosted";
-		public static const ERROR:String = "errorReceived";
+		public static const FORM_ERROR:String = "formErrorReceived";
+		public static const PHOTO_ERROR:String = "photoErrorReceived";
+		public static const FOLLOWUP_ERROR:String = "followUpErrorReceived";
 		public static const COMPLETE:String = "followupsProcessed";
 		
 		private const BASE_URL:String = "http://api.nowpik.com/api/";
@@ -28,12 +31,20 @@ package com.gmrmarketing.miller.gifphotobooth
 		
 		private var busy:Boolean; //true when submitting data
 		private var thePhoto:String;		
+		private var myGUID:String;
+		
+		private var log:Logger;
 		
 		
-		public function Hubble()
+		public function Hubble(guid:String)
 		{
+			myGUID = guid;//unique machine identifier - used as deviceId when submitting form data
 			token = "";
 			busy = false;	
+			
+			log = Logger.getInstance();//will make kiosklog.txt log on the desktop
+			log.logger = new LoggerAIR();
+			
 			hdr = new URLRequestHeader("Content-type", "application/json");
 			hdr2 = new URLRequestHeader("Accept", "application/json");
 		}
@@ -104,29 +115,39 @@ package com.gmrmarketing.miller.gifphotobooth
 		
 		/**
 		 * Called from Queue.uploadNext()
-		 * @param	curUpload.dob, curUpload.email, curUpload.phone, gString, curUpload.opt1, curUpload.opt2, curUpload.opt3, curUpload.opt4, curUpload.opt4	
+		 * @param	curUpload.dob, curUpload.email, curUpload.phone, gString, curUpload.opt1, curUpload.opt2, curUpload.opt3, curUpload.opt4, curUpload.opt4, curUpload.deviceResponseID,  curUpload.responseID
 		 */
 		public function submit(formData:Array):void
 		{	
 			if (hasToken()) {
+				log.log("Hubble.submit" + " | " + formData[1] + " | " + formData[2] + " | deviceResponseID: " + formData[9]);
 				
-				thePhoto = formData[3]; //used in submitPhoto
+				thePhoto = formData[3]; //used in submitPhoto - encoded to B64 string
 				
-				busy = true;//true when submitting the user object
+				busy = true;//true when submitting data
 				
-				var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":209, "DeviceId":"Flash", "DeviceResponseId":13, "ResponseDate":Strings.hubbleTimestamp(), "FieldResponses":[ { "FieldId":1484, "Response":formData[0] }, { "FieldId":1485, "Response":formData[1] },{ "FieldId":1486, "Response":formData[2] }, { "FieldId":1488, "Response":formData[4] }, { "FieldId":1489, "Response":true }, { "FieldId":1490, "Response":formData[5] }, { "FieldId":1491, "Response":formData[6] }, { "FieldId":1504, "Response":formData[7] }, { "FieldId":1505, "Response":formData[8] }], "Latitude":"0", "Longitude":"0" }};
+				if (formData[10] != -1) {
+					log.log("Hubble.submit-photo only, responseID: " + formData[10]);
+					//form data already posted but posting photo or followup got an error...just post photo again
+					responseId = formData[10];
+					submitPhoto();
+					
+				}else{
 				
-				var js:String = JSON.stringify(resp);
-				var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionresponse");
-				req.method = URLRequestMethod.POST;
-				req.data = js;
-				req.requestHeaders.push(hdr);
-				req.requestHeaders.push(hdr2);
-				
-				var lo:URLLoader = new URLLoader();
-				lo.addEventListener(Event.COMPLETE, formPosted, false, 0, true);
-				lo.addEventListener(IOErrorEvent.IO_ERROR, formError, false, 0, true);
-				lo.load(req);	
+					var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":209, "DeviceId":myGUID, "DeviceResponseId":formData[9], "ResponseDate":Strings.hubbleTimestamp(), "FieldResponses":[ { "FieldId":1484, "Response":formData[0] }, { "FieldId":1485, "Response":formData[1] },{ "FieldId":1486, "Response":formData[2] }, { "FieldId":1488, "Response":formData[4] }, { "FieldId":1489, "Response":true }, { "FieldId":1490, "Response":formData[5] }, { "FieldId":1491, "Response":formData[6] }, { "FieldId":1504, "Response":formData[7] }, { "FieldId":1505, "Response":formData[8] }], "Latitude":"0", "Longitude":"0" }};
+					
+					var js:String = JSON.stringify(resp);
+					var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionresponse");
+					req.method = URLRequestMethod.POST;
+					req.data = js;
+					req.requestHeaders.push(hdr);
+					req.requestHeaders.push(hdr2);
+					
+					var lo:URLLoader = new URLLoader();
+					lo.addEventListener(Event.COMPLETE, formPosted, false, 0, true);
+					lo.addEventListener(IOErrorEvent.IO_ERROR, formError, false, 0, true);
+					lo.load(req);	
+				}
 			}
 		}
 		
@@ -143,16 +164,26 @@ package com.gmrmarketing.miller.gifphotobooth
 			}
 		}
 		
+		/**
+		 * Called from Queue.hubblePhotoError() if posting the photo or followup generates an error
+		 * if so the responseID is injected into the user object so that subsequent attempts will use
+		 * the proper record as the form data is already posted into the database
+		 */
+		public function get responseID():int
+		{
+			return responseId;
+		}
 		
 		private function formError(e:IOErrorEvent = null):void
 		{
+			log.log("Hubble.formError()");
 			busy = false;
-			dispatchEvent(new Event(ERROR));
+			dispatchEvent(new Event(FORM_ERROR));
 		}
 		
 		
 		/**
-		 * Called from formPosted() is response.Status == 1
+		 * Called from formPosted() if response.Status == 1
 		 * thePhoto was set in submit()
 		 */
 		private function submitPhoto():void
@@ -185,10 +216,14 @@ package com.gmrmarketing.miller.gifphotobooth
 		}
 		
 		
+		/**
+		 * calls hubblePhotoError() in Queue
+		 */
 		private function photoError(e:IOErrorEvent = null):void
 		{
-			 busy = false;
-			dispatchEvent(new Event(ERROR));
+			log.log("Hubble.photoError()");
+			busy = false;
+			dispatchEvent(new Event(PHOTO_ERROR));
 		}
 		
 		
@@ -260,10 +295,15 @@ package com.gmrmarketing.miller.gifphotobooth
 		}
 		*/
 		
+		
+		/**
+		 * calls hubblePhotoError() in Queue.as
+		 */
 		private function followupError(e:IOErrorEvent = null):void
 		{
+			log.log("Hubble.followupError()");
 			busy = false;
-			dispatchEvent(new Event(ERROR));
+			dispatchEvent(new Event(FOLLOWUP_ERROR));
 		}
 	}
 	
