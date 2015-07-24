@@ -3,7 +3,7 @@
  * Stores and manages user objects in two csv files 
  */
 	
-package  com.gmrmarketing.miller.gifphotobooth
+package  com.gmrmarketing.esurance.usopen2015
 {	
 	import flash.display.MovieClip;	
 	import flash.filesystem.*;	

@@ -1,11 +1,9 @@
-package com.gmrmarketing.miller.gifphotobooth
+package com.gmrmarketing.png.gifphotobooth
 {
 	import flash.events.*;
 	import flash.display.*;
 	import com.greensock.TweenMax;	
-	import flash.geom.Matrix;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
+	import flash.geom.*;
 	import org.bytearray.gif.encoder.GIFEncoder;
 	import flash.filesystem.*;
 	import flash.utils.ByteArray;

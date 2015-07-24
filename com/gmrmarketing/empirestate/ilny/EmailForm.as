@@ -28,9 +28,11 @@ package com.gmrmarketing.empirestate.ilny
 			clip = new mcEmail();
 			
 			kbdBG = new Sprite();
-			kbdBG.graphics.beginFill(0x000000, 1);
-			kbdBG.graphics.drawRect(0, 0, 1920, 544);
+			kbdBG.graphics.beginFill(0xFF000000, 1);
+			kbdBG.graphics.drawRect(0, 0, 1920, 477);
 			kbdBG.graphics.endFill();
+			//kbdBG.x = 0;
+			//kbdBG.y = 1443;//screen bottom
 			
 			tim = TimeoutHelper.getInstance();
 			
@@ -52,47 +54,47 @@ package com.gmrmarketing.empirestate.ilny
 				myContainer.addChild(clip);
 			}
 			clip.alpha = 1;
-			clip.textEnter.alpha = 0;
-			clip.textEnter.theText.text = "Enter your information below.";
-			clip.fname.scaleX = clip.fname.scaleY = 0;
-			clip.lname.scaleX = clip.lname.scaleY = 0;
-			clip.email.scaleX = clip.email.scaleY = 0;
-			clip.zip.scaleX = clip.zip.scaleY = 0;
-			clip.heart.alpha = 0;
-			TweenMax.to(clip.heart, 0, { colorMatrixFilter: { saturation:0 }} );//gray
-			clip.optin.alpha = 0;
-			clip.optin.theText.text = "OPT-IN TO NEWSLETTER";
-			clip.btnSend.y = 1080;//915
+			clip.theForm.textEnter.alpha = 0;
+			clip.theForm.textEnter.theText.text = "Enter your information below.";
+			clip.theForm.fname.scaleX = clip.theForm.fname.scaleY = 0;
+			clip.theForm.lname.scaleX = clip.theForm.lname.scaleY = 0;
+			clip.theForm.email.scaleX = clip.theForm.email.scaleY = 0;
+			clip.theForm.zip.scaleX = clip.theForm.zip.scaleY = 0;
+			clip.theForm.heart.alpha = 0;
+			TweenMax.to(clip.theForm.heart, 0, { colorMatrixFilter: { saturation:0 }} );//gray
+			clip.theForm.optin.alpha = 0;
+			clip.theForm.optin.theText.text = "OPT-IN TO NEWSLETTER";
+			//clip.theForm.btnSend.y = 1080;//915
 			
-			TweenMax.to(clip.textEnter, .5, { alpha:1 } );
-			TweenMax.to(clip.fname, .5, { scaleX:1, scaleY:1, delay:.6 } );
-			TweenMax.to(clip.lname, .5, { scaleX:1, scaleY:1, delay:.8 } );
-			TweenMax.to(clip.email, .5, { scaleX:1, scaleY:1, delay:1 } );
-			TweenMax.to(clip.zip, .5, { scaleX:1, scaleY:1, delay:1.2 } );
+			TweenMax.to(clip.theForm.textEnter, .5, { alpha:1 } );
+			TweenMax.to(clip.theForm.fname, .5, { scaleX:1, scaleY:1, delay:.6 } );
+			TweenMax.to(clip.theForm.lname, .5, { scaleX:1, scaleY:1, delay:.8 } );
+			TweenMax.to(clip.theForm.email, .5, { scaleX:1, scaleY:1, delay:1 } );
+			TweenMax.to(clip.theForm.zip, .5, { scaleX:1, scaleY:1, delay:1.2 } );
 			
-			TweenMax.to(clip.heart, .5, { alpha:1, delay:1.3 } );
-			TweenMax.to(clip.optin, .5, { alpha:1, delay:1.3 } );
+			TweenMax.to(clip.theForm.heart, .5, { alpha:1, delay:1.3 } );
+			TweenMax.to(clip.theForm.optin, .5, { alpha:1, delay:1.3 } );
 			
-			TweenMax.to(clip.btnSend, .5, { y:915, delay:1.5, ease:Back.easeOut } );
+			//TweenMax.to(clip.theForm.btnSend, .5, { y:915, delay:1.5, ease:Back.easeOut } );
 			
-			clip.btnOptin.addEventListener(MouseEvent.MOUSE_DOWN, optin);
-			clip.btnSend.addEventListener(MouseEvent.MOUSE_DOWN, submit);
-			clip.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, backToMap);
+			clip.theForm.btnOptin.addEventListener(MouseEvent.MOUSE_DOWN, optin);
+			clip.theForm.btnSend.addEventListener(MouseEvent.MOUSE_DOWN, submit);
+			clip.theForm.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, backToMap);
 			
-			clip.fname.theText.text = "FIRST NAME";
-			clip.lname.theText.text = "LAST NAME";
-			clip.email.theText.text = "EMAIL@ADDRESS.COM";
-			clip.zip.theText.text = "ZIP CODE";
-			clip.zip.theText.restrict = "0-9";
+			clip.theForm.fname.theText.text = "FIRST NAME";
+			clip.theForm.lname.theText.text = "LAST NAME";
+			clip.theForm.email.theText.text = "EMAIL@ADDRESS.COM";
+			clip.theForm.zip.theText.text = "ZIP CODE";
+			clip.theForm.zip.theText.restrict = "0-9";
 			
-			clip.fname.addEventListener(MouseEvent.MOUSE_DOWN, clearFname);
-			clip.fname.addEventListener(FocusEvent.FOCUS_IN, clearFname);
-			clip.lname.addEventListener(MouseEvent.MOUSE_DOWN, clearLname);
-			clip.lname.addEventListener(FocusEvent.FOCUS_IN, clearLname);
-			clip.email.addEventListener(MouseEvent.MOUSE_DOWN, clearEmail);
-			clip.email.addEventListener(FocusEvent.FOCUS_IN, clearEmail);
-			clip.zip.addEventListener(MouseEvent.MOUSE_DOWN, clearZip);
-			clip.zip.addEventListener(FocusEvent.FOCUS_IN, clearZip);
+			clip.theForm.fname.addEventListener(MouseEvent.MOUSE_DOWN, clearFname);
+			clip.theForm.fname.addEventListener(FocusEvent.FOCUS_IN, clearFname);
+			clip.theForm.lname.addEventListener(MouseEvent.MOUSE_DOWN, clearLname);
+			clip.theForm.lname.addEventListener(FocusEvent.FOCUS_IN, clearLname);
+			clip.theForm.email.addEventListener(MouseEvent.MOUSE_DOWN, clearEmail);
+			clip.theForm.email.addEventListener(FocusEvent.FOCUS_IN, clearEmail);
+			clip.theForm.zip.addEventListener(MouseEvent.MOUSE_DOWN, clearZip);
+			clip.theForm.zip.addEventListener(FocusEvent.FOCUS_IN, clearZip);
 			
 			kbdShowing = false;
 		}
@@ -109,18 +111,18 @@ package com.gmrmarketing.empirestate.ilny
 		{
 			showKeyboard();
 			
-			if(clip.fname.theText.text == "FIRST NAME"){
-				clip.fname.theText.text = "";
+			if(clip.theForm.fname.theText.text == "FIRST NAME"){
+				clip.theForm.fname.theText.text = "";
 			}
 			
-			if (clip.lname.theText.text == "") {
-				clip.lname.theText.text = "LAST NAME";
+			if (clip.theForm.lname.theText.text == "") {
+				clip.theForm.lname.theText.text = "LAST NAME";
 			}
-			if (clip.email.theText.text == "") {
-				clip.email.theText.text = "EMAIL@ADDRESS.COM";
+			if (clip.theForm.email.theText.text == "") {
+				clip.theForm.email.theText.text = "EMAIL@ADDRESS.COM";
 			}
-			if (clip.zip.theText.text == "") {
-				clip.zip.theText.text = "ZIP CODE";
+			if (clip.theForm.zip.theText.text == "") {
+				clip.theForm.zip.theText.text = "ZIP CODE";
 			}
 		}
 		
@@ -129,18 +131,18 @@ package com.gmrmarketing.empirestate.ilny
 		{
 			showKeyboard();
 			
-			if(clip.lname.theText.text == "LAST NAME"){
-				clip.lname.theText.text = "";
+			if(clip.theForm.lname.theText.text == "LAST NAME"){
+				clip.theForm.lname.theText.text = "";
 			}
 			
-			if (clip.fname.theText.text == "") {
-				clip.fname.theText.text = "FIRST NAME";
+			if (clip.theForm.fname.theText.text == "") {
+				clip.theForm.fname.theText.text = "FIRST NAME";
 			}
-			if (clip.email.theText.text == "") {
-				clip.email.theText.text = "EMAIL@ADDRESS.COM";
+			if (clip.theForm.email.theText.text == "") {
+				clip.theForm.email.theText.text = "EMAIL@ADDRESS.COM";
 			}
-			if (clip.zip.theText.text == "") {
-				clip.zip.theText.text = "ZIP CODE";
+			if (clip.theForm.zip.theText.text == "") {
+				clip.theForm.zip.theText.text = "ZIP CODE";
 			}
 		}
 		
@@ -149,18 +151,18 @@ package com.gmrmarketing.empirestate.ilny
 		{
 			showKeyboard();
 			
-			if(clip.email.theText.text == "EMAIL@ADDRESS.COM"){
-				clip.email.theText.text = "";
+			if(clip.theForm.email.theText.text == "EMAIL@ADDRESS.COM"){
+				clip.theForm.email.theText.text = "";
 			}
 			
-			if (clip.lname.theText.text == "") {
-				clip.lname.theText.text = "LAST NAME";
+			if (clip.theForm.lname.theText.text == "") {
+				clip.theForm.lname.theText.text = "LAST NAME";
 			}
-			if (clip.fname.theText.text == "") {
-				clip.fname.theText.text = "FIRST NAME";
+			if (clip.theForm.fname.theText.text == "") {
+				clip.theForm.fname.theText.text = "FIRST NAME";
 			}
-			if (clip.zip.theText.text == "") {
-				clip.zip.theText.text = "ZIP CODE";
+			if (clip.theForm.zip.theText.text == "") {
+				clip.theForm.zip.theText.text = "ZIP CODE";
 			}
 		}
 		
@@ -169,30 +171,37 @@ package com.gmrmarketing.empirestate.ilny
 		{
 			showKeyboard();
 			
-			if(clip.zip.theText.text == "ZIP CODE"){
-				clip.zip.theText.text = "";
+			if(clip.theForm.zip.theText.text == "ZIP CODE"){
+				clip.theForm.zip.theText.text = "";
 			}
 			
-			if (clip.lname.theText.text == "") {
-				clip.lname.theText.text = "LAST NAME";
+			if (clip.theForm.lname.theText.text == "") {
+				clip.theForm.lname.theText.text = "LAST NAME";
 			}
-			if (clip.email.theText.text == "") {
-				clip.email.theText.text = "EMAIL@ADDRESS.COM";
+			if (clip.theForm.email.theText.text == "") {
+				clip.theForm.email.theText.text = "EMAIL@ADDRESS.COM";
 			}
-			if (clip.fname.theText.text == "") {
-				clip.fname.theText.text = "FIRST NAME";
+			if (clip.theForm.fname.theText.text == "") {
+				clip.theForm.fname.theText.text = "FIRST NAME";
 			}
 		}
 		
 		public function hide():void
 		{
 			TweenMax.to(clip, .5, { alpha:0, onComplete:kill } );
+			TweenMax.to(kbd, .5, { alpha:0 } );
+			TweenMax.to(kbdBG, .5, { alpha:0 } );
 		}
 		private function kill():void
 		{
-			clip.btnOptin.removeEventListener(MouseEvent.MOUSE_DOWN, optin);
-			clip.btnSend.removeEventListener(MouseEvent.MOUSE_DOWN, submit);
-			clip.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, backToMap);
+			clip.theForm.y = 373;
+			clip.topBar.y = 0;
+			clip.logo.y = 162;
+			clip.logo.scaleX = clip.logo.scaleY = 1;
+			
+			clip.theForm.btnOptin.removeEventListener(MouseEvent.MOUSE_DOWN, optin);
+			clip.theForm.btnSend.removeEventListener(MouseEvent.MOUSE_DOWN, submit);
+			clip.theForm.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, backToMap);
 			
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
@@ -201,14 +210,14 @@ package com.gmrmarketing.empirestate.ilny
 				myContainer.removeChild(kbd);
 				myContainer.removeChild(kbdBG);
 			}
-			clip.fname.removeEventListener(MouseEvent.MOUSE_DOWN, clearFname);
-			clip.fname.removeEventListener(FocusEvent.FOCUS_IN, clearFname);
-			clip.lname.removeEventListener(MouseEvent.MOUSE_DOWN, clearLname);
-			clip.lname.removeEventListener(FocusEvent.FOCUS_IN, clearLname);
-			clip.email.removeEventListener(MouseEvent.MOUSE_DOWN, clearEmail);
-			clip.email.removeEventListener(FocusEvent.FOCUS_IN, clearEmail);
-			clip.zip.removeEventListener(MouseEvent.MOUSE_DOWN, clearZip);
-			clip.zip.removeEventListener(FocusEvent.FOCUS_IN, clearZip);
+			clip.theForm.fname.removeEventListener(MouseEvent.MOUSE_DOWN, clearFname);
+			clip.theForm.fname.removeEventListener(FocusEvent.FOCUS_IN, clearFname);
+			clip.theForm.lname.removeEventListener(MouseEvent.MOUSE_DOWN, clearLname);
+			clip.theForm.lname.removeEventListener(FocusEvent.FOCUS_IN, clearLname);
+			clip.theForm.email.removeEventListener(MouseEvent.MOUSE_DOWN, clearEmail);
+			clip.theForm.email.removeEventListener(FocusEvent.FOCUS_IN, clearEmail);
+			clip.theForm.zip.removeEventListener(MouseEvent.MOUSE_DOWN, clearZip);
+			clip.theForm.zip.removeEventListener(FocusEvent.FOCUS_IN, clearZip);
 			
 			kbdShowing = false;
 			kbd.removeEventListener(KeyBoard.KBD, resetTim);
@@ -218,18 +227,28 @@ package com.gmrmarketing.empirestate.ilny
 		private function showKeyboard():void
 		{
 			tim.buttonClicked();
+			
 			if (!kbdShowing) {
+				
+				TweenMax.to(clip.theForm, .5, {y:-37});//373
+				TweenMax.to(clip.topBar, .5, {y:-180});//0
+				TweenMax.to(clip.logo, .5, {scaleX:.5, scaleY:.5, y:68});//y:162
+				
 				kbdShowing = true;
 				myContainer.addChild(kbdBG);
+				kbd.alpha = 1;
 				kbdBG.alpha = 0;
+				kbdBG.y = 623;
+				
 				myContainer.addChild(kbd);
 				kbd.x = 229;
-				kbd.y = -kbd.height;//96;
-				kbd.setFocusFields([[clip.fname.theText, 0], [clip.lname.theText, 0], [clip.email.theText, 0], [clip.zip.theText, 5]]);
+				kbd.y = 1080 + kbd.height;
+				kbd.setFocusFields([[clip.theForm.fname.theText, 0], [clip.theForm.lname.theText, 0], [clip.theForm.email.theText, 0], [clip.theForm.zip.theText, 5]]);
 				kbd.addEventListener(KeyBoard.KBD, resetTim, false, 0, true);
 				
-				TweenMax.to(kbdBG, .3, { alpha:.85 } );
-				TweenMax.to(kbd, .5, { y:76 } );
+				TweenMax.to(kbdBG, .3, { alpha:.85 } );				
+				
+				TweenMax.to(kbd, .5, { y:636 } );
 			}
 		}
 		
@@ -246,11 +265,11 @@ package com.gmrmarketing.empirestate.ilny
 			
 			opt = !opt;
 			if(opt){
-				TweenMax.to(clip.heart, 0, { colorMatrixFilter: { saturation:1 }} );//red
-				clip.optin.theText.text = "YOU ARE OPTED-IN TO THE NEWSLETTER";
+				TweenMax.to(clip.theForm.heart, 0, { colorMatrixFilter: { saturation:1 }} );//red
+				clip.theForm.optin.theText.text = "YOU ARE OPTED-IN TO THE NEWSLETTER";
 			}else {
-				TweenMax.to(clip.heart, 0, { colorMatrixFilter: { saturation:0 }} );//gray
-				clip.optin.theText.text = "OPT-IN TO NEWSLETTER";
+				TweenMax.to(clip.theForm.heart, 0, { colorMatrixFilter: { saturation:0 }} );//gray
+				clip.theForm.optin.theText.text = "OPT-IN TO NEWSLETTER";
 			}
 		}
 		
@@ -259,13 +278,13 @@ package com.gmrmarketing.empirestate.ilny
 		{
 			tim.buttonClicked();
 			
-			if (clip.lname.theText.text == "" || clip.lname.theText.text == "LAST NAME" || clip.fname.theText.text == "" || clip.fname.theText.text == "FIRST NAME" || clip.email.theText.text == "" || clip.email.theText.text == "EMAIL@ADDRESS.COM" || clip.zip.theText.text == ""  || clip.zip.theText.text == "ZIP CODE") {
+			if (clip.theForm.lname.theText.text == "" || clip.theForm.lname.theText.text == "LAST NAME" || clip.theForm.fname.theText.text == "" || clip.theForm.fname.theText.text == "FIRST NAME" || clip.theForm.email.theText.text == "" || clip.theForm.email.theText.text == "EMAIL@ADDRESS.COM" || clip.theForm.zip.theText.text == ""  || clip.theForm.zip.theText.text == "ZIP CODE") {
 				error("All fields are required.");
 			}else{
 			
-				if (Validator.isValidEmail(clip.email.theText.text)) {
+				if (Validator.isValidEmail(clip.theForm.email.theText.text)) {
 					
-					if (clip.zip.theText.text.length != 5) {
+					if (clip.theForm.zip.theText.text.length != 5) {
 						error("Please enter a valid zip code.");
 					}else{					
 						dispatchEvent(new Event(COMPLETE));
@@ -284,10 +303,10 @@ package com.gmrmarketing.empirestate.ilny
 		public function get data():Object
 		{
 			var o:Object = { };
-			o.fname = clip.fname.theText.text;
-			o.lname = clip.lname.theText.text;
-			o.email = clip.email.theText.text;
-			o.zipcode = clip.zip.theText.text;
+			o.fname = clip.theForm.fname.theText.text;
+			o.lname = clip.theForm.lname.theText.text;
+			o.email = clip.theForm.email.theText.text;
+			o.zipcode = clip.theForm.zip.theText.text;
 			o.optin = opt ? "true" : "false";
 			return o;
 		}
@@ -300,18 +319,18 @@ package com.gmrmarketing.empirestate.ilny
 		 */
 		private function error(m:String):void
 		{
-			clip.textEnter.theText.text = m;
-			TweenMax.to(clip.textEnter.theText, 0, { tint:0xEE2E24 } );
-			clip.textEnter.alpha = 1;
-			TweenMax.to(clip.textEnter, 1, { alpha:0, delay:2, onComplete:errorDone } );
+			clip.theForm.textEnter.theText.text = m;
+			TweenMax.to(clip.theForm.textEnter.theText, 0, { tint:0xEE2E24 } );
+			clip.theForm.textEnter.alpha = 1;
+			TweenMax.to(clip.theForm.textEnter, 1, { alpha:0, delay:2, onComplete:errorDone } );
 		}
 		
 		
 		private function errorDone():void
 		{
-			TweenMax.to(clip.textEnter.theText, 0, { tint:0xFFFFFF } );
-			clip.textEnter.theText.text = "Enter your information below.";
-			TweenMax.to(clip.textEnter, .3, { alpha:1 } );
+			TweenMax.to(clip.theForm.textEnter.theText, 0, { tint:0xFFFFFF } );
+			clip.theForm.textEnter.theText.text = "Enter your information below.";
+			TweenMax.to(clip.theForm.textEnter, .3, { alpha:1 } );
 		}
 		
 	}

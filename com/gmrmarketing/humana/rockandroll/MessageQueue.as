@@ -11,15 +11,28 @@ package com.gmrmarketing.humana.rockandroll
 	public class MessageQueue extends EventDispatcher
 	{
 		public static const RUNNERS_ADDED:String = "runnersAdded";		
-		private const DEFAULT_START_TIME:String = "07/20/2014 06:30:00 AM";
+		private var DEFAULT_START_TIME:String = "";
 		private var allRunners:Array;
 		private var queue:Array;		
 		private var viewDivisor:int;
 		private var numCompletelyMissed:int;//number past the message.missedTime
 		
+		private var startToMat:Number;//distance in miles from start to mat
+		private var matToSign:Number;//distance from mat to sign, in miles
 		
-		public function MessageQueue()
+		
+		/**
+		 * Instantiated by Main once xml is ready
+		 * @param	defStart String default start time of race - from config.xml
+		 * @param	startMat Number distance from start to mat in miles - from config.xml
+		 * @param	matDist Number distance from mat to sign in miles - from config.xml
+		 */
+		public function MessageQueue(defStart:String, startMat:Number, matDist:Number)
 		{
+			DEFAULT_START_TIME = defStart;
+			startToMat = startMat;
+			matToSign = matDist;
+			
 			//queue is an array of objects - each object has keys: id, fName, lName, tenTime, time, messages
 			//within the object, the messages key contains an array of message objects - each with keys: message, fromFName, fromLName
 			queue = new Array();
@@ -38,10 +51,11 @@ package com.gmrmarketing.humana.rockandroll
 		{	
 			//We only want from newRunners those runners not already in allRunners
 			var actualNewRunners:Array = new Array();
+			var inAllRunners:Boolean;
 			
 			for (var i:int = 0; i < newRunners.length; i++) {
 				var a:Object = newRunners[i];
-				var inAllRunners:Boolean = false;
+				inAllRunners = false;
 				
 				for (var kk:int = 0; kk < allRunners.length; kk++) {
 					if (a.FirstName == allRunners[kk].FirstName && a.LastName == allRunners[kk].LastName && a.TenMileTime == allRunners[kk].TenMileTime) {
@@ -91,6 +105,7 @@ package com.gmrmarketing.humana.rockandroll
 			
 			for (i = 0; i < actualNewRunners.length; i++) {				
 				
+				//each runner object straight from JSON
 				var theRunner:Object = actualNewRunners[i];				
 				
 				var fName:String = theRunner.FirstName;
@@ -98,13 +113,14 @@ package com.gmrmarketing.humana.rockandroll
 				var messages:Array = theRunner.Messages;//array of message objects with keys:Message, FromFirstName, FromLastName
 				
 				//String like: "7/4/2013 11:29:33 AM"
-				var tenMileTime:Number;				
+				var matMileTime:Number;				
 				if (theRunner.TenMileTime == "") {					
-					tenMileTime = new Date().valueOf();//now
+					matMileTime = now;
 				}else {
-					tenMileTime = new Date(theRunner.TenMileTime).valueOf();
+					matMileTime = new Date(theRunner.TenMileTime).valueOf();
 				}
 				
+				//String like: "7/4/2013 06:30:00 AM"
 				var startTime:Number;
 				if (theRunner.StartTime == "") {
 					startTime = new Date(DEFAULT_START_TIME).valueOf();
@@ -112,15 +128,14 @@ package com.gmrmarketing.humana.rockandroll
 					startTime = new Date(theRunner.StartTime).valueOf();				
 				}
 				
-				var tenMileElapsed:Number = (tenMileTime - startTime) / 1000;//seconds for 10 miles
-				var oneMileTime:Number = tenMileElapsed / 10;				
+				var matMileElapsed:Number = (matMileTime - startTime) / 1000;//total seconds from start to mat
+				var oneMileTime:Number = matMileElapsed / startToMat;//average seconds for 1 mile		
 				
 				//Calculate viewing times based on distance to display
-				//display is 578 yards from mat = 1734 feet = .32840909 miles				
-				var fullMessageTime:Number = oneMileTime * .32840909; //seconds - full time from mat to display			
-				var displayMessageTime:Number = oneMileTime / viewDivisor; //display for time
+				//display is 578 yards from mat = 1734 feet = .32840909 miles
 				
-				
+				var fullMessageTime:Number = oneMileTime * matToSign; //seconds - full time from mat to display			
+				var displayMessageTime:Number = oneMileTime / viewDivisor; //display for time				
 				
 				var mess:Object = new Object();	
 				mess.timeAdjusted = 0;
@@ -133,7 +148,7 @@ package com.gmrmarketing.humana.rockandroll
 				mess.missedTime = now + (fullMessageTime * 1000);//if message hasn't been displayed by this time it can be culled
 				
 				/*
-				trace("adding runner - tenMileElapsed:", tenMileElapsed);
+				trace("adding runner - tenMileElapsed:", matMileElapsed);
 				trace("oneMileTime:", oneMileTime);
 				trace("fullMessageTime", fullMessageTime);
 				trace("displayMessageTime:", displayMessageTime);
@@ -161,7 +176,7 @@ package com.gmrmarketing.humana.rockandroll
 						break;
 					}
 				}					
-				//not less than anyone elses in the queue - add at end
+				//not less than anyone else in the queue - add at end
 				if(!added){
 					queue.push(mess);
 				}				

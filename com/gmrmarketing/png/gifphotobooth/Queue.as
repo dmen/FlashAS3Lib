@@ -3,15 +3,15 @@
  * Stores and manages user objects in two csv files 
  */
 	
-package  com.gmrmarketing.miller.gifphotobooth
+package  com.gmrmarketing.png.gifphotobooth
 {	
 	import flash.display.MovieClip;	
 	import flash.filesystem.*;	
 	import flash.events.*;	
 	import flash.utils.Timer;
 	import com.gmrmarketing.utilities.Utility;
-	import com.gmrmarketing.miller.gifphotobooth.Hubble;
-	import com.gmrmarketing.miller.gifphotobooth.AutoIncrement;
+	import com.gmrmarketing.png.gifphotobooth.Hubble;
+	import com.gmrmarketing.png.gifphotobooth.AutoIncrement;
 	import com.gmrmarketing.utilities.Logger;
 	
 	public class Queue extends EventDispatcher  
@@ -68,7 +68,7 @@ package  com.gmrmarketing.miller.gifphotobooth
 		 * Adds a user data object to the csv file
 		 * Called from Main.removeForm() - once form is complete and Thanks is showing
 		 * Data object contains these keys dob,email,opt1,opt2,opt3,opt4,opt5,phone,gif
-		 * deviceResponseID is injected into object for use by Hubble so that each record has a unique identifier
+		 * deviceResponseID is injected into object for use by Hubble so that each record has unique identifier
 		 * 
 		 * called from Thanks.processFrames() once the gif has been created
 		 */

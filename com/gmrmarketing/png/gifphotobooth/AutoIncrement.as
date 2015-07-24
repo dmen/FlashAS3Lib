@@ -4,7 +4,7 @@
  * provides a unique machine/device identifier (GUID) and unique record identifier - simple int
  * 
  */
-package com.gmrmarketing.miller.gifphotobooth
+package com.gmrmarketing.png.gifphotobooth
 {
 	import flash.net.SharedObject;
 	import com.gmrmarketing.utilities.GUID;
@@ -15,15 +15,14 @@ package com.gmrmarketing.miller.gifphotobooth
 		private var myNum:int;
 		private var myGuid:String;		
 		
-		
 		public function AutoIncrement()
 		{
-			so = SharedObject.getLocal("GMR_HubbleMachineID", "/");
+			so = SharedObject.getLocal("autoInc");
 			
 			myNum = so.data.num;
 			myGuid = so.data.guid;			
 			
-			//if 1st use - init vars
+			//if 1st use init vars
 			if (myGuid == null) {
 				myGuid = GUID.create();
 				myNum = -1;

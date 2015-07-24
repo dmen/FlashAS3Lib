@@ -1,4 +1,4 @@
-package com.gmrmarketing.miller.gifphotobooth
+package com.gmrmarketing.png.gifphotobooth
 {	
 	import com.gmrmarketing.utilities.CornerQuit;
 	import com.gmrmarketing.utilities.TimeoutHelper;
@@ -21,7 +21,6 @@ package com.gmrmarketing.miller.gifphotobooth
 		private var thanks:Thanks;
 		
 		private var mainContainer:Sprite;
-		private var dripContainer:Sprite;
 		private var cornerContainer:Sprite;
 		
 		private var cc:CornerQuit;
@@ -29,7 +28,6 @@ package com.gmrmarketing.miller.gifphotobooth
 		private var ageEnabled:Boolean;
 		private var tim:TimeoutHelper;
 		
-		private var drips:Drips;
 		private var log:Logger;
 		
 		
@@ -37,13 +35,11 @@ package com.gmrmarketing.miller.gifphotobooth
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			Mouse.hide();
+			//Mouse.hide();
 			
 			mainContainer = new Sprite();
-			dripContainer = new Sprite();
 			cornerContainer = new Sprite();
 			addChild(mainContainer);
-			addChild(dripContainer);
 			addChild(cornerContainer);
 
 			intro = new Intro();
@@ -68,9 +64,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			emReview.container = mainContainer;
 			
 			thanks = new Thanks();
-			thanks.container = mainContainer;
-			
-			drips = new Drips(dripContainer);
+			thanks.container = mainContainer;			
 			
 			cc = new CornerQuit();
 			cc.init(cornerContainer, "ul");
@@ -80,7 +74,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			ageToggle.init(cornerContainer, "lr");
 			ageToggle.addEventListener(CornerQuit.CORNER_QUIT, toggleAgeGate);
 			
-			ageEnabled = true;
+			ageEnabled = false;
 			
 			tim = TimeoutHelper.getInstance();
 			tim.init(90000);
@@ -109,12 +103,14 @@ package com.gmrmarketing.miller.gifphotobooth
 		private function init(e:Event = null):void
 		{			
 			removeEventListener(Event.ADDED_TO_STAGE, init);
-			intro.addEventListener(Intro.BEGIN, showAgeGate);
+			if(ageEnabled){
+				intro.addEventListener(Intro.BEGIN, showAgeGate);
+				intro.removeEventListener(Intro.BEGIN, ageGateComplete);
+			}else {
+				intro.addEventListener(Intro.BEGIN, ageGateComplete);
+				intro.removeEventListener(Intro.BEGIN, showAgeGate);
+			}
 			intro.show();
-			
-			drips.regSpeed();
-			drips.image = "can";
-			drips.bg = intro.bg;			
 		}
 		
 		
@@ -122,8 +118,6 @@ package com.gmrmarketing.miller.gifphotobooth
 		{
 			intro.removeEventListener(Intro.BEGIN, showAgeGate);
 			tim.startMonitoring();
-			
-			drips.pause();
 			
 			ageGate.show();
 			ageGate.addEventListener(AgeGate.COMPLETE, ageGateComplete);
@@ -137,11 +131,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			
 			takePhoto.addEventListener(TakePhoto.SHOWING, hideIntro);
 			takePhoto.addEventListener(TakePhoto.COMPLETE, showReview);
-			takePhoto.show();
-			
-			drips.fastSpeed();
-			drips.image = "bottle";
-			drips.bg = takePhoto.bg;			
+			takePhoto.show();		
 		}
 		
 		
@@ -162,7 +152,6 @@ package com.gmrmarketing.miller.gifphotobooth
 			review.show(takePhoto.video);//array of bitmapData's
 			review.addEventListener(Review.RETAKE, retakePhotos, false, 0, true);
 			review.addEventListener(Review.NEXT, showReceive, false, 0, true);
-			drips.bg = review.bg;
 		}
 		
 		private function hideTakePhoto(e:Event):void
@@ -190,8 +179,6 @@ package com.gmrmarketing.miller.gifphotobooth
 			receive.addEventListener(Receive.SHOWING, hideReview, false, 0, true);
 			receive.addEventListener(Receive.COMPLETE, showReceiveChoice, false, 0, true);
 			receive.show();
-			drips.bg = receive.bg;
-			drips.regSpeed();
 		}
 		
 		
@@ -232,7 +219,6 @@ package com.gmrmarketing.miller.gifphotobooth
 			emp.addEventListener(EmailPhone.BACK, showReceive, false, 0, true);
 			emp.addEventListener(EmailPhone.COMPLETE, empComplete, false, 0, true);
 			emp.show(choice);
-			drips.bg = emp.bg;
 		}
 		
 		
@@ -254,7 +240,6 @@ package com.gmrmarketing.miller.gifphotobooth
 			emReview.addEventListener(EmailReview.ADD_PERSON, showReceiveChoice, false, 0, true);
 			emReview.addEventListener(EmailReview.COMPLETE, showThanks, false, 0, true);
 			emReview.show(emp.data);
-			drips.bg = emReview.bg;
 		}
 		
 		
@@ -337,7 +322,6 @@ package com.gmrmarketing.miller.gifphotobooth
 			
 			tim.buttonClicked();
 			
-			drips.pause();
 			thanks.show(takePhoto.video, o);			
 		}
 		
@@ -361,11 +345,6 @@ package com.gmrmarketing.miller.gifphotobooth
 				intro.removeEventListener(Intro.BEGIN, showAgeGate);
 			}
 			emp.clear();
-			
-			drips.pause();
-			drips.regSpeed();
-			drips.image = "can";
-			drips.bg = intro.bg;	
 			
 			intro.addEventListener(Intro.SHOWING, hideThanks, false, 0, true);
 			intro.show();			
@@ -409,7 +388,6 @@ package com.gmrmarketing.miller.gifphotobooth
 			
 			thanks.removeEventListener(Thanks.COMPLETE, finish);
 			thanks.hide();
-			drips.pause();
 			
 			if(ageEnabled){
 				intro.addEventListener(Intro.BEGIN, showAgeGate);

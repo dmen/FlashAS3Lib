@@ -1,6 +1,6 @@
 ﻿//used by Queue
 
-package com.gmrmarketing.miller.gifphotobooth
+package com.gmrmarketing.esurance.usopen2015
 {
 	import flash.events.*;
 	import flash.net.*;
@@ -26,7 +26,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		private var token:String; //GUID - token returned from call to validateuser
 		private var responseId:int;//set in submit if the form data is already posted, or formPosted normally
 		
-		private var hdr:URLRequestHeader;
+		private var hdr:URLRequestHeader;//need to set headers in order to send and receive JSON
 		private var hdr2:URLRequestHeader;
 		
 		private var busy:Boolean; //true when submitting data
@@ -40,6 +40,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		public function Hubble(guid:String)
 		{
 			myGUID = guid;//unique machine identifier - used as deviceId when submitting form data
+			
 			token = "";
 			busy = false;	
 			
@@ -79,6 +80,10 @@ package com.gmrmarketing.miller.gifphotobooth
 		}
 		
 		
+		/**
+		 * Queue will call this when uploading to verify last hubble post is complete
+		 * @return
+		 */
 		public function isBusy():Boolean
 		{
 			return  busy;
@@ -103,7 +108,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		
 		
 		/**
-		 * Error callback if getting the token returns an error or status != 1 within gotToken() calls modelError()
+		 * Error callback if getting the token returns an error or status != 1 within gotToken()
 		 * @param	e
 		 */
 		private function tokenError(e:IOErrorEvent = null):void
@@ -116,6 +121,11 @@ package com.gmrmarketing.miller.gifphotobooth
 		/**
 		 * Called from Queue.uploadNext()
 		 * @param	curUpload.dob, curUpload.email, curUpload.phone, gString, curUpload.opt1, curUpload.opt2, curUpload.opt3, curUpload.opt4, curUpload.opt4, curUpload.deviceResponseID,  curUpload.responseID, curUpload.followUpError
+		 * 
+		 * deviceReponseID is the unique record number used to process the same record if errors occur when posting
+		 * This number comes from the AutoInc class used by the Queue
+		 * 
+		 * responseID comes in initially as -1
 		 */
 		public function submit(formData:Array):void
 		{	
@@ -129,6 +139,7 @@ package com.gmrmarketing.miller.gifphotobooth
 				
 				if (formData[10] != -1) {
 					
+					//have a responseID back from Hubble so form data was posted
 					if (formData[11] == true) {
 						log.log("Hubble.submit - only process followups");
 						responseId = formData[10];
@@ -142,6 +153,8 @@ package com.gmrmarketing.miller.gifphotobooth
 					
 				}else{
 				
+					//responseID == -1 - post the full form and photo data
+					
 					var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":209, "DeviceId":myGUID, "DeviceResponseId":formData[9], "ResponseDate":Strings.hubbleTimestamp(), "FieldResponses":[ { "FieldId":1484, "Response":formData[0] }, { "FieldId":1485, "Response":formData[1] },{ "FieldId":1486, "Response":formData[2] }, { "FieldId":1488, "Response":formData[4] }, { "FieldId":1489, "Response":true }, { "FieldId":1490, "Response":formData[5] }, { "FieldId":1491, "Response":formData[6] }, { "FieldId":1504, "Response":formData[7] }, { "FieldId":1505, "Response":formData[8] }], "Latitude":"0", "Longitude":"0" }};
 					
 					var js:String = JSON.stringify(resp);
@@ -173,15 +186,19 @@ package com.gmrmarketing.miller.gifphotobooth
 			}
 		}
 		
+		
 		/**
 		 * Called from Queue.hubblePhotoError() if posting the photo or followup generates an error
-		 * if so the responseID is injected into the user object so that subsequent attempts will use
+		 * Set above in formPosted()
+		 * 
+		 * The responseID is injected into the user object so that subsequent attempts will use
 		 * the proper record as the form data is already posted into the database
 		 */
 		public function get responseID():int
 		{
 			return responseId;
 		}
+		
 		
 		private function formError(e:IOErrorEvent = null):void
 		{
@@ -270,19 +287,36 @@ package com.gmrmarketing.miller.gifphotobooth
 			if (j.Status == 1) {
 				log.log("Hubble.followupsProcessed - COMPLETE - deviceResponseId: " + String(loggerID));
 				dispatchEvent(new Event(COMPLETE));
-				//callPrintAPI();
+				
+				callPrintAPI();
 			}else {
 				log.log("Hubble.followupsProcessed - status error: " + String(j.Status));
 				followupError();
 			}
 		}
 		
-		/*
-		private function callPrintAPI():void
+		
+				
+		/**
+		 * calls hubbleFollowupError() in Queue.as
+		 */
+		private function followupError(e:IOErrorEvent = null):void
+		{
+			log.log("Hubble.followupError()" + e.toString());
+			busy = false;
+			dispatchEvent(new Event(FOLLOWUP_ERROR));
+		}
+		
+		
+		/**
+		 * Call the printAPI in order to record the number of prints that have been printed
+		 * The number in the Value key of the object is how many prints to add
+		 */
+		private function callPrintAPI(numPrints:int = 1):void
 		{	
-			var ts:String = Strings.timestamp();
+			var ts:String = Strings.hubbleTimestamp();
 			
-			var resp:Object = { "AccessToken":"2d125c5e-edb2-48ad-8a8e-07d9762091e7", "MethodData": { "InteractionId":202, "Label":"photoPrinted", "Value":"2", "Timestamp":ts, "DeviceResponseId":"sldkfjsdf" }};		
+			var resp:Object = { "AccessToken":"2d125c5e-edb2-48ad-8a8e-07d9762091e7", "MethodData": { "InteractionId":202, "Label":"photoPrinted", "Value":String(numPrints), "Timestamp":ts, "DeviceResponseId":"sldkfjsdf" }};		
 			var js:String = JSON.stringify(resp);
 			
 			var req:URLRequest = new URLRequest(BASE_URL + "interaction/CreateActivity");
@@ -293,7 +327,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			
 			var lo:URLLoader = new URLLoader();
 			lo.addEventListener(Event.COMPLETE, printProcessed, false, 0, true);
-			lo.addEventListener(IOErrorEvent.IO_ERROR, followupError, false, 0, true);
+			lo.addEventListener(IOErrorEvent.IO_ERROR, printAPIError, false, 0, true);
 			lo.load(req);			
 		}
 		
@@ -309,18 +343,13 @@ package com.gmrmarketing.miller.gifphotobooth
 				followupError();
 			}
 		}
-		*/
 		
 		
-		/**
-		 * calls hubblePhotoError() in Queue.as
-		 */
-		private function followupError(e:IOErrorEvent = null):void
+		private function printAPIError(e:IOErrorEvent):void
 		{
-			log.log("Hubble.followupError()" + e.toString());
-			busy = false;
-			dispatchEvent(new Event(FOLLOWUP_ERROR));
+			log.log("Hubble.printAPIError()" + e.toString());
 		}
+
 	}
 	
 }

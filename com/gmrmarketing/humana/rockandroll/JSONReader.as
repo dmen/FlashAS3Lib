@@ -11,6 +11,7 @@ package com.gmrmarketing.humana.rockandroll
 		
 		public function JSONReader(){}
 		
+		//called from Main.getRunners()
 		public function getRunners():void
 		{
 			var urlRequest:URLRequest  = new URLRequest("http://humanarocknroll.thesocialtab.net/Milestones/GetLatestRunners");

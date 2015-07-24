@@ -95,6 +95,8 @@ package com.gmrmarketing.empirestate.ilny
 			users.push(curUpload);
 			rewriteQueue();
 			users = getAllUsers();
+			
+			//uploadNext();
 		}
 		
 		
@@ -184,7 +186,6 @@ package com.gmrmarketing.empirestate.ilny
 		 * 
 		 * All key types are strings - sharephoto and emailoptin are string booleans "true" or "false"
 		 * uploaded is string boolean - special key added by add()
-		 * Object keys: {rfid, image}
 		 * 
 		 * @return Array of user objects
 		 */

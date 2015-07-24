@@ -1,6 +1,6 @@
 ﻿//used by Queue
 
-package com.gmrmarketing.miller.gifphotobooth
+package com.gmrmarketing.png.gifphotobooth
 {
 	import flash.events.*;
 	import flash.net.*;

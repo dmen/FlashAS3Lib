@@ -8,17 +8,19 @@ package com.gmrmarketing.humana.rockandroll
 	import flash.ui.Mouse;
 	import flash.utils.getTimer;
 	import com.greensock.TweenMax;
+	import com.gmrmarketing.utilities.AIRXML;
 	
 	public class Main extends MovieClip
 	{
 		private var json:JSONReader;
 		private var queue:MessageQueue;
-		private var screenLocs:Array;//array ox x,y positions for message boxes
+		private var screenLocs:Array;//array of x,y positions for message boxes
 		
 		private var bgContainer:Sprite;		
 		private var messageContainer:Sprite;		
 		
 		private var mTot:int;
+		private var config:AIRXML;
 		
 		
 		public function Main()
@@ -29,8 +31,8 @@ package com.gmrmarketing.humana.rockandroll
 
 			screenLocs = new Array([8, 2], [431, 316], [854, 2], [8, 316], [431, 2], [854, 316]);			
 			
-			queue = new MessageQueue();			
-			queue.addEventListener(MessageQueue.RUNNERS_ADDED, runnersAdded);
+			//queue = new MessageQueue();			
+			//queue.addEventListener(MessageQueue.RUNNERS_ADDED, runnersAdded);
 			
 			json = new JSONReader();
 			json.addEventListener(JSONReader.DATA_READY, gotNewRunners);			
@@ -38,10 +40,21 @@ package com.gmrmarketing.humana.rockandroll
 			messageContainer = new Sprite();
 			addChild(messageContainer);
 			
+			config = new AIRXML();
+			config.addEventListener(Event.COMPLETE, xmlReady);
+			config.readXML();
+			
 			mTot = 0;
-			getRunners();
+			//getRunners();
 		}
 		
+		private function xmlReady(e:Event):void
+		{			
+			queue = new MessageQueue(config.getXML().defaultStartTime, config.getXML().startToMatDistanceInMiles, config.getXML().matToSignDistanceInMiles);			
+			queue.addEventListener(MessageQueue.RUNNERS_ADDED, runnersAdded);
+			
+			getRunners();
+		}
 		
 		private function getRunners():void
 		{			
@@ -101,6 +114,7 @@ package com.gmrmarketing.humana.rockandroll
 			screenLocs.push(e.currentTarget.getPoint());//screen loc available
 			e.currentTarget.kill();//call kill in message object
 			
+			//if screen is empty show the logo animation
 			if (screenLocs.length == 6) {
 				TweenMax.to(logo, 2, { alpha:1 } );
 				logo.gotoAndPlay(1);
