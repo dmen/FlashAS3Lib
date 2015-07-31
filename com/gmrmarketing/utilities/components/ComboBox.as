@@ -315,13 +315,13 @@ package com.gmrmarketing.utilities.components
 		
 		/**
 		 * Adds items to the list
-		 * @param	newItems Array of objects with label and data(optional) properties
+		 * @param	newItems Array of objects with label and other optional properties
 		 */
 		public function addItems(newItems:Array):void
 		{
 			var curY:int = itemContainer.height;
 			
-			for (var i:int = 0; i < newItems.length; i++) {
+			for (var i:int = 0; i < newItems.length; i++) {				
 				var ni:ComboItem = new ComboItem(newItems[i], fieldWidth, visibleLinesHeight, listColors[0], listColors[1], listColors[2], listColors[3], itemFontSize, itemFontReference, listMargin);
 				ni.addEventListener(ComboItem.CLICKED, clicked, false, 0, true);
 				itemContainer.addChild(ni);

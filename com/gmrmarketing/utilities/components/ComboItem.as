@@ -28,7 +28,7 @@ package com.gmrmarketing.utilities.components
 		
 		/**
 		 * Constructor - called from ComboBox.addItems()
-		 * @param	$item
+		 * @param	$item Object with label property, can have data property
 		 * @param	$w
 		 * @param	$h
 		 * @param	$txtCol

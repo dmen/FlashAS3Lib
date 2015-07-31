@@ -129,11 +129,13 @@ package com.gmrmarketing.miller.gifphotobooth
 				
 				if (formData[10] != -1) {
 					
+					//previous hubble responseID - means form data was posted but there was an error posting photo or followup
 					if (formData[11] == true) {
+						//previous followup error
 						log.log("Hubble.submit - only process followups");
 						responseId = formData[10];
 						processFollowups();
-					}else{
+					}else {
 						log.log("Hubble.submit = photo only, responseID: " + formData[10]);
 						//form data already posted but posting photo or followup got an error...just post photo again
 						responseId = formData[10];
@@ -142,6 +144,8 @@ package com.gmrmarketing.miller.gifphotobooth
 					
 				}else{
 				
+					//no prior hubble responseID - New full form post
+					
 					var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":209, "DeviceId":myGUID, "DeviceResponseId":formData[9], "ResponseDate":Strings.hubbleTimestamp(), "FieldResponses":[ { "FieldId":1484, "Response":formData[0] }, { "FieldId":1485, "Response":formData[1] },{ "FieldId":1486, "Response":formData[2] }, { "FieldId":1488, "Response":formData[4] }, { "FieldId":1489, "Response":true }, { "FieldId":1490, "Response":formData[5] }, { "FieldId":1491, "Response":formData[6] }, { "FieldId":1504, "Response":formData[7] }, { "FieldId":1505, "Response":formData[8] }], "Latitude":"0", "Longitude":"0" }};
 					
 					var js:String = JSON.stringify(resp);
@@ -160,6 +164,11 @@ package com.gmrmarketing.miller.gifphotobooth
 		}
 		
 		
+		/**
+		 * Callback from posting the full form
+		 * sets the responseID from Hubble
+		 * @param	e
+		 */
 		private function formPosted(e:Event):void
 		{			
 			var j:Object = JSON.parse(e.currentTarget.data);			
@@ -173,6 +182,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			}
 		}
 		
+		
 		/**
 		 * Called from Queue.hubblePhotoError() if posting the photo or followup generates an error
 		 * if so the responseID is injected into the user object so that subsequent attempts will use
@@ -182,6 +192,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		{
 			return responseId;
 		}
+		
 		
 		private function formError(e:IOErrorEvent = null):void
 		{
