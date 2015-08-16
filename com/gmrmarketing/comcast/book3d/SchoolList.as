@@ -32,7 +32,7 @@ package com.gmrmarketing.comcast.book3d
 			combo.setListColors(0xcccccc, 0x333333, 0x666666, 0xaaaaaa);
 			combo.setDefaultMessage("Please Select University");
 			
-			so = SharedObject.getLocal("universityList", "/");			
+			so = SharedObject.getLocal("universityList");			
 			
 			var req:URLRequest = new URLRequest("http://comcastuniversityshellgame.thesocialtab.net/Service/GetSchools");		
 			

@@ -34,8 +34,9 @@ package com.gmrmarketing.esurance.usopen2015
 			clip.c3.alpha = .2;
 			clip.c2.alpha = .2;
 			clip.c1.alpha = .2;
-			clip.x = 765;
-			clip.y = 785;
+			clip.x = 548;
+			clip.y = 790;
+			
 			clip.scaleX = clip.scaleY = .3;
 			TweenMax.to(clip, .75, { alpha:1, scaleX:1, scaleY:1, ease:Back.easeOut, onComplete:startCountdown } );
 		}

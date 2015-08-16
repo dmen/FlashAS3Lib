@@ -26,8 +26,8 @@ package com.gmrmarketing.png.gifphotobooth
 			
 			itemContainer = new Sprite();
 			clip.addChild(itemContainer);
-			itemContainer.x = 370;
-			itemContainer.y = 355;
+			itemContainer.x = 450;
+			itemContainer.y = 400;
 			
 			tim = TimeoutHelper.getInstance();
 		}
@@ -82,14 +82,11 @@ package com.gmrmarketing.png.gifphotobooth
 			
 			for (var i:int = 0; i < items.length; i++) {
 				var m:MovieClip = new mcEmailItem();				
-				m.y = 36 * i;
+				m.y = 60 * i;
 				m.email.text = items[i].email;
 				m.phone.text = items[i].phone;
 				m.arrayIndex = i; //inject 
-				m.btnRemove.addEventListener(MouseEvent.MOUSE_DOWN, removeItem, false, 0, true);
-				if (i % 2 == 0) {
-					m.bg.alpha = 0;
-				}
+				m.btnRemove.addEventListener(MouseEvent.MOUSE_DOWN, removeItem, false, 0, true);				
 				itemContainer.addChild(m);
 			}
 		}

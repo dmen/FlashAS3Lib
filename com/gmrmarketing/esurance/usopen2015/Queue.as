@@ -10,14 +10,12 @@ package  com.gmrmarketing.esurance.usopen2015
 	import flash.events.*;	
 	import flash.utils.Timer;
 	import com.gmrmarketing.utilities.Utility;
-	import com.gmrmarketing.miller.gifphotobooth.Hubble;
-	import com.gmrmarketing.miller.gifphotobooth.AutoIncrement;
-	import com.gmrmarketing.utilities.Logger;
+	import com.gmrmarketing.utilities.AutoIncrement;
+	
 	
 	public class Queue extends EventDispatcher  
 	{
-		private const DATA_FILE_NAME:String = "millerGifQueued.csv"; //current users / not yet uploaded
-		private const SAVED_FILE_NAME:String = "millerGifSaved.csv"; //users successfully uploaded
+		private const DATA_FILE_NAME:String = "uso2015Queued.csv"; //current users / not yet uploaded
 		
 		private var fileFolder:File;
 		private var users:Array;//current queue
@@ -27,7 +25,7 @@ package  com.gmrmarketing.esurance.usopen2015
 	
 		private var autoInc:AutoIncrement;//so each record can have a unique deviceResponseID when sending to hubble
 		
-		private var log:Logger;
+		
 		
 		
 		public function Queue()
@@ -36,8 +34,6 @@ package  com.gmrmarketing.esurance.usopen2015
 			
 			autoInc = new AutoIncrement();
 			
-			log = Logger.getInstance();
-			
 			hubble = new Hubble(autoInc.guid);//guid is used for deviceId
 			
 			hubble.addEventListener(Hubble.GOT_TOKEN, gotToken);			
@@ -45,6 +41,7 @@ package  com.gmrmarketing.esurance.usopen2015
 			hubble.addEventListener(Hubble.FORM_ERROR, hubbleFormError);
 			hubble.addEventListener(Hubble.PHOTO_ERROR, hubblePhotoError);
 			hubble.addEventListener(Hubble.FOLLOWUP_ERROR, hubbleFollowupError);
+			hubble.addEventListener(Hubble.PRINTAPI_ERROR, hubblePrintAPIError);
 			hubble.getToken();
 		}
 		
@@ -55,9 +52,7 @@ package  com.gmrmarketing.esurance.usopen2015
 		 * @param	e
 		 */
 		private function gotToken(e:Event):void
-		{			
-			log.log("Queue.gotToken() - machine/deviceID: " + autoInc.guid);
-			
+		{
 			hubble.removeEventListener(Hubble.GOT_TOKEN, gotToken);			
 			uploadNext();
 		}
@@ -66,21 +61,21 @@ package  com.gmrmarketing.esurance.usopen2015
 		
 		/**
 		 * Adds a user data object to the csv file
-		 * Called from Main.removeForm() - once form is complete and Thanks is showing
-		 * Data object contains these keys dob,email,opt1,opt2,opt3,opt4,opt5,phone,gif
+		 * Called from Main
+		 * Data object contains these keys email,rfid,image keys
+		 * 
 		 * deviceResponseID is injected into object for use by Hubble so that each record has a unique identifier
 		 * 
-		 * called from Thanks.processFrames() once the gif has been created
+		 * called from Thanks.encFrame() once the gif has been created
 		 */
 		public function add(data:Object):void
 		{			
-			data.deviceResponseID = autoInc.num;
+			data.deviceResponseID = autoInc.nextNum;
 			data.responseID = -1;//only used if photo/followup post errors - this is hubble's response id from sending
 			//the form data, so that when the photo is sent it can be attached to the proper record - ie if this is -1 then the
 			//full form object and photo will be uploaded
-			data.followupError = false;//set to true in hubbleFollowupError
-			
-			log.log("Queue.add: " + data.email + " | " + data.phone + " | " + "deviceResponseID: " + data.deviceResponseID);
+			data.followupError = false;//set to true in hubbleFollowupError			
+			data.printAPIError = false;//set to true in hubblePrintAPIError
 			
 			users.push(data);//add to queue
 			rewriteQueue();
@@ -89,6 +84,11 @@ package  com.gmrmarketing.esurance.usopen2015
 		}
 		
 		
+		public function callPrintOnly(label:String = "photoPrinted"):void
+		{
+			hubble.callPrintAPI(label);
+		}
+		
 		/**
 		 * uploads the current user form data to the service
 		 * removes the curUpload object from users array
@@ -96,13 +96,9 @@ package  com.gmrmarketing.esurance.usopen2015
 		 */
 		private function uploadNext():void
 		{
-			log.log("Queue.uploadNext() - queue length: " + String(users.length));
-			if (hubble.hasToken() && !hubble.isBusy() && users.length > 0) {
-				
-				curUpload = users.shift();
-				
-				hubble.submit(new Array(curUpload.dob, curUpload.email, curUpload.phone, curUpload.gif, curUpload.opt1, curUpload.opt2, curUpload.opt3, curUpload.opt4, curUpload.opt5, curUpload.deviceResponseID, curUpload.responseID, curUpload.followupError));
-				
+			if (hubble.hasToken() && !hubble.isBusy() && users.length > 0) {				
+				curUpload = users.shift();				
+				hubble.submit(curUpload);				
 			}
 		}
 		
@@ -114,8 +110,7 @@ package  com.gmrmarketing.esurance.usopen2015
 		 * @param	e
 		 */
 		private function hubbleFormError(e:Event):void
-		{			
-			log.log("Queue.hubbleFormError() deviceResponseId: " + curUpload.deviceResponseID);
+		{	
 			users.push(curUpload);
 			rewriteQueue();
 			users = getAllUsers();
@@ -130,8 +125,7 @@ package  com.gmrmarketing.esurance.usopen2015
 		 * since the form data has already been posted
 		 */
 		private function hubblePhotoError(e:Event):void
-		{			
-			log.log("Queue.hubblePhotoError()"+" responseId:"+hubble.responseID + " | deviceResponseId: " + curUpload.deviceResponseID);
+		{
 			curUpload.responseID = hubble.responseID;//change from initial value of -1 to the responseID returned from posting the form
 			
 			users.push(curUpload);
@@ -143,8 +137,7 @@ package  com.gmrmarketing.esurance.usopen2015
 		
 		
 		private function hubbleFollowupError(e:Event):void
-		{			
-			log.log("Queue.hubbleFollowupError()"+" responseId:"+hubble.responseID + " | deviceResponseId: " + curUpload.deviceResponseID);
+		{
 			curUpload.followupError = true;
 			
 			users.push(curUpload);
@@ -154,15 +147,25 @@ package  com.gmrmarketing.esurance.usopen2015
 			uploadNext();
 		}
 		
+		
+		private function hubblePrintAPIError(e:Event):void
+		{
+			curUpload.printAPIError = true;
+			
+			users.push(curUpload);
+			rewriteQueue();
+			users = getAllUsers();
+			
+			uploadNext();
+		}
+		
+		
 		/**
 		 * Called once hubble submit is complete
 		 * @param	e Event.COMPLETE
 		 */
 		private function uploadComplete(e:Event):void
 		{
-			log.log("Queue.uploadComplete() deviceResponseId: " + curUpload.deviceResponseID);
-			writeSavedUser(curUpload); //keep saved users in sep file
-			
 			rewriteQueue();//writes the users array to disk - with curUpload object now removed
 			users = getAllUsers();//repopulate users array from file
 			
@@ -179,8 +182,7 @@ package  com.gmrmarketing.esurance.usopen2015
 		 */
 		private function rewriteQueue():void
 		{
-			try{
-				//var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
+			try{				
 				var file:File = File.documentsDirectory.resolvePath( DATA_FILE_NAME );
 				file.deleteFile();
 				
@@ -212,31 +214,7 @@ package  com.gmrmarketing.esurance.usopen2015
 				stream = null;
 			}catch (e:Error) {
 			}			
-		}
-		
-		
-		/**
-		 * Appends a single user object to the saved data file
-		 * Saved Data File contains all users that have been sent to the server
-		 * called from uploadComplete()
-		 * @param	obj
-		 */
-		private function writeSavedUser(obj:Object):void
-		{
-			//add a timestamp
-			obj.timeAdded = Utility.getTimeStamp();
-			try{
-				//var file:File = File.applicationStorageDirectory.resolvePath( SAVED_FILE_NAME );
-				var file:File = File.documentsDirectory.resolvePath( SAVED_FILE_NAME );
-				var stream:FileStream = new FileStream();
-				stream.open( file, FileMode.APPEND );
-				stream.writeObject(obj);
-				stream.close();
-				file = null;
-				stream = null;
-			}catch (e:Error) {
-			}			
-		}
+		}		
 		
 		
 		/**

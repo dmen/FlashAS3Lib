@@ -6,8 +6,6 @@ package com.gmrmarketing.png.gifphotobooth
 	import flash.display.*;
 	import flash.events.*;
 	import flash.desktop.NativeApplication;
-	import com.gmrmarketing.utilities.Logger;
-	import com.gmrmarketing.utilities.LoggerAIR;
 	
 	public class Main extends MovieClip
 	{
@@ -28,7 +26,7 @@ package com.gmrmarketing.png.gifphotobooth
 		private var ageEnabled:Boolean;
 		private var tim:TimeoutHelper;
 		
-		private var log:Logger;
+		private var print:Print;
 		
 		
 		public function Main()
@@ -56,6 +54,7 @@ package com.gmrmarketing.png.gifphotobooth
 			
 			receive = new Receive();
 			receive.container = mainContainer;
+			receive.clear();
 			
 			emp = new EmailPhone();
 			emp.container = mainContainer;
@@ -64,7 +63,7 @@ package com.gmrmarketing.png.gifphotobooth
 			emReview.container = mainContainer;
 			
 			thanks = new Thanks();
-			thanks.container = mainContainer;			
+			thanks.container = mainContainer;		
 			
 			cc = new CornerQuit();
 			cc.init(cornerContainer, "ul");
@@ -80,9 +79,7 @@ package com.gmrmarketing.png.gifphotobooth
 			tim.init(90000);
 			tim.addEventListener(TimeoutHelper.TIMED_OUT, doReset);
 			
-			log = Logger.getInstance();
-			log.logger = new LoggerAIR();//will make kiosklog.txt log on the desktop
-			log.log("APPLICATION START");
+			print = new Print();
 			
 			addEventListener(Event.ADDED_TO_STAGE, init);
 		}
@@ -177,6 +174,7 @@ package com.gmrmarketing.png.gifphotobooth
 			review.removeEventListener(Review.SHOWING, hideTakePhoto);
 			
 			receive.addEventListener(Receive.SHOWING, hideReview, false, 0, true);
+			receive.addEventListener(Receive.CANCEL, finish, false, 0, true);
 			receive.addEventListener(Receive.COMPLETE, showReceiveChoice, false, 0, true);
 			receive.show();
 		}
@@ -203,22 +201,27 @@ package com.gmrmarketing.png.gifphotobooth
 			emReview.removeEventListener(EmailReview.ADD_PERSON, showReceiveChoice);
 			receive.removeEventListener(Receive.SHOWING, hideReview);
 			receive.removeEventListener(Receive.COMPLETE, showReceiveChoice);
+			receive.removeEventListener(Receive.CANCEL, finish);
 			
-			var c:Object = receive.choice;//object with email,text,both keys - one will be true
-			
-			var choice:String;
-			if (c.email) {
-				choice = "email";
+			var c:Object = receive.choice;//email,text,print keys
+			var s:String = ""
+			if (c.email && c.text) {
+				s = "both";
+			}else if (c.email) {
+				s = "email";
 			}else if (c.text) {
-				choice = "text";
-			}else {
-				choice = "both";
+				s = "text";
 			}
 			
-			emp.addEventListener(EmailPhone.SHOWING, hideReceive, false, 0, true);
-			emp.addEventListener(EmailPhone.BACK, showReceive, false, 0, true);
-			emp.addEventListener(EmailPhone.COMPLETE, empComplete, false, 0, true);
-			emp.show(choice);
+			if (s == "") {
+				//user selected print only
+				showThanks();
+			}else{			
+				emp.addEventListener(EmailPhone.SHOWING, hideReceive, false, 0, true);
+				emp.addEventListener(EmailPhone.BACK, showReceive, false, 0, true);
+				emp.addEventListener(EmailPhone.COMPLETE, empComplete, false, 0, true);
+				emp.show(s);
+			}
 		}
 		
 		
@@ -259,47 +262,34 @@ package com.gmrmarketing.png.gifphotobooth
 		}
 		
 		
-		private function showThanks(e:Event):void
+		private function showThanks(e:Event = null):void
 		{			
 			emReview.removeEventListener(EmailReview.COMPLETE, showThanks);
 			thanks.addEventListener(Thanks.COMPLETE, finish, false, 0, true);
 			
-			var data:Array = emp.data; //array of objects
+			var data:Array = emp.data; //array of objects with email,phone,opt keys
 			
 			var o:Object = { };//for sending to thanks
 			o.email = "";
-			o.phone = "";			
-			o.opt1 = data[0].opt;
-			o.opt2 = false;
-			o.opt3 = false;
-			o.opt4 = false;
-			o.opt5 = false;
-			
-			if (data.length > 1) {
-				o.opt2 = data[1].opt
-			}
-			if (data.length > 2) {
-				o.opt3 = data[2].opt
-			}
-			if (data.length > 3) {
-				o.opt4 = data[3].opt
-			}
-			if (data.length > 4) {
-				o.opt4 = data[4].opt
-			}
+			o.phone = "";
+			o.print = receive.choice.print;//true false - used by Hubble to call printAPI or not
 			
 			var emails:Array = [];
 			var phones:Array = [];
 			
-			for (var i:int = 0; i < data.length; i++) {
+			for (var i:int = 0; i < data.length; i++) {				
 				if (data[i].email != "") {
 					emails.push(data[i].email);
+					if (data[i].opt) {
+						o["opt" + String(emails.length)] = "true";//matches opt index with email index
+					}
 				}
 				if (data[i].phone != "") {
 					phones.push(data[i].phone);
 				}
 			}
 			
+			//turn arrays into comma separated lists
 			if (emails.length > 0) {
 				o.email = emails.shift();
 			}
@@ -312,17 +302,20 @@ package com.gmrmarketing.png.gifphotobooth
 			}
 			while (phones.length) {
 				o.phone += "," + phones.shift();
-			}
-			
-			if(ageEnabled){
-				o.dob = ageGate.dob;
-			}else {
-				o.dob = ageGate.defaultDOB;//1900-01-01
-			}
+			}		
 			
 			tim.buttonClicked();
 			
-			thanks.show(takePhoto.video, o);			
+			if (o.email == "" && o.phone == "") {
+				//print only
+				o.email = "printOnly"
+			}
+			thanks.show(takePhoto.video, o);	//sends to Hubble
+			
+			//print?
+			if (o.print) {
+				print.doPrint(takePhoto.video);
+			}
 		}
 		
 		
@@ -345,6 +338,7 @@ package com.gmrmarketing.png.gifphotobooth
 				intro.removeEventListener(Intro.BEGIN, showAgeGate);
 			}
 			emp.clear();
+			receive.clear();
 			
 			intro.addEventListener(Intro.SHOWING, hideThanks, false, 0, true);
 			intro.show();			

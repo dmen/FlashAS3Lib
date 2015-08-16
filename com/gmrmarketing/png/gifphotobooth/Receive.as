@@ -8,6 +8,7 @@ package com.gmrmarketing.png.gifphotobooth
 	
 	public class Receive extends EventDispatcher
 	{
+		public static const CANCEL:String = "receiveCancel";
 		public static const COMPLETE:String = "receiveComplete";
 		public static const SHOWING:String = "receiveShowing";
 		private var clip:MovieClip;
@@ -17,6 +18,9 @@ package com.gmrmarketing.png.gifphotobooth
 		public function Receive()
 		{
 			clip = new mcReceive();
+			clip.cEmail.visible = false;
+			clip.cText.visible = false;
+			clip.cPrint.visible = false;
 		}
 		
 		
@@ -32,19 +36,26 @@ package com.gmrmarketing.png.gifphotobooth
 				myContainer.addChild(clip);
 			}
 			
-			clip.cEmail.visible = false;
-			clip.cText.visible = false;
-			clip.cBoth.visible = false;
+			//clip.cEmail.visible = false;
+			//clip.cText.visible = false;
+			//clip.cPrint.visible = false;
 			
 			clip.btnEmail.addEventListener(MouseEvent.MOUSE_DOWN, checkEmail, false, 0, true);
 			clip.btnText.addEventListener(MouseEvent.MOUSE_DOWN, checkText, false, 0, true);
-			clip.btnBoth.addEventListener(MouseEvent.MOUSE_DOWN, checkBoth, false, 0, true);
+			clip.btnPrint.addEventListener(MouseEvent.MOUSE_DOWN, checkPrint, false, 0, true);
 			clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, doNext, false, 0, true);
+			clip.btnCancel.addEventListener(MouseEvent.MOUSE_DOWN, doCancel, false, 0, true);
 			
 			clip.alpha = 0;
 			TweenMax.to(clip, .5, { alpha:1, onComplete:showing } );
 		}
 		
+		public function clear():void
+		{
+			clip.cEmail.visible = false;
+			clip.cText.visible = false;
+			clip.cPrint.visible = false;
+		}
 		
 		public function hide():void
 		{
@@ -55,8 +66,9 @@ package com.gmrmarketing.png.gifphotobooth
 			}
 			clip.btnEmail.removeEventListener(MouseEvent.MOUSE_DOWN, checkEmail);
 			clip.btnText.removeEventListener(MouseEvent.MOUSE_DOWN, checkText);
-			clip.btnBoth.removeEventListener(MouseEvent.MOUSE_DOWN, checkBoth);
+			clip.btnPrint.removeEventListener(MouseEvent.MOUSE_DOWN, checkPrint);
 			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, doNext);
+			clip.btnCancel.removeEventListener(MouseEvent.MOUSE_DOWN, doCancel);
 		}
 		
 		
@@ -71,7 +83,7 @@ package com.gmrmarketing.png.gifphotobooth
 			var o:Object = { };
 			o.email = clip.cEmail.visible;
 			o.text = clip.cText.visible;
-			o.both = clip.cBoth.visible;
+			o.print = clip.cPrint.visible;
 			return o;
 		}
 		
@@ -88,8 +100,6 @@ package com.gmrmarketing.png.gifphotobooth
 				clip.cEmail.visible = false;
 			}else {
 				clip.cEmail.visible = true;
-				clip.cText.visible = false;
-				clip.cBoth.visible = false;
 			}
 		}
 		
@@ -100,30 +110,26 @@ package com.gmrmarketing.png.gifphotobooth
 				clip.cText.visible = false;
 			}else {
 				clip.cText.visible = true;
-				clip.cEmail.visible = false;
-				clip.cBoth.visible = false;
 			}
 		}
 		
 		
-		private function checkBoth(e:MouseEvent):void
+		private function checkPrint(e:MouseEvent):void
 		{
-			if (clip.cBoth.visible) {
-				clip.cBoth.visible = false;
+			if (clip.cPrint.visible) {
+				clip.cPrint.visible = false;
 			}else {
-				clip.cBoth.visible = true;
-				clip.cEmail.visible = false;
-				clip.cText.visible = false;
+				clip.cPrint.visible = true;
 			}
 		}
 		
 		
 		private function doNext(e:MouseEvent):void
 		{
-			if (clip.cEmail.visible || clip.cText.visible || clip.cBoth.visible) {
+			if (clip.cEmail.visible || clip.cText.visible || clip.cPrint.visible) {
 				dispatchEvent(new Event(COMPLETE));
 			}else {
-				clip.theTitle.text = "Please choose one option";
+				clip.theTitle.text = "\nPlease choose one option";
 				TweenMax.to(clip.theTitle, .5, { alpha:0, delay:1, onComplete:doTitle } );
 			}
 		}
@@ -131,8 +137,14 @@ package com.gmrmarketing.png.gifphotobooth
 		
 		private function doTitle():void
 		{
-			clip.theTitle.text = "How would you like to receive your GIF?";
+			clip.theTitle.text = "How would you like to receive\nyour animated GIF?";
 			TweenMax.to(clip.theTitle, .5, { alpha:1 } );
+		}
+		
+		
+		private function doCancel(e:MouseEvent):void
+		{
+			dispatchEvent(new Event(CANCEL));
 		}
 	}
 	

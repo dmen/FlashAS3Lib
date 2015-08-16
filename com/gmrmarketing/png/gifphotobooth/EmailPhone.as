@@ -29,7 +29,7 @@ package com.gmrmarketing.png.gifphotobooth
 			tim = TimeoutHelper.getInstance();
 			kbd = new KeyBoard();
 			//kbd.addEventListener(KeyBoard.KEYFILE_LOADED, initkbd, false, 0, true);
-			kbd.loadKeyFile("kbd2.xml");
+			kbd.loadKeyFile("kbd3.xml");
 		}
 		
 		
@@ -41,9 +41,9 @@ package com.gmrmarketing.png.gifphotobooth
 		
 		/**
 		 * 
-		 * @param	which String one of email,text,both
+		 * @param	whichType String one of email,text,both
 		 */
-		public function show(which:String):void
+		public function show(whichType:String):void
 		{
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
@@ -51,16 +51,17 @@ package com.gmrmarketing.png.gifphotobooth
 			if(!myContainer.contains(kbd)){
 				myContainer.addChild(kbd);
 			}
-			myType = which;
+			myType = whichType;
 			
 			switch(myType) {
 				case "both":
-					clip.theTitle.text = "Please Enter Email Address and Phone";
-					clip.email.x = 491;
-					clip.phone.x = 1060;
+					clip.theTitle.text = "Please Enter Email address and/or Phone";
+					clip.email.x = 431;
+					clip.phone.x = 1000;
 					clip.email.visible = true;
 					clip.phone.visible = true;
 					clip.email.theCheck.visible = false;
+					clip.email.theCheck2.visible = false;
 					clip.phone.theCheck.visible = false;
 					
 					kbd.setFocusFields([[clip.email.theText, 0],[clip.phone.theText, 12]]);
@@ -71,11 +72,12 @@ package com.gmrmarketing.png.gifphotobooth
 					clip.phone.visible = false;
 					clip.email.visible = true;
 					clip.email.theCheck.visible = false;
+					clip.email.theCheck2.visible = false;
 					kbd.setFocusFields([[clip.email.theText, 0]]);
 					break;
 				case "text":
 					clip.theTitle.text = "Please Enter Phone";
-					clip.phone.x = 780;
+					clip.phone.x = 710;
 					clip.phone.visible = true;
 					clip.email.visible = false;
 					clip.phone.theCheck.visible = false;
@@ -83,14 +85,16 @@ package com.gmrmarketing.png.gifphotobooth
 					break;
 			}
 			
-			kbd.x = 90;
-			kbd.y = 1080;
+			kbd.x = 240;
+			kbd.y = 760;
+			kbd.alpha = 0;
 			
 			clip.phone.theText.restrict = "-0-9";
 			clip.email.theText.text = "";
 			clip.phone.theText.text = "";
 			
-			clip.email.btnCheck.addEventListener(MouseEvent.MOUSE_DOWN, toggleEmailOptIn, false, 0, true);
+			clip.email.btnCheck.addEventListener(MouseEvent.MOUSE_DOWN, toggleEmailAge, false, 0, true);
+			clip.email.btnCheck2.addEventListener(MouseEvent.MOUSE_DOWN, toggleEmailOptIn, false, 0, true);
 			clip.phone.btnCheck.addEventListener(MouseEvent.MOUSE_DOWN, togglePhoneOptIn, false, 0, true);
 			
 			clip.btnAdd.addEventListener(MouseEvent.MOUSE_DOWN, addPerson, false, 0, true);
@@ -120,10 +124,13 @@ package com.gmrmarketing.png.gifphotobooth
 			return clip;
 		}
 		
-		
-		private function toggleEmailOptIn(e:MouseEvent):void
+		private function toggleEmailAge(e:MouseEvent):void
 		{
 			clip.email.theCheck.visible = clip.email.theCheck.visible ? false : true;
+		}
+		private function toggleEmailOptIn(e:MouseEvent):void
+		{
+			clip.email.theCheck2.visible = clip.email.theCheck2.visible ? false : true;
 		}
 		private function togglePhoneOptIn(e:MouseEvent):void
 		{
@@ -174,7 +181,7 @@ package com.gmrmarketing.png.gifphotobooth
 		private function showing():void
 		{
 			dispatchEvent(new Event(SHOWING));
-			TweenMax.to(kbd, .5, { y:655, ease:Back.easeOut } );
+			TweenMax.to(kbd, .5, { y:682, alpha:1, ease:Back.easeOut } );
 		}
 		
 		
@@ -196,6 +203,12 @@ package com.gmrmarketing.png.gifphotobooth
 				}else {
 					good = 1;
 				}
+				if (good) {
+					if (!clip.email.theCheck.visible) {
+						message("You must be at least 13 years of age");
+						good = 0;
+					}
+				}
 			}
 			
 			if (clip.phone.theText.text != "") {
@@ -207,7 +220,7 @@ package com.gmrmarketing.png.gifphotobooth
 				}
 				if (good) {
 					if (!clip.phone.theCheck.visible) {
-						message("You must accept the SMS terms");
+						message("\nYou must accept the SMS terms");
 						good = 0;
 					}
 				}
@@ -215,13 +228,14 @@ package com.gmrmarketing.png.gifphotobooth
 			
 			if (good == 1) {
 				if(myData.length < 5){
-					var newEntry:Object = { email:clip.email.theText.text, phone:clip.phone.theText.text, opt:clip.email.theCheck.visible };
+					var newEntry:Object = { email:clip.email.theText.text, phone:clip.phone.theText.text, opt:clip.email.theCheck2.visible };
 					myData.push(newEntry);
 					message("New Data Added");
 					clip.email.theText.text = "";
 					clip.phone.theText.text = "";
-					clip.email.theCheck.visible = false;
-					clip.phone.theCheck.visible = false;
+					clip.email.theCheck.visible = false;//age > 13
+					clip.email.theCheck2.visible = false;//opt-in
+					clip.phone.theCheck.visible = false;//sms accept
 					kbd.setFocus(0);//reset to email
 				}else {
 					message("Maximum entries reached");
@@ -246,9 +260,15 @@ package com.gmrmarketing.png.gifphotobooth
 				}else {
 					good = 1;
 				}
+				if (good) {
+					if (!clip.email.theCheck.visible) {
+						message("You must be at least 13 years of age");
+						good = 0;
+					}
+				}
 			}
 			
-			if (clip.phone.theText.text != "") {
+			if (clip.phone.theText.text != "" && good != 0) {
 				if (!Validator.isValidPhoneNumber(clip.phone.theText.text)) {
 					message("Please enter a valid phone number with area code");
 					good = 0;
@@ -286,7 +306,7 @@ package com.gmrmarketing.png.gifphotobooth
 					}else if (myType == "text") {
 						message("Please enter at least one phone number");
 					}else {
-						message("Please enter at least one email or phone number");
+						message("Please enter an email or phone number");
 					}
 				}
 			}

@@ -20,7 +20,7 @@ package com.gmrmarketing.png.gifphotobooth
 		private var animTimer:Timer;
 		private var curFrame:int;
 		private var bmp:Bitmap;
-		private var over:Bitmap;
+		private var over:Bitmap;//overlay
 		
 		private var tim:TimeoutHelper;
 		
@@ -33,12 +33,12 @@ package com.gmrmarketing.png.gifphotobooth
 			animTimer.addEventListener(TimerEvent.TIMER, advanceFrame);
 			
 			over = new Bitmap(new overlayLarge());//library
-			over.x = 598;
-			over.y = 231;
+			over.x = 575;
+			over.y = 214;
 			
 			bmp = new Bitmap();			
-			bmp.x = 598;
-			bmp.y = 231;
+			bmp.x = 575;
+			bmp.y = 214;
 			/*
 			previewBMD = new BitmapData(320, 240, false, 0x000000);
 			preview = new Bitmap(previewBMD);
@@ -67,14 +67,13 @@ package com.gmrmarketing.png.gifphotobooth
 				myContainer.addChild(clip);
 			}
 			
-			clip.addChild(bmp);
-			//clip.addChild(over);
+			clip.addChildAt(bmp, 0);
+			clip.addChild(over);
 			
 			frames = f;
 			
 			clip.alpha = 0;
-			TweenMax.to(clip, .5, { alpha:1, onComplete:showing } );
-			clip.addEventListener(Event.ENTER_FRAME, updateCaps);
+			TweenMax.to(clip, .5, { alpha:1, onComplete:showing } );			
 			
 			curFrame = 0;
 			animTimer.start();
@@ -83,6 +82,7 @@ package com.gmrmarketing.png.gifphotobooth
 			clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, doNext, false, 0, true);
 		}
 		
+		
 		private function showing():void
 		{
 			dispatchEvent(new Event(SHOWING));
@@ -90,7 +90,6 @@ package com.gmrmarketing.png.gifphotobooth
 		
 		public function hide():void
 		{
-			clip.removeEventListener(Event.ENTER_FRAME, updateCaps);
 			clip.btnRetake.removeEventListener(MouseEvent.MOUSE_DOWN, doRetake);
 			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, doNext);
 			
@@ -110,14 +109,10 @@ package com.gmrmarketing.png.gifphotobooth
 			}
 		}
 		
-		
-		private function updateCaps(e:Event):void
-		{
-			clip.capRetake.rotation += .2;
-			clip.capNext.rotation += .2;
-		}
-		
-		
+		/**
+		 * called by animTimer
+		 * @param	e
+		 */
 		private function advanceFrame(e:TimerEvent):void
 		{
 			bmp.bitmapData = frames[curFrame];

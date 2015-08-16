@@ -26,7 +26,8 @@ package com.gmrmarketing.comcast.book3d
 		
 		
 		public function show():void
-		{			
+		{	
+			clip.alpha = 1;
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
@@ -48,13 +49,13 @@ package com.gmrmarketing.comcast.book3d
 			TweenMax.to(clip.subText, .5, { y:"-50", alpha:1, delay:1.25 } );
 			TweenMax.to(clip.btnStart, .5, { alpha:1, delay:1.8 } );
 			
-			clip.stageClick.addEventListener(MouseEvent.MOUSE_DOWN, userClicked, false, 0, true);
+			clip.btnStart.addEventListener(MouseEvent.MOUSE_DOWN, userClicked, false, 0, true);
 		}
 		
 		
 		public function userClicked(e:MouseEvent):void
 		{
-			clip.stageClick.removeEventListener(MouseEvent.MOUSE_DOWN, userClicked);
+			clip.btnStart.removeEventListener(MouseEvent.MOUSE_DOWN, userClicked);
 			dispatchEvent(new Event(CLICKED));
 		}
 		

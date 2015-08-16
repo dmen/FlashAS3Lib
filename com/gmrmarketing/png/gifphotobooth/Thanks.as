@@ -49,20 +49,20 @@ package com.gmrmarketing.png.gifphotobooth
 		
 		
 		/**
-		 *
-		 * @param	f Array of bitmapData frames 812x610
-		 * @param	o Object with email, phone, opt1, opt2, opt3, dob keys
+		 * Called from Main.showThanks()
+		 * @param	f Array of bitmapData frames 749x657
+		 * @param	o Object with email, phone, opt[1-5], print keys
 		 */
 		public function show(f:Array, o:Object):void
 		{
+			frames = f;
+			userData = o;			
+			
 			tim.buttonClicked();
 			
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
-			
-			frames = f;
-			userData = o;
 			
 			clip.alpha = 0;
 			TweenMax.to(clip, .5, { alpha:1, onComplete:showing } );
@@ -109,12 +109,14 @@ package com.gmrmarketing.png.gifphotobooth
 		}
 		private function encFrame(e:Event):void
 		{
+			var over:BitmapData = new overlay();//lib
+			
 			if(frames.length > 0){
 				var m:Matrix = new Matrix();
-				m.scale(320 / 812, 240 / 610);
-				var b:BitmapData = new BitmapData(320, 240);
+				m.scale(320 / 749, 281 / 657);
+				var b:BitmapData = new BitmapData(320, 281);
 				b.draw(frames.shift(), m, null, null, null, true);			
-				//b.copyPixels(over, new Rectangle(0, 0, 320, 240), new Point(0, 0), null, null, true);		
+				b.copyPixels(over, new Rectangle(0, 0, 320, 281), new Point(0, 0), null, null, true);		
 				encoder.addFrame(b);
 			}else {
 				myContainer.removeEventListener(Event.ENTER_FRAME, encFrame);
@@ -122,13 +124,14 @@ package com.gmrmarketing.png.gifphotobooth
 				
 				var gString:String = Base64.encodeByteArray(encoder.stream);
 				
-				userData.gif = gString;
+				userData.gif = gString;//userData object set in show()
 				
 				queue.add(userData);
 				
 				dispatchEvent(new Event(COMPLETE));
 			}
 		}
+		
 		
 		public function hide():void
 		{

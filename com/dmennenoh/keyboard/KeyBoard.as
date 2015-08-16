@@ -28,6 +28,9 @@
 	  Modified draw() to allow keys to have individual font colors. In the XML file when type is flat or linear
 	  the key will use the fontColor attribute to color the key text.
 	  
+	  6/15
+	  allowed nudgex,nudgey in the individual key data - not incorporated into editor yet
+	  
 	  TODO: Need to update Editor to write the fontColor attribute
  */
 
@@ -360,7 +363,7 @@ package com.dmennenoh.keyboard
 				keyIndex = e.currentTarget.index;//keys index in the xmllist of keys
 				
 				//Check for special chars
-				if ((lastChar == "Backspace" || lastChar == "Back") && targetField) {
+				if ((lastChar.toLowerCase() == "backspace" || lastChar.toLowerCase() == "back") && targetField) {
 					var bo:Boolean = targetField.selectionBeginIndex == 1 ? true : false;
 					num = targetField.selectionBeginIndex == targetField.selectionEndIndex ? targetField.selectionBeginIndex - 1 : targetField.selectionBeginIndex;
 					targetField.replaceText(num, targetField.selectionEndIndex, '');
@@ -387,7 +390,7 @@ package com.dmennenoh.keyboard
 					}else {
 						tabToNextField();
 					}
-				}else if (lastChar == "Submit" || lastChar == "Send") {
+				}else if (lastChar.toLowerCase() == "submit" || lastChar.toLowerCase() == "send") {
 					dispatchEvent(new Event(SUBMIT));
 				}else {
 					if (targetField) {					
@@ -457,7 +460,7 @@ package com.dmennenoh.keyboard
 				
 				thisKey = keys[i];
 				if(thisKey.@type != undefined) {
-					//this key has  unique color data - use it instead of the defaults
+					//this key has unique color data - use it instead of the defaults
 					if (thisKey.@nudgex != undefined) {
 						a = new Key(i, thisKey.@val, thisKey.@shiftval, thisKey.@showshiftval, parseInt(thisKey.@w), parseInt(thisKey.@h), parseInt(setup.keybackground.@r), setup.keybackground.@borderWidth, setup.keybackground.@borderColor, setup.highlight.@color, setup.highlight.@startAlpha, thisKey.@type, thisKey.@gradienttype, thisKey.@color1, thisKey.@color2, parseInt(setup.font.@size), setup.font.@color, keyboardFont, thisKey.@nudgex, thisKey.@nudgey, setup.keyTextNudge.@shiftX, setup.keyTextNudge.@shiftY);
 					}else{

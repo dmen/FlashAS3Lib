@@ -395,11 +395,13 @@ package com.gmrmarketing.utilities.components
 		
 		
 		private function stageClicked(e:MouseEvent):void
-		{			
-			if((stage.mouseX < x || stage.mouseX > (x + width)) || (stage.mouseY < y || stage.mouseY > (y + myHeight + (visibleLines * visibleLinesHeight)))){
-				e.stopImmediatePropagation();//stop the event from bubbling to anywhere else
-				stage.removeEventListener(MouseEvent.MOUSE_DOWN, stageClicked);
-				close();
+		{		
+			if(stage){
+				if((stage.mouseX < x || stage.mouseX > (x + width)) || (stage.mouseY < y || stage.mouseY > (y + myHeight + (visibleLines * visibleLinesHeight)))){
+					e.stopImmediatePropagation();//stop the event from bubbling to anywhere else
+					stage.removeEventListener(MouseEvent.MOUSE_DOWN, stageClicked);
+					close();
+				}
 			}
 		}
 		

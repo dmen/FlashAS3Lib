@@ -27,6 +27,7 @@ package com.gmrmarketing.comcast.book3d
 		
 		public function show():void
 		{
+			clip.alpha = 1;
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}

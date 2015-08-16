@@ -8,6 +8,7 @@ package com.gmrmarketing.png.gifphotobooth
 	import flash.geom.*;
 	import flash.utils.ByteArray;
 	import com.gmrmarketing.utilities.TimeoutHelper;
+	import com.gmrmarketing.utilities.Utility;
 	
 	
 	public class TakePhoto extends EventDispatcher
@@ -15,7 +16,7 @@ package com.gmrmarketing.png.gifphotobooth
 		public static const SHOWING:String = "takePhotoShowing";
 		public static const COMPLETE:String = "takePhotoFinished";
 		
-		private const EVERY_NTH:int = 10; //capture every n frames
+		private const EVERY_NTH:int = 10; //capture every n frames ~3 fps
 		private const MAX_FRAMES:int = 10;
 		
 		private var clip:MovieClip;
@@ -32,14 +33,19 @@ package com.gmrmarketing.png.gifphotobooth
 		
 		private var tim:TimeoutHelper;
 		
+		private var arcContainer:Sprite;//added to clip.theCount
+		
 		
 		public function TakePhoto()
 		{
 			clip = new mcTakePhoto();
 			
+			arcContainer = new Sprite();
+			clip.theCount.addChild(arcContainer);
+			
 			camContainer = new Sprite();
-			camContainer.x = 362;
-			camContainer.y = 174;
+			camContainer.x = 311;
+			camContainer.y = 184;
 			camContainer.graphics.beginFill(0x000000);
 			camContainer.graphics.drawRect(0, 0, 1280, 720);
 			camContainer.graphics.endFill();
@@ -63,25 +69,30 @@ package com.gmrmarketing.png.gifphotobooth
 		{
 			myContainer = c;
 		}
+		
+		
 		public function get bg():MovieClip
 		{
 			return clip;
 		}
+		
 		
 		public function show():void
 		{
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
-			
+			arcContainer.graphics.clear();
 			camPic.show(camContainer);
 			//camPic.addEventListener(CamPic.CAMERA_UPDATE, updatePreview, false, 0, true);
 			
-			clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, startCounting, false, 0, true);
-			clip.addEventListener(Event.ENTER_FRAME, updateCap);
-			clip.progBar.progress.scaleX = 0;
+			clip.btnTake.alpha = 1;
+			clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, startCounting, false, 0, true);			
+			
 			clip.theCount.visible = false;
-			clip.theCount.theText.text = "3";
+			clip.theCount.scaled.theText.text = "3";
+			
+			clip.sideText.alpha = 1;
 			
 			clip.alpha = 0;
 			TweenMax.to(clip, .5, { alpha:1, onComplete:showComplete } );
@@ -100,16 +111,13 @@ package com.gmrmarketing.png.gifphotobooth
 			}
 		}
 		
-		
+		/**
+		 * Returns an array of BitmapData objects
+		 * frames are 749x657
+		 */
 		public function get video():Array
 		{
 			return frames;
-		}
-		
-		
-		private function updateCap(e:Event):void
-		{
-			clip.cap.rotation += .2;
 		}
 		
 		
@@ -142,33 +150,44 @@ package com.gmrmarketing.png.gifphotobooth
 			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, startCounting);
 			
 			clip.theCount.visible = true;
-			clip.theCount.theText.text = "3";
-			clip.theCount.theText.alpha = 1;
-			TweenMax.to(clip.theCount.theText, 1, { alpha:.1, onComplete:countTwo } );
+			clip.theCount.alpha = 0;
+			TweenMax.to(clip.btnTake, .5, { alpha:0 } );
+			TweenMax.to(clip.theCount, .5, { alpha:1 } );
+			TweenMax.to(clip.sideText, .5, { alpha: 0 } );
+			
+			clip.theCount.scaled.theText.text = "3";
+			clip.theCount.scaled.theText.x = -27;
+			clip.theCount.scaled.theText..y = -57;
+			clip.theCount.scaled.theText.alpha = 1;
+			TweenMax.to(clip.theCount.scaled.theText, 1, { alpha:.1, onComplete:countTwo } );
 		}
 		
 		private function countTwo():void
 		{
-			clip.theCount.theText.text = "2";
-			clip.theCount.theText.alpha = 1;
-			TweenMax.to(clip.theCount.theText, 1, { alpha:.1, onComplete:countOne } );
+			clip.theCount.scaled.theText.text = "2";
+			clip.theCount.scaled.theText.x = -28;
+			clip.theCount.scaled.theText..y = -59;
+			clip.theCount.scaled.theText.alpha = 1;
+			TweenMax.to(clip.theCount.scaled.theText, 1, { alpha:.1, onComplete:countOne } );
 		}
 		
 		private function countOne():void
 		{
-			clip.theCount.theText.text = "1";
-			clip.theCount.theText.alpha = 1;
-			TweenMax.to(clip.theCount.theText, 1, { alpha:.1, onComplete:startRecording } );
+			clip.theCount.scaled.theText.text = "1";
+			clip.theCount.scaled.theText.x = -33;
+			clip.theCount.scaled.theText..y = -58;
+			clip.theCount.scaled.theText.alpha = 1;
+			TweenMax.to(clip.theCount.scaled.theText, 1, { alpha:.1, onComplete:startRecording } );
 		}
 		
 		
 		private function startRecording():void
 		{
-			clip.theCount.visible = false;
+			//clip.theCount.visible = false;
+			clip.theCount.theTitle.text = "Recording:";
 			
 			frames = [];
 			frameCount = 0;
-			clip.progBar.progress.scaleX = 0;
 			
 			clip.addEventListener(Event.ENTER_FRAME, grabFrame);			
 		}
@@ -178,22 +197,22 @@ package com.gmrmarketing.png.gifphotobooth
 		{
 			frameCount++;
 			if (frameCount % EVERY_NTH == 0) {
-				//crop
-				var a:BitmapData = new BitmapData(812, 610);
-				a.copyPixels(camPic.getCapture(), new Rectangle(234, 55, 812, 610), new Point(0, 0));
+				//crop - capture at 1280x720
+				var a:BitmapData = new BitmapData(749, 657);
+				a.copyPixels(camPic.getCapture(), new Rectangle(265, 31, 749, 657), new Point(0, 0));
 				frames.push(a);
 			}
 			if (frames.length >= MAX_FRAMES) {
 				stopRecording();
 			}
-			clip.progBar.progress.scaleX = frames.length / MAX_FRAMES;
+			
+			Utility.drawArc(arcContainer.graphics, 0, 0, 98, 0, 360 * (frames.length / MAX_FRAMES), 25, 0xffffff, 1);
 		}
 		
 		
 		private function stopRecording(e:MouseEvent = null):void
 		{
-			clip.removeEventListener(Event.ENTER_FRAME, grabFrame);
-			clip.progBar.progress.scaleX = 1;
+			clip.removeEventListener(Event.ENTER_FRAME, grabFrame);			
 			
 			dispatchEvent(new Event(COMPLETE));			
 		}

@@ -36,7 +36,7 @@ package com.gmrmarketing.utilities
 		public function FolderWatcher()
 		{
 			file = new File();			
-			watchTimer = new Timer(1000);
+			watchTimer = new Timer(500);
 			watchTimer.addEventListener(TimerEvent.TIMER, checkFolder);
 		}
 		

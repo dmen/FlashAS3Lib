@@ -44,8 +44,7 @@ package  com.gmrmarketing.comcast.book3d
 		 * @param	data
 		 */
 		public function add(data:Object):void
-		{			
-			trace("queue.add",data.firstName,data.dp);
+		{
 			users.push(data);//add to queue
 			rewriteQueue();
 			users = getAllUsers();

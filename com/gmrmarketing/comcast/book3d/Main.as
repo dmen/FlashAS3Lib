@@ -15,6 +15,7 @@ package com.gmrmarketing.comcast.book3d
 	import com.greensock.TweenMax;
 	
 	import com.gmrmarketing.utilities.Strings;
+	//import com.gmrmarketing.particles.Dust;
 	
 	public class Main extends MovieClip
 	{
@@ -69,42 +70,57 @@ package com.gmrmarketing.comcast.book3d
 		
 		private var shadowLight:ShadowProjector3D;		
 		
-		private var queue:Queue;
+		private var queue:Queue;		
 		
+		private var mainContainer:Sprite;
+		private var vignetteContainer:Sprite;
 		
 		
 		public function Main()
 		{
 			sceneContainer = new Sprite();
+			mainContainer = new Sprite();
+			vignetteContainer = new Sprite();
 			
 			schoolList = new SchoolList();
 			schoolList.addEventListener(SchoolList.COMPLETE, showSchoolList);
-			schoolList.container = this;
+			schoolList.container = mainContainer;
 			
 			intro = new Intro();
-			intro.container = this;
+			intro.container = mainContainer;
 			
 			form = new Form();
-			form.container = this;
+			form.container = mainContainer;
 			
 			instructions = new Instructions();
-			instructions.container = this;
+			instructions.container = mainContainer;
 			
 			vignette = new Vignette();
-			vignette.container = this;
+			vignette.container = vignetteContainer;
 			
 			winLose = new WinLose();
-			winLose.container = this;
+			winLose.container = mainContainer;
 			
 			tweenObject = { };
 			
 			queue = new Queue();
 			
-			sequences = [[0,1,0,2,1,2,0,1,1,2,0,2,1,2,0,1,0,2,1,2], [1,2,0,2,0,1,0,2,1,2,0,2,0,1,1,2,0,1,0,2], [0,2,1,2,0,1,0,2,1,2,0,2,0,1,1,2,0,2,0,1],[1,2,0,1,0,2,0,1,1,2,0,2,1,2,0,1,1,2,0,1,0,2,1,2]];
+			sequences = [[0,1,0,2,1,2,0,1,1,2,0,2,1,2,0,1,0,2,1,2], [1,2,0,2,0,1,0,2,1,2,0,2,0,1,1,2,0,1,0,2], [0,2,1,2,0,1,0,2,1,2,0,2,0,1,1,2,0,2,1,2],[1,2,0,1,0,2,0,1,1,2,0,2,1,2,0,1,1,2,0,1,0,2,1,2]];
 			
 			_scene = new Scene3D(sceneContainer);
 			_scene.clearColor = new Vector3D ();
-			_scene.antialias = 4;
+			_scene.antialias = 4;			
+		
+			addChildAt(sceneContainer, 0);//behind book click sprites
+			addChild(vignetteContainer);
+			addChild(mainContainer);			
+			/*
+			for (var i:int = 0; i < 75; i++) {
+				var d:Sprite = new Dust();
+				d.x = Math.random() * 1024;
+				d.y = Math.random() * 768;
+				dustContainer.addChild(d);
+			}*/
 		}
 		
 		
@@ -130,9 +146,7 @@ package com.gmrmarketing.comcast.book3d
 		private function mapLoaded(e:Event):void
 		{
 			_scene.resume();
-			_scene.removeEventListener( Scene3D.COMPLETE_EVENT, mapLoaded );
-			
-			addChildAt(sceneContainer,0);//behind book click sprites			
+			_scene.removeEventListener( Scene3D.COMPLETE_EVENT, mapLoaded );						
 			
 			_camera = _scene.camera;
 			
@@ -148,7 +162,7 @@ package com.gmrmarketing.comcast.book3d
 			skinR = meshR.modifier as SkinModifier;
 			pageR = skinR.root.getChildByName( "Page_L" );
 			
-			ipad = model.getChildByName("iPad") as Mesh3D;			
+			ipad = model.getChildByName("iPad2") as Mesh3D;			
 			
 			bookPositions = [meshL.getPosition(false), meshM.getPosition(false), meshR.getPosition(false)];
 			init();
@@ -159,8 +173,10 @@ package com.gmrmarketing.comcast.book3d
 		 * Closes all three books and moves the ipad out of view
 		 */
 		private function init():void
-		{			
-			_camera.fieldOfView = 40;
+		{	
+			winLose.hide();			
+			
+			_camera.fieldOfView = 42.96;
 			
 			theBooks = [meshL, meshM, meshR];
 			
@@ -174,13 +190,21 @@ package com.gmrmarketing.comcast.book3d
 			
 			ipad.setPosition( -1.27, 0.14, 4, 1, false);			
 			
-			tweenObject.fov = 40;
+			tweenObject.fov = 42.96
 			tweenObject.mult = 0;//light multiplier
-			
+						
 			vignette.show();
 			intro.show();			
 			intro.addEventListener(Intro.CLICKED, showForm);
 			
+			bookL.removeEventListener(MouseEvent.MOUSE_DOWN, bookLClicked);
+			bookM.removeEventListener(MouseEvent.MOUSE_DOWN, bookMClicked);
+			bookR.removeEventListener(MouseEvent.MOUSE_DOWN, bookRClicked);
+			//TweenMax.delayedCall(.2, scenePause);
+		}
+		private function scenePause():void
+		{
+			_scene.pause();
 		}
 		
 		
@@ -196,17 +220,17 @@ package com.gmrmarketing.comcast.book3d
 		{
 			form.removeEventListener(Form.COMPLETE, showInstructions);
 			form.hide();
-			instructions.addEventListener(Instructions.INST_COMPLETE, begin, false, 0, true);
+			instructions.addEventListener(Instructions.INST_COMPLETE, startDolly, false, 0, true);
 			instructions.show();
-		}
+		}		
 		
-		private function begin(e:Event):void
-		{
-			instructions.removeEventListener(Instructions.INST_COMPLETE, begin);
+		private function startDolly(e:Event):void
+		{	
+			instructions.removeEventListener(Instructions.INST_COMPLETE, startDolly);
 			instructions.hide();
-			
-			TweenMax.to(tweenObject, 3, { fov:72, mult:1, onUpdate:dollyCamera } );
-			vignette.hide(3);
+			vignette.hide(.5);			
+			//_scene.resume();
+			TweenMax.to(tweenObject, 3, { fov:71.06, mult:1, onUpdate:dollyCamera } );			
 			
 			TweenMax.delayedCall(3, openAllBooks);
 			TweenMax.delayedCall(4, bringInIpad);
@@ -280,7 +304,8 @@ package com.gmrmarketing.comcast.book3d
 			//hide ipad
 			ipad.visible = false;	
 			
-			currentSequence = sequences[Math.floor(Math.random() * sequences.length)];
+			var ind:int = Math.floor(Math.random() * sequences.length);
+			currentSequence = sequences[ind];
 			sequenceIndex = -2;//index in the currently selected sequence					
 			
 			shuffleSpeed = .6;
@@ -291,7 +316,7 @@ package com.gmrmarketing.comcast.book3d
 		private function nextShuffle():void
 		{
 			shuffleSpeed -= .1;
-			shuffleSpeed = shuffleSpeed < .25 ? .25 : shuffleSpeed;
+			shuffleSpeed = shuffleSpeed < .35 ? .35 : shuffleSpeed;
 			
 			sequenceIndex += 2;			
 			
@@ -444,25 +469,37 @@ package com.gmrmarketing.comcast.book3d
 		private function showWinLose():void
 		{
 			vignette.show();
+			
 			winLose.show(didWin ? "win" : "lose");
+			winLose.addEventListener(WinLose.COMPLETE, restart);
 			/*
 			firstName: 'ravi', 
 			lastName: 'pujari', 
 			school: 'University of Wisconsin', 
 			wonShellGame: true, 
 			dp: '2015-7-23 8:30:00', 
-			Email : 'pujarit@gmail.com', 
+			Email : 'pujarit@gmail.com',
 			PhoneNumber : '6147472636', 
 			Agree : true, 
 			OptIn : false
 			*/
 			
-			var userData:Object = form.userData; //firstName,lastName,Email,PhoneNumber,Agree,OptIn
+			var userData:Object = form.userData; //firstName,lastName,PhoneNumber,Agree,OptIn
+			
+			//Email no longer in the form
+			userData.Email = "";
+			
 			userData.school = schoolList.selected.label;
 			userData.wonShellGame = didWin;
 			userData.dp = Strings.hubbleTimestamp();
 			
 			queue.add(userData);
+		}
+		
+		private function restart(e:Event):void
+		{			
+			winLose.removeEventListener(WinLose.COMPLETE, restart);
+			init();
 		}
 	}
 	

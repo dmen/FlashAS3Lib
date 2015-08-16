@@ -9,7 +9,6 @@ package com.gmrmarketing.esurance.usopen2015
 	import com.gmrmarketing.utilities.LoggerAIR;
 	import com.greensock.TweenMax;
 	import com.gmrmarketing.utilities.Strings;//for timestamp
-	import com.gmrmarketing.utilities.Logger;
 	
 	
 	public class Hubble extends EventDispatcher
@@ -19,6 +18,7 @@ package com.gmrmarketing.esurance.usopen2015
 		public static const FORM_ERROR:String = "formErrorReceived";
 		public static const PHOTO_ERROR:String = "photoErrorReceived";
 		public static const FOLLOWUP_ERROR:String = "followUpErrorReceived";
+		public static const PRINTAPI_ERROR:String = "printAPIErrorReceived";
 		public static const COMPLETE:String = "followupsProcessed";
 		
 		private const BASE_URL:String = "http://api.nowpik.com/api/";
@@ -26,25 +26,21 @@ package com.gmrmarketing.esurance.usopen2015
 		private var token:String; //GUID - token returned from call to validateuser
 		private var responseId:int;//set in submit if the form data is already posted, or formPosted normally
 		
-		private var hdr:URLRequestHeader;//need to set headers in order to send and receive JSON
+		private var hdr:URLRequestHeader;
 		private var hdr2:URLRequestHeader;
 		
 		private var busy:Boolean; //true when submitting data
-		private var thePhoto:String;		
+		private var thePhoto:String;
+		private var didPrint:Boolean;//set in submit - calls printAPI if true
 		private var myGUID:String;
 		
-		private var log:Logger;
-		private var loggerID:int;
 		
 		
 		public function Hubble(guid:String)
 		{
 			myGUID = guid;//unique machine identifier - used as deviceId when submitting form data
-			
 			token = "";
-			busy = false;	
-			
-			log = Logger.getInstance();//will make kiosklog.txt log on the desktop
+			busy = false;				
 			
 			hdr = new URLRequestHeader("Content-type", "application/json");
 			hdr2 = new URLRequestHeader("Accept", "application/json");
@@ -80,10 +76,6 @@ package com.gmrmarketing.esurance.usopen2015
 		}
 		
 		
-		/**
-		 * Queue will call this when uploading to verify last hubble post is complete
-		 * @return
-		 */
 		public function isBusy():Boolean
 		{
 			return  busy;
@@ -108,7 +100,7 @@ package com.gmrmarketing.esurance.usopen2015
 		
 		
 		/**
-		 * Error callback if getting the token returns an error or status != 1 within gotToken()
+		 * Error callback if getting the token returns an error or status != 1 within gotToken() calls modelError()
 		 * @param	e
 		 */
 		private function tokenError(e:IOErrorEvent = null):void
@@ -120,42 +112,36 @@ package com.gmrmarketing.esurance.usopen2015
 		
 		/**
 		 * Called from Queue.uploadNext()
-		 * @param	curUpload.dob, curUpload.email, curUpload.phone, gString, curUpload.opt1, curUpload.opt2, curUpload.opt3, curUpload.opt4, curUpload.opt4, curUpload.deviceResponseID,  curUpload.responseID, curUpload.followUpError
-		 * 
-		 * deviceReponseID is the unique record number used to process the same record if errors occur when posting
-		 * This number comes from the AutoInc class used by the Queue
-		 * 
-		 * responseID comes in initially as -1
+		 * @param	formData Object with keys:
+			 email, rfid, image, deviceResponseID, responseID, followupError, print
 		 */
-		public function submit(formData:Array):void
+		public function submit(formData:Object):void
 		{	
 			if (hasToken()) {
-				log.log("Hubble.submit" + " | " + formData[1] + " | " + formData[2] + " | deviceResponseID: " + formData[9]);
-				loggerID = formData[9];
 				
-				thePhoto = formData[3]; //used in submitPhoto - encoded to B64 string
+				thePhoto = formData.image; //used in submitPhoto - encoded to B64 string
+				didPrint = formData.print;//boolean - if true Hubble print API will be called
 				
 				busy = true;//true when submitting data
 				
-				if (formData[10] != -1) {
+				if (formData.responseID != -1) {
 					
-					//have a responseID back from Hubble so form data was posted
-					if (formData[11] == true) {
-						log.log("Hubble.submit - only process followups");
-						responseId = formData[10];
+					if (formData.printAPIError) {
+						responseId = formData.responseID;
+						callPrintAPI();
+					}else if (formData.followupError) {						
+						responseId = formData.responseID;
 						processFollowups();
 					}else{
-						log.log("Hubble.submit = photo only, responseID: " + formData[10]);
 						//form data already posted but posting photo or followup got an error...just post photo again
-						responseId = formData[10];
+						responseId = formData.responseID;
 						submitPhoto();
 					}
 					
 				}else{
-				
-					//responseID == -1 - post the full form and photo data
+					//responseID = -1 form data has not been sent yet
 					
-					var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":209, "DeviceId":myGUID, "DeviceResponseId":formData[9], "ResponseDate":Strings.hubbleTimestamp(), "FieldResponses":[ { "FieldId":1484, "Response":formData[0] }, { "FieldId":1485, "Response":formData[1] },{ "FieldId":1486, "Response":formData[2] }, { "FieldId":1488, "Response":formData[4] }, { "FieldId":1489, "Response":true }, { "FieldId":1490, "Response":formData[5] }, { "FieldId":1491, "Response":formData[6] }, { "FieldId":1504, "Response":formData[7] }, { "FieldId":1505, "Response":formData[8] }], "Latitude":"0", "Longitude":"0" }};
+					var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":228, "DeviceId":myGUID, "DeviceResponseId":formData.deviceResponseID, "ResponseDate":Strings.hubbleTimestamp(), "FieldResponses":[ { "FieldId":1703, "Response":formData.email }, { "FieldId":1653, "Response":formData.rfid }], "Latitude":"0", "Longitude":"0" }};
 					
 					var js:String = JSON.stringify(resp);
 					var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionresponse");
@@ -178,20 +164,15 @@ package com.gmrmarketing.esurance.usopen2015
 			var j:Object = JSON.parse(e.currentTarget.data);			
 			responseId = j.ResponseObject;//used in submitPhoto() and processFollowups()
 			if (j.Status == 1) {
-				log.log("Hubble.formPosted() - deviceResponseId: " + String(loggerID));
 				submitPhoto();
 			}else {
-				log.log("Hubble.formPosted() - status error: " + String(j.Status));
 				formError();
 			}
 		}
 		
-		
 		/**
 		 * Called from Queue.hubblePhotoError() if posting the photo or followup generates an error
-		 * Set above in formPosted()
-		 * 
-		 * The responseID is injected into the user object so that subsequent attempts will use
+		 * if so the responseID is injected into the user object so that subsequent attempts will use
 		 * the proper record as the form data is already posted into the database
 		 */
 		public function get responseID():int
@@ -199,10 +180,8 @@ package com.gmrmarketing.esurance.usopen2015
 			return responseId;
 		}
 		
-		
 		private function formError(e:IOErrorEvent = null):void
 		{
-			log.log("Hubble.formError() " + e.toString());
 			busy = false;
 			dispatchEvent(new Event(FORM_ERROR));
 		}
@@ -213,10 +192,8 @@ package com.gmrmarketing.esurance.usopen2015
 		 * thePhoto was set in submit()
 		 */
 		private function submitPhoto():void
-		{
-			log.log("Hubble.submitPhoto() - deviceResponseId: " + String(loggerID) + " photo len: " + thePhoto.length);
-			
-			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":responseId, "FieldId":1487, "Response":thePhoto }};			
+		{			
+			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":responseId, "FieldId":1654, "Response":thePhoto }};			
 			var js:String = JSON.stringify(resp);
 			
 			var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionfieldresponse");
@@ -239,7 +216,6 @@ package com.gmrmarketing.esurance.usopen2015
 			if (j.Status == 1) {
 				processFollowups();
 			}else {
-				log.log("Hubble.photoPosted() - status error: " + String(j.Status));
 				photoError();
 			}
 		}
@@ -250,7 +226,6 @@ package com.gmrmarketing.esurance.usopen2015
 		 */
 		private function photoError(e:IOErrorEvent = null):void
 		{
-			log.log("Hubble.photoError()" + e.toString());
 			busy = false;
 			dispatchEvent(new Event(PHOTO_ERROR));
 		}
@@ -261,9 +236,7 @@ package com.gmrmarketing.esurance.usopen2015
 		 * responseID is set in formPosted if Status response == 1
 		 */
 		private function processFollowups():void
-		{	
-			log.log("Hubble.processFollowups() - deviceResponseId: " + String(loggerID));
-			
+		{			
 			var resp:Object = { "AccessToken":token, "MethodData": responseId };			
 			var js:String = JSON.stringify(resp);
 			
@@ -285,38 +258,22 @@ package com.gmrmarketing.esurance.usopen2015
 			var j:Object = JSON.parse(e.currentTarget.data);
 			busy = false;
 			if (j.Status == 1) {
-				log.log("Hubble.followupsProcessed - COMPLETE - deviceResponseId: " + String(loggerID));
-				dispatchEvent(new Event(COMPLETE));
-				
-				callPrintAPI();
+				if (didPrint) {
+					callPrintAPI();
+				}else{
+					dispatchEvent(new Event(COMPLETE));
+				}				
 			}else {
-				log.log("Hubble.followupsProcessed - status error: " + String(j.Status));
 				followupError();
 			}
 		}
 		
 		
-				
-		/**
-		 * calls hubbleFollowupError() in Queue.as
-		 */
-		private function followupError(e:IOErrorEvent = null):void
-		{
-			log.log("Hubble.followupError()" + e.toString());
-			busy = false;
-			dispatchEvent(new Event(FOLLOWUP_ERROR));
-		}
-		
-		
-		/**
-		 * Call the printAPI in order to record the number of prints that have been printed
-		 * The number in the Value key of the object is how many prints to add
-		 */
-		private function callPrintAPI(numPrints:int = 1):void
+		public function callPrintAPI(theLabel:String = "photoPrinted"):void
 		{	
 			var ts:String = Strings.hubbleTimestamp();
 			
-			var resp:Object = { "AccessToken":"2d125c5e-edb2-48ad-8a8e-07d9762091e7", "MethodData": { "InteractionId":202, "Label":"photoPrinted", "Value":String(numPrints), "Timestamp":ts, "DeviceResponseId":"sldkfjsdf" }};		
+			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":228, "Label":theLabel, "Value":"1", "Timestamp":ts, "DeviceResponseId":myGUID }};		
 			var js:String = JSON.stringify(resp);
 			
 			var req:URLRequest = new URLRequest(BASE_URL + "interaction/CreateActivity");
@@ -345,11 +302,21 @@ package com.gmrmarketing.esurance.usopen2015
 		}
 		
 		
-		private function printAPIError(e:IOErrorEvent):void
+		/**
+		 * calls hubblePhotoError() in Queue.as
+		 */
+		private function followupError(e:IOErrorEvent = null):void
 		{
-			log.log("Hubble.printAPIError()" + e.toString());
+			busy = false;
+			dispatchEvent(new Event(FOLLOWUP_ERROR));
 		}
-
+		
+		
+		private function printAPIError():void
+		{
+			busy = false;
+			dispatchEvent(new Event(PRINTAPI_ERROR));
+		}
 	}
 	
 }
