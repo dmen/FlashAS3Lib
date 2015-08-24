@@ -41,6 +41,8 @@ package org.bytearray.gif.encoder
 	    private var sizeSet:Boolean = false; // if false, get size from first frame
 	    private var sample:int = 10; // default sample interval for quantizer
 		
+		private var nq:NeuQuant;
+		
 		/**
 		* Sets the delay time between each frame, or changes it for subsequent frames
 		* (applies to last frame added)
@@ -128,11 +130,14 @@ package org.bytearray.gif.encoder
 				image = new Bitmap ( im );
 				if (!sizeSet) setSize(image.width, image.height);
 				getImagePixels(); // convert to correct format if necessary
+				if (firstFrame) {
+					nq = new NeuQuant(pixels, pixels.length, sample)
+				}
 				analyzePixels(); // build color table & map pixels
 				
 				if (firstFrame) 
 				{
-					writeLSD(); // logical screen descriptor
+					writeLSD(); // logical screen descriptior
 					writePalette(); // global color table
 					if (repeat >= 0) 
 					{
@@ -140,10 +145,11 @@ package org.bytearray.gif.encoder
 						writeNetscapeExt();
 					}
 		      }
-			  
+			  //graphics control extetnsion is optional... so save space and don't write it...
 			  //writeGraphicCtrlExt(); // write graphic control extension
+			  
 		      writeImageDesc(); // image descriptor
-		      if (!firstFrame) writePalette(); // local color table
+		      //if (!firstFrame) writePalette(); // local color table
 		      writePixels(); // encode and write pixel data
 		      firstFrame = false;
 		    } catch (e:Error) {
@@ -282,9 +288,11 @@ package org.bytearray.gif.encoder
 			var len:int = pixels.length;
 		    var nPix:int = len / 3;
 		    indexedPixels = new ByteArray;
-		    var nq:NeuQuant = new NeuQuant(pixels, len, sample);
-		    // initialize quantizer
-		    colorTab = nq.process(); // create reduced palette
+			if(firstFrame){
+				//var nq:NeuQuant = new NeuQuant(pixels, len, sample);
+				// initialize quantizer
+				colorTab = nq.process(); // create reduced palette
+			}
 		    // map image pixels to new palette
 		    var k:int = 0;
 		    for (var j:int = 0; j < nPix; j++) {
@@ -414,7 +422,7 @@ package org.bytearray.gif.encoder
 		    WriteShort(0);
 		    WriteShort(width); // image size
 		    WriteShort(height);
-
+/*
 		    // packed fields
 		    if (firstFrame) {
 		      // no LCT - GCT is used for first (or only) frame
@@ -427,6 +435,8 @@ package org.bytearray.gif.encoder
 		          0 | // 4-5 reserved
 		          palSize); // 6-8 size of color table
 		    }
+			*/
+			out.writeByte(0);
 		}
 		
 		/**

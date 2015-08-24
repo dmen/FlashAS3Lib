@@ -1,6 +1,5 @@
 ﻿package com.gmrmarketing.esurance.usopen2015
-{
-	import com.gmrmarketing.utilities.SharedObjectWrapper;
+{	
 	import flash.display.*;
 	import flash.events.*;
 	import flash.desktop.NativeApplication;
@@ -130,6 +129,8 @@
 		 */
 		private function doReset(e:Event):void
 		{
+			trace("Main.doReset()");
+			
 			if (!config.data.isKidsDay) {
 				var o:Object = intro.getData(); //Object with email, rfid keys
 				o.image = takePhoto.getPhotoString();
@@ -151,6 +152,7 @@
 		//called from timeoutHelper timeout
 		private function doReset2(e:Event):void
 		{			
+			trace("Main.doReset2()");
 			takePhoto.hide();
 			intro.addEventListener(Intro.RFID, showTakePhoto, false, 0, true);
 			timeoutHelper.stopMonitoring(); //don't monitor the intro screen

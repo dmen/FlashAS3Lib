@@ -1,11 +1,13 @@
-/**
+﻿/**
 * This class lets you play animated GIF files in AS3
 * @author Thibault Imbert (bytearray.org)
-* @version 0.6
+* @version 0.1
 */
 
-package org.bytearray.gif.player
-{	
+package org.gif.player
+
+{
+	
 	import flash.events.TimerEvent;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLLoader;
@@ -19,18 +21,21 @@ package org.bytearray.gif.player
 	import flash.utils.getTimer;
 	import flash.events.IOErrorEvent;
 	import flash.errors.ScriptTimeoutError;
-	import org.bytearray.gif.frames.GIFFrame;
-	import org.bytearray.gif.decoder.GIFDecoder;
-	import org.bytearray.gif.events.GIFPlayerEvent;
-	import org.bytearray.gif.events.FrameEvent;
-	import org.bytearray.gif.events.TimeoutEvent;
-	import org.bytearray.gif.events.FileTypeEvent;
-	import org.bytearray.gif.errors.FileTypeError;
+	import org.gif.frames.GIFFrame;
+	
+	import org.gif.decoder.GIFDecoder;
+	import org.gif.events.GIFPlayerEvent;
+	import org.gif.events.FrameEvent;
+	import org.gif.events.TimeoutEvent;
+	import org.gif.events.FileTypeEvent;
+	import org.gif.errors.FileTypeError;
 	
 	public class GIFPlayer extends Bitmap
+	
 	{
-		private var urlLoader:URLLoader;
-		private var gifDecoder:GIFDecoder
+		
+		private var myURLLoader:URLLoader;
+		private var myGIFDecoder:GIFDecoder
 		private var aFrames:Array;
 		private var myTimer:Timer;
 		private var iInc:int;
@@ -40,98 +45,104 @@ package org.bytearray.gif.player
 		
 		public function GIFPlayer ( pAutoPlay:Boolean = true )
 		{
+			
 			auto = pAutoPlay;
 			iIndex = iInc = 0;
 			
 			myTimer = new Timer ( 0, 0 );
-			aFrames = new Array();
-			urlLoader = new URLLoader();
-			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
+			aFrames = new Array;
+			myURLLoader = new URLLoader;
+			myURLLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			
-			urlLoader.addEventListener ( Event.COMPLETE, onComplete );
-			urlLoader.addEventListener ( IOErrorEvent.IO_ERROR, onIOError );
-			
+			myURLLoader.addEventListener ( Event.COMPLETE, onComplete );
+			myURLLoader.addEventListener ( IOErrorEvent.IO_ERROR, onIOError );
 			myTimer.addEventListener ( TimerEvent.TIMER, update );
 			
-			gifDecoder = new GIFDecoder();
+			myGIFDecoder = new GIFDecoder();
+			
 		}
 		
 		private function onIOError ( pEvt:IOErrorEvent ):void
 		{
-			dispatchEvent ( pEvt );	
+			
+			dispatchEvent ( pEvt );
+			
 		}
 		
-		private function onComplete ( pEvt:Event ):void 
+		private function onComplete ( pEvt:Event ):void
 		{
-			readStream ( pEvt.target.data );	
-		}
-		
-		private function readStream ( pBytes:ByteArray ):void
-		{
-			var gifStream:ByteArray = pBytes;
+			
+			var myGIFStream:ByteArray = pEvt.target.data;
 			
 			aFrames = new Array;
 			iInc = 0;
 			
 			try 
 			{
-				gifDecoder.read ( gifStream );
 				
-				var lng:int = gifDecoder.getFrameCount();
+				myGIFDecoder.read ( myGIFStream );
 				
-				for ( var i:int = 0; i< lng; i++ ) 
-					aFrames[int(i)] = gifDecoder.getFrame(i);
+				var lng:int = myGIFDecoder.getFrameCount();
+				
+				for ( var i:int = 0; i< lng; i++ ) aFrames[int(i)] = myGIFDecoder.getFrame(i);
+
+				dispatchEvent ( new GIFPlayerEvent ( GIFPlayerEvent.COMPLETE , aFrames[0].bitmapData.rect ) );
 				
 				arrayLng = aFrames.length;
 				
 				auto ? play() : gotoAndStop (1);
-				
-				dispatchEvent ( new GIFPlayerEvent ( GIFPlayerEvent.COMPLETE , aFrames[0].bitmapData.rect ) );
 
 			} catch ( e:ScriptTimeoutError )
-			{	
+			{
+				
 				dispatchEvent ( new TimeoutEvent ( TimeoutEvent.TIME_OUT ) );
 				
 			} catch ( e:FileTypeError )
-			{	
+			{
+				
 				dispatchEvent ( new FileTypeEvent ( FileTypeEvent.INVALID ) );
 				
 			} catch ( e:Error )
 			{
-				throw new Error ("An unknown error occured, make sure the GIF file contains at least one frame\nNumber of frames : " + aFrames.length);	
+				
+				throw new Error ("An unknown error occured, make sure the GIF file contains at least one frame\nNumber of frames : " + aFrames.length);
+				
 			}
 
 		}
 		
 		private function update ( pEvt:TimerEvent ) :void
 		{
-			var delay:int = aFrames[ int(iIndex = iInc++ % arrayLng) ].delay;
+			
+			var delay:int = aFrames[ iIndex = iInc++ % arrayLng ].delay;
 			
 			pEvt.target.delay = ( delay > 0 ) ? delay : 100;
 			
-			switch ( gifDecoder.disposeValue ) 
-			{		
+			switch ( myGIFDecoder.disposeValue ) 
+			
+			{
+				
 				case 1:
-					if ( !iIndex ) 
-						bitmapData = aFrames[ 0 ].bitmapData.clone();
+					if ( !iIndex ) bitmapData = aFrames[ 0 ].bitmapData.clone();
 					bitmapData.draw ( aFrames[ iIndex ].bitmapData );
 					break
 				case 2:
 					bitmapData = aFrames[ iIndex ].bitmapData;
 					break;
+					
 			}
 			
 			dispatchEvent ( new FrameEvent ( FrameEvent.FRAME_RENDERED, aFrames[ iIndex ] ) );
+
 		}
 		
 		private function concat ( pIndex:int ):int
-		{	
-			bitmapData.lock();
-			for (var i:int = 0; i< pIndex; i++ ) 
-				bitmapData.draw ( aFrames[ i ].bitmapData );
-			bitmapData.unlock();
+		{
+			
+			for (var i:int = 0; i< pIndex; i++ ) bitmapData.draw ( aFrames[ i ].bitmapData );
 			
 			return i;
+			
 		}
 		
 		/**
@@ -139,20 +150,13 @@ package org.bytearray.gif.player
 		 *
 		 * @return void
 		*/
-		public function load ( pRequest:URLRequest ):void
+		public function load ( pRequest:URLRequest, pContext:LoaderContext = null ):void
 		{
+			
 			stop();
-			urlLoader.load ( pRequest );	
-		}
-		
-		/**
-		 * Load any valid GIF ByteArray
-		 *
-		 * @return void
-		*/
-		public function loadBytes ( pBytes:ByteArray ):void 
-		{
-			readStream ( pBytes );	
+			
+			myURLLoader.load ( pRequest );
+			
 		}
 		
 		/**
@@ -161,13 +165,15 @@ package org.bytearray.gif.player
 		 * @return void
 		*/
 		public function play ():void
-		{	
-			if ( aFrames.length > 0 ) 
-			{	
-				if ( !myTimer.running ) 
-					myTimer.start();
+		{
+			
+			if ( aFrames.length ) 
+			{
+				
+				if ( !myTimer.running ) myTimer.start();
 				
 			} else throw new Error ("Nothing to play");
+			
 		}
 		
 		/**
@@ -177,8 +183,9 @@ package org.bytearray.gif.player
 		*/
 		public function stop ():void
 		{
-			if ( myTimer.running ) 
-				myTimer.stop();	
+			
+			if ( myTimer.running ) myTimer.stop();
+			
 		}
 		
 		/**
@@ -188,7 +195,9 @@ package org.bytearray.gif.player
 		*/
 		public function get currentFrame ():int
 		{
-			return iIndex+1;	
+			
+			return iIndex+1;
+			
 		}
 		
 		/**
@@ -197,8 +206,10 @@ package org.bytearray.gif.player
 		 * @return number of frames
 		*/
 		public function get totalFrames ():int
-		{	
-			return aFrames.length;	
+		{
+			
+			return aFrames.length;
+			
 		}
 				
 		/**
@@ -208,8 +219,11 @@ package org.bytearray.gif.player
 		 * @return loop value
 		*/
 		public function get loopCount ():int
+		
 		{
-			return gifDecoder.getLoopCount();	
+			
+			return myGIFDecoder.getLoopCount();
+			
 		}
 		
 		/**
@@ -218,8 +232,11 @@ package org.bytearray.gif.player
 		 * @return autoPlay value
 		*/
 		public function get autoPlay ():Boolean
+		
 		{
-			return auto;	
+			
+			return auto;
+			
 		}
 		
 		/**
@@ -228,8 +245,11 @@ package org.bytearray.gif.player
 		 * @return aFrames
 		*/
 		public function get frames ():Array
+		
 		{
-			return aFrames;	
+			
+			return aFrames;
+			
 		}
 		
 		/**
@@ -239,13 +259,17 @@ package org.bytearray.gif.player
 		*/
 		public function gotoAndStop (pFrame:int):void
 		{
-			if ( pFrame >= 1 && pFrame <= aFrames.length ) 	
+
+			if ( pFrame > 0 && pFrame <= aFrames.length ) 
+			
 			{
-				if ( pFrame == currentFrame ) return;
-				iIndex = iInc = int(int(pFrame)-1);
 				
-				switch ( gifDecoder.disposeValue ) 
+				iInc = int(int(pFrame)-1);
+				
+				switch ( myGIFDecoder.disposeValue ) 
+				
 				{
+				
 					case 1:
 						bitmapData = aFrames[ 0 ].bitmapData.clone();
 						bitmapData.draw ( aFrames[ concat ( iInc ) ].bitmapData );
@@ -253,12 +277,13 @@ package org.bytearray.gif.player
 					case 2:
 						bitmapData = aFrames[ iInc ].bitmapData;
 						break;
+				
 				}
 				
-				if ( myTimer.running ) 
-					myTimer.stop();
+				if ( myTimer.running ) myTimer.stop();
 				
 			} else throw new RangeError ("Frame out of range, please specify a frame between 1 and " + aFrames.length );
+			
 		}
 		
 		/**
@@ -267,25 +292,32 @@ package org.bytearray.gif.player
 		 * @return void
 		*/
 		public function gotoAndPlay (pFrame:int):void
-		{	
-			if ( pFrame >= 1 && pFrame <= aFrames.length ) 
-			{	
-				if ( pFrame == currentFrame ) return;
-				iIndex = iInc = int(int(pFrame)-1);
+		{
+			
+			if ( pFrame > 0 && pFrame <= aFrames.length ) 
+			
+			{
 				
-				switch ( gifDecoder.disposeValue ) 
-				{	
+				iInc = int(int(pFrame)-1);
+				
+				switch ( myGIFDecoder.disposeValue ) 
+				
+				{
+				
 					case 1:
 						bitmapData = aFrames[ 0 ].bitmapData.clone();
 						bitmapData.draw ( aFrames[ concat ( iInc ) ].bitmapData );
 						break
 					case 2:
 						bitmapData = aFrames[ iInc ].bitmapData;
-						break;		
+						break;
+						
 				}
+				
 				if ( !myTimer.running ) myTimer.start();
 				
 			} else throw new RangeError ("Frame out of range, please specify a frame between 1 and " + aFrames.length );
+			
 		}
 		
 		/**
@@ -294,15 +326,17 @@ package org.bytearray.gif.player
 		 * @return BitmapData object
 		*/
 		public function getFrame ( pFrame:int ):GIFFrame
+		
 		{
+			
 			var frame:GIFFrame;
 			
-			if ( pFrame >= 1 && pFrame <= aFrames.length ) 
-				frame = aFrames[ pFrame-1 ];
+			if ( pFrame > 0 && pFrame <= aFrames.length ) frame = aFrames[ pFrame-1 ];
 			
 			else throw new RangeError ("Frame out of range, please specify a frame between 1 and " + aFrames.length );
 			
-			return frame;	
+			return frame;
+			
 		}
 		
 		/**
@@ -311,29 +345,19 @@ package org.bytearray.gif.player
 		 * @return int
 		*/
 		public function getDelay ( pFrame:int ):int
+		
 		{
+			
 			var delay:int;
 			
-			if ( pFrame >= 1 && pFrame <= aFrames.length )
-				delay = aFrames[ pFrame-1 ].delay;
+			if ( pFrame > 0 && pFrame <= aFrames.length ) delay = aFrames[ pFrame-1 ].delay;
 			
 			else throw new RangeError ("Frame out of range, please specify a frame between 1 and " + aFrames.length );
 			
-			return delay;	
+			return delay;
+			
 		}
 		
-		/**
-		 * Dispose a GIFPlayer instance
-		 *
-		 * @return int
-		*/
-		public function dispose():void
-		{
-			stop();
-			var lng:int = aFrames.length;
-				
-			for ( var i:int = 0; i< lng; i++ ) 
-				aFrames[int(i)].bitmapData.dispose();
-		}
 	}
+	
 }

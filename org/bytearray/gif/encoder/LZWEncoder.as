@@ -8,10 +8,12 @@
 
 package org.bytearray.gif.encoder
 {
+	
 	import flash.utils.ByteArray;
 	
 	public class LZWEncoder
 	{
+		
 		private static var EOF:int = -1;
 		private var imgW:int;
 		private var imgH:int

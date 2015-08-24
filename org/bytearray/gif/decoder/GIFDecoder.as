@@ -1,4 +1,4 @@
-/**
+﻿/**
 * This class lets you decode animated GIF files, and show animated GIF's in the Flash player
 * Base Class : http://www.java2s.com/Code/Java/2D-Graphics-GUI/GiffileEncoder.htm
 * @author Kevin Weiner (original Java version - kweiner@fmsware.com)
@@ -6,16 +6,17 @@
 * @version 0.1 AS3 implementation
 */
 
-package org.bytearray.gif.decoder
+package org.gif.decoder
 {
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
-	import org.bytearray.gif.errors.FileTypeError;
-	import org.bytearray.gif.frames.GIFFrame;
+	import org.gif.errors.FileTypeError;
+	import org.gif.frames.GIFFrame;
 	
 	public class GIFDecoder 
+	
 	{
 		/**
 		 * File read status: No errors.
@@ -112,13 +113,18 @@ package org.bytearray.gif.decoder
 		private var frameCount:int
 		
 		public function GIFDecoder ( )
+		
 		{
-			block = new ByteArray;	
+			
+			block = new ByteArray;
+			
 		}
 		
-		public function get disposeValue():int
+		public function get disposeValue(): int
+		
 		{
-			return dispose;
+			   return dispose;
+			   
 		}
 		
 		/**
@@ -171,19 +177,19 @@ package org.bytearray.gif.decoder
 		 * Creates new frame image from current data (and previous
 		 * frames as specified by their disposition codes).
 		 */
-		private function getPixels( bitmap:BitmapData ):Array
-		{	
+		 private function getPixels( bitmap:BitmapData ):Array
+		{
+			
 			var pixels:Array = new Array ( 4 * image.width * image.height );
 			var count:int = 0;
 			var lngWidth:int = image.width;
 			var lngHeight:int = image.height;
-			var color:int;
 			
 			for (var th:int = 0; th < lngHeight; th++)
 			{
 				for (var tw:int = 0; tw < lngWidth; tw++)
 				{
-					color = bitmap.getPixel (th, tw);
+					var color:int = bitmap.getPixel (th, tw);
 
 					pixels[count++] = (color & 0xFF0000) >> 16;
 					pixels[count++] = (color & 0x00FF00) >> 8;
@@ -193,25 +199,23 @@ package org.bytearray.gif.decoder
 			return pixels;
 		}
 		
-		private function setPixels( pixels:Array ):void
+		private function setPixels( pixels:Array )
 		{
 			var count:int = 0;
-			var color:int;
 			pixels.position = 0;
 			
 			var lngWidth:int = image.width;
 			var lngHeight:int = image.height;
-			bitmap.lock();
 			
 			for (var th:int = 0; th < lngHeight; th++)
 			{
 				for (var tw:int = 0; tw < lngWidth; tw++)
 				{
-					color = pixels[int(count++)];
+					var color:int = pixels[int(count++)];
+
 					bitmap.setPixel32 ( tw, th, color );
 				}
 			}
-			bitmap.unlock();
 		}
 
 		private function transferPixels():void
@@ -231,8 +235,11 @@ package org.bytearray.gif.decoder
 
 				if (lastImage != null) 
 				{
-					var prev:Array = getPixels( lastImage );	
+					
+					var prev:Array = getPixels( lastImage );
+					
 					dest = prev.slice();
+	
 					// copy pixels
 					if (lastDispose == 2) 
 					{
@@ -287,13 +294,12 @@ package org.bytearray.gif.decoder
 						dlim = k + width; // past dest edge
 					}
 					var sx:int = i * iw; // start of line in source
-					var index:int;
-					var tmp:int;
 					while (dx < dlim) 
 					{
 						// map color and insert in destination
-						index = (pixels[sx++]) & 0xff;
-						tmp = act[index];
+						var index:int = (pixels[sx++]) & 0xff;
+
+						var tmp:int = act[index];
 						if (tmp != 0) 
 						{
 							dest[dx] = tmp;
@@ -416,6 +422,7 @@ package org.bytearray.gif.decoder
 			}
 
 			//  Decode GIF pixel stream.
+
 			datum = bits = count = first = top = pi = bi = 0;
 
 			for (i = 0; i < npix;) 
@@ -586,6 +593,7 @@ package org.bytearray.gif.decoder
 		 */
 		private function readColorTable(ncolors:int):Array 
 		{
+
 			var nbytes:int = 3 * ncolors;
 			var tab:Array = null;
 			var c:ByteArray = new ByteArray;
@@ -812,7 +820,7 @@ package org.bytearray.gif.decoder
 		/**
 		 * Reads Netscape extenstion to obtain iteration count
 		 */
-		private function readNetscapeExt():void
+		private function readNetscapeExt() 
 		{
 			do 
 			{

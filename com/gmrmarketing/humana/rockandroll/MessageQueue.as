@@ -1,5 +1,6 @@
 /**
  * The current queue of message objects waiting to display
+ * used by Main
  */
 
 package com.gmrmarketing.humana.rockandroll

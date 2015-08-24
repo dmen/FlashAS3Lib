@@ -311,6 +311,7 @@ package com.gmrmarketing.png.gifphotobooth
 				o.email = "printOnly"
 			}
 			thanks.show(takePhoto.video, o);	//sends to Hubble
+			tim.stopMonitoring();
 			
 			//print?
 			if (o.print) {

@@ -108,11 +108,15 @@ package com.gmrmarketing.esurance.usopen2015
 			//set camera and capture res to 1920x1080 and display at 1313x739
 			cam.init(1920, 1080, 0, 0, 1313, 739, 30);
 			cam.show(clip.camImage);//black box behind bg image	- 1313x739
+			//clip.camImage.alpha = 0;
 			
 			if (fromMain) {
 				//called from Main instead of retake button - fade in
 				clip.alpha = 0;
-				TweenMax.to(clip, 1, { alpha:1, delay:.5, onComplete:showing } );
+				TweenMax.to(clip, .5, { alpha:1, onComplete:showing } );
+				//TweenMax.to(clip.camImage, .25, { alpha:1, delay:.5 } );
+			}else {
+				//clip.camImage.alpha = 1;
 			}
 		}
 		
@@ -160,6 +164,7 @@ package com.gmrmarketing.esurance.usopen2015
 		
 		public function hide():void
 		{
+			trace("takePhoto.hide()");
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
 			}			
@@ -276,11 +281,14 @@ package com.gmrmarketing.esurance.usopen2015
 			
 			var jpeg:ByteArray = getJpeg(b);
 			imageString = getBase64(jpeg);
+			
+			trace("process complete");
 		}
 		
 		
 		private function finished():void
 		{
+			trace("take dispatching FINISHED");
 			dispatchEvent(new Event(FINISHED));
 		}
 		

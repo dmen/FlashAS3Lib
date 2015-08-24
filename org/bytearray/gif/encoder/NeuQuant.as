@@ -32,6 +32,7 @@ package org.bytearray.gif.encoder
 	
 	public class NeuQuant
 	{
+		
 		private static var netsize:int = 256; /* number of colours used */
 		
 		/* four primes near 500 - assume no image has a length so large */

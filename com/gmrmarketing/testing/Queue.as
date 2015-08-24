@@ -3,7 +3,7 @@
  * Stores and manages user objects in two csv files 
  */
 	
-package  com.gmrmarketing.png.gifphotobooth
+package  com.gmrmarketing.testing
 {	
 	import flash.display.MovieClip;	
 	import flash.filesystem.*;	
@@ -16,8 +16,7 @@ package  com.gmrmarketing.png.gifphotobooth
 	
 	public class Queue extends EventDispatcher  
 	{
-		private const DATA_FILE_NAME:String = "pngGifQueued.csv"; //current users / not yet uploaded
-		//private const SAVED_FILE_NAME:String = "pngGifSaved.csv"; //users successfully uploaded
+		private const DATA_FILE_NAME:String = "mutiamQueued.csv"; //current users / not yet uploaded
 		
 		private var fileFolder:File;
 		private var users:Array;//current queue
@@ -25,8 +24,7 @@ package  com.gmrmarketing.png.gifphotobooth
 		private var hubble:Hubble;//NowPik integration		
 		private var curUpload:Object; //currently uploading user object - users[0] - set in uploadNext()		
 	
-		private var autoInc:AutoIncrement;//so each record can have a unique deviceResponseID when sending to hubble
-		
+		private var autoInc:AutoIncrement;//so each record can have a unique deviceResponseID when sending to hubble	
 		
 		
 		
@@ -64,7 +62,7 @@ package  com.gmrmarketing.png.gifphotobooth
 		/**
 		 * Adds a user data object to the csv file
 		 * Called from Main.removeForm() - once form is complete and Thanks is showing
-		 * Data object contains these keys email,phone,opt1,opt2,opt3,opt4,opt5,gif
+		 * Data object contains keys: email, gif
 		 * 
 		 * deviceResponseID is injected into object for use by Hubble so that each record has a unique identifier
 		 * 
@@ -212,7 +210,7 @@ package  com.gmrmarketing.png.gifphotobooth
 			}catch (e:Error) {
 			}			
 		}
-
+		
 		
 		
 		/**

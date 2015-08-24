@@ -3,21 +3,20 @@
  * Stores and manages user objects in two csv files 
  */
 	
-package  com.gmrmarketing.png.gifphotobooth
+package  com.gmrmarketing.hp.multicam
 {	
 	import flash.display.MovieClip;	
 	import flash.filesystem.*;	
 	import flash.events.*;	
 	import flash.utils.Timer;
 	import com.gmrmarketing.utilities.Utility;
-	import com.gmrmarketing.png.gifphotobooth.Hubble;
+	import com.gmrmarketing.hp.multicam.Hubble;
 	import com.gmrmarketing.png.gifphotobooth.AutoIncrement;
 	
 	
 	public class Queue extends EventDispatcher  
 	{
-		private const DATA_FILE_NAME:String = "pngGifQueued.csv"; //current users / not yet uploaded
-		//private const SAVED_FILE_NAME:String = "pngGifSaved.csv"; //users successfully uploaded
+		private const DATA_FILE_NAME:String = "muticamQueued.csv"; //current users / not yet uploaded
 		
 		private var fileFolder:File;
 		private var users:Array;//current queue
@@ -25,8 +24,7 @@ package  com.gmrmarketing.png.gifphotobooth
 		private var hubble:Hubble;//NowPik integration		
 		private var curUpload:Object; //currently uploading user object - users[0] - set in uploadNext()		
 	
-		private var autoInc:AutoIncrement;//so each record can have a unique deviceResponseID when sending to hubble
-		
+		private var autoInc:AutoIncrement;//so each record can have a unique deviceResponseID when sending to hubble	
 		
 		
 		
@@ -64,22 +62,24 @@ package  com.gmrmarketing.png.gifphotobooth
 		/**
 		 * Adds a user data object to the csv file
 		 * Called from Main.removeForm() - once form is complete and Thanks is showing
-		 * Data object contains these keys email,phone,opt1,opt2,opt3,opt4,opt5,gif
+		 * Data array of objects with keys: email, gif
 		 * 
 		 * deviceResponseID is injected into object for use by Hubble so that each record has a unique identifier
 		 * 
 		 * called from Thanks.encFrame() once the gif has been created
 		 */
-		public function add(data:Object):void
-		{			
-			data.deviceResponseID = autoInc.num;
-			data.responseID = -1;//only used if photo/followup post errors - this is hubble's response id from sending
-			//the form data, so that when the photo is sent it can be attached to the proper record - ie if this is -1 then the
-			//full form object and photo will be uploaded
-			data.followupError = false;//set to true in hubbleFollowupError			
-			data.printAPIError = false;//set to true in hubblePrintAPIError
-			
-			users.push(data);//add to queue
+		public function add(data:Array):void
+		{	
+			for (var i:int = 0; i < data.length; i++){
+				data[i].deviceResponseID = autoInc.num;
+				data[i].responseID = -1;//only used if photo/followup post errors - this is hubble's response id from sending
+				//the form data, so that when the photo is sent it can be attached to the proper record - ie if this is -1 then the
+				//full form object and photo will be uploaded
+				data[i].followupError = false;//set to true in hubbleFollowupError			
+				data[i].printAPIError = false;//set to true in hubblePrintAPIError
+				
+				users.push(data[i]);//add to queue
+			}
 			rewriteQueue();
 			users = getAllUsers();
 			uploadNext();			
@@ -93,7 +93,8 @@ package  com.gmrmarketing.png.gifphotobooth
 		 */
 		private function uploadNext():void
 		{
-			if (hubble.hasToken() && !hubble.isBusy() && users.length > 0) {				
+			if (hubble.hasToken() && !hubble.isBusy() && users.length > 0) {
+		
 				curUpload = users.shift();				
 				hubble.submit(curUpload);				
 			}
@@ -212,7 +213,7 @@ package  com.gmrmarketing.png.gifphotobooth
 			}catch (e:Error) {
 			}			
 		}
-
+		
 		
 		
 		/**
@@ -248,6 +249,7 @@ package  com.gmrmarketing.png.gifphotobooth
 			
 			file = null;
 			stream = null;
+			
 			return obs;
 		}
 		

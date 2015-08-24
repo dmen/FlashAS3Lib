@@ -1,10 +1,19 @@
-package org.bytearray.gif.errors
+package org.gif.errors
+
 {
-	public class FileTypeError extends Error 	
+	
+	public class FileTypeError extends Error 
+	
 	{
-		public function FileTypeError ( pMessage:String )	
+		
+		public function FileTypeError ( pMessage:String )
+		
 		{
-			super ( pMessage );	
+			
+			super ( pMessage );
+			
 		}
+		
 	}
+	
 }

@@ -23,14 +23,14 @@ package com.gmrmarketing.png.gifphotobooth
 		private var queue:Queue;
 		private var userData:Object;
 		
-		private var tim:TimeoutHelper;
+		private var overlay:BitmapData;
 		
 		
 		public function Thanks()
 		{
-			tim = TimeoutHelper.getInstance();
 			encoder = new GIFEncoder();
 			queue = new Queue();
+			overlay = new overlaySmall();//lib
 			clip = new mcThanks();
 		}
 		
@@ -56,9 +56,7 @@ package com.gmrmarketing.png.gifphotobooth
 		public function show(f:Array, o:Object):void
 		{
 			frames = f;
-			userData = o;			
-			
-			tim.buttonClicked();
+			userData = o;
 			
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
@@ -81,7 +79,7 @@ package com.gmrmarketing.png.gifphotobooth
 			
 			encoder.setRepeat(0);
 			encoder.setDelay(150);
-			encoder.setQuality(8);//default is 10 - lower = slower/better
+			encoder.setQuality(4);//default is 10 - lower = slower/better
 			
 			encoder.start();//returns a boolean... 
 			myContainer.addEventListener(Event.ENTER_FRAME, encFrame, false, 0, true);
@@ -108,26 +106,25 @@ package com.gmrmarketing.png.gifphotobooth
 			*/
 		}
 		private function encFrame(e:Event):void
-		{
-			var over:BitmapData = new overlay();//lib
-			
+		{			
 			if(frames.length > 0){
 				var m:Matrix = new Matrix();
-				m.scale(320 / 749, 281 / 657);
-				var b:BitmapData = new BitmapData(320, 281);
+				m.scale(500 / 749, 439 / 657);
+				var b:BitmapData = new BitmapData(500, 439);
 				b.draw(frames.shift(), m, null, null, null, true);			
-				b.copyPixels(over, new Rectangle(0, 0, 320, 281), new Point(0, 0), null, null, true);		
+				b.copyPixels(overlay, new Rectangle(0, 0, 500, 439), new Point(0, 0), null, null, true);		
 				encoder.addFrame(b);
 			}else {
 				myContainer.removeEventListener(Event.ENTER_FRAME, encFrame);
 				encoder.finish();
 				
 				var gString:String = Base64.encodeByteArray(encoder.stream);
+				//saveFile(encoder.stream);
 				
 				userData.gif = gString;//userData object set in show()
 				
-				queue.add(userData);
-				
+				queue.add(userData);				
+			
 				dispatchEvent(new Event(COMPLETE));
 			}
 		}

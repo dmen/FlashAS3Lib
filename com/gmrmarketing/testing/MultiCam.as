@@ -43,7 +43,7 @@ package com.gmrmarketing.testing
 		private var gif3:String;
 		
 		private var encoder:Encoder;
-		
+		private var queue:Queue;
 		
 		private var dp:DataProvider;//camera names for drop downs
 		private var so:SharedObject;
@@ -51,6 +51,8 @@ package com.gmrmarketing.testing
 		public function MultiCam()
 		{
 			var cams:Array = Camera.names;
+			
+			queue = new Queue();
 			
 			so = SharedObject.getLocal("multicamconfig");
 			
@@ -108,10 +110,7 @@ package com.gmrmarketing.testing
 			v2.x = 340;
 			v2.y = 30;
 			v3.x = 670;
-			v3.y = 30;
-			
-			frames = [[],[],[]];
-			frameCount = 0;			
+			v3.y = 30;			
 			
 			combo1.addEventListener(Event.CHANGE, changeCam1);
 			combo2.addEventListener(Event.CHANGE, changeCam2);
@@ -138,10 +137,24 @@ package com.gmrmarketing.testing
 			everyNthFrame.addEventListener(Event.CHANGE, calcMaxFrames);
 			numSeconds.addEventListener(Event.CHANGE, calcMaxFrames);
 			
+			init();
+		}
+		
+		
+		private function init():void
+		{			
+			frames = [[],[],[]];
+			frameCount = 0;	
+			
+			email1 = "";
+			email2 = "";
+			email3 = "";
+			
 			recording1 = false;
 			recording2 = false;
 			recording3 = false;
 		}
+		
 		
 		private function changeCam1(e:Event = null):void
 		{		
@@ -378,6 +391,21 @@ package com.gmrmarketing.testing
 			if(e != null){
 				gif3 = encoder.getGif();
 			}
+			
+			if (frames[0].length != 0 && email1 != "") {
+				var p1:Object = { email:email1, gif:gif1 } );
+				queue.add(p1);
+			}
+			if (frames[1].length != 0 && email2 != "") {
+				var p2:Object = { email:email1, gif:gif2 } );
+				queue.add(p2);
+			}
+			if (frames[2].length != 0 && email3 != "") {
+				var p3:Object = { email:email1, gif:gif3 } );
+				queue.add(p3);
+			}
+			
+			init();
 		}
 			
 			
