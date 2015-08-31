@@ -102,20 +102,23 @@ package com.gmrmarketing.humana.rockandroll
 		 * Called from runnersAdded()		
 		 */
 		private function updateScreen():void
-		{			
+		{		
+			var p:Message;
+			var sl:Array;
+			
 			while (queue.pastViewingTime() && screenLocs.length) {				
 				//returns -1 if no messages in queue			
 				var m:Object = queue.getMessage();//removes message from queue				
 				if (m != -1) {					
-					var sl:Array = screenLocs.shift();
-					var p:Message = new Message(m, messageContainer, sl[0], sl[1]);					
+					sl = screenLocs.shift();
+					p = new Message(m, messageContainer, sl[0], sl[1]);					
 					p.addEventListener(Message.MESSAGE_DISPLAYED, removeMessage);
 				}
 			}
 			
 			//see if there's a spot open for a military cheer
-			if (screenLocs.length > 0 && militaryCheers.length > 0) {
-				var sl:Array = screenLocs.shift();
+			if (screenLocs.length > 0 && screenLocs.length < 6 && militaryCheers.length > 0) {
+				sl = screenLocs.shift();
 				
 				//fName, lName, messages, time, tenTime, viewingTime, messageTime
 				//messages is an array of objects with keys: message, fromFName, fromLName
@@ -126,7 +129,7 @@ package com.gmrmarketing.humana.rockandroll
 					militaryIndex = 0;
 				}
 				
-				var p:Message = new Message(milMessage, messageContainer, sl[0], sl[1]);					
+				p = new Message(milMessage, messageContainer, sl[0], sl[1], true);					
 				p.addEventListener(Message.MESSAGE_DISPLAYED, removeMessage);
 			}
 			

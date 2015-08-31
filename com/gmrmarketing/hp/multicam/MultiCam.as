@@ -262,17 +262,18 @@ package com.gmrmarketing.hp.multicam
 		 * @param	e
 		 */
 		private function startRecording1(e:Event):void
-		{
+		{			
 			p1.text = "player 1: waiting to start";
 			calcMaxFrames();			
-			watcher1.stopWatching();
-			loadFile1();
-			
+			watcher1.stopWatching();			
+		
 			TweenMax.to(p1Outline.outline, .5, { tint:0x00cc00 } );
-			
+		
 			var t:Timer = new Timer(1000 * parseInt(startSeconds.text), 1);
 			t.addEventListener(TimerEvent.TIMER, rec1, false, 0, true);
 			t.start();
+			
+			loadFile1();
 		}
 		private function rec1(e:TimerEvent):void
 		{
@@ -291,13 +292,14 @@ package com.gmrmarketing.hp.multicam
 			p2.text = "player 2: waiting to start";
 			calcMaxFrames();
 			watcher2.stopWatching();
-			loadFile2();
 			
 			TweenMax.to(p2Outline.outline, .5, { tint:0x00cc00 } );
 			
 			var t:Timer = new Timer(1000 * parseInt(startSeconds.text), 1);
 			t.addEventListener(TimerEvent.TIMER, rec2, false, 0, true);
 			t.start();
+			
+			loadFile2();
 		}
 		private function rec2(e:TimerEvent):void
 		{
@@ -316,13 +318,14 @@ package com.gmrmarketing.hp.multicam
 			p3.text = "player 3: waiting to start";
 			calcMaxFrames();
 			watcher3.stopWatching();
-			loadFile3();
 			
 			TweenMax.to(p3Outline.outline, .5, { tint:0x00cc00 } );
 			
 			var t:Timer = new Timer(1000 * parseInt(startSeconds.text), 1);
 			t.addEventListener(TimerEvent.TIMER, rec3, false, 0, true);
 			t.start();
+			
+			loadFile3();
 		}
 		private function rec3(e:TimerEvent):void
 		{
@@ -333,6 +336,11 @@ package com.gmrmarketing.hp.multicam
 		}
 		
 		
+		/**
+		 * calculates maxFrames based on user input of number of seconds
+		 * in gif and capture every nth frame
+		 * @param	e
+		 */
 		private function calcMaxFrames(e:Event = null):void
 		{
 			everyNth = parseInt(everyNthFrame.text);
@@ -386,17 +394,27 @@ package com.gmrmarketing.hp.multicam
 			fileLoader1.removeEventListener(Event.COMPLETE, loaded1);
 			fileLoader1.close();
 			
-			var j:Object = JSON.parse(e.target.data) as Object;	//client & email keys
-			email1 = j.email;
+			try{
+				var j:Object = JSON.parse(e.target.data) as Object;	//client & email keys
+				email1 = j.email;
+				trace("loaded1", email1);
+			}catch (e:Error) {
+				email1 = "";
+			}
 			TweenMax.delayedCall(.5, deleteFile, ["1"]);
 		}
 		private function loaded2(e:Event):void
 		{
 			fileLoader2.removeEventListener(Event.COMPLETE, loaded2);
 			fileLoader2.close();
-			
-			var j:Object = JSON.parse(e.target.data) as Object;			
-			email2 = j.email;
+			//
+			try{
+				var j:Object = JSON.parse(e.target.data) as Object;			
+				email2 = j.email;
+				trace("loaded2", email2);
+			}catch (e:Error) {
+				email2 = "";
+			}
 			TweenMax.delayedCall(.5, deleteFile, ["2"]);
 		}
 		private function loaded3(e:Event):void
@@ -404,14 +422,20 @@ package com.gmrmarketing.hp.multicam
 			fileLoader3.removeEventListener(Event.COMPLETE, loaded3);
 			fileLoader3.close();
 			
-			var j:Object = JSON.parse(e.target.data) as Object;			
-			email3 = j.email;
+			try{
+				var j:Object = JSON.parse(e.target.data) as Object;			
+				email3 = j.email;
+				trace("loaded3", email3);
+			}catch (e:Error) {
+				email3 = "";
+			}
 			TweenMax.delayedCall(.5, deleteFile, ["3"]);
 		}
 		
 		
 		private function deleteFile(which:String):void
 		{
+			trace("deleteFile",which);
 			var targetDir:File = new File();
 			var targetFile:File = targetDir.resolvePath("c:/cams_vmworld/start" + which + ".txt");
 			targetFile.deleteFile();
@@ -474,7 +498,7 @@ package com.gmrmarketing.hp.multicam
 				}else{
 					encoder.addFrames(frames[0]);
 				}
-				TweenMax.to(p1Outline.outline, .5, { tint:0x07bcff } );//blue for encoding
+				TweenMax.to(p1Outline.outline, 0, { tint:0x07bcff } );//blue for encoding
 			}else {
 				process2();
 			}
@@ -487,7 +511,7 @@ package com.gmrmarketing.hp.multicam
 		private function process2(e:Event = null):void
 		{
 			p1.text = "player 1: idle";
-			TweenMax.to(p1Outline.outline, .5, { tint:0xcccccc } );
+			TweenMax.to(p1Outline.outline, 0, { tint:0xcccccc } );
 			encoder.removeEventListener(Encoder.UPDATE, update1);
 			encoder.removeEventListener(Encoder.COMPLETE, process2);
 			
@@ -502,7 +526,7 @@ package com.gmrmarketing.hp.multicam
 				}else{
 					encoder.addFrames(frames[1]);
 				}
-				TweenMax.to(p2Outline.outline, .5, { tint:0x07bcff } );
+				TweenMax.to(p2Outline.outline, 0, { tint:0x07bcff } );
 			}else {
 				process3();
 			}			
@@ -515,7 +539,7 @@ package com.gmrmarketing.hp.multicam
 		private function process3(e:Event = null):void
 		{
 			p2.text = "player 2: idle";
-			TweenMax.to(p2Outline.outline, .5, { tint:0xcccccc } );
+			TweenMax.to(p2Outline.outline, 0, { tint:0xcccccc } );
 			encoder.removeEventListener(Encoder.UPDATE, update2);
 			encoder.removeEventListener(Encoder.COMPLETE, process3);
 			
@@ -530,7 +554,7 @@ package com.gmrmarketing.hp.multicam
 				}else{
 					encoder.addFrames(frames[2]);
 				}
-				TweenMax.to(p3Outline.outline, .5, { tint:0x07bcff } );
+				TweenMax.to(p3Outline.outline, 0, { tint:0x07bcff } );
 			}else {
 				finishProcess();
 			}	
@@ -543,7 +567,7 @@ package com.gmrmarketing.hp.multicam
 		private function finishProcess(e:Event = null):void
 		{
 			p3.text = "player 3: idle";
-			TweenMax.to(p3Outline.outline, .5, { tint:0xcccccc } );
+			TweenMax.to(p3Outline.outline, 0, { tint:0xcccccc } );
 			encoder.removeEventListener(Encoder.UPDATE, update3);
 			encoder.removeEventListener(Encoder.COMPLETE, finishProcess);
 			
@@ -566,7 +590,9 @@ package com.gmrmarketing.hp.multicam
 				players.push(p3);
 			}
 			
-			queue.add(players);
+			if(players.length > 0){
+				queue.add(players);
+			}
 			
 			init();
 		}

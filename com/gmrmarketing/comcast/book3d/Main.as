@@ -484,7 +484,7 @@ package com.gmrmarketing.comcast.book3d
 			OptIn : false
 			*/
 			
-			var userData:Object = form.userData; //firstName,lastName,PhoneNumber,Agree,OptIn
+			var userData:Object = form.userData; //firstName,lastName,PhoneNumber,Agree,(OptIn)
 			
 			//Email no longer in the form
 			userData.Email = "";

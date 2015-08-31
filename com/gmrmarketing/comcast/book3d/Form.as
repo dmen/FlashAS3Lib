@@ -44,7 +44,7 @@ package com.gmrmarketing.comcast.book3d
 			//u.Email = clip.email.text;
 			u.PhoneNumber = clip.phone.text;
 			u.Agree = true;
-			u.OptIn = clip.checkAdditional.currentFrame == 2 ? true : false;
+			u.OptIn = false;
 			
 			return u;
 		}
@@ -71,7 +71,7 @@ package com.gmrmarketing.comcast.book3d
 			clip.phone.restrict = "-0-9";
 			
 			clip.checkRules.gotoAndStop(1);
-			clip.checkAdditional.gotoAndStop(1);
+			//clip.checkAdditional.gotoAndStop(1);
 			/*
 			kbd.x = 70;
 			kbd.y = 435;
@@ -81,7 +81,7 @@ package com.gmrmarketing.comcast.book3d
 			*/
 			clip.btnSubmit.addEventListener(MouseEvent.MOUSE_DOWN, formSubmit, false, 0, true);
 			clip.btnRules.addEventListener(MouseEvent.MOUSE_DOWN, toggleRulesCheck, false, 0, true);
-			clip.btnAdditional.addEventListener(MouseEvent.MOUSE_DOWN, toggleAdditionalCheck, false, 0, true);
+			//clip.btnAdditional.addEventListener(MouseEvent.MOUSE_DOWN, toggleAdditionalCheck, false, 0, true);
 			clip.btnShowRules.addEventListener(MouseEvent.MOUSE_DOWN, showRules, false, 0, true);
 			
 			//kbd.addEventListener(KeyBoard.KBD, resetTimeout, false, 0, true);
@@ -96,7 +96,7 @@ package com.gmrmarketing.comcast.book3d
 			clip.title.alpha = 0;
 			clip.title.y += 50;
 			clip.checkRules.alpha = 0;
-			clip.checkAdditional.alpha = 0;
+			//clip.checkAdditional.alpha = 0;
 			clip.checkText.alpha = 0;
 			//kbd.alpha = 0;
 			//kbd.y += 50;
@@ -108,7 +108,7 @@ package com.gmrmarketing.comcast.book3d
 			//TweenMax.to(clip.w4, .5, { scaleX:1, delay:.3, ease:Back.easeOut } );
 			TweenMax.to(clip.fieldTitles, .5, { alpha:1, delay:.75 } );
 			TweenMax.to(clip.checkRules, .5, { alpha:1, delay:.75 } );
-			TweenMax.to(clip.checkAdditional, .5, { alpha:1, delay:.75 } );
+			//TweenMax.to(clip.checkAdditional, .5, { alpha:1, delay:.75 } );
 			TweenMax.to(clip.checkText, .5, { alpha:1, delay:.75 } );
 			TweenMax.to(clip.btnSubmit, .5, { scaleX:1, delay:.5, ease:Back.easeOut } );
 			TweenMax.to(clip.title, .5, { y:"-50", alpha:1, delay:.8 } );
@@ -119,7 +119,7 @@ package com.gmrmarketing.comcast.book3d
 		
 		private function updateRulesPosition(e:Event):void
 		{
-			clip.rules.theText.y = 59 - slider.getPosition() * 910;
+			clip.rules.theText.y = 59 - slider.getPosition() * 1000;
 		}
 		
 		private function formSubmit(e:MouseEvent):void
@@ -131,7 +131,7 @@ package com.gmrmarketing.comcast.book3d
 						if (clip.checkRules.currentFrame == 2) {
 							clip.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, formSubmit);
 							clip.btnRules.removeEventListener(MouseEvent.MOUSE_DOWN, toggleRulesCheck);
-							clip.btnAdditional.removeEventListener(MouseEvent.MOUSE_DOWN, toggleAdditionalCheck);
+							//clip.btnAdditional.removeEventListener(MouseEvent.MOUSE_DOWN, toggleAdditionalCheck);
 							clip.btnShowRules.removeEventListener(MouseEvent.MOUSE_DOWN, showRules);
 							dispatchEvent(new Event(COMPLETE));
 						}else {
@@ -175,7 +175,7 @@ package com.gmrmarketing.comcast.book3d
 				clip.checkRules.gotoAndStop(1);
 			}
 		}
-		
+		/*
 		private function toggleAdditionalCheck(e:MouseEvent):void
 		{
 			if (clip.checkAdditional.currentFrame == 1) {
@@ -184,7 +184,7 @@ package com.gmrmarketing.comcast.book3d
 				clip.checkAdditional.gotoAndStop(1);
 			}
 		}
-		
+		*/
 		
 		private function message(s:String):void
 		{

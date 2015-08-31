@@ -73,7 +73,7 @@ package com.gmrmarketing.esurance.usopen2015
 			if (clip.contains(overlay)) {
 				clip.removeChild(overlay);
 			}
-			overlayShowing = 0;
+			overlayShowing = 2;
 			
 			clip.theText.visible = true;
 			clip.theText.alpha = 1;
@@ -96,6 +96,7 @@ package com.gmrmarketing.esurance.usopen2015
 				clip.t1.addEventListener(MouseEvent.MOUSE_DOWN, overlayOneClick, false, 0, true);
 				clip.t2.addEventListener(MouseEvent.MOUSE_DOWN, overlayTwoClick, false, 0, true);
 			}
+			overlayTwoClick();
 			
 			clip.thanks.visible = false;
 			clip.btnRetake.visible = false;
@@ -125,33 +126,19 @@ package com.gmrmarketing.esurance.usopen2015
 		{
 			overlayData = new overlayOne();//lib
 			overlay.bitmapData = overlayData;
-			if (overlayShowing == 0 || overlayShowing == 2) {
-				overlayShowing = 1;
-				if (!clip.contains(overlay)) {
-					clip.addChild(overlay);
-				}
-			}else {
-				if (clip.contains(overlay)) {
-					clip.removeChild(overlay);
-				}
-				overlayShowing = 0;
+			overlayShowing = 1;
+			if (!clip.contains(overlay)) {
+				clip.addChild(overlay);
 			}
 		}
 		
-		private function overlayTwoClick(e:MouseEvent):void
+		private function overlayTwoClick(e:MouseEvent = null):void
 		{
 			overlayData = new overlayTwo();//lib
 			overlay.bitmapData = overlayData;
-			if (overlayShowing == 0 || overlayShowing == 1) {
-				overlayShowing = 2;
-				if (!clip.contains(overlay)) {
-					clip.addChild(overlay);
-				}
-			}else {
-				if (clip.contains(overlay)) {
-					clip.removeChild(overlay);
-				}
-				overlayShowing = 0;
+			overlayShowing = 2;
+			if (!clip.contains(overlay)) {
+				clip.addChild(overlay);
 			}
 		}
 		

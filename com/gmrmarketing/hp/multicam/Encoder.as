@@ -31,7 +31,7 @@ package com.gmrmarketing.hp.multicam
 		
 		public function Encoder()
 		{
-			overlay = new overlayBMD();//library
+			overlay = new overlayBMD();//library 50x50
 			
 			timer = new Timer(35);
 			timer.addEventListener(TimerEvent.TIMER, encFrame);
@@ -93,7 +93,7 @@ package com.gmrmarketing.hp.multicam
 				m.scale(myW / origW, myH / origH);
 				var b:BitmapData = new BitmapData(myW, myH);
 				b.draw(frames.shift(), m, null, null, null, true);			
-				b.copyPixels(overlay, new Rectangle(0, 0, 30, 30), new Point(myW - 35, myH - 35), null, null, true);		
+				b.copyPixels(overlay, new Rectangle(0, 0, 35, 35), new Point(myW - 40, myH - 40), null, null, true);		
 				encoder.addFrame(b);
 				dispatchEvent(new Event(UPDATE));
 			}else {

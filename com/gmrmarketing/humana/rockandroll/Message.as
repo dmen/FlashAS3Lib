@@ -10,6 +10,8 @@ package com.gmrmarketing.humana.rockandroll
 	import flash.events.*;
 	import flash.events.EventDispatcher;
 	import flash.events.TimerEvent;
+	import flash.text.TextFormat;
+	import flash.text.TextFormatAlign;
 	import flash.utils.Timer;
 	import com.greensock.TweenMax;
 	
@@ -32,28 +34,36 @@ package com.gmrmarketing.humana.rockandroll
 		 * @param	tx
 		 * @param	ty
 		 */
-		public function Message(message:Object, $container:DisplayObjectContainer, tx:int, ty:int)
-		{			
+		public function Message(message:Object, $container:DisplayObjectContainer, tx:int, ty:int, isMilitary:Boolean = false)
+		{		
+			var myFormat:TextFormat = new TextFormat();
+			
 			clip = new mcMessage(); //lib clip
 			clip.x = tx;
 			clip.y = ty;
 			
 			var bg:MovieClip;
-			var r:Number = Math.random();
-			if (r > .84) {
-				bg = new boxPurple();
-				bg.y = 11;
-			}else if (r > .68) {
-				bg = new boxPurple2();
-				bg.y = 11;
-			}else if (r > .52) {
-				bg = new boxGreen1();
-			}else if (r > .36) {
-				bg = new boxGreen2();
-			}else if (r > .2) {
-				bg = new boxGray1();
+			if(!isMilitary){
+				var r:Number = Math.random();
+				if (r > .84) {
+					bg = new boxPurple();
+					bg.y = 11;
+				}else if (r > .68) {
+					bg = new boxPurple2();
+					bg.y = 11;
+				}else if (r > .52) {
+					bg = new boxGreen1();
+				}else if (r > .36) {
+					bg = new boxGreen2();
+				}else if (r > .2) {
+					bg = new boxGray1();
+				}else {
+					bg = new boxGray2();
+				}
+				myFormat.align = TextFormatAlign.LEFT;
 			}else {
-				bg = new boxGray2();
+				bg = new boxMilitary();
+				myFormat.align = TextFormatAlign.CENTER;
 			}
 			
 			clip.addChildAt(bg, 0);
@@ -62,6 +72,7 @@ package com.gmrmarketing.humana.rockandroll
 			
 			messages = message.messages;
 			curMessage = 0;
+			clip.message.defaultTextFormat = myFormat;
 			clip.message.text = messages[curMessage].message;
 			clip.from.text = messages[curMessage].fromFName + " " + messages[curMessage].fromLName;			
 			

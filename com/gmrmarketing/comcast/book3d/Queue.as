@@ -39,8 +39,7 @@ package  com.gmrmarketing.comcast.book3d
 			Email : 'pujarit@gmail.com', 
 			PhoneNumber : '6147472636', 
 			Agree : true, 
-			OptIn : false 
-
+			OptIn : false - OptIn removed
 		 * @param	data
 		 */
 		public function add(data:Object):void
