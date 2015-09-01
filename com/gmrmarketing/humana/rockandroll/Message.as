@@ -36,14 +36,14 @@ package com.gmrmarketing.humana.rockandroll
 		 */
 		public function Message(message:Object, $container:DisplayObjectContainer, tx:int, ty:int, isMilitary:Boolean = false)
 		{		
-			var myFormat:TextFormat = new TextFormat();
+			//var myFormat:TextFormat = new TextFormat();
 			
 			clip = new mcMessage(); //lib clip
 			clip.x = tx;
 			clip.y = ty;
 			
 			var bg:MovieClip;
-			if(!isMilitary){
+			//if(!isMilitary){
 				var r:Number = Math.random();
 				if (r > .84) {
 					bg = new boxPurple();
@@ -60,11 +60,11 @@ package com.gmrmarketing.humana.rockandroll
 				}else {
 					bg = new boxGray2();
 				}
-				myFormat.align = TextFormatAlign.LEFT;
-			}else {
-				bg = new boxMilitary();
-				myFormat.align = TextFormatAlign.CENTER;
-			}
+				//myFormat.align = TextFormatAlign.LEFT;
+			//}else {
+				//bg = new boxMilitary();
+				//myFormat.align = TextFormatAlign.CENTER;
+			//}
 			
 			clip.addChildAt(bg, 0);
 			
@@ -72,9 +72,15 @@ package com.gmrmarketing.humana.rockandroll
 			
 			messages = message.messages;
 			curMessage = 0;
-			clip.message.defaultTextFormat = myFormat;
+			//clip.message.defaultTextFormat = myFormat;
 			clip.message.text = messages[curMessage].message;
-			clip.from.text = messages[curMessage].fromFName + " " + messages[curMessage].fromLName;			
+			if (isMilitary) {
+				clip.from.text = "";
+				clip.humana.visible = true;
+			}else{
+				clip.from.text = messages[curMessage].fromFName + " " + messages[curMessage].fromLName;
+				clip.humana.visible = false;
+			}
 			
 			messageTimer = new Timer(message.messageTime * 1000);
 			messageTimer.addEventListener(TimerEvent.TIMER, nextMessage);

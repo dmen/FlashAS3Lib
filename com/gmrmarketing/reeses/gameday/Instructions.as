@@ -29,6 +29,29 @@ package  com.gmrmarketing.reeses.gameday
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
+			
+			clip.s1.scaleX = clip.s1.scaleY = 0;
+			clip.s2.scaleX = clip.s2.scaleY = 0;
+			clip.s3.scaleX = clip.s3.scaleY = 0;
+			clip.title1.alpha = 0;
+			clip.title2.alpha = 0;
+			clip.title3.alpha = 0;
+			clip.sub1.alpha = 0;
+			clip.sub2.alpha = 0;
+			clip.sub3.alpha = 0;
+			
+			TweenMax.to(clip.s1, .4, { scaleX:1, scaleY:1, ease:Back.easeOut } );
+			TweenMax.to(clip.s2, .4, { scaleX:1, scaleY:1, delay:.1, ease:Back.easeOut } );
+			TweenMax.to(clip.s3, .4, { scaleX:1, scaleY:1, delay:.2, ease:Back.easeOut } );
+			
+			TweenMax.to(clip.title1, .4, { alpha:1, delay:.2 } );
+			TweenMax.to(clip.title2, .4, { alpha:1, delay:.3 } );
+			TweenMax.to(clip.title3, .4, { alpha:1, delay:.4 } );
+			
+			TweenMax.to(clip.sub1, .4, { alpha:1, delay:.3 } );
+			TweenMax.to(clip.sub2, .4, { alpha:1, delay:.4 } );
+			TweenMax.to(clip.sub3, .4, { alpha:1, delay:.5 } );
+			
 			clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, nextClicked, false, 0, true);
 		}
 		

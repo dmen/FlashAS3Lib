@@ -42,15 +42,15 @@ package com.gmrmarketing.reeses.gameday
 			clip.perfectPick.alpha = 0;
 			clip.rCup.scaleX = clip.rCup.scaleY = 0;
 			
-			TweenMax.to(clip.rCup, .5, { scaleX:1, scaleY:1, ease:Back.easeOut } );
-			TweenMax.to(clip.perfectPick, 1, { alpha:1,  scaleX:1, scaleY:1, delay:.4, ease:Back.easeOut } );
-			TweenMax.to(clip.tline, .5, { scaleX:1, delay:1.2, ease:Back.easeOut } );
-			TweenMax.to(clip.bline, .5, { scaleX:1, delay:1.2, ease:Back.easeOut } );
-			TweenMax.to(clip.getReady, .5, { scaleY:1, delay:1.6, ease:Back.easeOut } );
-			TweenMax.to(clip.touch, .5, { scaleY:1, delay:1.6, ease:Back.easeOut } );
-			TweenMax.to(clip.rece, 1, { alpha:1, delay:2} );
-			TweenMax.to(clip.header, 2, { alpha:1, delay:3} );
-			TweenMax.to(clip.cgd, 2, { alpha:1, delay:3, onComplete:growShort} );
+			TweenMax.to(clip.rCup, .4, { scaleX:1, scaleY:1, ease:Back.easeOut } );
+			TweenMax.to(clip.perfectPick, .5, { alpha:1,  scaleX:1, scaleY:1, delay:.3, ease:Back.easeOut } );
+			TweenMax.to(clip.tline, .4, { scaleX:1, delay:1.2, ease:Back.easeOut } );
+			TweenMax.to(clip.bline, .4, { scaleX:1, delay:1.2, ease:Back.easeOut } );
+			TweenMax.to(clip.getReady, .4, { scaleY:1, delay:1.6, ease:Back.easeOut } );
+			TweenMax.to(clip.touch, .4, { scaleY:1, delay:1.6, ease:Back.easeOut } );
+			TweenMax.to(clip.rece, .5, { alpha:1, delay:2} );
+			TweenMax.to(clip.header, .5, { alpha:1, delay:3} );
+			TweenMax.to(clip.cgd, 1, { alpha:1, delay:3, onComplete:growShort} );
 			
 			clip.addEventListener(MouseEvent.MOUSE_DOWN, begin, false, 0, true);	
 			

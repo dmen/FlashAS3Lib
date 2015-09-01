@@ -24,7 +24,7 @@ package com.gmrmarketing.reeses.gameday
 		private var questionNumber:int;
 		
 		private var stitcher:Stitcher;
-		
+		private var tim:Timer;
 		
 		
 		public function Capture()
@@ -50,6 +50,19 @@ package com.gmrmarketing.reeses.gameday
 				myContainter.addChild(clip);
 			}			
 			
+			clip.waitForRece.alpha = 0;
+			
+			clip.receVid.y = 1100;
+			clip.userVid.y = 1100;
+			clip.userVid.timer.alpha = 0;
+			TweenMax.to(clip.receVid, .5, { y:256, ease:Back.easeOut } );
+			TweenMax.to(clip.userVid, .5, { y:325, delay:.1, ease:Back.easeOut, onComplete:initCams } );
+		}
+		
+		
+		private function initCams():void
+		{
+			//USER
 			cam = Camera.getCamera();
 			cam.setQuality(750000, 0);//bandwidth, quality
 			cam.setMode(640, 360, 30, false);//width, height, fps, favorArea
@@ -57,22 +70,30 @@ package com.gmrmarketing.reeses.gameday
 			
 			vidConnection = new NetConnection();
 			vidConnection.addEventListener(NetStatusEvent.NET_STATUS, statusHandler);	
-			vidConnection.connect("rtmp://localhost/reesesGameDay");	
+			vidConnection.connect("rtmp://localhost/reesesGameday");
 			
-			clip.waitForRece.alpha = 0;
-			clip.waitForRece.scaleX = clip.waitForRece.scaleY = 0;
+			clip.userVid.addChildAt(vid, 0);
+			vid.x = 20; 
+			vid.y = 20;
+			vid.attachCamera(cam);
 			
+			//RECE
 			receInterview = new Interview2();
 			receInterview.container = clip.receVid;
 			receInterview.show();
 			receInterview.addEventListener(Interview2.INTRO_COMPLETE, startQuestions);
 			receInterview.playIntro();
-			
-			clip.userVid.addChild(vid);
-			vid.x = 20; 
-			vid.y = 20;
-			vid.attachCamera(cam);
 		}
+		
+		
+		public function hide():void
+		{
+			if(clip.userVid.contains(vid)){
+				clip.userVid.removeChild(vid);
+			}
+			vid.attachCamera(null);
+		}
+		
 		
 		//callback for vidConnection object
 		private function statusHandler(e:NetStatusEvent):void
@@ -92,10 +113,19 @@ package com.gmrmarketing.reeses.gameday
 		private function startQuestions(e:Event):void
 		{
 			questionNumber = 0;
+			
+			//reset circle indicators
+			clip.waitForRece.q1.gotoAndStop(1);
+			clip.waitForRece.q2.gotoAndStop(1);
+			clip.waitForRece.q3.gotoAndStop(1);
+			clip.waitForRece.q4.gotoAndStop(1);
+			clip.waitForRece.q5.gotoAndStop(1);
+			
 			receInterview.removeEventListener(Interview2.INTRO_COMPLETE, startQuestions);			
 			receInterview.addEventListener(Interview2.OUTRO_COMPLETE, interviewComplete, false, 0, true);			
-			TweenMax.to(clip.waitForRece, 1, { alpha:1, scaleX:1, scaleY:1, ease:Back.easeOut, onComplete:nextQuestion } );
+			TweenMax.to(clip.waitForRece, 1, { alpha:1, onComplete:nextQuestion } );
 		}
+		
 		
 		/**
 		 * Rece asks a question
@@ -103,13 +133,22 @@ package com.gmrmarketing.reeses.gameday
 		private function nextQuestion():void
 		{
 			questionNumber++;
+			clip.userVid.redDot.gotoAndStop(1);//show gray dot
+			TweenMax.to(clip.userVid.timer, .4, { alpha: 0 } );
 			
 			TweenMax.to(clip.receVid, .5, { y:256, ease:Back.easeOut } );
 			TweenMax.to(clip.userVid, .5, { y:325, ease:Back.easeOut } );			
-			
 			TweenMax.to(clip.whiteArrow, .5, { scaleX:1, x:997 } );			
-			
-			TweenMax.to(clip.waitForRece, .5, { y:726, ease:Back.easeOut } );
+			TweenMax.to(clip.waitForRece, .5, { y:708, ease:Back.easeOut, onComplete:doNextQuestion } );
+		}		
+		
+		
+		private function doNextQuestion():void		
+		{	
+			//advance circle indicator
+			if(questionNumber <= 5){
+				clip.waitForRece["q" + questionNumber].gotoAndStop(2);
+			}
 			
 			receInterview.addEventListener(Interview2.QUESTION_COMPLETE, recordUser);
 			timeToRespond = receInterview.nextQuestion();
@@ -120,8 +159,17 @@ package com.gmrmarketing.reeses.gameday
 		{
 			TweenMax.to(clip.receVid, .5, { y:325, ease:Back.easeOut } );
 			TweenMax.to(clip.userVid, .5, { y:256, ease:Back.easeOut } );
-			TweenMax.to(clip.whiteArrow, .5, { scaleX:-1, x:907 } );
-			TweenMax.to(clip.waitForRece, .5, { y:795, ease:Back.easeOut } );
+			TweenMax.to(clip.whiteArrow, .5, { scaleX: -1, x:907 } );
+			clip.userVid.timer.theTime.text = timeToRespond.toString();
+			TweenMax.to(clip.userVid.timer, .4, { alpha:1 } );
+			TweenMax.to(clip.waitForRece, .5, { y:777, ease:Back.easeOut, onComplete:doRecordUser } );
+		}
+		
+		
+		private function doRecordUser():void
+		{
+			//show red dot
+			clip.userVid.redDot.gotoAndStop(2);			
 			
 			mic.setSilenceLevel(0);			
 			mic.rate = 44; //KHz
@@ -131,13 +179,25 @@ package com.gmrmarketing.reeses.gameday
 			
 			vidStream.publish("user" + questionNumber.toString(), "record"); //flv
 			
-			var tim:Timer = new Timer(1000 * timeToRespond, 1);
-			tim.addEventListener(TimerEvent.TIMER, stopRecording, false, 0, true);
+			tim = new Timer(1000, 0);
+			tim.addEventListener(TimerEvent.TIMER, updateTimer, false, 0, true);
 			tim.start();
 		}
 		
 		
-		private function stopRecording(e:TimerEvent):void
+		private function updateTimer(e:TimerEvent):void
+		{
+			timeToRespond--;
+			clip.userVid.timer.theTime.text = timeToRespond.toString();
+			if (timeToRespond <= 0) {
+				clip.userVid.timer.theTime.text = "0";
+				tim.stop();
+				stopRecording();
+			}			
+		}
+		
+		
+		private function stopRecording():void
 		{			
 			//clip.vid.attachCamera(null);
 			vidStream.attachCamera(null);
