@@ -330,7 +330,6 @@ package com.dmennenoh.keyboard
 			var i:int;
 			
 			if (enabled) {
-				
 				if (lastKey) {
 					if (lastKey.value == "Shift") {
 						lastKey.unHighlight();

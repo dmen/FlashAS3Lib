@@ -68,7 +68,18 @@ package com.gmrmarketing.reeses.gameday
 		
 		public function show():void
 		{
-			var questions:Array = [[BASE_PATH + "conferenceChampionship.flv",5], [BASE_PATH + "preGameTailgate.flv",5], [BASE_PATH + "beatingTheNumberOne.flv",5], [BASE_PATH + "afternoonGames.flv",5], [BASE_PATH + "underdogsOrFavorites.flv",5], [BASE_PATH + "modernJerseys.flv",5], [BASE_PATH + "studentSection.flv",5], [BASE_PATH + "pocketPassers.flv",5], [BASE_PATH + "speedOrPower.flv",5], [BASE_PATH + "unstoppableOffense.flv",5], [BASE_PATH + "piecesOrCups.flv",5]];
+			randQuestions();
+			
+			if (!myContainer.contains(vid)) {
+				myContainer.addChild(vid);
+				vid.x = 20;
+				vid.y = 20;
+			}
+		}
+		
+		public function randQuestions():void
+		{
+			var questions:Array = [[BASE_PATH + "conferenceChampionship.f4v",5], [BASE_PATH + "preGameTailgate.f4v",5], [BASE_PATH + "beatingTheNumberOne.f4v",5], [BASE_PATH + "afternoonGames.f4v",5], [BASE_PATH + "underdogsOrFavorites.f4v",5], [BASE_PATH + "modernJerseys.f4v",5], [BASE_PATH + "studentSection.f4v",5], [BASE_PATH + "pocketPassers.f4v",5], [BASE_PATH + "speedOrPower.f4v",5], [BASE_PATH + "unstoppableOffense.f4v",5], [BASE_PATH + "piecesOrCups.f4v",5]];
 			
 			playList = [];
 			
@@ -80,22 +91,22 @@ package com.gmrmarketing.reeses.gameday
 			for (var i:int = 0; i < playList.length; i++) {
 				fileList.push(playList[i][0]);
 			}
-			fileList.unshift(BASE_PATH + "intro.flv");
-			fileList.push(BASE_PATH + "outro.flv");
-			
-			if (!myContainer.contains(vid)) {
-				myContainer.addChild(vid);
-				vid.x = 20;
-				vid.y = 20;
-			}
+			fileList.unshift(BASE_PATH + "intro.f4v");
+			fileList.push(BASE_PATH + "outro.f4v");
 		}
-		
 		
 		public function playIntro():void
 		{
 			ns.addEventListener(NetStatusEvent.NET_STATUS, introStatus);
-			ns.play(BASE_PATH + "intro.flv");
+			ns.play(BASE_PATH + "intro.f4v");
 		}
+		
+		
+		public function stop():void
+		{
+			ns.play(null);
+		}
+		
 		
 		private function introStatus(e:NetStatusEvent):void 
 		{
@@ -150,7 +161,7 @@ package com.gmrmarketing.reeses.gameday
 				whiteFader.alpha = 1;
 				TweenMax.to(whiteFader, .5, { alpha:0, onComplete:removeWhiteFader } );
 				ns.addEventListener(NetStatusEvent.NET_STATUS, outroStatus);
-				ns.play(BASE_PATH + "outro.flv");
+				ns.play(BASE_PATH + "outro.f4v");
 				return -1;
 			}
 		}
