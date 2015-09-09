@@ -12,6 +12,7 @@ package com.gmrmarketing.reeses.gameday
 	{
 		public static const COMPLETE:String = "captureComplete";
 		public static const CANCEL:String = "captureCanceled";
+		public static const VID_READY:String = "videoReadyFromStitcher";
 		
 		private var clip:MovieClip;
 		private var myContainter:DisplayObjectContainer;
@@ -36,7 +37,7 @@ package com.gmrmarketing.reeses.gameday
 			vid.width = 640
 			vid.height = 360;
 			
-			stitcher = new Stitcher();
+			stitcher = new Stitcher();			
 			
 			tim = new Timer(1000, 0);
 			
@@ -75,7 +76,7 @@ package com.gmrmarketing.reeses.gameday
 			//USER
 			cam = Camera.getCamera();
 			cam.setQuality(750000, 0);//bandwidth, quality
-			cam.setMode(640, 360, 30, false);//width, height, fps, favorArea
+			cam.setMode(640, 360, 24, false);//width, height, fps, favorArea
 			
 			mic = Microphone.getMicrophone();
 			mic.setSilenceLevel(0);			
@@ -121,6 +122,18 @@ package com.gmrmarketing.reeses.gameday
 		}
 		
 		
+		public function stitchVideo():void
+		{
+			stitcher.addEventListener(Stitcher.COMPLETE, videoReady, false, 0, true);
+			stitcher.questions2 = receInterview.questions;
+		}
+		private function videoReady(e:Event):void
+		{
+			stitcher.removeEventListener(Stitcher.COMPLETE, videoReady);
+			dispatchEvent(new Event(VID_READY));
+		}
+		
+		
 		private function cancelPressed(e:MouseEvent):void
 		{
 			dispatchEvent(new Event(CANCEL));
@@ -135,8 +148,8 @@ package com.gmrmarketing.reeses.gameday
 				vidStream = new NetStream(vidConnection);
 				vidStream.client = { onMetaData:metaDataHandler, onCuePoint:cuePointHandler };			
 				
-				//vidStream.attachCamera(cam);
-				//vidStream.attachAudio(mic);	
+				vidStream.attachCamera(cam);
+				vidStream.attachAudio(mic);	
 			}
 		}
 		
@@ -206,9 +219,9 @@ package com.gmrmarketing.reeses.gameday
 			//show red dot
 			clip.userVid.redDot.gotoAndStop(2);								
 			
-			vidStream.attachCamera(cam);
-			vidStream.attachAudio(mic);	
-			vidStream.soundTransform.volume = .5;
+			//vidStream.attachCamera(cam);
+			//vidStream.attachAudio(mic);	
+			vidStream.soundTransform.volume = .7;
 			vidStream.publish("user" + questionNumber.toString(), "record"); //flv			
 			
 			tim.addEventListener(TimerEvent.TIMER, updateTimer, false, 0, true);
@@ -233,14 +246,10 @@ package com.gmrmarketing.reeses.gameday
 		{			
 			clip.userVid.redDot.gotoAndStop(1);//show gray dot
 			
-			vidStream.attachCamera(null);
-			vidStream.attachAudio(null);	
-			//vidStream.close();
+			//vidStream.attachCamera(null);
+			//vidStream.attachAudio(null);	
+			vidStream.close();
 			
-			
-			//vidStream.attachCamera(cam);
-			//vidStream.attachAudio(mic);	
-			//vidStream.close();
 			nextQuestion();
 		}
 		
@@ -252,7 +261,6 @@ package com.gmrmarketing.reeses.gameday
 		private function interviewComplete(e:Event):void
 		{
 			receInterview.removeEventListener(Interview2.OUTRO_COMPLETE, interviewComplete);			
-			stitcher.questions2 = receInterview.questions;
 			
 			//close the connection to FMS - fixes problem with 10 connection max
 			vidConnection.close();

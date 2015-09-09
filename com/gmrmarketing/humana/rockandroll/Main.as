@@ -117,7 +117,7 @@ package com.gmrmarketing.humana.rockandroll
 			}
 			
 			//see if there's a spot open for a military cheer
-			if (screenLocs.length > 0 && screenLocs.length < 6 && militaryCheers.length > 0) {
+			if ((screenLocs.length > 0) && (screenLocs.length < 6) && (militaryCheers.length > 0)) {
 				sl = screenLocs.shift();
 				
 				//fName, lName, messages, time, tenTime, viewingTime, messageTime

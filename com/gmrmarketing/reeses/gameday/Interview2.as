@@ -12,12 +12,12 @@ package com.gmrmarketing.reeses.gameday
 	import flash.net.*;
 	import flash.utils.ByteArray;
 	import com.greensock.TweenMax;
-	
+	import flash.filesystem.File;
 	
 	public class Interview2 extends EventDispatcher
 	{
-		//private const BASE_PATH:String = "recevideo/";
-		private const BASE_PATH:String = "c:/Users/dmennenoh/Desktop/reeses/receVideo/";
+		//private const basePath:String = "recevideo/";
+		private var basePath:String;
 		
 		public static const INTRO_COMPLETE:String = "introFinishedPlaying";
 		public static const QUESTION_COMPLETE:String = "questionFinishedPlaying";
@@ -34,6 +34,9 @@ package com.gmrmarketing.reeses.gameday
 		
 		public function Interview2()
 		{
+			//folder where rece videos are located
+			 basePath = File.applicationDirectory.resolvePath("receVideo").nativePath + "\\";
+			 
 			vid = new Video();
 			vid.width = 640;
 			vid.height = 360;
@@ -77,28 +80,32 @@ package com.gmrmarketing.reeses.gameday
 			}
 		}
 		
+		
 		public function randQuestions():void
 		{
-			var questions:Array = [[BASE_PATH + "conferenceChampionship.f4v",5], [BASE_PATH + "preGameTailgate.f4v",5], [BASE_PATH + "beatingTheNumberOne.f4v",5], [BASE_PATH + "afternoonGames.f4v",5], [BASE_PATH + "underdogsOrFavorites.f4v",5], [BASE_PATH + "modernJerseys.f4v",5], [BASE_PATH + "studentSection.f4v",5], [BASE_PATH + "pocketPassers.f4v",5], [BASE_PATH + "speedOrPower.f4v",5], [BASE_PATH + "unstoppableOffense.f4v",5], [BASE_PATH + "piecesOrCups.f4v",5]];
+			var questions:Array = [[basePath + "conferenceChampionship",5], [basePath + "preGameTailgate",5], [basePath + "beatingTheNumberOne",5], [basePath + "afternoonGames",5], [basePath + "underdogsOrFavorites",5], [basePath + "modernJerseys",5], [basePath + "studentSection",5], [basePath + "pocketPassers",5], [basePath + "speedOrPower",5], [basePath + "unstoppableOffense",5], [basePath + "piecesOrCups",5]];
 			
+			//this is for flash player - .mp4 for these
 			playList = [];
-			
-			while (playList.length < 5) {
-				playList.push(questions.splice(Math.floor(Math.random() * questions.length), 1)[0]);
-			}			
-			
 			fileList = [];
-			for (var i:int = 0; i < playList.length; i++) {
-				fileList.push(playList[i][0]);
-			}
-			fileList.unshift(BASE_PATH + "intro.f4v");
-			fileList.push(BASE_PATH + "outro.f4v");
+			while (playList.length < 5) {
+				var a:Array = questions.splice(Math.floor(Math.random() * questions.length), 1)[0];
+				var b:Array = a.concat();
+				a[0] += ".mp4";
+				b[0] += ".mov";
+				playList.push(a);
+				fileList.push(b[0]);
+			}		
+		
+			fileList.unshift(basePath + "intro.mov");
+			fileList.push(basePath + "outro.mov");
 		}
+		
 		
 		public function playIntro():void
 		{
 			ns.addEventListener(NetStatusEvent.NET_STATUS, introStatus);
-			ns.play(BASE_PATH + "intro.f4v");
+			ns.play(basePath + "intro.mp4");
 		}
 		
 		
@@ -161,7 +168,7 @@ package com.gmrmarketing.reeses.gameday
 				whiteFader.alpha = 1;
 				TweenMax.to(whiteFader, .5, { alpha:0, onComplete:removeWhiteFader } );
 				ns.addEventListener(NetStatusEvent.NET_STATUS, outroStatus);
-				ns.play(BASE_PATH + "outro.f4v");
+				ns.play(basePath + "outro.mp4");
 				return -1;
 			}
 		}

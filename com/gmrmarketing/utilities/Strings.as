@@ -181,48 +181,6 @@ package com.gmrmarketing.utilities
 			return s.split(" ").length;
 		}
 		
-		
-		/**
-		 * Returns a timestamp string like: 2015-06-08T15:43:07.544Z
-		 * @return String timestamp
-		 */
-		public static function hubbleTimestamp():String
-		{
-			var a:Date = new Date();
-			var yr:String = String(a.fullYear);
-			var m:String = String(a.month + 1);
-			if(m.length < 2){
-				m = "0" + m;
-			}
-			var d:String = String(a.date);
-			if(d.length < 2){
-				d = "0" + d;
-			}
-
-			var h:String = String(a.hours);
-			if(h.length < 2){
-				h = "0" + h;
-			}
-			var min:String = String(a.minutes);
-			if(min.length < 2){
-				min = "0" + min;
-			}
-			var sec:String = String(a.seconds);
-			if(sec.length < 2){
-				sec = "0" + sec;
-			}
-			var ms:String= String(a.milliseconds);
-			if(ms.length < 3){
-				if(ms.length < 2){
-					ms = "00" + ms;
-				}else{
-					ms = "0" + ms;
-				}
-			}
-			var ts:String = yr + "-" + m + "-" + d + "T" + h + ":" + min + ":" + sec + "." + ms + "Z";
-			
-			return ts;
-		}
 	}
 	
 }

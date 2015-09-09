@@ -5,6 +5,7 @@ package com.gmrmarketing.reeses.gameday
 	import flash.display.StageDisplayState;
 	import flash.display.StageScaleMode;
 	import flash.ui.Mouse;
+	import flash.filesystem.File;
 	
 	public class Main extends MovieClip
 	{
@@ -15,6 +16,7 @@ package com.gmrmarketing.reeses.gameday
 		private var review:Review;
 		private var email:Email;
 		private var thanks:Thanks;
+		private var queue:Queue;
 		
 		private var vidContainer:Sprite;
 		private var mainContainer:Sprite;
@@ -24,7 +26,7 @@ package com.gmrmarketing.reeses.gameday
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			//Mouse.hide();
+			Mouse.hide();
 
 			vidContainer = new Sprite();
 			mainContainer = new Sprite();
@@ -52,6 +54,8 @@ package com.gmrmarketing.reeses.gameday
 			thanks = new Thanks();
 			thanks.container = mainContainer;
 			
+			queue = new Queue();
+			
 			init();
 		}
 		
@@ -73,7 +77,7 @@ package com.gmrmarketing.reeses.gameday
 		{
 			intro.removeEventListener(Intro.BEGIN, showInstructions);
 			intro.hide();
-			//email.show();/*
+			//thanks.show();
 			instructions.addEventListener(Instructions.COMPLETE, showCapture, false, 0, true);
 			instructions.addEventListener(Instructions.CANCEL, init, false, 0, true);
 			instructions.show();
@@ -128,9 +132,17 @@ package com.gmrmarketing.reeses.gameday
 			email.removeEventListener(Email.COMPLETE, showThanks);
 			email.removeEventListener(Email.BACK, emailBack);
 			email.hide();
+			
 			captureComplete();
 		}
 		
+		
+		/**
+		 * called when user enters a valid email
+		 * Good to add video and email to the queue
+		 * 
+		 * @param	e
+		 */
 		private function showThanks(e:Event):void
 		{
 			email.hide(); 
@@ -138,17 +150,26 @@ package com.gmrmarketing.reeses.gameday
 			email.removeEventListener(Email.BACK, emailBack);
 			
 			thanks.show();
-			thanks.addEventListener(Thanks.COMPLETE, doReset, false, 0, true);
+			
+			capture.addEventListener(Capture.VID_READY, videoDoneProcessing);
+			capture.stitchVideo();
 		}
 		
 		
-		private function doReset(e:Event):void
-		{
-			thanks.removeEventListener(Thanks.COMPLETE, doReset);
+		/**
+		 * called once video has been processed by stitcher (ffmpeg)
+		 * @param	e
+		 */
+		private function videoDoneProcessing(e:Event):void
+		{		
+			capture.removeEventListener(Capture.VID_READY, videoDoneProcessing);
+			
+			queue.add( { video:File.applicationStorageDirectory.nativePath + "\\output.mp4", email:email.email } );
+			
 			thanks.hide();
 			intro.addEventListener(Intro.BEGIN, showInstructions, false, 0, true);
-			intro.show();
-		}
+			intro.show();			
+		}		
 		
 	}
 	

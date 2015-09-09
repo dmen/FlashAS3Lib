@@ -1,14 +1,7 @@
 /**
  * Used by Capture
  * 
- * Runs ffmpeg with NativeProcess
- * 
- * First converts the five user videos to quickTime's and copies
- * them to the applicationFolder
- * 
- * Then uses filter_complex to concatenate the twelve videos into an mp4
- * 
- * Dispathes COMPLETE event when finished - it output.mp4 is available in the applicationDirectory
+ * creates the ffmpeg command
  */
 
 package com.gmrmarketing.reeses.gameday
@@ -18,30 +11,58 @@ package com.gmrmarketing.reeses.gameday
 	import flash.desktop.NativeProcess;
     import flash.desktop.NativeProcessStartupInfo;
 	import flash.filesystem.File;
-	import com.gmrmarketing.utilities.Logger;
-	import com.gmrmarketing.utilities.LoggerAIR;
 	
 	public class Stitcher extends EventDispatcher
 	{
-		public static const COMPLETE:String = "videoComplete";
-		
 		private var questions:Array;
+		private var ffs:String;
 		private var process:NativeProcess ;
 		private var userPath:String;//videos from FMS
 		private var outputPath:String;//where to save compiled mp4
 		private var overlayPath:String;//path to overlay.png - part of install
-		private var log:Logger;
+		
 		
 		public function Stitcher()
-		{			
+		{
 			userPath = "c:/Program Files/Adobe/Flash Media Server 4.5/applications/reesesGameday/streams/_definst_/";
 			overlayPath = File.applicationDirectory.nativePath + "\\";
-			outputPath = File.applicationStorageDirectory.nativePath + "\\";
-			
-			log = Logger.getInstance();
-			log.logger = new LoggerAIR();
+			//outputPath = File.applicationStorageDirectory.nativePath + "\\";
+			outputPath = File.applicationDirectory.nativePath + "\\";			
 		}
 		
+		
+		public function get commandString():String
+		{
+			return ffs;
+		}
+		
+		
+		/*
+		public function set questions(q:Array):void
+		{			
+			ffs = "";			
+			
+			ffs += "ffmpeg -r 24 -i \"" + q.shift() + "\" -r 24 -i \"" + q.shift() + "\"";//intro q1
+			ffs += " -r 29.96 -i \"" + userPath + "user1.flv\"";
+			ffs += " -r 24 -i \"" + q.shift() + "\"";//q2
+			ffs += " -r 29.96 -i \"" + userPath + "user2.flv\"";
+			ffs += " -r 24 -i \"" + q.shift() + "\"";//q3
+			ffs += " -r 29.96 -i \"" + userPath + "user3.flv\"";
+			ffs += " -r 24 -i \"" + q.shift() + "\"";//q4
+			ffs += " -r 29.96 -i \"" + userPath + "user4.flv\"";
+			ffs += " -r 24 -i \"" + q.shift() + "\"";//q5
+			ffs += " -r 29.96 -i \"" + userPath + "user5.flv\"";
+			ffs += " -r 24 -i \"" + q.shift() + "\"";//outro
+			
+			//overlay
+			ffs += " -i \"" + overlayPath + "overlay.png" + "\"";
+			
+			ffs += " -filter_complex \"[0:0] [0:1] [1:0] [1:1] [2:0] [2:1] [3:0] [3:1] [4:0] [4:1] [5:0] [5:1] [6:0] [6:1]";
+			ffs += " [7:0] [7:1] [8:0] [8:1] [9:0] [9:1] [10:0] [10:1] [11:0] [11:1]";
+			ffs += " concat=n=12:v=1:a=1 [bg] [a]; [bg][12:v] overlay=0:0[v]\" -map \"[v]\" -map \"[a]\" -c:v libx264 -c:a aac -strict -2 -y ";
+			ffs += outputPath + "output.mp4";
+		}
+		*/
 		
 		/**
 		 * Called from Capture.interviewComplete()
@@ -62,15 +83,15 @@ package com.gmrmarketing.reeses.gameday
 			var args:Vector.<String> = new Vector.<String>();
 			
 			args.push('-y');
-			args.push('-r');		
-			args.push('24');
+			args.push('-r');
+			args.push('29.97');
 			args.push('-i');
-			args.push(userPath + "user1.flv");			
+			args.push(userPath + "user1.flv");
 			args.push('-vcodec');
-			args.push('libx264');
+			args.push('png');
 			args.push('-acodec');
-			args.push('copy');//libvo_aacenc
-			args.push(outputPath + "user1.mov");//applicationStorageDirectory
+			args.push('copy');
+			args.push(outputPath + "user1.mov");
 			
 			nativeProcessStartupInfo.arguments = args;			
 			
@@ -97,12 +118,12 @@ package com.gmrmarketing.reeses.gameday
 			var args:Vector.<String> = new Vector.<String>();
 			
 			args.push('-y');
-			args.push('-r');		
-			args.push('24');
+			args.push('-r');
+			args.push('29.97');
 			args.push('-i');
-			args.push(userPath + "user2.flv");			
+			args.push(userPath + "user2.flv");
 			args.push('-vcodec');
-			args.push('libx264');
+			args.push('png');
 			args.push('-acodec');
 			args.push('copy');
 			args.push(outputPath + "user2.mov");
@@ -113,7 +134,7 @@ package com.gmrmarketing.reeses.gameday
 			process.addEventListener(NativeProcessExitEvent.EXIT, user2Complete);
     
 			//start the process
-			process.start(nativeProcessStartupInfo);
+			process.start(nativeProcessStartupInfo);			
 		}
 		
 		private function user2Complete(e:NativeProcessExitEvent):void
@@ -129,12 +150,12 @@ package com.gmrmarketing.reeses.gameday
 			var args:Vector.<String> = new Vector.<String>();
 			
 			args.push('-y');
-			args.push('-r');		
-			args.push('24');
+			args.push('-r');
+			args.push('29.97');
 			args.push('-i');
 			args.push(userPath + "user3.flv");
 			args.push('-vcodec');
-			args.push('libx264');
+			args.push('png');
 			args.push('-acodec');
 			args.push('copy');
 			args.push(outputPath + "user3.mov");
@@ -161,12 +182,12 @@ package com.gmrmarketing.reeses.gameday
 			var args:Vector.<String> = new Vector.<String>();
 			
 			args.push('-y');
-			args.push('-r');		
-			args.push('24');
+			args.push('-r');
+			args.push('29.97');
 			args.push('-i');
 			args.push(userPath + "user4.flv");
 			args.push('-vcodec');
-			args.push('libx264');
+			args.push('png');
 			args.push('-acodec');
 			args.push('copy');
 			args.push(outputPath + "user4.mov");
@@ -193,12 +214,12 @@ package com.gmrmarketing.reeses.gameday
 			var args:Vector.<String> = new Vector.<String>();
 			
 			args.push('-y');
-			args.push('-r');		
-			args.push('24');
+			args.push('-r');
+			args.push('29.97');
 			args.push('-i');
 			args.push(userPath + "user5.flv");
 			args.push('-vcodec');
-			args.push('libx264');
+			args.push('png');
 			args.push('-acodec');
 			args.push('copy');
 			args.push(outputPath + "user5.mov");
@@ -223,9 +244,6 @@ package com.gmrmarketing.reeses.gameday
 			nativeProcessStartupInfo.executable = ffm;		
 			
 			var args:Vector.<String> = new Vector.<String>();			
-			
-			//always overwrite
-			args.push('-y');
 			
 			//intro
 			args.push('-i');
@@ -268,7 +286,8 @@ package com.gmrmarketing.reeses.gameday
 			args.push(overlayPath + "overlay.png");
 			
 			args.push('-filter_complex');
-			args.push('[0:0][0:1][1:0][1:1][2:0][2:1][3:0][3:1][4:0][4:1][5:0][5:1][6:0][6:1][7:0][7:1][8:0][8:1][9:0][9:1][10:0][10:1][11:0][11:1]concat=n=12:v=1:a=1[bg][a];[bg][12:v]overlay=0:0[v]');
+			args.push('[0:0][0:1][1:0][1:1][2:0][2:1][3:0][3:1][4:0][4:1][5:0][5:1][6:0][6:1][7:0][7:1][8:0][8:1][9:0][9:1][10:0][10:1][11:0][11:1]concat=n=12:v=1:a=1[bg][a];');
+			args.push('[bg][12:v]overlay=0:0[v]');
 			
 			args.push('-map');
 			args.push('[v]');
@@ -283,7 +302,9 @@ package com.gmrmarketing.reeses.gameday
 			args.push('aac');
 			
 			args.push('-strict');
-			args.push('-2');			
+			args.push('-2');
+			
+			args.push('-y');
 			
 			args.push(outputPath + "output.mp4");
 			
@@ -301,14 +322,13 @@ package com.gmrmarketing.reeses.gameday
 		{
 			// read the data from the error channel bytearray to string
 			var s:String = process.standardError.readUTFBytes(process.standardError.bytesAvailable);
-			//log.log(s);
+			trace(s);
 		}
 		
 		
-		//listened to by capture.stitchVideo()
 		private function onExit(e:NativeProcessExitEvent):void 
 		{
-			dispatchEvent(new Event(COMPLETE));
+			trace("Conversion complete.");
 		}
 	}
 	

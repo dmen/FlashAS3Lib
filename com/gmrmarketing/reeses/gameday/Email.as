@@ -58,6 +58,8 @@ package com.gmrmarketing.reeses.gameday
 			clip.mainText.alpha = 0;
 			clip.checkText.alpha = 0;
 			
+			clip.pubRelease.y = 1080;
+			
 			TweenMax.to(clip.whiteBox, .5, { scaleX:1, ease:Back.easeOut } );
 			TweenMax.to(clip.check1, .5, { scaleX:1, scaleY:1, delay:.2, ease:Back.easeOut } );
 			TweenMax.to(clip.check2, .5, { scaleX:1, scaleY:1, delay:.3, ease:Back.easeOut } );
@@ -69,6 +71,7 @@ package com.gmrmarketing.reeses.gameday
 			clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, nextPressed, false, 0, true);
 			clip.btnCheck1.addEventListener(MouseEvent.MOUSE_DOWN, toggleCheck1, false, 0, true);
 			clip.btnCheck2.addEventListener(MouseEvent.MOUSE_DOWN, toggleCheck2, false, 0, true);
+			clip.btnPublicity.addEventListener(MouseEvent.MOUSE_DOWN, showPublicity, false, 0, true);
 			
 			kbd.setFocusFields([[clip.email.theText, 40]]);
 			kbd.x = 225;
@@ -84,12 +87,40 @@ package com.gmrmarketing.reeses.gameday
 			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, nextPressed);
 			clip.btnCheck1.removeEventListener(MouseEvent.MOUSE_DOWN, toggleCheck1);
 			clip.btnCheck2.removeEventListener(MouseEvent.MOUSE_DOWN, toggleCheck2);
+			clip.btnPublicity.removeEventListener(MouseEvent.MOUSE_DOWN, showPublicity);
 			
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
 				myContainer.removeChild(kbd);
 			}
 			kbd.removeEventListener(KeyBoard.SUBMIT, submitPressed);
+		}
+		
+		
+		private function showPublicity(e:MouseEvent):void
+		{
+			clip.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, backPressed);
+			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, nextPressed);
+			kbd.visible = false;
+			clip.pubRelease.alpha = 0;
+			clip.pubRelease.y = 258;
+			clip.pubRelease.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, hidePublicity, false, 0, true);
+			TweenMax.to(clip.pubRelease, .5, { alpha:1, y:208, ease:Back.easeOut } );
+		}
+		
+		
+		private function hidePublicity(e:MouseEvent):void
+		{
+			clip.pubRelease.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, hidePublicity);
+			TweenMax.to(clip.pubRelease, .3, { alpha:0, onComplete:killPublicity } );
+		}
+		
+		private function killPublicity():void
+		{
+			clip.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, backPressed, false, 0, true);
+			clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, nextPressed, false, 0, true);
+			kbd.visible = true;
+			clip.pubRelease.y = 1080;
 		}
 		
 		
@@ -100,7 +131,7 @@ package com.gmrmarketing.reeses.gameday
 		
 		
 		private function backPressed(e:MouseEvent):void
-		{
+		{			
 			dispatchEvent(new Event(BACK));
 		}
 		
@@ -126,11 +157,10 @@ package com.gmrmarketing.reeses.gameday
 		
 		private function submitPressed(e:Event = null):void
 		{
-			if (Validator.isValidEmail(clip.email.theText.text)) {
-				
-				if (clip.check.currentFrame == 1) {
-					doError("You must accept the checkbox");
-				}else{				
+			if (Validator.isValidEmail(clip.email.theText.text)) {				
+				if (clip.check1.currentFrame == 1 || clip.check2.currentFrame == 1) {
+					doError("You must check both check boxes.");				
+				}else{
 					dispatchEvent(new Event(COMPLETE));
 				}
 			}else {

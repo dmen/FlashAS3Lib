@@ -35,9 +35,9 @@ package  com.gmrmarketing.reeses.gameday
 			clip.s2.scaleX = clip.s2.scaleY = 0;
 			clip.s3.scaleX = clip.s3.scaleY = 0;
 			clip.title.alpha = 0;//main title after perfect pick header
-			clip.title1.alpha = 0;
-			clip.title2.alpha = 0;
-			clip.title3.alpha = 0;
+			clip.title1.scaleX = clip.title1.scaleY = 0;
+			clip.title2.scaleX = clip.title2.scaleY = 0;
+			clip.title3.scaleX = clip.title3.scaleY = 0;
 			clip.sub1.alpha = 0;
 			clip.sub2.alpha = 0;
 			clip.sub3.alpha = 0;
@@ -46,15 +46,15 @@ package  com.gmrmarketing.reeses.gameday
 			TweenMax.to(clip.s2, .4, { scaleX:1, scaleY:1, delay:.1, ease:Back.easeOut } );
 			TweenMax.to(clip.s3, .4, { scaleX:1, scaleY:1, delay:.2, ease:Back.easeOut } );
 			
-			TweenMax.to(clip.title1, .4, { alpha:1, delay:.2 } );
-			TweenMax.to(clip.title2, .4, { alpha:1, delay:.3 } );
-			TweenMax.to(clip.title3, .4, { alpha:1, delay:.4 } );
+			TweenMax.to(clip.title1, .4, { scaleX:1, scaleY:1, delay:.3 } );
+			TweenMax.to(clip.title2, .4, { scaleX:1, scaleY:1, delay:.4 } );
+			TweenMax.to(clip.title3, .4, { scaleX:1, scaleY:1, delay:.5 } );
 			
-			TweenMax.to(clip.sub1, .4, { alpha:1, delay:.3 } );
-			TweenMax.to(clip.sub2, .4, { alpha:1, delay:.4 } );
-			TweenMax.to(clip.sub3, .4, { alpha:1, delay:.5 } );
+			TweenMax.to(clip.sub1, .4, { alpha:1, delay:.6 } );
+			TweenMax.to(clip.sub2, .4, { alpha:1, delay:.7 } );
+			TweenMax.to(clip.sub3, .4, { alpha:1, delay:.8 } );
 			
-			TweenMax.to(clip.title, .5, { alpha:1, delay:.7 } );
+			TweenMax.to(clip.title, .5, { alpha:1, delay:.8 } );
 			
 			clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, nextClicked, false, 0, true);
 			clip.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, backClicked, false, 0, true);

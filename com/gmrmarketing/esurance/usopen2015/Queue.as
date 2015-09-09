@@ -15,7 +15,7 @@ package  com.gmrmarketing.esurance.usopen2015
 	
 	public class Queue extends EventDispatcher  
 	{
-		private const DATA_FILE_NAME:String = "uso2015Queued.csv"; //current users / not yet uploaded
+		private const DATA_FILE_NAME:String = "uso2015Queued.csv"; //users not yet uploaded
 		
 		private var fileFolder:File;
 		private var users:Array;//current queue

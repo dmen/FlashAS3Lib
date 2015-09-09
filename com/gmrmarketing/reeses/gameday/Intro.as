@@ -32,7 +32,6 @@ package com.gmrmarketing.reeses.gameday
 			}
 			
 			clip.rece.alpha = 0;
-			clip.header.alpha = 0;
 			clip.cgd.alpha = 0;
 			clip.touch.scaleY = 0;
 			clip.getReady.scaleY = 0;
@@ -48,23 +47,25 @@ package com.gmrmarketing.reeses.gameday
 			TweenMax.to(clip.bline, .4, { scaleX:1, delay:1.2, ease:Back.easeOut } );
 			TweenMax.to(clip.getReady, .4, { scaleY:1, delay:1.6, ease:Back.easeOut } );
 			TweenMax.to(clip.touch, .4, { scaleY:1, delay:1.6, ease:Back.easeOut } );
-			TweenMax.to(clip.rece, .5, { alpha:1, delay:2} );
-			TweenMax.to(clip.header, .5, { alpha:1, delay:3} );
+			TweenMax.to(clip.rece, .5, { alpha:1, delay:2} );			
 			TweenMax.to(clip.cgd, 1, { alpha:1, delay:3, onComplete:growShort} );
 			
 			clip.addEventListener(MouseEvent.MOUSE_DOWN, begin, false, 0, true);	
 			
 		}
 		
+		
 		private function growShort():void
 		{
 			TweenMax.to(clip.touch, 1, { scaleY:.8, onComplete:growTall } );
 		}
 		
+		
 		private function growTall():void
 		{
 			TweenMax.to(clip.touch, 1, { scaleY:1, onComplete:growShort } );
 		}
+		
 		
 		public function hide():void
 		{
