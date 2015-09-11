@@ -6,8 +6,6 @@ package com.gmrmarketing.reeses.gameday
 	import flash.events.*;	
 	import flash.utils.Timer;
 	import com.gmrmarketing.reeses.gameday.WebService;
-	import com.gmrmarketing.utilities.Utility;
-	import com.gmrmarketing.utilities.GUID;
 	import com.gmrmarketing.utilities.Logger;
 	import com.gmrmarketing.utilities.LoggerAIR;
 	
@@ -40,32 +38,16 @@ package com.gmrmarketing.reeses.gameday
 		 * Called from Main.videoDoneProcessing()
 		 * Adds a user data object to the csv file
 		 * Called from Main
-		 * @param data Object with email,video keys
+		 * @param data Object with email, video, guid, timestamp keys
 		 * video is just a string path to the video file
-		 * Adds a timestamp key, and guid key
+		 * guid is the file name - minus the .mp4 extension
 		 */
 		public function add(data:Object):void
-		{		
-			data.timestamp = Utility.hubbleTimeStamp();
+		{
+			log.log("queue.add: " + data.video);			
+			
 			data.videoError = false; //set to true if videoPostError is called
-			
-			var f:File = new File();
-			f.nativePath = data.video;//output.mp4 in applicationStorageDirectory
-			
-			log.log("queue.add: " + data.video);
-			
-			var n:String = GUID.create();
-			//can't write to applicationDirectory
-			var t:File = File.applicationStorageDirectory.resolvePath(n + ".mp4");
-			data.video = t.nativePath;//new file path/name with GUID
-			data.guid = n;
-			log.log("queue.add: " + n + " -- " + data.video);
-			try{
-				f.moveTo(t);
-				log.log("move succeeded");
-			}catch (e:Error) {
-				log.log(e.message);
-			}
+			//used by WebService - if this is true then the form data won't post again - just the video
 			
 			users.push(data);//add to queue
 			rewriteQueue();

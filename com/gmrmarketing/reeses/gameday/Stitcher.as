@@ -31,6 +31,7 @@ package com.gmrmarketing.reeses.gameday
 		private var outputPath:String;//where to save compiled mp4
 		private var overlayPath:String;//path to overlay.png - part of install
 		private var log:Logger;
+		private var outputFileName:String;
 		
 		public function Stitcher()
 		{			
@@ -44,12 +45,14 @@ package com.gmrmarketing.reeses.gameday
 		
 		
 		/**
-		 * Called from Capture.interviewComplete()
+		 * Called from Capture.stitchVideo()
 		 * questions array is intro, five questions, outro
+		 * outName is output file name with extension
 		 */
-		public function set questions2(q:Array):void
+		public function questions2(q:Array, outName:String):void
 		{
 			questions = q;
+			outputFileName = outName;//used in user5Complete
 			
 			process = new NativeProcess();
 			var nativeProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo();
@@ -285,7 +288,7 @@ package com.gmrmarketing.reeses.gameday
 			args.push('-strict');
 			args.push('-2');			
 			
-			args.push(outputPath + "output.mp4");
+			args.push(outputPath + outputFileName);
 			
 			nativeProcessStartupInfo.arguments = args;	
 

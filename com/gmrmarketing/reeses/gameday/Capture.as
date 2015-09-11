@@ -29,6 +29,7 @@ package com.gmrmarketing.reeses.gameday
 		
 		private var stitcher:Stitcher;
 		private var tim:Timer;
+		private var outputFileName:String;
 		
 		
 		public function Capture()
@@ -122,11 +123,18 @@ package com.gmrmarketing.reeses.gameday
 		}
 		
 		
-		public function stitchVideo():void
+		public function stitchVideo(guid:String):void
 		{
+			outputFileName = guid + ".mp4";
 			stitcher.addEventListener(Stitcher.COMPLETE, videoReady, false, 0, true);
-			stitcher.questions2 = receInterview.questions;
+			stitcher.questions2(receInterview.questions, outputFileName);
 		}
+		//called from Main.videoDoneProcessing()
+		public function get fileName():String
+		{
+			return outputFileName;
+		}
+		
 		private function videoReady(e:Event):void
 		{
 			stitcher.removeEventListener(Stitcher.COMPLETE, videoReady);

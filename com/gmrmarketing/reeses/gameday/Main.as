@@ -6,6 +6,9 @@ package com.gmrmarketing.reeses.gameday
 	import flash.display.StageScaleMode;
 	import flash.ui.Mouse;
 	import flash.filesystem.File;
+	import com.gmrmarketing.utilities.GUID;	
+	import com.gmrmarketing.utilities.Utility;
+	
 	
 	public class Main extends MovieClip
 	{
@@ -20,13 +23,14 @@ package com.gmrmarketing.reeses.gameday
 		
 		private var vidContainer:Sprite;
 		private var mainContainer:Sprite;
+		private var aGUID:String;
 		
 		
 		public function Main()
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			Mouse.hide();
+			//Mouse.hide();
 
 			vidContainer = new Sprite();
 			mainContainer = new Sprite();
@@ -151,8 +155,9 @@ package com.gmrmarketing.reeses.gameday
 			
 			thanks.show();
 			
+			aGUID = GUID.create();
 			capture.addEventListener(Capture.VID_READY, videoDoneProcessing);
-			capture.stitchVideo();
+			capture.stitchVideo(aGUID);
 		}
 		
 		
@@ -164,7 +169,7 @@ package com.gmrmarketing.reeses.gameday
 		{		
 			capture.removeEventListener(Capture.VID_READY, videoDoneProcessing);
 			
-			queue.add( { video:File.applicationStorageDirectory.nativePath + "\\output.mp4", email:email.email } );
+			queue.add( { video:File.applicationStorageDirectory.nativePath + "\\" + capture.fileName, email:email.email, guid:aGUID, timestamp:Utility.hubbleTimeStamp() } );
 			
 			thanks.hide();
 			intro.addEventListener(Intro.BEGIN, showInstructions, false, 0, true);

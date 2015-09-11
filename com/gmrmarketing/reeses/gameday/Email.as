@@ -49,6 +49,7 @@ package com.gmrmarketing.reeses.gameday
 			clip.error.theText.text = "";
 			clip.error.visible = false;
 			clip.email.visible = true;
+			clip.reesesRight.gotoAndStop(1);
 			
 			clip.whiteBox.scaleX = 0;
 			clip.check1.scaleX = clip.check1.scaleY = 0;
@@ -102,6 +103,7 @@ package com.gmrmarketing.reeses.gameday
 			clip.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, backPressed);
 			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, nextPressed);
 			kbd.visible = false;
+			clip.reesesRight.gotoAndStop(2);//unhighlited arrow
 			clip.pubRelease.alpha = 0;
 			clip.pubRelease.y = 258;
 			clip.pubRelease.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, hidePublicity, false, 0, true);
@@ -120,6 +122,7 @@ package com.gmrmarketing.reeses.gameday
 			clip.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, backPressed, false, 0, true);
 			clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, nextPressed, false, 0, true);
 			kbd.visible = true;
+			clip.reesesRight.gotoAndStop(1);
 			clip.pubRelease.y = 1080;
 		}
 		

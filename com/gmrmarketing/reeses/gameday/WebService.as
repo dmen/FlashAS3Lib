@@ -98,14 +98,21 @@ package com.gmrmarketing.reeses.gameday
 		
 		private function doneUploading(e:Event):void
 		{
-			//delete video
-			var f:File = File.applicationStorageDirectory.resolvePath(upload.guid + ".mp4");
-			try {
-				log.log("WebService.doneUploading - delete video");
-				f.deleteFile();
-			}catch (e:Error) {log.log("WebService.doneUploading - delete video failed" + e.message);}
-			
-			dispatchEvent(new Event(USER_COMPLETE));
+			if(e.target.data == "Success=true"){
+				//delete video
+				var f:File = File.applicationStorageDirectory.resolvePath(upload.guid + ".mp4");
+				try {
+					log.log("WebService.doneUploading - delete video");
+					f.deleteFile();
+				}catch (e:Error) {log.log("WebService.doneUploading - delete video failed" + e.message);}
+				
+				dispatchEvent(new Event(USER_COMPLETE));
+				
+			}else {
+				
+				dispatchEvent(new Event(VIDEO_ERROR));
+				
+			}
 		}
 		
 		

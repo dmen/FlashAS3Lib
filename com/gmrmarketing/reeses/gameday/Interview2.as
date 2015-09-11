@@ -16,7 +16,6 @@ package com.gmrmarketing.reeses.gameday
 	
 	public class Interview2 extends EventDispatcher
 	{
-		//private const basePath:String = "recevideo/";
 		private var basePath:String;
 		
 		public static const INTRO_COMPLETE:String = "introFinishedPlaying";
@@ -116,38 +115,26 @@ package com.gmrmarketing.reeses.gameday
 		
 		
 		private function introStatus(e:NetStatusEvent):void 
-		{
-			var code:String = e.info.code;
-			//trace("introStatus",code);
-			switch(code) {				
-				case "NetStream.Play.Stop":
-					ns.removeEventListener(NetStatusEvent.NET_STATUS, introStatus);
-					dispatchEvent(new Event(INTRO_COMPLETE));
-					break;
+		{			
+			if(e.info.code == "NetStream.Play.Stop"){
+				ns.removeEventListener(NetStatusEvent.NET_STATUS, introStatus);
+				dispatchEvent(new Event(INTRO_COMPLETE));
 			}
 		}		
 		
 		private function questionStatus(e:NetStatusEvent):void 
 		{
-			var code:String = e.info.code;
-			//trace("questionStatus",code);
-			switch(code) {				
-				case "NetStream.Play.Stop":
-					ns.removeEventListener(NetStatusEvent.NET_STATUS, questionStatus);
-					dispatchEvent(new Event(QUESTION_COMPLETE));
-					break;
+			if(e.info.code == "NetStream.Play.Stop"){
+				ns.removeEventListener(NetStatusEvent.NET_STATUS, questionStatus);
+				dispatchEvent(new Event(QUESTION_COMPLETE));			
 			}
 		}		
 		
 		private function outroStatus(e:NetStatusEvent):void 
 		{
-			var code:String = e.info.code;
-			//trace("outroStatus",code);
-			switch(code) {				
-				case "NetStream.Play.Stop":
-					ns.removeEventListener(NetStatusEvent.NET_STATUS, questionStatus);
-					dispatchEvent(new Event(OUTRO_COMPLETE));
-					break;
+			if(e.info.code == "NetStream.Play.Stop"){
+				ns.removeEventListener(NetStatusEvent.NET_STATUS, questionStatus);
+				dispatchEvent(new Event(OUTRO_COMPLETE));
 			}
 		}	
 
