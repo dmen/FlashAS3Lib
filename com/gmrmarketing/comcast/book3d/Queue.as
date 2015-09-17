@@ -15,16 +15,17 @@ package  com.gmrmarketing.comcast.book3d
 	public class Queue extends EventDispatcher  
 	{
 		private const DATA_FILE_NAME:String = "comcastShellQueued.csv"; //current users / not yet uploaded
-		private const SAVED_FILE_NAME:String = "comcastShellSaved.csv"; //users successfully uploaded
 		
 		private var fileFolder:File;
 		private var users:Array;//current queue		
 		
 		private var curUpload:Object; //currently uploading user object - users[0] - set in uploadNext()	
+		private var isBusy:Boolean;
 		
 		
 		public function Queue()
 		{
+			isBusy = false;
 			users = getAllUsers();//populate users array from disk file			
 			uploadNext();
 		}
@@ -58,7 +59,9 @@ package  com.gmrmarketing.comcast.book3d
 		 */
 		private function uploadNext():void
 		{
-			if (users.length > 0) {
+			if (users.length > 0  && !isBusy) {
+				
+				isBusy = true;
 				
 				curUpload = users.shift();
 				
@@ -83,21 +86,35 @@ package  com.gmrmarketing.comcast.book3d
 		
 		private function dataError(e:IOErrorEvent):void
 		{
+			isBusy = false;
+			
 			users.push(curUpload);
 			rewriteQueue();
 			users = getAllUsers();
 			
-			uploadNext();
+			delayedUpload();
 		}
 		
 		
 		private function dataPosted(e:Event):void
-		{
-			writeSavedUser(curUpload); //keep saved users in sep file
+		{		
+			isBusy = false;
 			
 			rewriteQueue();//writes the users array to disk - with curUpload object now removed
 			users = getAllUsers();//repopulate users array from file
 			
+			delayedUpload();
+		}
+		
+		
+		private function delayedUpload():void
+		{
+			var t:Timer = new Timer(5000, 1);
+			t.addEventListener(TimerEvent.TIMER, callUpload, false, 0, true);
+			t.start();
+		}
+		private function callUpload(e:TimerEvent):void
+		{
 			uploadNext();
 		}
 		
@@ -135,28 +152,6 @@ package  com.gmrmarketing.comcast.book3d
 			try{
 				//var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
 				var file:File = File.documentsDirectory.resolvePath( DATA_FILE_NAME );
-				var stream:FileStream = new FileStream();
-				stream.open( file, FileMode.APPEND );
-				stream.writeObject(obj);
-				stream.close();
-				file = null;
-				stream = null;
-			}catch (e:Error) {
-			}			
-		}
-		
-		
-		/**
-		 * Appends a single user object to the saved data file
-		 * Saved Data File contains all users that have been sent to the server
-		 * called from uploadComplete()
-		 * @param	obj
-		 */
-		private function writeSavedUser(obj:Object):void
-		{			
-			try{
-				//var file:File = File.applicationStorageDirectory.resolvePath( SAVED_FILE_NAME );
-				var file:File = File.documentsDirectory.resolvePath( SAVED_FILE_NAME );
 				var stream:FileStream = new FileStream();
 				stream.open( file, FileMode.APPEND );
 				stream.writeObject(obj);

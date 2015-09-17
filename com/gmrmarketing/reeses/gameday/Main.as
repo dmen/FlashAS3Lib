@@ -2,13 +2,14 @@ package com.gmrmarketing.reeses.gameday
 {
 	import flash.display.*;
 	import flash.events.*;
-	import flash.display.StageDisplayState;
-	import flash.display.StageScaleMode;
 	import flash.ui.Mouse;
+	import flash.desktop.NativeApplication;
 	import flash.filesystem.File;
 	import com.gmrmarketing.utilities.GUID;	
 	import com.gmrmarketing.utilities.Utility;
-	
+	import com.gmrmarketing.utilities.CornerQuit;	
+	import com.gmrmarketing.utilities.Logger;
+	import com.gmrmarketing.utilities.LoggerAIR;	
 	
 	public class Main extends MovieClip
 	{
@@ -23,20 +24,30 @@ package com.gmrmarketing.reeses.gameday
 		
 		private var vidContainer:Sprite;
 		private var mainContainer:Sprite;
+		private var cornerContainer:Sprite;
+		private var cq:CornerQuit;
 		private var aGUID:String;
+		private var log:Logger;
 		
 		
 		public function Main()
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			//Mouse.hide();
+			Mouse.hide();
+			
+			log = Logger.getInstance();
+			log.logger = new LoggerAIR();
+			log.truncate();//limt to 2000 entries
+			log.log(Utility.timeStamp + " | Application Start");
 
 			vidContainer = new Sprite();
 			mainContainer = new Sprite();
+			cornerContainer = new Sprite();
 			
 			addChild(vidContainer);
 			addChild(mainContainer);
+			addChild(cornerContainer);
 			
 			vb = new VideoBackground(vidContainer);
 			
@@ -60,6 +71,10 @@ package com.gmrmarketing.reeses.gameday
 			
 			queue = new Queue();
 			
+			cq = new CornerQuit();
+			cq.init(cornerContainer, "ll");
+			cq.addEventListener(CornerQuit.CORNER_QUIT, closeApp);
+			
 			init();
 		}
 		
@@ -81,7 +96,7 @@ package com.gmrmarketing.reeses.gameday
 		{
 			intro.removeEventListener(Intro.BEGIN, showInstructions);
 			intro.hide();
-			//thanks.show();
+			
 			instructions.addEventListener(Instructions.COMPLETE, showCapture, false, 0, true);
 			instructions.addEventListener(Instructions.CANCEL, init, false, 0, true);
 			instructions.show();
@@ -117,6 +132,7 @@ package com.gmrmarketing.reeses.gameday
 			review.hide();
 			review.removeEventListener(Review.CANCELED, reRecord);
 			review.removeEventListener(Review.OKED, videoGood);
+			
 			showCapture();
 		}
 		
@@ -131,6 +147,8 @@ package com.gmrmarketing.reeses.gameday
 			email.addEventListener(Email.BACK, emailBack, false, 0, true);
 			email.addEventListener(Email.COMPLETE, showThanks, false, 0, true);
 		}
+		
+		
 		private function emailBack(e:Event):void
 		{
 			email.removeEventListener(Email.COMPLETE, showThanks);
@@ -166,15 +184,22 @@ package com.gmrmarketing.reeses.gameday
 		 * @param	e
 		 */
 		private function videoDoneProcessing(e:Event):void
-		{		
+		{			
 			capture.removeEventListener(Capture.VID_READY, videoDoneProcessing);
 			
-			queue.add( { video:File.applicationStorageDirectory.nativePath + "\\" + capture.fileName, email:email.email, guid:aGUID, timestamp:Utility.hubbleTimeStamp() } );
+			queue.add( { video:File.applicationStorageDirectory.nativePath + "\\" + capture.fileName, email:email.email, guid:aGUID, timestamp:Utility.hubbleTimeStamp } );
 			
 			thanks.hide();
 			intro.addEventListener(Intro.BEGIN, showInstructions, false, 0, true);
 			intro.show();			
-		}		
+		}
+		
+		
+		private function closeApp(e:Event):void
+		{
+			log.log(Utility.timeStamp + " | Application exit 4ct");
+			NativeApplication.nativeApplication.exit();
+		}
 		
 	}
 	

@@ -6,6 +6,7 @@ package com.gmrmarketing.reeses.gameday
 	import flash.net.*;	
 	import com.gmrmarketing.utilities.Logger;
 	import com.gmrmarketing.utilities.LoggerAIR;
+	import com.gmrmarketing.utilities.Utility;
 	
 	
 	public class WebService extends EventDispatcher
@@ -23,9 +24,13 @@ package com.gmrmarketing.reeses.gameday
 		
 		private var log:Logger;
 		
+		private var isBusy:Boolean;		
+		
 		
 		public function WebService()
 		{
+			isBusy = false;
+			
 			log = Logger.getInstance();
 			log.logger = new LoggerAIR();
 			
@@ -33,12 +38,21 @@ package com.gmrmarketing.reeses.gameday
 		}
 		
 		
+		public function get busy():Boolean
+		{
+			return isBusy;			
+		}
+		
+		
 		public function send(o:Object):void
 		{
+			isBusy = true;
+			
 			upload = o;
 			
 			if (upload.videoError) {
 				
+				log.log(Utility.timeStamp + " | WebService.send() - upload.videoError = true");
 				dataPosted();
 				
 			}else{
@@ -63,6 +77,7 @@ package com.gmrmarketing.reeses.gameday
 		
 		private function dataError(e:IOErrorEvent):void
 		{
+			isBusy = false;
 			formLoader.removeEventListener(IOErrorEvent.IO_ERROR, dataError);
 			formLoader.removeEventListener(Event.COMPLETE, dataPosted);
 			dispatchEvent(new Event(DATA_ERROR));
@@ -75,36 +90,42 @@ package com.gmrmarketing.reeses.gameday
 		 */
 		private function dataPosted(e:Event = null):void
 		{
-			if(e){
-				if(e.target.data == "Success=true"){
-					
-					videoLoader = File.applicationStorageDirectory.resolvePath(upload.guid + ".mp4");
-					
-					videoLoader.addEventListener(IOErrorEvent.IO_ERROR, ioError, false, 0, true);
-					videoLoader.addEventListener(Event.COMPLETE, doneUploading, false, 0, true);
-					videoLoader.addEventListener(ProgressEvent.PROGRESS, onProgress, false, 0, true);
-					videoLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler, false, 0, true);
-					videoLoader.addEventListener(Event.OPEN, openHandler, false, 0, true);
-					videoLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler, false, 0, true);
-					
-					videoLoader.upload(new URLRequest(VIDEO_URL));
-				}
-			}else {
+			log.log(Utility.timeStamp + " | WebService.dataPosted() " + e.target.data);
+			
+			if(!e || e.target.data == "Success=true"){
 				
+				videoLoader = File.applicationStorageDirectory.resolvePath(upload.guid + ".mp4");
+				
+				videoLoader.addEventListener(IOErrorEvent.IO_ERROR, ioError, false, 0, true);
+				videoLoader.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, doneUploading, false, 0, true);
+				videoLoader.addEventListener(ProgressEvent.PROGRESS, onProgress, false, 0, true);
+				videoLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler, false, 0, true);
+				videoLoader.addEventListener(Event.OPEN, openHandler, false, 0, true);
+				videoLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler, false, 0, true);
+				
+				videoLoader.upload(new URLRequest(VIDEO_URL));
+				//}
+			}else {
+				isBusy = false;
 				dispatchEvent(new Event(DATA_ERROR));	
 			}
 		}
 		
 		
-		private function doneUploading(e:Event):void
+		private function doneUploading(e:DataEvent):void
 		{
-			if(e.target.data == "Success=true"){
+			isBusy = false;			
+			
+			log.log(Utility.timeStamp + " | WebService.doneUploading() " + e.data);
+			
+			if(e.data == "Success=true"){
 				//delete video
 				var f:File = File.applicationStorageDirectory.resolvePath(upload.guid + ".mp4");
 				try {
-					log.log("WebService.doneUploading - delete video");
+					log.log(Utility.timeStamp + " | WebService.doneUploading - delete video");
 					f.deleteFile();
-				}catch (e:Error) {log.log("WebService.doneUploading - delete video failed" + e.message);}
+				}catch (e:Error) {log.log(Utility.timeStamp + " | WebService.doneUploading - delete video failed" + e.message);}
+				
 				
 				dispatchEvent(new Event(USER_COMPLETE));
 				
@@ -131,6 +152,8 @@ package com.gmrmarketing.reeses.gameday
 		
 		private function securityErrorHandler(e:SecurityErrorEvent):void 
 		{
+			log.log(Utility.timeStamp + " | WebService.securityErrorHandler() " + e.toString());
+			isBusy = false;
             dispatchEvent(new Event(VIDEO_ERROR));
         }
 		
@@ -143,6 +166,8 @@ package com.gmrmarketing.reeses.gameday
 		
 		private function ioError(e:IOErrorEvent):void
 		{
+			log.log(Utility.timeStamp + " | WebService.ioError() " + e.toString());
+			isBusy = false;
 			dispatchEvent(new Event(VIDEO_ERROR));
 		}
 		

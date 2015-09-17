@@ -64,7 +64,7 @@ package com.gmrmarketing.utilities
 	import flash.geom.Point;
 	import flash.utils.getTimer;
 	import flash.system.fscommand
-	
+	import flash.desktop.NativeApplication;
 	
 	public class CornerQuit extends EventDispatcher
 	{
@@ -337,8 +337,8 @@ package com.gmrmarketing.utilities
 					resetArray();
 				}
 			}
-		}				
-		
+		}		
+	
 	}
 	
 }

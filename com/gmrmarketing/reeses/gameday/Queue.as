@@ -8,6 +8,7 @@ package com.gmrmarketing.reeses.gameday
 	import com.gmrmarketing.reeses.gameday.WebService;
 	import com.gmrmarketing.utilities.Logger;
 	import com.gmrmarketing.utilities.LoggerAIR;
+	import com.gmrmarketing.utilities.Utility;
 	
 	
 	public class Queue extends EventDispatcher  
@@ -22,7 +23,6 @@ package com.gmrmarketing.reeses.gameday
 		public function Queue()
 		{
 			log = Logger.getInstance();
-			log.logger = new LoggerAIR();
 			
 			web = new WebService();
 			web.addEventListener(WebService.DATA_ERROR, formPostError);
@@ -44,7 +44,7 @@ package com.gmrmarketing.reeses.gameday
 		 */
 		public function add(data:Object):void
 		{
-			log.log("queue.add: " + data.video);			
+			log.log(Utility.timeStamp + " | queue.add: " + data.email + " / " + data.video);			
 			
 			data.videoError = false; //set to true if videoPostError is called
 			//used by WebService - if this is true then the form data won't post again - just the video
@@ -63,9 +63,9 @@ package com.gmrmarketing.reeses.gameday
 		 */
 		private function uploadNext():void
 		{
-			if (users.length > 0) {		//and uploader not busy...		
+			if (users.length > 0 && !web.busy) {
 				curUpload = users.shift();//object:email,video,timeAdded
-				
+				log.log(Utility.timeStamp + " | Queue.uploadNext() " + curUpload.email);
 				//send to server
 				web.send(curUpload);
 			}
@@ -80,6 +80,7 @@ package com.gmrmarketing.reeses.gameday
 		 */
 		private function formPostError(e:Event):void
 		{
+			log.log(Utility.timeStamp + " | Queue.formPostError() " + curUpload.email);
 			users.push(curUpload);
 			rewriteQueue();
 			users = getAllUsers();
@@ -95,6 +96,8 @@ package com.gmrmarketing.reeses.gameday
 		 */
 		private function videoPostError(e:Event):void
 		{
+			log.log(Utility.timeStamp + " | Queue.videoPostError() " + curUpload.email);
+			
 			curUpload.videoError = true; //WebService will attemp to only upload the video - not the form data as well
 			
 			users.push(curUpload);
@@ -112,6 +115,8 @@ package com.gmrmarketing.reeses.gameday
 		 */
 		private function uploadComplete(e:Event):void
 		{
+			log.log(Utility.timeStamp + " | Queue.uploadComplete() " + curUpload.email);
+
 			rewriteQueue();//writes the users array to disk - with curUpload object now removed
 			users = getAllUsers();//repopulate users array from file			
 			delayNext();
@@ -124,10 +129,13 @@ package com.gmrmarketing.reeses.gameday
 			a.addEventListener(TimerEvent.TIMER, callUploadNext, false, 0, true);
 			a.start();
 		}
+		
+		
 		private function callUploadNext(e:TimerEvent):void
 		{
 			uploadNext();
 		}
+		
 		
 		//FILE METHODS BELOW
 		/**
@@ -186,19 +194,31 @@ package com.gmrmarketing.reeses.gameday
 		
 			var file:File = File.documentsDirectory.resolvePath( DATA_FILE_NAME );
 			var stream:FileStream = new FileStream();
-				
+			
+			var isOK:Boolean = true;
+			
 			try{
 				stream.open( file, FileMode.READ );
+			}catch (e:Error) { isOK = false; }
 				
+			try{
 				a = stream.readObject();
+			}catch (e:Error) { isOK = false;}
+			
+			if(isOK){
 				while (a.email != undefined) {					
-					obs.push(a);					
-					a = stream.readObject();
+					obs.push(a);
+					try{
+						a = stream.readObject();
+					}catch (e:Error) {
+						break;
+					}
 				}
+			}
 				
+			try{
 				stream.close();
-				
-			}catch (e:Error) {}
+			}catch(e:Error){}			
 			
 			file = null;
 			stream = null;

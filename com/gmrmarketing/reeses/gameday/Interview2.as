@@ -110,6 +110,9 @@ package com.gmrmarketing.reeses.gameday
 		
 		public function stop():void
 		{
+			ns.removeEventListener(NetStatusEvent.NET_STATUS, introStatus);
+			ns.removeEventListener(NetStatusEvent.NET_STATUS, questionStatus);
+			ns.removeEventListener(NetStatusEvent.NET_STATUS, outroStatus);
 			ns.play(null);
 		}
 		
@@ -133,7 +136,7 @@ package com.gmrmarketing.reeses.gameday
 		private function outroStatus(e:NetStatusEvent):void 
 		{
 			if(e.info.code == "NetStream.Play.Stop"){
-				ns.removeEventListener(NetStatusEvent.NET_STATUS, questionStatus);
+				ns.removeEventListener(NetStatusEvent.NET_STATUS, outroStatus);
 				dispatchEvent(new Event(OUTRO_COMPLETE));
 			}
 		}	

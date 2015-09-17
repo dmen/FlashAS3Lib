@@ -10,7 +10,8 @@ package com.gmrmarketing.utilities
 	{		
 		private static var instance:Logger;
 		private var myLogger:ILogger; //type ILogger so loggers can be swapped
-		private var loggerAvailable:Boolean = false; //true is setLogger has been called
+		private var loggerAvailable:Boolean = false; //true if setLogger has been called
+		private var isEnabled:Boolean = true;
 		
 		
 		public function Logger(p_key:SingletonBlocker)
@@ -45,13 +46,19 @@ package com.gmrmarketing.utilities
 		 */
 		public function log(logMessage:String):Boolean
 		{
-			if(loggerAvailable){
+			if(loggerAvailable && isEnabled){
 				myLogger.log(logMessage);
 				return true;
 			}else {
 				return false;
 			}
-		}	
+		}
+		
+		
+		public function set enabled(b:Boolean):void
+		{
+			isEnabled = b;
+		}
 		
 		
 		/**
@@ -78,6 +85,15 @@ package com.gmrmarketing.utilities
 				return true;
 			}else {
 				return false;
+			}
+		}
+		
+		
+		
+		public function truncate():void
+		{
+			if(loggerAvailable){
+				myLogger.truncate();
 			}
 		}
 		

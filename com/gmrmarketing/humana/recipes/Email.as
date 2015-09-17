@@ -63,7 +63,7 @@ package com.gmrmarketing.humana.recipes
 			kbd.removeEventListener(KeyBoard.KEYFILE_LOADED, initKbd);
 			container.addChild(kbd);
 			kbd.y = 650;
-			kbd.setFocusFields([clip.theEmail]);
+			kbd.setFocusFields([[clip.theEmail, 40]]);
 			kbd.addEventListener(KeyBoard.SUBMIT, submitKeyboard, false, 0, true);
 			kbd.enableKeyboard();
 		}
@@ -172,8 +172,8 @@ package com.gmrmarketing.humana.recipes
 			
 			var request:URLRequest = new URLRequest(emailURL);
 			var vars:URLVariables = new URLVariables();
-			vars.api_user = "gmrappdevelopers";
-			vars.api_key = "n0s0upf0ru";
+			vars.api_user = "gmrsendemails_generic";
+			vars.api_key = "yhBPcVeJ6Cu29nVM";
 			vars.subject = "Humana Vitality Recipe";
 			vars.from = "VitalityHealthyFood@gmrmarketing.com";
 			vars.to = em;

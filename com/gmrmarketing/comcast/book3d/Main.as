@@ -14,7 +14,7 @@ package com.gmrmarketing.comcast.book3d
 	import flash.events.*;
 	import com.greensock.TweenMax;
 	
-	import com.gmrmarketing.utilities.Strings;
+	import com.gmrmarketing.utilities.Utility;
 	//import com.gmrmarketing.particles.Dust;
 	
 	public class Main extends MovieClip
@@ -491,7 +491,7 @@ package com.gmrmarketing.comcast.book3d
 			
 			userData.school = schoolList.selected.label;
 			userData.wonShellGame = didWin;
-			userData.dp = Strings.hubbleTimestamp();
+			userData.dp = Utility.hubbleTimeStamp;
 			
 			queue.add(userData);
 		}

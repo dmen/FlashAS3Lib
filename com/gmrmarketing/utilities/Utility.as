@@ -125,7 +125,7 @@ package com.gmrmarketing.utilities
 		/**
 		 * Returns a timestamp like: 8/23/2013 9:20:57 am
 		 */
-		public static function timeStamp():String
+		public static function get timeStamp():String
 		{	
 			var today:Date = new Date();
 			var ampm:String;
@@ -162,7 +162,7 @@ package com.gmrmarketing.utilities
 		/**
 		 * Returns a timestamp string like: 2015-06-08T15:43:07.544Z
 		 */
-		public static function hubbleTimeStamp():String
+		public static function get hubbleTimeStamp():String
 		{
 			var a:Date = new Date();
 			var yr:String = String(a.fullYear);

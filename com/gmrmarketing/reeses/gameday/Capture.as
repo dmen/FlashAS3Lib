@@ -43,6 +43,26 @@ package com.gmrmarketing.reeses.gameday
 			tim = new Timer(1000, 0);
 			
 			clip = new mcCapture();
+			
+			//USER
+			cam = Camera.getCamera();
+			cam.setQuality(750000, 0);//bandwidth, quality
+			cam.setMode(640, 360, 24, false);//width, height, fps, favorArea
+			
+			mic = Microphone.getMicrophone();
+			mic.setSilenceLevel(0);			
+			mic.rate = 44; //KHz
+			
+			vidConnection = new NetConnection();
+			vidConnection.addEventListener(NetStatusEvent.NET_STATUS, statusHandler);	
+			vidConnection.connect("rtmp://localhost/reesesGameday");
+			
+			clip.userVid.addChildAt(vid, 0);
+			vid.x = 20; 
+			vid.y = 20;
+			
+			receInterview = new Interview2();
+			receInterview.container = clip.receVid;
 		}
 		
 		
@@ -54,6 +74,7 @@ package com.gmrmarketing.reeses.gameday
 		
 		public function show():void
 		{
+			//trace("capture.show");
 			if (!myContainter.contains(clip)) {
 				myContainter.addChild(clip);
 			}			
@@ -73,7 +94,7 @@ package com.gmrmarketing.reeses.gameday
 		
 		
 		private function initCams():void
-		{
+		{/*
 			//USER
 			cam = Camera.getCamera();
 			cam.setQuality(750000, 0);//bandwidth, quality
@@ -90,11 +111,11 @@ package com.gmrmarketing.reeses.gameday
 			clip.userVid.addChildAt(vid, 0);
 			vid.x = 20; 
 			vid.y = 20;
-			vid.attachCamera(cam);			
+				*/	
 			
 			//RECE
-			receInterview = new Interview2();
-			receInterview.container = clip.receVid;
+			//receInterview = new Interview2();
+			//receInterview.container = clip.receVid;
 			receInterview.show();
 			receInterview.addEventListener(Interview2.INTRO_COMPLETE, startQuestions);
 			receInterview.playIntro();
@@ -103,20 +124,28 @@ package com.gmrmarketing.reeses.gameday
 		
 		public function hide():void
 		{
+			//trace("capture.hide");
 			clip.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, cancelPressed);
 			
-			if(clip.userVid.contains(vid)){
-				clip.userVid.removeChild(vid);
-			}
+			//if(clip.userVid.contains(vid)){
+				//clip.userVid.removeChild(vid);
+			//}
 			if (myContainter.contains(clip)) {
 				myContainter.removeChild(clip);
 			}
-			vid.attachCamera(null);
+			/*
+			//attach null to vidstream first
 			if(vidStream){
 				vidStream.attachAudio(null);
 				vidStream.attachCamera(null);
 				vidStream.close();
 			}
+			
+			vid.attachCamera(null);
+			cam = null;
+			mic = null;
+			vidStream = null;
+			*/
 			if(receInterview){
 				receInterview.stop();
 			}
@@ -150,7 +179,8 @@ package com.gmrmarketing.reeses.gameday
 		
 		//callback for vidConnection object
 		private function statusHandler(e:NetStatusEvent):void
-		{
+		{			
+			//trace("Capture.statusHandler:", e.info.code);
 			if (e.info.code == "NetConnection.Connect.Success")
 			{		
 				vidStream = new NetStream(vidConnection);
@@ -158,8 +188,11 @@ package com.gmrmarketing.reeses.gameday
 				
 				vidStream.attachCamera(cam);
 				vidStream.attachAudio(mic);	
+				
+				vid.attachCamera(cam);
 			}
 		}
+		
 		
 		/**
 		 * called once intro is done playing - fades in wait for rece text
@@ -271,7 +304,7 @@ package com.gmrmarketing.reeses.gameday
 			receInterview.removeEventListener(Interview2.OUTRO_COMPLETE, interviewComplete);			
 			
 			//close the connection to FMS - fixes problem with 10 connection max
-			vidConnection.close();
+			//vidConnection.close();
 			
 			dispatchEvent(new Event(COMPLETE));
 		}
