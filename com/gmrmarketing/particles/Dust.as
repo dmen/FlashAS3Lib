@@ -1,3 +1,7 @@
+/**
+ * A single dust particle
+ * Add a bunch of these to a container
+ */
 package com.gmrmarketing.particles
 {
 	import flash.display.Sprite;
@@ -49,13 +53,13 @@ package com.gmrmarketing.particles
 			y += yVel + Math.sin(ang);
 			
 			if (x < 0) {
-				x = 1030;
+				x = 2160;
 			}
-			if (x > 1030) {
+			if (x > 2160) {
 				x = 0;
 			}
-			if (y > 772) {
-				y = 20;
+			if (y > 1440) {
+				y = 0;
 			}
 			
 			alpha = y * mult > 1 ? 1 : y * mult;

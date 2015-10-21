@@ -119,7 +119,8 @@ package com.gmrmarketing.utilities
 			
 			//uniques can exist inside a word and still provide a positive
 			unique = new Array();
-			unique.push("assmuncher", "asseater", "assbeater", "asslick", "asshole", "asshat", "assface", "a55", "bullshit", "buttplug", "blowjob");		unique.push("cameltoe", "cunt", "cunny", "prostitute");
+			unique.push("assmuncher", "asseater", "assbeater", "asslick", "asshole", "asshat", "assface", "a55", "bullshit", "buttplug", "blowjob");
+			unique.push("cameltoe", "cunt", "cunny", "prostitute");
 			unique.push("fellatio", "fuck", "fvck", "faggot")
 			unique.push("nigger", "nigg3r", "niglet", "nutsack", "motherfucker");
 			unique.push("jigaboo", "junglebunny", "handjob", "p3nis", "sh1t", "shithead", "retard", "queer");

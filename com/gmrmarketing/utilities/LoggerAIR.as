@@ -7,7 +7,6 @@ package com.gmrmarketing.utilities
 {		
 	import com.gmrmarketing.utilities.ILogger;
 	import com.gmrmarketing.utilities.Strings;
-	import Date;
 	import flash.filesystem.*;
 
 	public class LoggerAIR implements ILogger

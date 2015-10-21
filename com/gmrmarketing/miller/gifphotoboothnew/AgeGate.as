@@ -1,4 +1,4 @@
-package com.gmrmarketing.miller.gifphotobooth
+package com.gmrmarketing.miller.gifphotoboothnew
 {
 	import flash.events.*;
 	import flash.display.*;

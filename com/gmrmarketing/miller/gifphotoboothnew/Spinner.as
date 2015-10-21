@@ -19,7 +19,7 @@
  * used by:AgeGate
  */
 
-package com.gmrmarketing.miller.gifphotobooth
+package com.gmrmarketing.miller.gifphotoboothnew
 {	
 	import flash.display.*;
 	import flash.events.*;

@@ -21,7 +21,7 @@ package com.gmrmarketing.utilities
 		public function encode(bmd:BitmapData, q:int = 86):void
 		{
 			var ba:ByteArray = getJpeg(bmd, q);
-			enc = getBase64(ba);
+			enc = Base64.encodeByteArray(ba);
 			
 			dispatchEvent(new Event(COMPLETE));
 		}
@@ -40,11 +40,6 @@ package com.gmrmarketing.utilities
 			return ba;
 		}
 		
-		
-		private function getBase64(ba:ByteArray):String
-		{
-			return Base64.encodeByteArray(ba);
-		}
 	}
 	
 }

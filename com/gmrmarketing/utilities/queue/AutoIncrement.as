@@ -1,4 +1,9 @@
-package com.gmrmarketing.utilities
+/**
+ * Provides a one-time machine identifier (deviceID - GUID)
+ * and auto incrementing record number (deviceResponseID)
+ * to Hubble services
+ */
+package com.gmrmarketing.utilities.queue
 {
 	import flash.net.SharedObject;
 	import com.gmrmarketing.utilities.GUID;
@@ -30,6 +35,11 @@ package com.gmrmarketing.utilities
 		}
 		
 		
+		/**
+		 * Gets the next integer
+		 * Begins at 0
+		 * Used for a deviceResponseID for Hubble
+		 */
 		public function get nextNum():int
 		{
 			num++;
@@ -39,6 +49,9 @@ package com.gmrmarketing.utilities
 		}
 		
 		
+		/**
+		 * Gets a GUID - used as a deviceID for Hubble
+		 */
 		public function get guid():String
 		{
 			return myGuid;

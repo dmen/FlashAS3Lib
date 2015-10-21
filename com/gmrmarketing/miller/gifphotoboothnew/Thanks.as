@@ -1,4 +1,4 @@
-package com.gmrmarketing.miller.gifphotobooth
+package com.gmrmarketing.miller.gifphotoboothnew
 {
 	import flash.events.*;
 	import flash.display.*;
@@ -9,6 +9,8 @@ package com.gmrmarketing.miller.gifphotobooth
 	import org.bytearray.gif.encoder.GIFEncoder;
 	import flash.filesystem.*;
 	import flash.utils.ByteArray;
+	import com.gmrmarketing.utilities.TimeoutHelper;	
+	import com.dynamicflash.util.Base64;
 	
 	
 	public class Thanks extends EventDispatcher
@@ -23,9 +25,12 @@ package com.gmrmarketing.miller.gifphotobooth
 		private var queue:Queue;
 		private var userData:Object;
 		
+		private var tim:TimeoutHelper;
+		
 		
 		public function Thanks()
 		{
+			tim = TimeoutHelper.getInstance();
 			encoder = new GIFEncoder();
 			queue = new Queue();
 			clip = new mcThanks();
@@ -52,6 +57,8 @@ package com.gmrmarketing.miller.gifphotobooth
 		 */
 		public function show(f:Array, o:Object):void
 		{
+			tim.buttonClicked();
+			
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
@@ -60,38 +67,70 @@ package com.gmrmarketing.miller.gifphotobooth
 			userData = o;
 			
 			clip.alpha = 0;
-			TweenMax.to(clip, .5, { alpha:1, onComplete:processFrames } );
+			TweenMax.to(clip, .5, { alpha:1, onComplete:showing } );
+		}
+		
+		
+		private function showing():void
+		{
+			TweenMax.delayedCall(.1, processFrames);
 		}
 		
 		
 		private function processFrames():void
 		{
-			var over:BitmapData = new overlay();//lib
+			//var over:BitmapData = new overlay();//lib
 			
 			encoder.setRepeat(0);
 			encoder.setDelay(150);
 			encoder.setQuality(8);//default is 10 - lower = slower/better
-			encoder.start();
 			
+			encoder.start();//returns a boolean... 
+			myContainer.addEventListener(Event.ENTER_FRAME, encFrame, false, 0, true);
+			/*
 			var m:Matrix = new Matrix();
 			m.scale(320 / 812, 240 / 610);
 			
 			for (var i:int = 0; i < frames.length; i++) {
 				var b:BitmapData = new BitmapData(320, 240);
 				b.draw(frames[i], m, null, null, null, true);			
-				b.copyPixels(over, new Rectangle(0, 0, 320, 240), new Point(0, 0), null, null, true);		
+				//b.copyPixels(over, new Rectangle(0, 0, 320, 240), new Point(0, 0), null, null, true);		
 				encoder.addFrame(b);
 			}
 			
 			encoder.finish();
 			
-			userData.gif = encoder.stream;//byteArray
+			var gString:String = Base64.encodeByteArray(encoder.stream);
+				
+			userData.gif = gString;
+			
 			queue.add(userData);
 			
-			//saveFile(encoder.stream);
 			dispatchEvent(new Event(COMPLETE));
+			*/
 		}
-		
+		private function encFrame(e:Event):void
+		{
+			if(frames.length > 0){
+				var m:Matrix = new Matrix();
+				m.scale(320 / 812, 240 / 610);
+				var b:BitmapData = new BitmapData(320, 240);
+				b.draw(frames.shift(), m, null, null, null, true);			
+				//b.copyPixels(over, new Rectangle(0, 0, 320, 240), new Point(0, 0), null, null, true);		
+				encoder.addFrame(b);
+			}else {
+				myContainer.removeEventListener(Event.ENTER_FRAME, encFrame);
+				encoder.finish();
+				
+				var gString:String = Base64.encodeByteArray(encoder.stream);
+				
+				userData.gif = gString;
+				
+				queue.add(userData);
+				
+				dispatchEvent(new Event(COMPLETE));
+			}
+		}
 		
 		public function hide():void
 		{

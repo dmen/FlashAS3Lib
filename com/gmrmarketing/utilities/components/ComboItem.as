@@ -28,7 +28,7 @@ package com.gmrmarketing.utilities.components
 		
 		/**
 		 * Constructor - called from ComboBox.addItems()
-		 * @param	$item Object with label property, can have data property
+		 * @param	$item Object with label property, can have other optional properties
 		 * @param	$w
 		 * @param	$h
 		 * @param	$txtCol
@@ -85,12 +85,12 @@ package com.gmrmarketing.utilities.components
 		
 		
 		/**
-		 * Returns an object containing the items label and data properties
+		 * Returns the item
 		 * @return
 		 */
 		public function getProps():Object
 		{			
-			return { label:item.label, data:item.data };
+			return item;
 		}
 		
 		

@@ -27,27 +27,37 @@ package com.gmrmarketing.hp.multicam
 		private var myH:int;
 		private var origW:int;
 		private var origH:int;
-		private var overlay:BitmapData;
+		private var myOverlay:BitmapData;
+		
 		
 		public function Encoder()
 		{
-			overlay = new overlayBMD();//library 50x50
-			
 			timer = new Timer(35);
 			timer.addEventListener(TimerEvent.TIMER, encFrame);
 		}
 		
 		
-		public function setSize(w:int, h:int):void
+		public function set overlay(o:BitmapData):void
+		{
+			myOverlay = o;
+		}
+		
+		
+		public function set width(w:int):void
 		{
 			myW = w;
+		}
+		
+		
+		public function set height(h:int):void
+		{			
 			myH = h;
 		}
 		
 		
 		public function addFrames(images:Array, save:Boolean = false, $email:String = "", $folder:String = ""):void
 		{
-			frames = images;
+			frames = images.concat();
 			numFrames = frames.length;			
 			saveToFile = save;
 			email = $email;
@@ -61,22 +71,20 @@ package com.gmrmarketing.hp.multicam
 		}
 		
 		
-		public function getGif():String
+		public function get GIF():String
 		{
 			return gif;
 		}
 		
 		
-		public function getProgress():Number 
+		public function get progress():Number 
 		{
 			return 1 - (frames.length / numFrames);
 		}
 		
 		
 		private function processFrames():void
-		{
-			//var over:BitmapData = new overlay();//lib
-			
+		{			
 			encoder.setRepeat(0);
 			encoder.setDelay(150);
 			encoder.setQuality(4);//default is 10 - lower = slower/better
@@ -88,13 +96,17 @@ package com.gmrmarketing.hp.multicam
 		
 		private function encFrame(e:TimerEvent):void
 		{
-			if(frames.length > 0){
+			if (frames.length > 0) {
+		
 				var m:Matrix = new Matrix();
 				m.scale(myW / origW, myH / origH);
 				var b:BitmapData = new BitmapData(myW, myH);
-				b.draw(frames.shift(), m, null, null, null, true);			
-				b.copyPixels(overlay, new Rectangle(0, 0, 35, 35), new Point(myW - 40, myH - 40), null, null, true);		
+				b.draw(frames.shift(), m, null, null, null, true);
+				if(myOverlay){
+					b.copyPixels(myOverlay, new Rectangle(0, 0, myOverlay.width, myOverlay.height), new Point(0,0), null, null, true);
+				}
 				encoder.addFrame(b);
+				
 				dispatchEvent(new Event(UPDATE));
 			}else {
 				timer.reset();

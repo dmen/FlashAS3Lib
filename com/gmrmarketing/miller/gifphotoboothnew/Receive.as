@@ -1,5 +1,5 @@
 
-package com.gmrmarketing.miller.gifphotobooth
+package com.gmrmarketing.miller.gifphotoboothnew
 {
 	import flash.events.*;
 	import flash.display.*;
@@ -9,6 +9,7 @@ package com.gmrmarketing.miller.gifphotobooth
 	public class Receive extends EventDispatcher
 	{
 		public static const COMPLETE:String = "receiveComplete";
+		public static const SHOWING:String = "receiveShowing";
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		
@@ -41,7 +42,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, doNext, false, 0, true);
 			
 			clip.alpha = 0;
-			TweenMax.to(clip, .5, { alpha:1 } );
+			TweenMax.to(clip, .5, { alpha:1, onComplete:showing } );
 		}
 		
 		
@@ -59,6 +60,12 @@ package com.gmrmarketing.miller.gifphotobooth
 		}
 		
 		
+		public function get bg():MovieClip
+		{
+			return clip;
+		}
+		
+		
 		public function get choice():Object
 		{
 			var o:Object = { };
@@ -66,6 +73,12 @@ package com.gmrmarketing.miller.gifphotobooth
 			o.text = clip.cText.visible;
 			o.both = clip.cBoth.visible;
 			return o;
+		}
+		
+		
+		private function showing():void
+		{
+			dispatchEvent(new Event(SHOWING));
 		}
 		
 		

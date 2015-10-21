@@ -98,7 +98,7 @@ package com.gmrmarketing.reeses.gameday
 		{
 			log.log(Utility.timeStamp + " | Queue.videoPostError() " + curUpload.email);
 			
-			curUpload.videoError = true; //WebService will attemp to only upload the video - not the form data as well
+			curUpload.videoError = true; //WebService will attempt to only upload the video - not the form data as well
 			
 			users.push(curUpload);
 			rewriteQueue();

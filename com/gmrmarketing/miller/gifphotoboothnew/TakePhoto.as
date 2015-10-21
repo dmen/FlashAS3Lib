@@ -1,4 +1,4 @@
-package com.gmrmarketing.miller.gifphotobooth
+package com.gmrmarketing.miller.gifphotoboothnew
 {	
 	import flash.events.*;
 	import flash.display.*;
@@ -77,9 +77,11 @@ package com.gmrmarketing.miller.gifphotobooth
 			camPic.show(camContainer);
 			//camPic.addEventListener(CamPic.CAMERA_UPDATE, updatePreview, false, 0, true);
 			
-			clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, startRecording, false, 0, true);
+			clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, startCounting, false, 0, true);
 			clip.addEventListener(Event.ENTER_FRAME, updateCap);
 			clip.progBar.progress.scaleX = 0;
+			clip.theCount.visible = false;
+			clip.theCount.theText.text = "3";
 			
 			clip.alpha = 0;
 			TweenMax.to(clip, .5, { alpha:1, onComplete:showComplete } );
@@ -88,6 +90,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		
 		public function hide():void
 		{
+			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, startCounting);
 			camPic.pause();
 			//camPic.removeEventListener(CamPic.CAMERA_UPDATE, updatePreview);
 			if(myContainer){
@@ -132,9 +135,36 @@ package com.gmrmarketing.miller.gifphotobooth
 		}
 		
 		
-		private function startRecording(e:MouseEvent):void
+		//called by pressing the take photos cap
+		private function startCounting(e:MouseEvent):void
 		{
 			tim.buttonClicked();
+			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, startCounting);
+			
+			clip.theCount.visible = true;
+			clip.theCount.theText.text = "3";
+			clip.theCount.theText.alpha = 1;
+			TweenMax.to(clip.theCount.theText, 1, { alpha:.1, onComplete:countTwo } );
+		}
+		
+		private function countTwo():void
+		{
+			clip.theCount.theText.text = "2";
+			clip.theCount.theText.alpha = 1;
+			TweenMax.to(clip.theCount.theText, 1, { alpha:.1, onComplete:countOne } );
+		}
+		
+		private function countOne():void
+		{
+			clip.theCount.theText.text = "1";
+			clip.theCount.theText.alpha = 1;
+			TweenMax.to(clip.theCount.theText, 1, { alpha:.1, onComplete:startRecording } );
+		}
+		
+		
+		private function startRecording():void
+		{
+			clip.theCount.visible = false;
 			
 			frames = [];
 			frameCount = 0;

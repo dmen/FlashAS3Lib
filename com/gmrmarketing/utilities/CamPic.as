@@ -144,7 +144,7 @@ package com.gmrmarketing.utilities
 			
 			camTimer = new Timer(1000 / fps);			
 			
-			if (isAvailable()) {				
+			if (available) {				
 				theVideo.attachCamera(cam);
 			}
 		}		
@@ -156,7 +156,7 @@ package com.gmrmarketing.utilities
 		 * 
 		 * @return Boolean
 		 */
-		public function isAvailable():Boolean
+		public function get available():Boolean
 		{
 			return camAvailable;
 		}		
@@ -167,7 +167,7 @@ package com.gmrmarketing.utilities
 		 * 
 		 * @return an object containing width and height properties
 		 */
-		public function getResolution():Object
+		public function get resolution():Object
 		{
 			var o:Object = new Object();
 			o.width = camWidth;
@@ -203,6 +203,8 @@ package com.gmrmarketing.utilities
 		{
 			overlays.push([overlay, loc]);
 		}
+		
+		
 		public function removeOverlay(index:int):void
 		{
 			if (overlays.length >= index) {
@@ -308,7 +310,7 @@ package com.gmrmarketing.utilities
 		 * @param	withFilters Pass in False to get camera pic with no filters
 		 * @return BitmapData
 		 */
-		public function getCamera(withFilters:Boolean = false):BitmapData
+		public function getCameraImage(withFilters:Boolean = false):BitmapData
 		{
 			var blank:BitmapData = new BitmapData(camWidth, camHeight, true, 0xffffff);
 			blank.draw(theVideo, null, null, null, null, true);
@@ -332,7 +334,7 @@ package com.gmrmarketing.utilities
 		 * @param	withFilters Pass in False to get camera pic with no filters
 		 * @return BitmapData
 		 */
-		public function getCapture(withFilters:Boolean = false):BitmapData
+		public function getCaptureImage(withFilters:Boolean = false):BitmapData
 		{		
 			var blank:BitmapData = new BitmapData(captureWidth, captureHeight, true, 0xffffff);
 			blank.draw(theVideo, captureMatrix, null, null, null, true);
@@ -356,7 +358,7 @@ package com.gmrmarketing.utilities
 		 * @param	withFilters Pass in False to get camera pic with no filters
 		 * @return BitmapData
 		 */
-		public function getDisplay(withFilters:Boolean = false):BitmapData
+		public function getDisplayImage(withFilters:Boolean = false):BitmapData
 		{
 			var blank:BitmapData = new BitmapData(displayData.width, displayData.height, false, 0xffffff);
 			blank.draw(theVideo, displayMatrix, null, null, null, true);
