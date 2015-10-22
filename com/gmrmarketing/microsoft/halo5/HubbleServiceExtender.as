@@ -27,9 +27,9 @@ package com.gmrmarketing.microsoft.halo5
 		 */
 		override public function send(data:Object):void
 		{
-			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":251, "DeviceId":autoInc.guid, "DeviceResponseId":autoInc.nextNum, "ResponseDate":Utility.hubbleTimeStamp, "FieldResponses":[ { "FieldId":1912, "Response":data.email },{ "FieldId":1915, "Response":data.optIn },{ "FieldId":1948, "Response":data.storeID } ], "Latitude":"0", "Longitude":"0" }};
+			var resp:Object = {"MethodData": { "InteractionId":251, "FieldResponses":[ { "FieldId":1912, "Response":data.email },{ "FieldId":1915, "Response":data.optIn },{ "FieldId":1948, "Response":data.storeID } ] } };
 			
-			var d:Object = new Object();
+			var d:Object = { };
 			d.data = data;//store the full original data for HubbleService to use
 			d.resp = resp;//the unique response object for the initial post to NowPik
 			d.photoFieldID = 1913;//the ID of the field used to submit the photo - photo stored in image property of data object

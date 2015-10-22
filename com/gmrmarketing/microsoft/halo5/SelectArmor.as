@@ -4,8 +4,7 @@ package com.gmrmarketing.microsoft.halo5
 	import flash.events.*;
 	import flash.display.*;
 	import com.greensock.TweenMax;
-	import com.greensock.easing.*;		
-	import com.gmrmarketing.particles.Dust;
+	import com.greensock.easing.*;
 	
 	
 	public class SelectArmor extends EventDispatcher
@@ -21,8 +20,6 @@ package com.gmrmarketing.microsoft.halo5
 		public function SelectArmor()
 		{
 			clip = new mcSelectArmor();
-			dustContainer = new Sprite();
-			clip.addChildAt(dustContainer, 1); //add between main bg and dark overlay with logos
 		}
 		
 		
@@ -39,14 +36,7 @@ package com.gmrmarketing.microsoft.halo5
 					myContainer.addChild(clip);
 				}
 				
-			}
-			
-			for (var i:int = 0; i < 150; i++) {
-				var a:Dust = new Dust();
-				a.x = Math.random() * 2160;
-				a.y = Math.random() * 1440;
-				dustContainer.addChild(a);
-			}
+			}			
 			
 			clip.b1.addEventListener(MouseEvent.MOUSE_DOWN, selectBlue1, false, 0, true);
 			clip.b2.addEventListener(MouseEvent.MOUSE_DOWN, selectBlue2, false, 0, true);
@@ -61,10 +51,6 @@ package com.gmrmarketing.microsoft.halo5
 				if (myContainer.contains(clip)) {
 					myContainer.removeChild(clip);
 				}				
-			}
-			
-			while (dustContainer.numChildren) {
-				dustContainer.removeChildAt(0);
 			}
 			
 			clip.b1.removeEventListener(MouseEvent.MOUSE_DOWN, selectBlue1);

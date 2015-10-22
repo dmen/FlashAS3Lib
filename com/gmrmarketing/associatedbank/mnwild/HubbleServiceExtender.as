@@ -23,7 +23,7 @@ package com.gmrmarketing.associatedbank.mnwild
 		
 		/**
 		 * 
-		 * @param	data optIn,survey,over18,fname,lname,email,phone,zip,currentCustomer,checking,moreInfo,permission,gif
+		 * @param	data optIn,survey,over18,fname,lname,email,phone,zip,currentCustomer,checking,moreInfo,permission,image
 		 */
 		override public function send(data:Object):void
 		{

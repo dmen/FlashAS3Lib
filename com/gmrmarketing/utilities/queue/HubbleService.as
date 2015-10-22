@@ -3,13 +3,16 @@
  * Version 1 - 9/22/2015
  * 10/14/2015 - added parameters to HubbleService constructor to allow passing userName and password
  * 10/16		Changed .gif to .image when passing the data object to send
+ * 				added a second image2 to allow sending multiple images
  * 
  * Implements IQueueService - used as a service for Queue.as
  * 
  * Properties of the data object sent to send():	
- * gif	Base64 encoded String - used by the submitPhoto() method
- * email, name, etc. Any properties used to construct the JSON in the send() method
- * printed If printed == true then the PrintAPI will be called - using the interactionID set by the constant INTERACTION_ID
+ * image - 			Base64 encoded String - used by the submitPhoto() method
+ * photoFieldID - 	NowPik field ID that image will be sent to
+ * image2 - 		Base64 encoded String - if present submitPhoto2() is called
+ * photoFieldID2 - 	NowPik field ID that image2 will be sent to
+ * printed -		If true the Print API will be called
  * 
  * Properties injected by the Class:
  * responseID - injected into the object - recordID returned from the service in formPosted() - used for error processing
@@ -31,16 +34,16 @@ package com.gmrmarketing.utilities.queue
 	
 	public class HubbleService extends EventDispatcher implements IQueueService
 	{	
-		protected const BASE_URL:String = "http://api.nowpik.com/api/";
-		
-		protected var token:String; //GUID - token returned from call to validateuser
+		private const BASE_URL:String = "http://api.nowpik.com/api/";
+
+		private var token:String; //GUID - token returned from call to validateuser
 		private var responseId:int;//set in submit if the form data is already posted, or formPosted normally
 		
 		private var hdr:URLRequestHeader;//headers for sending and receiving JSON
 		private var hdr2:URLRequestHeader;
 		
 		private var isBusy:Boolean; //true when submitting data
-		protected var autoInc:AutoIncrement;//used for unique machine ID (GUID) and auto inc integer for deviceResponseID in send()
+		private var autoInc:AutoIncrement;//used for unique machine ID (GUID) and auto inc integer for deviceResponseID in send()
 		private var upload:Object;//current object being uploaded
 		private var interactionID:int; //Hubble ID - set in send()
 		private var photoFieldID:int;//for sending in submitPhoto() set in send()
@@ -75,15 +78,18 @@ package com.gmrmarketing.utilities.queue
 			getToken();
 		}
 		
+		
 		public function get ready():Boolean
 		{
 			return token != "";
 		}
 		
+		
 		public function get errorEvent():String
 		{
 			return "serviceError";
 		}
+		
 		
 		public function get completeEvent():String
 		{
@@ -172,11 +178,19 @@ package com.gmrmarketing.utilities.queue
 		 */
 		public function send(data:Object):void
 		{	
-			upload = data.data;//current data object
+			upload = data.data;//original data object sent to the service extender
+			
+			data.resp.AccessToken = token;
+			data.resp.MethodData.DeviceId = autoInc.guid;
+			data.resp.MethodData.DeviceResponseId = autoInc.nextNum;
+			data.resp.MethodData.ResponseDate = Utility.hubbleTimeStamp;
+			data.resp.MethodData.Latitude = "0";
+			data.resp.MethodData.Longitude = "0";
+			
 			interactionID = data.resp.MethodData.InteractionId;//The main interactionID - used in callPrintAPI()
 			photoFieldID = data.photoFieldID;//used in submitPhoto()
 			photoFieldID2 = data.photoFieldID2;//used in submitPhoto2() if defined -- will be 0 if photoFieldID2 is undefined in the object
-			trace("HS.send()", upload.error, token, upload.responseID);
+			//trace("HS.send()", upload.error, token, upload.responseID);
 			if (upload.responseID == undefined || upload.responseID == 0) {
 				//first time trying to send
 				upload.responseID = -1;

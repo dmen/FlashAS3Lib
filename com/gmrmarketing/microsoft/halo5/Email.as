@@ -5,7 +5,6 @@ package com.gmrmarketing.microsoft.halo5
 	import com.gmrmarketing.utilities.Validator;
 	import com.dmennenoh.keyboard.KeyBoard;
 	import com.greensock.TweenMax;
-	import com.gmrmarketing.particles.Dust;
 	
 	
 	public class Email extends EventDispatcher
@@ -15,15 +14,12 @@ package com.gmrmarketing.microsoft.halo5
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		private var kbd:KeyBoard;
-		private var dustContainer:Sprite;
 		private var ppDlg:MovieClip;
 		
 		
 		public function Email()
 		{
 			clip = new mcEmail();
-			dustContainer = new Sprite();
-			clip.addChildAt(dustContainer, 1); //add between main bg and dark overlay with logos
 			
 			ppDlg = new ppDialog();
 			ppDlg.x = 980;
@@ -49,14 +45,7 @@ package com.gmrmarketing.microsoft.halo5
 				if (!myContainer.contains(clip)) {
 					myContainer.addChild(clip);
 				}
-			}
-			
-			for (var i:int = 0; i < 150; i++) {
-				var a:Dust = new Dust();
-				a.x = Math.random() * 2160;
-				a.y = Math.random() * 1440;
-				dustContainer.addChild(a);
-			}	
+			}			
 			
 			clip.addChild(kbd);	//so it's behind the privacy dialog		
 			kbd.setFocusFields([[clip.theText, 50]]);
@@ -88,10 +77,6 @@ package com.gmrmarketing.microsoft.halo5
 			clip.btnSend.removeEventListener(MouseEvent.MOUSE_DOWN, validate);
 			clip.btnPrivacy.removeEventListener(MouseEvent.MOUSE_DOWN, showPrivacy);
 			ppDlg.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, closePPDialog);
-			
-			while (dustContainer.numChildren) {
-				dustContainer.removeChildAt(0);
-			}
 			
 			killPPdlg();
 		}

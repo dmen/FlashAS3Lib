@@ -5,7 +5,6 @@ package com.gmrmarketing.microsoft.halo5
 	import flash.geom.*;
 	import com.greensock.plugins.*;
 	import flash.filters.BlurFilter;
-	import com.gmrmarketing.particles.Dust;
 	
 	public class ModifyPhoto extends EventDispatcher
 	{
@@ -27,8 +26,7 @@ package com.gmrmarketing.microsoft.halo5
 		
 		private var blur:BlurFilter;
 		private var handles:Array;
-		
-		private var dustContainer:Sprite;
+		private var frameCounter:int;
 		
 		
 		public function ModifyPhoto()
@@ -53,12 +51,8 @@ package com.gmrmarketing.microsoft.halo5
 			mask.y = 132;
 			
 			clip = new mcModify();//currently empty...
-			dustContainer = new Sprite();
-			clip.addChildAt(dustContainer, 1); //add between main bg and dark overlay with logos			
 			
 			blur = new BlurFilter(6, 6, 2);//applied to maskData
-			
-			
 		}
 		
 		
@@ -78,14 +72,7 @@ package com.gmrmarketing.microsoft.halo5
 				if (!myContainer.contains(clip)) {
 					myContainer.addChild(clip);
 				}
-			}	
-			
-			for (var i:int = 0; i < 150; i++) {
-				var d:Dust = new Dust();
-				d.x = Math.random() * 2160;
-				d.y = Math.random() * 1440;
-				dustContainer.addChild(d);
-			}
+			}			
 			
 			originalPhoto = p;
 			
@@ -127,6 +114,12 @@ package com.gmrmarketing.microsoft.halo5
 			headPoints.h10.addEventListener(MouseEvent.MOUSE_DOWN, dragH10, false, 0, true);
 			headPoints.h11.addEventListener(MouseEvent.MOUSE_DOWN, dragH11, false, 0, true);
 			
+			for (var i:int = 0; i < 11; i++) {	
+				//handles[i].grip.rotation = Math.atan2(335 - handles[i].y, 600 - handles[i].x) * 57.295;
+				handles[i].grip.rotation = Math.atan2(540 - handles[i].y, 960 - handles[i].x) * 57.295;
+			}
+			frameCounter = 0;
+			
 			myContainer.stage.addEventListener(MouseEvent.MOUSE_UP, endDrag, false, 0, true);
 			
 			clip.btnRetake.addEventListener(MouseEvent.MOUSE_DOWN, retakePic, false, 0, true);
@@ -152,10 +145,6 @@ package com.gmrmarketing.microsoft.halo5
 				clip.removeChild(headPoints);
 			}
 			
-			while (dustContainer.numChildren) {
-				dustContainer.removeChildAt(0);
-			}
-			
 			headPoints.h1.removeEventListener(MouseEvent.MOUSE_DOWN, dragH1);
 			headPoints.h2.removeEventListener(MouseEvent.MOUSE_DOWN, dragH2);
 			headPoints.h3.removeEventListener(MouseEvent.MOUSE_DOWN, dragH3);
@@ -178,21 +167,12 @@ package com.gmrmarketing.microsoft.halo5
 		
 		public function suspend():void
 		{
-			clip.removeEventListener(Event.ENTER_FRAME, drawLines);
-			while (dustContainer.numChildren) {
-				dustContainer.removeChildAt(0);
-			}
+			clip.removeEventListener(Event.ENTER_FRAME, drawLines);			
 		}
 		
 		public function wake():void
 		{
 			clip.addEventListener(Event.ENTER_FRAME, drawLines, false, 0, true);
-			for (var i:int = 0; i < 150; i++) {
-				var a:Dust = new Dust();
-				a.x = Math.random() * 2160;
-				a.y = Math.random() * 1440;
-				dustContainer.addChild(a);
-			}
 		}
 		
 		
@@ -226,11 +206,14 @@ package com.gmrmarketing.microsoft.halo5
 		{	
 			var i:int;
 			
-			for (i = 0; i < 11; i++) {	
-				//handles[i].grip.rotation = Math.atan2(335 - handles[i].y, 600 - handles[i].x) * 57.295;
-				handles[i].grip.rotation = Math.atan2(540 - handles[i].y, 960 - handles[i].x) * 57.295;
+			frameCounter++;
+			if(frameCounter % 10 == 0){
+				for (i = 0; i < 11; i++) {	
+					//handles[i].grip.rotation = Math.atan2(335 - handles[i].y, 600 - handles[i].x) * 57.295;
+					handles[i].grip.rotation = Math.atan2(540 - handles[i].y, 960 - handles[i].x) * 57.295;
+				}
 			}
-			
+	
 			msg.clear();
 			msg.beginFill(0x00ff00, 1);
 			

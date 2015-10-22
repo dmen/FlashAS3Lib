@@ -124,7 +124,7 @@ package com.gmrmarketing.associatedbank.mnwild
 			thanks.show();			
 			
 			var qo:Object = form.data;
-			qo.gif = review.GIF;
+			qo.image = review.GIF;
 			
 			queue.add(qo);
 		}

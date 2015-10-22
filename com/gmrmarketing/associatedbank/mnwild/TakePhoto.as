@@ -65,7 +65,7 @@ package com.gmrmarketing.associatedbank.mnwild
 			cam = Camera.getCamera();
 			cam.setMode(1280, 720, 30);
 			vid.attachCamera(cam);
-			vid.scaleX = -1;
+			//vid.scaleX = -1;
 			
 			myContainer.addChild(vid);
 			myContainer.addChild(overlay);

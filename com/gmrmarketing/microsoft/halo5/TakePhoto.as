@@ -5,8 +5,7 @@ package com.gmrmarketing.microsoft.halo5
 	import flash.media.Camera;
 	import flash.media.Video;
 	import com.gmrmarketing.utilities.CamPic;
-	import com.greensock.TweenMax;		
-	import com.gmrmarketing.particles.Dust;
+	import com.greensock.TweenMax;
 	
 	
 	public class TakePhoto extends EventDispatcher
@@ -22,14 +21,11 @@ package com.gmrmarketing.microsoft.halo5
 		private var thePic:BitmapData;
 		
 		private var whiteFlash:MovieClip;
-		private var dustContainer:Sprite;
 		
 		
 		public function TakePhoto()
 		{
-			clip = new mcTakePhoto();
-			dustContainer = new Sprite();
-			clip.addChildAt(dustContainer, 1); //add between main bg and dark overlay with logos
+			clip = new mcTakePhoto();			
 			
 			camContainer = new Sprite();			
 			camContainer.x = 440;
@@ -59,14 +55,7 @@ package com.gmrmarketing.microsoft.halo5
 				if (!myContainer.contains(clip)) {
 					myContainer.addChild(clip);
 				}
-			}
-			
-			for (var i:int = 0; i < 150; i++) {
-				var a:Dust = new Dust();
-				a.x = Math.random() * 2160;
-				a.y = Math.random() * 1440;
-				dustContainer.addChild(a);
-			}
+			}			
 			
 			myContainer.addChild(camContainer);
 			myContainer.addChild(camMask);
@@ -90,11 +79,7 @@ package com.gmrmarketing.microsoft.halo5
 					myContainer.removeChild(camContainer);
 				}
 			}
-			
-			while (dustContainer.numChildren) {
-				dustContainer.removeChildAt(0);
-			}
-			
+						
 			cam.pause();
 			cam.hide();
 		}		

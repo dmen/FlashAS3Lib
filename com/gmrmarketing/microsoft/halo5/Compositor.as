@@ -4,7 +4,6 @@ package com.gmrmarketing.microsoft.halo5
 	import flash.display.*;
 	import flash.utils.getTimer;
 	import flash.geom.Matrix;
-	import com.gmrmarketing.particles.Dust;
 	
 	
 	public class Compositor extends EventDispatcher
@@ -25,16 +24,11 @@ package com.gmrmarketing.microsoft.halo5
 		private var timeDelta:int;
 		private const buttonDelay:int = 400;
 		
-		private var dustContainer:Sprite;
-		
 		
 		
 		public function Compositor()
 		{
-			clip = new mcCompositor();
-			dustContainer = new Sprite();
-			clip.addChildAt(dustContainer, 1); //add between main bg and dark overlay with logos
-			
+			clip = new mcCompositor();			
 			
 			controls = new mcControls();
 			controls.x = 1881;
@@ -67,14 +61,7 @@ package com.gmrmarketing.microsoft.halo5
 					myContainer.addChild(clip);
 				}
 			}
-			
-			for (var i:int = 0; i < 150; i++) {
-				var a:Dust = new Dust();
-				a.x = Math.random() * 2160;
-				a.y = Math.random() * 1440;
-				dustContainer.addChild(a);
-			}			
-			
+
 			clip.visible = true;
 			
 			facePic = new Bitmap(userImage, "auto", true);
@@ -99,8 +86,9 @@ package com.gmrmarketing.microsoft.halo5
 			facePic.y = -(facePic.height * .5);
 			
 			armor.addChildAt(faceContainer, 1);
-			faceContainer.x = 1080;
-			faceContainer.y = 500;
+			faceContainer.x = 1040;
+			faceContainer.y = 480;
+			faceContainer.scaleX = faceContainer.scaleY = .72;
 			clip.addChild(armor);
 			clip.addChild(controls);
 			
@@ -121,7 +109,6 @@ package com.gmrmarketing.microsoft.halo5
 		
 		public function hide():void
 		{
-			trace("comp.hide");
 			controls.rotLeft.removeEventListener(MouseEvent.MOUSE_DOWN, rotateLeft);
 			controls.rotRight.removeEventListener(MouseEvent.MOUSE_DOWN, rotateRight);
 			controls.scaleMinus.removeEventListener(MouseEvent.MOUSE_DOWN, scaleMinus);
@@ -141,11 +128,7 @@ package com.gmrmarketing.microsoft.halo5
 				if (myContainer.contains(clip)) {
 					myContainer.removeChild(clip);
 				}
-			}
-			
-			while (dustContainer.numChildren) {
-				dustContainer.removeChildAt(0);
-			}
+			}			
 			
 			if(armor){
 				if (clip.contains(armor)) {
@@ -162,21 +145,12 @@ package com.gmrmarketing.microsoft.halo5
 		public function suspend():void
 		{
 			clip.visible = false;
-			while (dustContainer.numChildren) {
-				dustContainer.removeChildAt(0);
-			}
 		}
 		
 		public function wake(userImage:BitmapData):void
 		{
 			clip.visible = true;
 			facePic.bitmapData = userImage;
-			for (var i:int = 0; i < 150; i++) {
-				var a:Dust = new Dust();
-				a.x = Math.random() * 2160;
-				a.y = Math.random() * 1440;
-				dustContainer.addChild(a);
-			}	
 		}
 		
 		private function rotateLeft(e:MouseEvent):void
