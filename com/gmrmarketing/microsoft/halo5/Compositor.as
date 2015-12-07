@@ -91,7 +91,7 @@ package com.gmrmarketing.microsoft.halo5
 			faceContainer.scaleX = faceContainer.scaleY = .72;
 			clip.addChild(armor);
 			clip.addChild(controls);
-			
+			/*
 			controls.rotLeft.addEventListener(MouseEvent.MOUSE_DOWN, rotateLeft, false, 0, true);
 			controls.rotRight.addEventListener(MouseEvent.MOUSE_DOWN, rotateRight, false, 0, true);
 			controls.scaleMinus.addEventListener(MouseEvent.MOUSE_DOWN, scaleMinus, false, 0, true);
@@ -103,24 +103,37 @@ package com.gmrmarketing.microsoft.halo5
 			controls.btnSpline.addEventListener(MouseEvent.MOUSE_DOWN, editSpline, false, 0, true);
 			controls.btnMirror.addEventListener(MouseEvent.MOUSE_DOWN, mirror, false, 0, true);
 			controls.btnFinish.addEventListener(MouseEvent.MOUSE_DOWN, editComplete, false, 0, true);
-			myContainer.stage.addEventListener(MouseEvent.MOUSE_UP, endAutoButton, false, 0, true);
+			*/
+			controls.rotLeft.addEventListener(TouchEvent.TOUCH_BEGIN, rotateLeft, false, 0, true);
+			controls.rotRight.addEventListener(TouchEvent.TOUCH_BEGIN, rotateRight, false, 0, true);
+			controls.scaleMinus.addEventListener(TouchEvent.TOUCH_BEGIN, scaleMinus, false, 0, true);
+			controls.scalePlus.addEventListener(TouchEvent.TOUCH_BEGIN, scalePlus, false, 0, true);
+			controls.moveUp.addEventListener(TouchEvent.TOUCH_BEGIN, moveUp, false, 0, true);
+			controls.moveLeft.addEventListener(TouchEvent.TOUCH_BEGIN, moveLeft, false, 0, true);
+			controls.moveRight.addEventListener(TouchEvent.TOUCH_BEGIN, moveRight, false, 0, true);
+			controls.moveDown.addEventListener(TouchEvent.TOUCH_BEGIN, moveDown, false, 0, true);
+			controls.btnSpline.addEventListener(TouchEvent.TOUCH_BEGIN, editSpline, false, 0, true);
+			controls.btnMirror.addEventListener(TouchEvent.TOUCH_BEGIN, mirror, false, 0, true);
+			controls.btnFinish.addEventListener(TouchEvent.TOUCH_BEGIN, editComplete, false, 0, true);
+			
+			myContainer.stage.addEventListener(TouchEvent.TOUCH_END, endAutoButton, false, 0, true);
 		}
 		
 		
 		public function hide():void
 		{
-			controls.rotLeft.removeEventListener(MouseEvent.MOUSE_DOWN, rotateLeft);
-			controls.rotRight.removeEventListener(MouseEvent.MOUSE_DOWN, rotateRight);
-			controls.scaleMinus.removeEventListener(MouseEvent.MOUSE_DOWN, scaleMinus);
-			controls.scalePlus.removeEventListener(MouseEvent.MOUSE_DOWN, scalePlus);
-			controls.moveUp.removeEventListener(MouseEvent.MOUSE_DOWN, moveUp);
-			controls.moveLeft.removeEventListener(MouseEvent.MOUSE_DOWN, moveLeft);
-			controls.moveRight.removeEventListener(MouseEvent.MOUSE_DOWN, moveRight);
-			controls.moveDown.removeEventListener(MouseEvent.MOUSE_DOWN, moveDown);
-			controls.btnSpline.removeEventListener(MouseEvent.MOUSE_DOWN, editSpline);
-			controls.btnMirror.removeEventListener(MouseEvent.MOUSE_DOWN, mirror);
-			controls.btnFinish.removeEventListener(MouseEvent.MOUSE_DOWN, editComplete);
-			myContainer.stage.removeEventListener(MouseEvent.MOUSE_UP, endAutoButton);
+			controls.rotLeft.removeEventListener(TouchEvent.TOUCH_BEGIN, rotateLeft);
+			controls.rotRight.removeEventListener(TouchEvent.TOUCH_BEGIN, rotateRight);
+			controls.scaleMinus.removeEventListener(TouchEvent.TOUCH_BEGIN, scaleMinus);
+			controls.scalePlus.removeEventListener(TouchEvent.TOUCH_BEGIN, scalePlus);
+			controls.moveUp.removeEventListener(TouchEvent.TOUCH_BEGIN, moveUp);
+			controls.moveLeft.removeEventListener(TouchEvent.TOUCH_BEGIN, moveLeft);
+			controls.moveRight.removeEventListener(TouchEvent.TOUCH_BEGIN, moveRight);
+			controls.moveDown.removeEventListener(TouchEvent.TOUCH_BEGIN, moveDown);
+			controls.btnSpline.removeEventListener(TouchEvent.TOUCH_BEGIN, editSpline);
+			controls.btnMirror.removeEventListener(TouchEvent.TOUCH_BEGIN, mirror);
+			controls.btnFinish.removeEventListener(TouchEvent.TOUCH_BEGIN, editComplete);
+			myContainer.stage.removeEventListener(TouchEvent.TOUCH_END, endAutoButton);
 			
 			endAutoButton();
 			
@@ -153,21 +166,21 @@ package com.gmrmarketing.microsoft.halo5
 			facePic.bitmapData = userImage;
 		}
 		
-		private function rotateLeft(e:MouseEvent):void
+		private function rotateLeft(e:TouchEvent):void
 		{	
 			faceContainer.rotation -= 1;
 			timeDelta = getTimer() + buttonDelay;
 			myContainer.addEventListener(Event.ENTER_FRAME, autoRotLeft, false, 0, true);
 		}
 		
-		private function rotateRight(e:MouseEvent):void
+		private function rotateRight(e:TouchEvent):void
 		{
 			faceContainer.rotation += 1;
 			timeDelta = getTimer() + buttonDelay;
 			myContainer.addEventListener(Event.ENTER_FRAME, autoRotRight, false, 0, true);
 		}
 		
-		private function scaleMinus(e:MouseEvent):void
+		private function scaleMinus(e:TouchEvent):void
 		{
 			var a:Number = faceContainer.scaleX;
 			faceContainer.scaleX = faceContainer.scaleY = a - .01;
@@ -175,7 +188,7 @@ package com.gmrmarketing.microsoft.halo5
 			myContainer.addEventListener(Event.ENTER_FRAME, autoScaleMinus, false, 0, true);
 		}
 		
-		private function scalePlus(e:MouseEvent):void
+		private function scalePlus(e:TouchEvent):void
 		{
 			var a:Number = faceContainer.scaleX;
 			faceContainer.scaleX = faceContainer.scaleY = a + .01;
@@ -183,28 +196,28 @@ package com.gmrmarketing.microsoft.halo5
 			myContainer.addEventListener(Event.ENTER_FRAME, autoScalePlus, false, 0, true);
 		}
 		
-		private function moveUp(e:MouseEvent):void
+		private function moveUp(e:TouchEvent):void
 		{
 			faceContainer.y -= 1;
 			timeDelta = getTimer() + buttonDelay;
 			myContainer.addEventListener(Event.ENTER_FRAME, autoUp, false, 0, true);
 		}
 		
-		private function moveLeft(e:MouseEvent):void
+		private function moveLeft(e:TouchEvent):void
 		{
 			faceContainer.x -= 1;
 			timeDelta = getTimer() + buttonDelay;
 			myContainer.addEventListener(Event.ENTER_FRAME, autoLeft, false, 0, true);
 		}
 		
-		private function moveRight(e:MouseEvent):void
+		private function moveRight(e:TouchEvent):void
 		{
 			faceContainer.x += 1;
 			timeDelta = getTimer() + buttonDelay;
 			myContainer.addEventListener(Event.ENTER_FRAME, autoRight, false, 0, true);
 		}
 		
-		private function moveDown(e:MouseEvent):void
+		private function moveDown(e:TouchEvent):void
 		{
 			faceContainer.y += 1;
 			timeDelta = getTimer() + buttonDelay;
@@ -271,7 +284,7 @@ package com.gmrmarketing.microsoft.halo5
 			}
 		}
 		
-		private function endAutoButton(e:MouseEvent = null):void
+		private function endAutoButton(e:TouchEvent = null):void
 		{
 			myContainer.removeEventListener(Event.ENTER_FRAME, autoRotLeft);
 			myContainer.removeEventListener(Event.ENTER_FRAME, autoRotRight);
@@ -284,13 +297,13 @@ package com.gmrmarketing.microsoft.halo5
 		}
 		
 		
-		private function editSpline(e:MouseEvent):void
+		private function editSpline(e:TouchEvent):void
 		{
 			dispatchEvent(new Event(EDIT_SPLINE));
 		}
 		
 		
-		private function mirror(e:MouseEvent):void
+		private function mirror(e:TouchEvent):void
 		{
 			var flipped:BitmapData = new BitmapData(facePic.width, facePic.height, true, 0x00000000);
 			var matrix:Matrix = new Matrix( -1, 0, 0, 1, facePic.width, 0);
@@ -299,7 +312,7 @@ package com.gmrmarketing.microsoft.halo5
 		}
 		
 		
-		private function editComplete(e:Event):void
+		private function editComplete(e:TouchEvent):void
 		{
 			dispatchEvent(new Event(COMPLETE));
 		}

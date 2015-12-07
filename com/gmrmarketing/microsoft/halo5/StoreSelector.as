@@ -49,9 +49,19 @@ package com.gmrmarketing.microsoft.halo5
 		}
 		
 		
+		/**
+		 * array of objects with id,label,value keys (label=value)
+		 * @param	items
+		 */
 		public function showList(items:Array):void
 		{
+			/*
+			for (var i:int = 0; i < items.length; i++) {
+				trace("a.push({\"id\":" + items[i].id + ", \"label\":\"" + items[i].label + "\", \"value\":\"" + items[i].value + "\"});");
+			}
+			*/
 			clip.theText.text = ""; //erase default downloading text
+			
 			cb.addItems(items);
 			cb.addEventListener(ComboBox.CHANGED, comboSelected, false, 0, true);			
 			clip.addChild(cb);
@@ -85,10 +95,12 @@ package com.gmrmarketing.microsoft.halo5
 			clip.theStore.text = myData.label;
 		}
 		
+		
 		private function chooseStore(e:MouseEvent):void
 		{
 			dispatchEvent(new Event(COMPLETE));
 		}
+		
 		
 	}
 	

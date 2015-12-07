@@ -8,24 +8,33 @@ package com.gmrmarketing.humana.rockandroll
 		public static const DATA_READY:String = "dataReady";
 		private var data:Object;
 		
+		private const DEBUG:Boolean = false;
+		
 		
 		public function JSONReader(){}
 		
 		//called from Main.getRunners()
 		public function getRunners():void
 		{
-			var urlRequest:URLRequest  = new URLRequest("http://humanarocknroll.thesocialtab.net/Milestones/GetLatestRunners");
+			if(!DEBUG){
+				var urlRequest:URLRequest  = new URLRequest("http://humanarocknroll.thesocialtab.net/Milestones/GetLatestRunners");
 
-			var urlLoader:URLLoader = new URLLoader();
-			urlLoader.addEventListener(Event.COMPLETE, completeHandler, false, 0, true);
+				var urlLoader:URLLoader = new URLLoader();
+				urlLoader.addEventListener(Event.COMPLETE, completeHandler, false, 0, true);
 
-			try{
-				urlLoader.load(urlRequest);
-			} catch (e:Error) {
-				trace("JSON - Cannot load : " + e.message);
+				try{
+					urlLoader.load(urlRequest);
+				} catch (e:Error) {
+					trace("JSON - Cannot load : " + e.message);
+				}
+			}else {
+				//DEBUG
+				var lo:URLLoader = new URLLoader();
+				lo.addEventListener(Event.COMPLETE, completeHandler, false, 0, true);
+				lo.load(new URLRequest("raceData.json"));
 			}
 		}
-
+		
 		
 		private function completeHandler(e:Event):void 
 		{

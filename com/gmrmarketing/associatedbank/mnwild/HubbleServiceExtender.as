@@ -27,7 +27,7 @@ package com.gmrmarketing.associatedbank.mnwild
 		 */
 		override public function send(data:Object):void
 		{
-			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":245, "DeviceId":autoInc.guid, "DeviceResponseId":autoInc.nextNum, "ResponseDate":Utility.hubbleTimeStamp, "FieldResponses":[ { "FieldId":1810, "Response":data.fname }, { "FieldId":1811, "Response":data.lname }, { "FieldId":1813, "Response":data.email }, { "FieldId":1816, "Response":data.phone }, { "FieldId":1817, "Response":data.zip }], "Latitude":"0", "Longitude":"0" }};
+			var resp:Object = { "MethodData": { "InteractionId":245, "FieldResponses":[ { "FieldId":1810, "Response":data.fname }, { "FieldId":1811, "Response":data.lname }, { "FieldId":1813, "Response":data.email }, { "FieldId":1816, "Response":data.phone }, { "FieldId":1817, "Response":data.zip }]}};
 			
 			if (data.optIn == 4520) {
 				resp.MethodData.FieldResponses.push( { "FieldId":1807, "ResponseID": 4520, "Response":"I agree" });

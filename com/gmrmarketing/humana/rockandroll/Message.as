@@ -1,5 +1,5 @@
 /**
- * Use by Main
+ * Used by Main
  */
 
 
@@ -41,6 +41,8 @@ package com.gmrmarketing.humana.rockandroll
 			clip = new mcMessage(); //lib clip
 			clip.x = tx;
 			clip.y = ty;
+			
+			clip.isMilitary = message.mil;
 			
 			var bg:MovieClip;
 			//if(!isMilitary){
@@ -98,7 +100,7 @@ package com.gmrmarketing.humana.rockandroll
 			curMessage++;
 			if (curMessage >= messages.length) {
 				messageTimer.stop();
-				dispatchEvent(new Event(MESSAGE_DISPLAYED));	//all messages to the runner have been shown			
+				TweenMax.to(clip, .5, { alpha:0, onComplete:dispatchRemove } );	
 			}else{
 				clip.message.text = messages[curMessage].message;
 				clip.from.text = messages[curMessage].fromFName + " " + messages[curMessage].fromLName;
@@ -110,6 +112,18 @@ package com.gmrmarketing.humana.rockandroll
 		{
 			return [clip.x, clip.y];
 		}
+		
+		public function isMilitary():Boolean
+		{
+			return clip.isMilitary;
+		}
+		
+		
+		private function dispatchRemove():void
+		{
+			dispatchEvent(new Event(MESSAGE_DISPLAYED));	//all messages to the runner have been shown			
+		}
+		
 		
 		public function kill():void
 		{

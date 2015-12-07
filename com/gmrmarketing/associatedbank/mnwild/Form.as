@@ -38,7 +38,7 @@ package com.gmrmarketing.associatedbank.mnwild
 			clip.c2.gotoAndStop(1);
 			clip.c3.gotoAndStop(1);
 			clip.c4.gotoAndStop(1);
-			clip.c5.gotoAndStop(1);
+			//clip.c5.gotoAndStop(1);
 			clip.c6.gotoAndStop(1);
 			clip.c7.gotoAndStop(1);
 			clip.c8.gotoAndStop(1);
@@ -66,7 +66,7 @@ package com.gmrmarketing.associatedbank.mnwild
 			
 			clip.c3.addEventListener(MouseEvent.MOUSE_DOWN, toggle345, false, 0, true);
 			clip.c4.addEventListener(MouseEvent.MOUSE_DOWN, toggle345, false, 0, true);
-			clip.c5.addEventListener(MouseEvent.MOUSE_DOWN, toggle345, false, 0, true);
+			//clip.c5.addEventListener(MouseEvent.MOUSE_DOWN, toggle345, false, 0, true);
 			
 			clip.c6.addEventListener(MouseEvent.MOUSE_DOWN, toggle67, false, 0, true);
 			clip.c7.addEventListener(MouseEvent.MOUSE_DOWN, toggle67, false, 0, true);
@@ -99,7 +99,7 @@ package com.gmrmarketing.associatedbank.mnwild
 			
 			clip.c3.removeEventListener(MouseEvent.MOUSE_DOWN, toggle345);
 			clip.c4.removeEventListener(MouseEvent.MOUSE_DOWN, toggle345);
-			clip.c5.removeEventListener(MouseEvent.MOUSE_DOWN, toggle345);
+			//clip.c5.removeEventListener(MouseEvent.MOUSE_DOWN, toggle345);
 			
 			clip.c6.removeEventListener(MouseEvent.MOUSE_DOWN, toggle67);
 			clip.c7.removeEventListener(MouseEvent.MOUSE_DOWN, toggle67);
@@ -132,11 +132,16 @@ package com.gmrmarketing.associatedbank.mnwild
 			data.optIn = clip.c1.currentFrame == 2 ? 4520 : 4521;
 			if (clip.c3.currentFrame == 2) {
 				data.survey = 4522;
+			}else {
+				data.survey = 4524;
+			}
+			/*
 			}else if (clip.c4.currentFrame == 2) {
 				data.survey = 4523;
 			}else {
 				data.survey = 4524;
-			}			
+			}
+			*/
 			data.over18 =  clip.c6.currentFrame == 2 ? 4525 : 4526;
 			
 			data.fname = clip.fname.text;
@@ -181,15 +186,15 @@ package com.gmrmarketing.associatedbank.mnwild
 			if (m.name.indexOf("3") != -1) {
 				clip.c3.gotoAndStop(2);
 				clip.c4.gotoAndStop(1);
-				clip.c5.gotoAndStop(1);
-			}else if (m.name.indexOf("4") != -1) {
+				//clip.c5.gotoAndStop(1);
+			}/*else if (m.name.indexOf("4") != -1) {
 				clip.c3.gotoAndStop(1);
 				clip.c4.gotoAndStop(2);
 				clip.c5.gotoAndStop(1);
-			}else {
+			}*/else {
 				clip.c3.gotoAndStop(1);
-				clip.c4.gotoAndStop(1);
-				clip.c5.gotoAndStop(2);
+				clip.c4.gotoAndStop(2);
+				//clip.c5.gotoAndStop(2);
 			}
 		}
 		
@@ -268,7 +273,7 @@ package com.gmrmarketing.associatedbank.mnwild
 				if (clip.c4.currentFrame == 2 && clip.phone.text == "") {
 					showError("Please supply a mobile number for SMS follow-up.");
 				}else{
-					if ((clip.c1.currentFrame == 1 && clip.c2.currentFrame == 1) || (clip.c3.currentFrame == 1 && clip.c4.currentFrame == 1 && clip.c5.currentFrame == 1) || (clip.c6.currentFrame == 1 && clip.c7.currentFrame == 1) || (clip.c8.currentFrame == 1 && clip.c9.currentFrame == 1) || (clip.c10.currentFrame == 1 && clip.c11.currentFrame == 1) || (clip.c12.currentFrame == 1 && clip.c13.currentFrame == 1)|| (clip.c14.currentFrame == 1 && clip.c15.currentFrame == 1)) {
+					if ((clip.c1.currentFrame == 1 && clip.c2.currentFrame == 1) || (clip.c3.currentFrame == 1 && clip.c4.currentFrame == 1) || (clip.c6.currentFrame == 1 && clip.c7.currentFrame == 1) || (clip.c8.currentFrame == 1 && clip.c9.currentFrame == 1) || (clip.c10.currentFrame == 1 && clip.c11.currentFrame == 1) || (clip.c12.currentFrame == 1 && clip.c13.currentFrame == 1)|| (clip.c14.currentFrame == 1 && clip.c15.currentFrame == 1)) {
 						showError("Please answer all required questions.");
 					}else {
 						if (Validator.isValidEmail(clip.email.text)) {

@@ -3,7 +3,7 @@
  * Version 1 - 09/22/2015
  * 
  * Stores data objects in a specified local file
- * File is located in the users Documents folder
+ * File is located in the users Documents folder - extension is .que auto appended
  * 
  * Set the service in order to send queue objects to a web service
  * 

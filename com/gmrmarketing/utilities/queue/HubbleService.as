@@ -34,7 +34,7 @@ package com.gmrmarketing.utilities.queue
 	
 	public class HubbleService extends EventDispatcher implements IQueueService
 	{	
-		private const BASE_URL:String = "http://api.nowpik.com/api/";
+		private const BASE_URL:String = "https://api.nowpik.com/api/";
 
 		private var token:String; //GUID - token returned from call to validateuser
 		private var responseId:int;//set in submit if the form data is already posted, or formPosted normally
@@ -79,18 +79,27 @@ package com.gmrmarketing.utilities.queue
 		}
 		
 		
+		/**
+		 * Returns true if the token has been received from NowPik
+		 */
 		public function get ready():Boolean
 		{
 			return token != "";
 		}
 		
 		
+		/**
+		 * implements interface method
+		 */
 		public function get errorEvent():String
 		{
 			return "serviceError";
 		}
 		
 		
+		/**
+		 * implements interface method
+		 */
 		public function get completeEvent():String
 		{
 			return "serviceComplete";
@@ -119,12 +128,18 @@ package com.gmrmarketing.utilities.queue
 		}
 	
 		
+		/**
+		 * Returns true if a user object is currently being sent
+		 */
 		public function get busy():Boolean
 		{
 			return  isBusy;
 		}
 		
 		
+		/**
+		 * Returns an object with the NowPik token for this interaction
+		 */
 		public function get authData():Object
 		{
 			return {"AccessToken":token};
@@ -145,7 +160,7 @@ package com.gmrmarketing.utilities.queue
 		
 		
 		/**
-		 * If a token error occurs call getToken() again in 5 seconds
+		 * If a token error occurs call getToken() again in 10 seconds
 		 * 
 		 * @param	e
 		 */
@@ -153,7 +168,7 @@ package com.gmrmarketing.utilities.queue
 		{
 			error = "HubbleService.tokenError";
 			token = "";
-			var a:Timer = new Timer(5000, 1);
+			var a:Timer = new Timer(10000, 1);
 			a.addEventListener(TimerEvent.TIMER, delayedToken, false, 0, true);
 			a.start();
 		}

@@ -26,7 +26,7 @@ package com.gmrmarketing.utilities
 		public function AutoUpdate() 
 		{
 			appUpdater = new ApplicationUpdater();
-			lastError = "No error";
+			lastError = "";
 			
 			clip = new mcAutoUpdate();
 			clip.x = 552;
@@ -97,6 +97,7 @@ package com.gmrmarketing.utilities
 				
 				clip.btn1.theText.text = "cancel";
 				clip.btn2.theText.text = "update";
+				clip.btn2.alpha = 1;
 				clip.btn1.addEventListener(MouseEvent.MOUSE_DOWN, closeUpdater, false, 0, true);
 				clip.btn2.addEventListener(MouseEvent.MOUSE_DOWN, startDownload, false, 0, true);
 				clip.progBar.bar.scaleX = 0;
@@ -106,6 +107,9 @@ package com.gmrmarketing.utilities
 						myContainer.addChild(clip);
 					}
 				}
+			}else {
+				lastError = "No update";
+				dispatchEvent(new Event(UPDATE_ERROR));
 			}
 		}
 		
@@ -135,6 +139,7 @@ package com.gmrmarketing.utilities
 		{
 			clip.btn1.removeEventListener(MouseEvent.MOUSE_DOWN, closeUpdater);
 			clip.btn1.addEventListener(MouseEvent.MOUSE_DOWN, cancelUpdate, false, 0, true);
+			clip.btn2.alpha = .4;
 			clip.btn2.removeEventListener(MouseEvent.MOUSE_DOWN, startDownload);
 			
 			appUpdater.addEventListener(ProgressEvent.PROGRESS, downloadProgress);		   

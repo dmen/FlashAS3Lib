@@ -38,7 +38,7 @@ package com.gmrmarketing.microsoft.halo5
 			
 			whiteFlash = new mcWhiteFlash();
 			
-			cam = new CamPic();
+			cam = new CamPic("Logitech");
 			cam.init(1280, 720, 0, 0, 0, 0, 30);
 		}
 		
@@ -82,7 +82,7 @@ package com.gmrmarketing.microsoft.halo5
 						
 			cam.pause();
 			cam.hide();
-		}		
+		}
 		
 		
 		public function get photo():BitmapData

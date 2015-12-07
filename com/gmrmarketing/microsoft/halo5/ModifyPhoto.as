@@ -26,17 +26,13 @@ package com.gmrmarketing.microsoft.halo5
 		
 		private var blur:BlurFilter;
 		private var handles:Array;
-		private var frameCounter:int;
-		
+		private var beziers:Object;
 		
 		public function ModifyPhoto()
 		{
 			/*headPoints = new mcHeadPoints();//library movieClip with handles h1-h8 - has 1280x720 frame
 			headPoints.x = 440;
-			headPoints.y = 150;*/
-			
-			
-			
+			headPoints.y = 150;*/			
 			
 			maskSprite = new Sprite();	//draw into this and then image it into the mask Bitmap
 			msg = maskSprite.graphics;
@@ -118,7 +114,6 @@ package com.gmrmarketing.microsoft.halo5
 				//handles[i].grip.rotation = Math.atan2(335 - handles[i].y, 600 - handles[i].x) * 57.295;
 				handles[i].grip.rotation = Math.atan2(540 - handles[i].y, 960 - handles[i].x) * 57.295;
 			}
-			frameCounter = 0;
 			
 			myContainer.stage.addEventListener(MouseEvent.MOUSE_UP, endDrag, false, 0, true);
 			
@@ -161,7 +156,8 @@ package com.gmrmarketing.microsoft.halo5
 			
 			myContainer.stage.removeEventListener(MouseEvent.MOUSE_UP, endDrag);
 			clip.btnRetake.removeEventListener(MouseEvent.MOUSE_DOWN, retakePic);
-			clip.btnComplete.removeEventListener(MouseEvent.MOUSE_DOWN, picComplete);			
+			clip.btnComplete.removeEventListener(MouseEvent.MOUSE_DOWN, picComplete);
+			
 			clip.removeEventListener(Event.ENTER_FRAME, drawLines);
 		}
 		
@@ -178,6 +174,8 @@ package com.gmrmarketing.microsoft.halo5
 		
 		public function get headImage():BitmapData
 		{
+			maskData.applyFilter(mask.bitmapData, new Rectangle(0, 0, 1920, 1080), new Point(0, 0), blur);
+			
 			var smallMask:BitmapData = new BitmapData(1280, 720, true, 0x00000000);
 			var m:Matrix = new Matrix();
 			m.scale(0.6666666666666667, 0.6666666666666667);
@@ -206,12 +204,9 @@ package com.gmrmarketing.microsoft.halo5
 		{	
 			var i:int;
 			
-			frameCounter++;
-			if(frameCounter % 10 == 0){
-				for (i = 0; i < 11; i++) {	
-					//handles[i].grip.rotation = Math.atan2(335 - handles[i].y, 600 - handles[i].x) * 57.295;
-					handles[i].grip.rotation = Math.atan2(540 - handles[i].y, 960 - handles[i].x) * 57.295;
-				}
+			for (i = 0; i < 11; i++) {	
+				//handles[i].grip.rotation = Math.atan2(335 - handles[i].y, 600 - handles[i].x) * 57.295;
+				handles[i].grip.rotation = Math.atan2(540 - handles[i].y, 960 - handles[i].x) * 57.295;
 			}
 	
 			msg.clear();
@@ -220,7 +215,7 @@ package com.gmrmarketing.microsoft.halo5
 			g.clear();			
 			g.lineStyle(.5, 0x999999);
 			
-			var beziers:Object = BezierPlugin.bezierThrough([ { x:headPoints.h1.x, y:headPoints.h1.y }, { x:headPoints.h2.x, y:headPoints.h2.y }, { x:headPoints.h3.x, y:headPoints.h3.y }, { x:headPoints.h4.x, y:headPoints.h4.y },{ x:headPoints.h5.x, y:headPoints.h5.y },{ x:headPoints.h6.x, y:headPoints.h6.y },{ x:headPoints.h7.x, y:headPoints.h7.y },{ x:headPoints.h8.x, y:headPoints.h8.y },{ x:headPoints.h9.x, y:headPoints.h9.y },{ x:headPoints.h10.x, y:headPoints.h10.y }, { x:headPoints.h11.x, y:headPoints.h11.y }, { x:headPoints.h1.x, y:headPoints.h1.y }], 1, true);
+			beziers = BezierPlugin.bezierThrough([ { x:headPoints.h1.x, y:headPoints.h1.y }, { x:headPoints.h2.x, y:headPoints.h2.y }, { x:headPoints.h3.x, y:headPoints.h3.y }, { x:headPoints.h4.x, y:headPoints.h4.y },{ x:headPoints.h5.x, y:headPoints.h5.y },{ x:headPoints.h6.x, y:headPoints.h6.y },{ x:headPoints.h7.x, y:headPoints.h7.y },{ x:headPoints.h8.x, y:headPoints.h8.y },{ x:headPoints.h9.x, y:headPoints.h9.y },{ x:headPoints.h10.x, y:headPoints.h10.y }, { x:headPoints.h11.x, y:headPoints.h11.y }, { x:headPoints.h1.x, y:headPoints.h1.y }], 1, true);
 			var bx:Array = beziers.x; //the "x" Beziers
 			var by:Array = beziers.y; //the "y" Beziers
 			
@@ -241,42 +236,42 @@ package com.gmrmarketing.microsoft.halo5
 			maskData = new BitmapData(1920, 1080, true, 0x00FF0000);
 			mask.bitmapData = maskData;
 			maskData.draw(maskSprite, null, null, null, null, true);
-			maskData.applyFilter(mask.bitmapData, new Rectangle(0, 0, 1920, 1080), new Point(0,0), blur);
+			
 		}
 		
 		
 		private function dragH1(e:MouseEvent):void
-		{	
+		{
 			headPoints.h1.startDrag();
 		}
 		
 		private function dragH2(e:MouseEvent):void
-		{	
+		{
 			headPoints.h2.startDrag();
 		}
 		
 		private function dragH3(e:MouseEvent):void
-		{	
+		{
 			headPoints.h3.startDrag();
 		}
 		
 		private function dragH4(e:MouseEvent):void
-		{	
+		{
 			headPoints.h4.startDrag();
 		}
 		
 		private function dragH5(e:MouseEvent):void
-		{	
+		{
 			headPoints.h5.startDrag();
 		}
 		
 		private function dragH6(e:MouseEvent):void
-		{	
+		{
 			headPoints.h6.startDrag();
 		}
 		
 		private function dragH7(e:MouseEvent):void
-		{	
+		{
 			headPoints.h7.startDrag();
 		}
 		
@@ -303,7 +298,7 @@ package com.gmrmarketing.microsoft.halo5
 		private function endDrag(e:MouseEvent):void
 		{
 			//check handle bounds
-			headPoints.stopDrag();
+			headPoints.stopDrag();	
 		}
 		
 	}

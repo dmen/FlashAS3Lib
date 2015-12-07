@@ -1,6 +1,5 @@
 package com.gmrmarketing.empirestate.ilny
 {
-	import com.adobe.air.logging.FileTarget;
 	import flash.events.*;
 	import flash.display.*;
 	import flash.geom.Matrix;

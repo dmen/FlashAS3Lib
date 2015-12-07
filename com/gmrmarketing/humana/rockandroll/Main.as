@@ -23,6 +23,7 @@ package com.gmrmarketing.humana.rockandroll
 		
 		private var militaryCheers:Array;
 		private var militaryIndex:int;
+		private var showingMilitary:Boolean;
 		
 		
 		public function Main()
@@ -116,13 +117,16 @@ package com.gmrmarketing.humana.rockandroll
 				}
 			}
 			
-			//see if there's a spot open for a military cheer
-			if ((screenLocs.length > 0) && (screenLocs.length < 6) && (militaryCheers.length > 0)) {
+			//see if there's a spot open for a military cheer - but only put one if at least one regular cheer is showing
+			if ((screenLocs.length > 0) && (screenLocs.length < 6) && (militaryCheers.length > 0) && !showingMilitary) {
+				
+				showingMilitary = true;
+				
 				sl = screenLocs.shift();
 				
 				//fName, lName, messages, time, tenTime, viewingTime, messageTime
 				//messages is an array of objects with keys: message, fromFName, fromLName
-				var milMessage:Object = { fName:"", lName:"", messageTime:5, messages:[ { message:militaryCheers[militaryIndex], fromFName:"", fromLName:"" } ] };
+				var milMessage:Object = { mil:true,  fName:"", lName:"", messageTime:5, messages:[ { message:militaryCheers[militaryIndex], fromFName:"", fromLName:"" } ] };
 				
 				militaryIndex++;
 				if (militaryIndex >= militaryCheers.length) {
@@ -144,7 +148,10 @@ package com.gmrmarketing.humana.rockandroll
 		 * @param	e
 		 */
 		private function removeMessage(e:Event):void
-		{			
+		{		
+			if (e.currentTarget.isMilitary()) {
+				showingMilitary = false;
+			}
 			screenLocs.push(e.currentTarget.getPoint());//screen loc available
 			e.currentTarget.kill();//call kill in message object
 			
@@ -154,6 +161,7 @@ package com.gmrmarketing.humana.rockandroll
 				logo.gotoAndPlay(1);
 			}
 		}
+		
 	}
 	
 }

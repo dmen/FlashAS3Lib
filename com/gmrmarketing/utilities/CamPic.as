@@ -70,10 +70,23 @@ package com.gmrmarketing.utilities
 		
 		/**
 		 * CONSTRUCTOR
-		 */
-		public function CamPic() 
+		 */		
+		public function CamPic(camName:String = "") 
 		{			
-			cam = Camera.getCamera();
+			if (camName != "") {
+				var n:Array = Camera.names;
+				for (var i:int = 0; i < n.length; i++) {
+					if (String(n[i]).indexOf(camName) != -1) {
+						cam = Camera.getCamera(i as String);
+						break;
+					}
+				}
+			}
+			
+			if (cam == null) {
+				cam = Camera.getCamera();
+			}
+			
 			camAvailable = cam == null ? false : true;				
 			clearFilters();
 			clearOverlays();

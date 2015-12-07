@@ -8,7 +8,7 @@ package com.gmrmarketing.microsoft.halo5
 	import com.gmrmarketing.utilities.CornerQuit;	
 	import flash.net.SharedObject;
 	import flash.utils.Timer;
-	import flash.ui.Mouse;	
+	import flash.ui.*;	
 	
 	
 	public class Main extends MovieClip
@@ -40,6 +40,7 @@ package com.gmrmarketing.microsoft.halo5
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.EXACT_FIT;
 			Mouse.hide();
+			Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
 			
 			mainContainer = new Sprite();
 			addChild(mainContainer);
@@ -68,15 +69,7 @@ package com.gmrmarketing.microsoft.halo5
 			thanks = new Thanks();
 			thanks.container = mainContainer;
 			
-			queue = new Queue();
-			queue.fileName = "msHalo5queue";
-			queue.service = new HubbleServiceExtender();
-			queue.start();
-			
 			msDef = new MSDef();
-			
-			so = SharedObject.getLocal("MSHalo5_storeList");
-			//so.clear();
 			
 			storeCorner = new CornerQuit();
 			storeCorner.init(cornerContainer, "ur");
@@ -84,42 +77,83 @@ package com.gmrmarketing.microsoft.halo5
 			
 			quitCorner = new CornerQuit();
 			quitCorner.init(cornerContainer, "ul");
-			quitCorner.addEventListener(CornerQuit.CORNER_QUIT, quitApp);
-			
-			authPoller = new Timer(3000);
-			
-			autoUpdate = new AutoUpdate();
-			autoUpdate.container = cornerContainer;
-			autoUpdate.addEventListener(AutoUpdate.UPDATE_ERROR, showAutoUpdateError, false, 0, true);
-			autoUpdate.init("http://design.gmrmarketing.com/microsoft/h5armor/autoupdate.xml");
+			quitCorner.addEventListener(CornerQuit.CORNER_QUIT, quitApp);			
 			
 			dialogBox = new DialogBox();
 			dialogBox.container = cornerContainer;
+			
+			authPoller = new Timer(10000, 2);
+			
+			autoUpdate = new AutoUpdate();
+			autoUpdate.container = cornerContainer;
+			
+			addEventListener(Event.ADDED_TO_STAGE, init);
+		}
 		
+		
+		private function init(e:Event):void
+		{
+			removeEventListener(Event.ADDED_TO_STAGE, init);			
+			
+			so = SharedObject.getLocal("MSHaloFive");
+			//so.clear();
+			
+			autoUpdate.addEventListener(AutoUpdate.UPDATE_ERROR, showAutoUpdateError, false, 0, true);
+			autoUpdate.init("http://design.gmrmarketing.com/microsoft/h5armor/autoupdate.xml");
+			//showAutoUpdateError();
+		}
+		
+		
+		/**
+		 * callback from autoUpdate call
+		 * called if autoUpdate errors or works
+		 * 
+		 * @param	e
+		 */
+		private function showAutoUpdateError(e:Event):void
+		{
+			
+			if (autoUpdate.error != "No update") {
+				//some error occured - if there is an update it will show its own dialog
+				dialogBox.show(autoUpdate.error);
+			}
+			
+			queue = new Queue();
+			queue.fileName = "msHalo5queue";
+			queue.service = new HubbleServiceExtender();
+			queue.start();
+			
 			//if store selection is not made yet then wait for token and get definitions			
 			if (so.data.storeSelection == undefined) {
 				
 				storeSelector.show("No store selected");//has default - downloading store list... text
 				
-				if(queue.serviceAuthData.AccessToken == ""){					
+				so.data.storeList = msDef.defaultStoreList;
+				so.flush();
+			
+				storeSelector.addEventListener(StoreSelector.COMPLETE, showArmorSelector, false, 0, true);
+				storeSelector.showList(msDef.defaultStoreList);
+		
+				/*
+				if (queue.serviceAuthData.AccessToken == "") {				
 					authPoller.addEventListener(TimerEvent.TIMER, checkForToken, false, 0, true);
 					authPoller.start();
 				}else {
 					checkForToken();
 				}
+				*/
 			}else {
 				//trace(so.data.storeSelection.id, so.data.storeSelection.label);
 				showArmorSelector();
-			}
-			
+			}			
 		}
 		
-		
+		/*
 		private function checkForToken(e:TimerEvent = null):void
-		{
-			if (queue.serviceAuthData.AccessToken != "") {
+		{			
+			if (queue.serviceAuthData.AccessToken != "" || authPoller.currentCount == authPoller.repeatCount) {
 				
-				authPoller.stop();
+				authPoller.reset();
 				authPoller.removeEventListener(TimerEvent.TIMER, checkForToken);
 				
 				msDef.addEventListener(MSDef.COMPLETE, gotInteractionDefinitions, false, 0, true);
@@ -141,7 +175,7 @@ package com.gmrmarketing.microsoft.halo5
 			storeSelector.addEventListener(StoreSelector.COMPLETE, showArmorSelector, false, 0, true);
 			storeSelector.showList(msDef.data);
 		}
-		
+		*/
 		
 		//called by four taps at upper-right
 		private function showStoreSelector(e:Event):void
@@ -151,22 +185,47 @@ package com.gmrmarketing.microsoft.halo5
 			}else {
 				storeSelector.show("No store selected");
 			}
+			
+			storeSelector.addEventListener(StoreSelector.COMPLETE, closeStoreSelector, false, 0, true);
+			storeSelector.showList(msDef.defaultStoreList);
+			
+			
+			
+			/*
 			if(queue.serviceAuthData.AccessToken == ""){					
 				authPoller.addEventListener(TimerEvent.TIMER, checkForToken, false, 0, true);
 				authPoller.start();
 			}else {
 				checkForToken();
-			}
+			}			
+			*/
 		}		
+		private function closeStoreSelector(e:Event):void
+		{
+			//save storeSelection in the sharedObject
+			var o:Object = storeSelector.data;
+			if(o.id != undefined){//if undefined no selection was made
+				so.data.storeSelection = o;
+				so.flush();
+			}
+			storeSelector.removeEventListener(StoreSelector.COMPLETE, closeStoreSelector);
+			storeSelector.hide();
+		}
 		
-		
+		/*
 		private function interactionDefinitionError(e:Event):void
 		{
 			msDef.removeEventListener(MSDef.COMPLETE, gotInteractionDefinitions);
 			msDef.removeEventListener(MSDef.ERROR, interactionDefinitionError);			
+			dialogBox.show("Error retrieving store list - using default");
 			
+			so.data.storeList = msDef.defaultStoreList;
+			so.flush();
+			
+			storeSelector.addEventListener(StoreSelector.COMPLETE, showArmorSelector, false, 0, true);
+			storeSelector.showList(msDef.defaultStoreList);
 		}
-		
+		*/
 		
 		private function showArmorSelector(e:Event = null):void
 		{
@@ -175,7 +234,7 @@ package com.gmrmarketing.microsoft.halo5
 			
 			//save storeSelection in the sharedObject
 			var o:Object = storeSelector.data;
-			if(o.id != undefined){
+			if(o.id != undefined){//if undefined no selection was made
 				so.data.storeSelection = o;
 				so.flush();
 			}
@@ -292,11 +351,6 @@ package com.gmrmarketing.microsoft.halo5
 			showArmorSelector();
 		}
 		
-		
-		private function showAutoUpdateError(e:Event):void
-		{
-			dialogBox.show(autoUpdate.error);
-		}
 		
 		private function quitApp(e:Event):void
 		{

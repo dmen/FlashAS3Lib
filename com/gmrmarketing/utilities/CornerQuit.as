@@ -56,15 +56,10 @@
  
 package com.gmrmarketing.utilities
 {
-	import flash.display.DisplayObjectContainer;
-	import flash.display.Sprite;
-	import flash.events.EventDispatcher;
-	import flash.events.MouseEvent;
-	import flash.events.Event;
+	import flash.display.*;
+	import flash.events.*;
 	import flash.geom.Point;
 	import flash.utils.getTimer;
-	import flash.system.fscommand
-	import flash.desktop.NativeApplication;
 	
 	public class CornerQuit extends EventDispatcher
 	{

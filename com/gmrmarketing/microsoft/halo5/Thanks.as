@@ -7,7 +7,7 @@ package com.gmrmarketing.microsoft.halo5
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.ByteArray;
-	import flash.filesystem.*; 
+	//import flash.filesystem.*; 
 	import com.adobe.images.JPEGEncoder;
 	import com.dynamicflash.util.Base64;
 	import flash.utils.Timer;
