@@ -43,8 +43,9 @@ package com.gmrmarketing.nfl.wineapp
 		 * 
 		 * @param	answers three element array with 0 or 1
 		 * @param 	wines Array of wine objects from the json
+		 * @param	userRank Array of three items - 1,2,3
 		 */
-		public function show(answers:Array, answersText:Array, wines:Array)
+		public function show(answers:Array, answersText:Array, wines:Array, userRank:Array)
 		{			
 			theAnswers = answers;
 			theWines = wines;
@@ -52,6 +53,9 @@ package com.gmrmarketing.nfl.wineapp
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
+			
+			arcContainer.graphics.clear();
+			
 			clip.x = 0;
 			clip.title.alpha = 0;
 			clip.subTitle.alpha = 0;
@@ -66,6 +70,10 @@ package com.gmrmarketing.nfl.wineapp
 			clip.circ1.theText.text = "1";
 			clip.circ2.theText.text = "2";
 			clip.circ3.theText.text = "3";
+			
+			clip.circ1.theRank.theText.text = "#" + userRank[0];// String(3 - userRank.indexOf(1));
+			clip.circ2.theRank.theText.text = "#" + userRank[1];//String(3 - userRank.indexOf(2));
+			clip.circ3.theRank.theText.text = "#" + userRank[2];//String(3 - userRank.indexOf(3));
 			
 			clip.circ1.subText.text = wines[0].producer + "\n" + wines[0].variety;
 			clip.circ2.subText.text = wines[1].producer + "\n" + wines[1].variety;
@@ -172,6 +180,9 @@ package com.gmrmarketing.nfl.wineapp
 			infoDialog.producer.text = theWines[index].producer;
 			infoDialog.variety.text = theWines[index].variety;
 			infoDialog.notes.text = theWines[index].notes;
+			infoDialog.scentsOf.text = theWines[index].l3AnswerA + ", " + theWines[index].l3AnswerB + ", " + theWines[index].l3AnswerC;
+			infoDialog.pairsWith.text = theWines[index].l2AnswerA + ", " + theWines[index].l2AnswerB + ", " + theWines[index].l2AnswerC;
+			//right side info
 			infoDialog.vintage.text = theWines[index].vintage;
 			infoDialog.abv.text = String(theWines[index].abv) + "%";
 			if (theWines[index].ratingNumber != 0) {

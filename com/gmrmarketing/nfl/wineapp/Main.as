@@ -198,8 +198,9 @@ package com.gmrmarketing.nfl.wineapp
 			
 			results.addEventListener(Results.COMPLETE, hideResults, false, 0, true);
 			results.addEventListener(Results.SKIP, hideResultsSkip, false, 0, true);
-			results.show(challenge.selection, challenge.answersText, wineData.getWineDataFromSelections(configDialog.selectedWines(selectPreference.selection)));
+			results.show(challenge.selection, challenge.answersText, wineData.getWineDataFromSelections(configDialog.selectedWines(selectPreference.selection)), rankWine.selection);
 		}
+		
 		
 		/**
 		 * called if user presses send email button in results
@@ -257,6 +258,7 @@ package com.gmrmarketing.nfl.wineapp
 			email.hide();
 		}
 		
+		
 		private function showThanks(e:Event):void
 		{
 			email.removeEventListener(Email.HIDDEN, showThanks);
@@ -264,7 +266,21 @@ package com.gmrmarketing.nfl.wineapp
 			
 			if (didEmail) {
 				//send data to web service
-				//service.send(email.data, wineData.getWineDataFromSelections(configDialog.selectedWines(selectPreference.selection)));
+				var o:Object = email.data; //object with name and email properties
+				
+				//the users ranking order - so we can tell them their favorite
+				o.userRankWine1 = rankWine.selection[0];//1 if favorite - 3 least favorite
+				o.userRankWine2 = rankWine.selection[1];
+				o.userRankWine3 = rankWine.selection[2];
+				
+				//array of 3 objects from the JSON
+				var wineList:Array = wineData.getWineDataFromSelections(configDialog.selectedWines(selectPreference.selection));
+				
+				o.wine1 = wineList[0];
+				o.wine2 = wineList[1];
+				o.wine3 = wineList[2];
+				
+				q.add(o);
 			}
 			
 			thanks.addEventListener(Thanks.COMPLETE, hideThanks, false, 0, true);

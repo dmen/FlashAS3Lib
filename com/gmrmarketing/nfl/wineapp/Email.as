@@ -34,9 +34,12 @@ package com.gmrmarketing.nfl.wineapp
 		}
 		
 		
-		public function get data():Array
+		/**
+		 * Returns an object with name and email properties
+		 */
+		public function get data():Object
 		{
-			return [clip.inputs.thaName.text, clip.inputs.theEmail.text];
+			return {name:clip.inputs.thaName.text, email:clip.inputs.theEmail.text};
 		}
 		
 		

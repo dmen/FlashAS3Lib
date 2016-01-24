@@ -45,11 +45,21 @@ package com.gmrmarketing.nfl.wineapp
 		
 		/**
 		 * returns the ranking in a 3 element array
-		 * ranking is 1,2,3
+		 * ranking is 1,2,3 - in order of their favorite
+		 * 1 is favorite, 3 least favorite
+		 * so if users choices were #3 favorite, #2 liked it, #1 loved it
+		 * this array would be [2,3,1]
 		 */
 		public function get selection():Array
 		{
-			return buckets;
+			var rank:Array = [0, 0, 0];
+			
+			rank[0] = 3 - buckets.indexOf(1);
+			rank[1] = 3 - buckets.indexOf(2);
+			rank[2] = 3 - buckets.indexOf(3);
+			
+			return rank;
+			
 		}
 		
 		
