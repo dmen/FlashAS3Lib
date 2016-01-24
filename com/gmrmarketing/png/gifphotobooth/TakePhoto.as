@@ -199,7 +199,7 @@ package com.gmrmarketing.png.gifphotobooth
 			if (frameCount % EVERY_NTH == 0) {
 				//crop - capture at 1280x720
 				var a:BitmapData = new BitmapData(749, 657);
-				a.copyPixels(camPic.getCapture(), new Rectangle(265, 31, 749, 657), new Point(0, 0));
+				a.copyPixels(camPic.getCaptureImage(), new Rectangle(265, 31, 749, 657), new Point(0, 0));
 				frames.push(a);
 			}
 			if (frames.length >= MAX_FRAMES) {

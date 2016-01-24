@@ -71,7 +71,7 @@ package  com.gmrmarketing.png.gifphotobooth
 		 * called from Thanks.encFrame() once the gif has been created
 		 */
 		public function add(data:Object):void
-		{			
+		{	
 			data.deviceResponseID = autoInc.num;
 			data.responseID = -1;//only used if photo/followup post errors - this is hubble's response id from sending
 			//the form data, so that when the photo is sent it can be attached to the proper record - ie if this is -1 then the
@@ -199,7 +199,7 @@ package  com.gmrmarketing.png.gifphotobooth
 		 */
 		private function writeUser(obj:Object):void
 		{
-			obj.timeAdded = Utility.getTimeStamp();
+			obj.timeAdded = Utility.hubbleTimeStamp;
 			try{
 				//var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
 				var file:File = File.documentsDirectory.resolvePath( DATA_FILE_NAME );

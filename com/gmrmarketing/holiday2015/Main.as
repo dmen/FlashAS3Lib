@@ -5,6 +5,9 @@ package com.gmrmarketing.holiday2015
 	import flash.events.*;
 	import flash.geom.*;	
 	import flash.ui.Mouse;
+	import flash.utils.ByteArray;
+	import flash.filesystem.*; 
+	import com.adobe.images.JPEGEncoder;
 	import com.greensock.TweenMax;
 	import com.gmrmarketing.utilities.queue.Queue;
 	import flash.desktop.NativeApplication;
@@ -33,6 +36,8 @@ package com.gmrmarketing.holiday2015
 		private var tim:TimeoutHelper;
 		
 		private var originalUserImage:BitmapData; //image obtained in countComplete()
+		
+		private var encoder:JPEGEncoder;
 		
 		
 		public function Main()
@@ -84,6 +89,8 @@ package com.gmrmarketing.holiday2015
 			tim = TimeoutHelper.getInstance();
 			tim.addEventListener(TimeoutHelper.TIMED_OUT, doReset, false, 0, true);
 			tim.init(60000);
+			
+			encoder = new JPEGEncoder(82); 
 			
 			bg.show();
 			
@@ -158,6 +165,8 @@ package com.gmrmarketing.holiday2015
 			composed.copyPixels(pics[0], new Rectangle(0, 0, 870, 865), new Point(0, 0));	
 			composed.copyPixels(pics[1], new Rectangle(0, 0, 870, 865), new Point(0, 0), null, null, true);	
 			
+			TweenMax.delayedCall(1.25, saveImageLocal, [composed]);
+			
 			userImage = new Bitmap(composed);
 			userImage.x = 537;
 			userImage.y = 57;
@@ -197,6 +206,8 @@ package com.gmrmarketing.holiday2015
 			buttonBar.removeEventListener(ButtonBar.CONT, doContinue);
 			
 			TweenMax.to(userImage, .5, { alpha:0, onComplete:killUser } );
+			
+			buttonBar.hideRetakeCont();
 			
 			take.removeEventListener(Take.OVERLAY_CHANGED, updateUserPic);
 			take.addEventListener(Take.HIDDEN, showEmail, false, 0, true);			
@@ -299,6 +310,28 @@ package com.gmrmarketing.holiday2015
 		private function quitApplication(e:Event):void
 		{
 			NativeApplication.nativeApplication.exit();
+		}
+		
+		
+		private function saveImageLocal(bmpd:BitmapData):void
+		{
+			//quality 1-100
+			var ba:ByteArray = encoder.encode(bmpd); //bitmap data object
+			
+			var a:Date = new Date();
+			var fileName:String = "holiday2015_" + String(a.valueOf()) + ".jpg";			
+			
+			try{
+				var file:File = File.documentsDirectory.resolvePath( fileName );
+				var stream:FileStream = new FileStream();
+				stream.open( file, FileMode.APPEND );
+				stream.writeBytes (ba, 0, ba.length );
+				stream.close();
+				file = null;
+				stream = null;
+			}catch (e:Error) {
+							
+			}
 		}
 	}
 	

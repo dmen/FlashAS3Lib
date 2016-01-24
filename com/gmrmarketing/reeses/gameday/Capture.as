@@ -57,7 +57,7 @@ package com.gmrmarketing.reeses.gameday
 			vidConnection.addEventListener(NetStatusEvent.NET_STATUS, statusHandler);	
 			vidConnection.connect("rtmp://localhost/reesesGameday");
 			
-			clip.userVid.addChildAt(vid, 0);
+			clip.userVid.addChildAt(vid, 0);//container with white border, etc.
 			vid.x = 20; 
 			vid.y = 20;
 			
@@ -84,7 +84,9 @@ package com.gmrmarketing.reeses.gameday
 			clip.receVid.y = 1100;
 			clip.userVid.y = 1100;
 			clip.userVid.timer.alpha = 0;
+			clip.userVid.sil.alpha = .69;
 			
+			TweenMax.to(clip.userVid.redDot, 0, { colorMatrixFilter: { saturation:0 }} );
 			TweenMax.to(clip.receVid, .5, { y:256, ease:Back.easeOut } );
 			TweenMax.to(clip.userVid, .5, { y:325, delay:.1, ease:Back.easeOut } );
 			TweenMax.to(clip.title, .5, { alpha:1, delay:.4, onComplete:initCams } );
@@ -158,11 +160,14 @@ package com.gmrmarketing.reeses.gameday
 			stitcher.addEventListener(Stitcher.COMPLETE, videoReady, false, 0, true);
 			stitcher.questions2(receInterview.questions, outputFileName);
 		}
+		
+		
 		//called from Main.videoDoneProcessing()
 		public function get fileName():String
 		{
 			return outputFileName;
 		}
+		
 		
 		private function videoReady(e:Event):void
 		{
@@ -208,7 +213,7 @@ package com.gmrmarketing.reeses.gameday
 			clip.waitForRece.q2.gotoAndStop(1);
 			clip.waitForRece.q3.gotoAndStop(1);
 			clip.waitForRece.q4.gotoAndStop(1);
-			clip.waitForRece.q5.gotoAndStop(1);
+			//clip.waitForRece.q5.gotoAndStop(1);
 			
 			receInterview.removeEventListener(Interview2.INTRO_COMPLETE, startQuestions);			
 			receInterview.addEventListener(Interview2.OUTRO_COMPLETE, interviewComplete, false, 0, true);			
@@ -226,7 +231,8 @@ package com.gmrmarketing.reeses.gameday
 			TweenMax.to(clip.userVid.timer, .4, { alpha: 0 } );
 			
 			TweenMax.to(clip.receVid, .5, { y:256, ease:Back.easeOut } );
-			TweenMax.to(clip.userVid, .5, { y:325, ease:Back.easeOut } );			
+			TweenMax.to(clip.userVid, .5, { y:325, ease:Back.easeOut } );
+			TweenMax.to(clip.userVid.sil, .4, { alpha:.69 } );
 			TweenMax.to(clip.whiteArrow, .5, { scaleX:1, x:997 } );			
 			TweenMax.to(clip.waitForRece, .5, { y:708, ease:Back.easeOut, onComplete:doNextQuestion } );
 		}		
@@ -235,7 +241,8 @@ package com.gmrmarketing.reeses.gameday
 		private function doNextQuestion():void		
 		{	
 			//advance circle indicator
-			if(questionNumber <= 5){
+			//total of four questions
+			if(questionNumber <= 4){
 				clip.waitForRece["q" + questionNumber].gotoAndStop(2);
 			}
 			
@@ -248,6 +255,7 @@ package com.gmrmarketing.reeses.gameday
 		{
 			TweenMax.to(clip.receVid, .5, { y:325, ease:Back.easeOut } );
 			TweenMax.to(clip.userVid, .5, { y:256, ease:Back.easeOut } );
+			TweenMax.to(clip.userVid.sil, .4, { alpha:0 } );
 			TweenMax.to(clip.whiteArrow, .5, { scaleX: -1, x:907 } );
 			clip.userVid.timer.theTime.text = timeToRespond.toString();
 			TweenMax.to(clip.userVid.timer, .4, { alpha:1 } );
@@ -258,15 +266,34 @@ package com.gmrmarketing.reeses.gameday
 		private function doRecordUser():void
 		{
 			//show red dot
-			clip.userVid.redDot.gotoAndStop(2);								
+			//clip.userVid.redDot.gotoAndStop(2);								
+			//TweenMax.to(clip.userVid.redDot, .5, { colorMatrixFilter: { saturation:1 }} );
+			TweenMax.to(clip.userVid.redDot, .5, {glowFilter:{color:0xff0000, strength:2, alpha:1, blurX:44, blurY:44}, yoyo:true, repeat:-1, colorMatrixFilter: { saturation:1 }});
 			
 			//vidStream.attachCamera(cam);
 			//vidStream.attachAudio(mic);	
 			vidStream.soundTransform.volume = .7;
-			vidStream.publish("user" + questionNumber.toString(), "record"); //flv			
+			vidStream.publish("user" + questionNumber.toString(), "record"); //flv
+			
+			myContainter.stage.addEventListener(KeyboardEvent.KEY_DOWN, checkForStopRecording, false, 0, true);
 			
 			tim.addEventListener(TimerEvent.TIMER, updateTimer, false, 0, true);
 			tim.start();
+		}
+		
+		
+		/**
+		 * Looks for PageUp or PageDown KeyCode from remote and cancel recording
+		 * @param	e
+		 */
+		private function checkForStopRecording(e:KeyboardEvent):void
+		{
+			if (e.keyCode == 33 || e.keyCode == 34) {
+				clip.userVid.timer.theTime.text = "0";
+				tim.stop();
+				tim.removeEventListener(TimerEvent.TIMER, updateTimer);
+				stopRecording();
+			}
 		}
 		
 		
@@ -284,8 +311,10 @@ package com.gmrmarketing.reeses.gameday
 		
 		
 		private function stopRecording():void
-		{			
-			clip.userVid.redDot.gotoAndStop(1);//show gray dot
+		{
+			myContainter.stage.removeEventListener(KeyboardEvent.KEY_DOWN, checkForStopRecording);			
+			
+			TweenMax.to(clip.userVid.redDot, .5, {glowFilter:{color:0xff0000, strength:0, alpha:0, blurX:0, blurY:0}, yoyo:false, colorMatrixFilter: { saturation:0 }});			
 			
 			//vidStream.attachCamera(null);
 			//vidStream.attachAudio(null);	

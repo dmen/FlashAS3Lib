@@ -82,12 +82,13 @@ package com.gmrmarketing.reeses.gameday
 		
 		public function randQuestions():void
 		{
-			var questions:Array = [[basePath + "conferenceChampionship",5], [basePath + "preGameTailgate",5], [basePath + "beatingTheNumberOne",5], [basePath + "afternoonGames",5], [basePath + "underdogsOrFavorites",5], [basePath + "modernJerseys",5], [basePath + "studentSection",5], [basePath + "pocketPassers",5], [basePath + "speedOrPower",5], [basePath + "unstoppableOffense",5], [basePath + "piecesOrCups",5]];
+			//questions and user response time (in sec) for each question
+			var questions:Array = [[basePath + "conferenceChampionship",10], [basePath + "preGameTailgate",10], [basePath + "beatingTheNumberOne",10], [basePath + "afternoonGames",10], [basePath + "underdogsOrFavorites",10], [basePath + "modernJerseys",10], [basePath + "studentSection",10], [basePath + "pocketPassers",10], [basePath + "speedOrPower",10], [basePath + "unstoppableOffense",10], [basePath + "piecesOrCups",10]];
 			
 			//this is for flash player - .mp4 for these
 			playList = [];
 			fileList = [];
-			while (playList.length < 5) {
+			while (playList.length < 4) {
 				var a:Array = questions.splice(Math.floor(Math.random() * questions.length), 1)[0];
 				var b:Array = a.concat();
 				a[0] += ".mp4";

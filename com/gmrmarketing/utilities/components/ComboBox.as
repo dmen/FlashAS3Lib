@@ -17,18 +17,22 @@
 		trace(item.label, item.data);
 	}	
 	
+	
 	To customize the component, don't call useDefaults() and instead:
 	
 	//width, height, corner radius, toggle percent, fontSize, fontReference, leftMargin
 	a.setLabelProperties(400, 60, 20, 18, 36, new treb(),12);
+	
 	//numVisibleItems, itemHeight, sliderPercentWidth, fontSize, fontReference, leftMargin
 	a.setListProperties(6, 36, 10, 18, new treb(), 14);
+	
 	//labelTextColor, bgColor, borderColor, arrowBorderColor, arrowFillColor, separatorLineColor
 	a.setLabelColors(0xbbbbbb,0x666666,0xdddddd,0xaaaaaa,0xdddddd,0xaaaaaa);
+	
 	//itemTextColor, itemHighlightColor, bgColor, bgHighlightColor
 	a.setListColors(0xcccccc,0x333333,0x666666,0xaaaaaa);
-
  */
+	
 package com.gmrmarketing.utilities.components
 {
 	import flash.display.*;
@@ -37,8 +41,7 @@ package com.gmrmarketing.utilities.components
 	import flash.text.*;
 	import com.gmrmarketing.utilities.components.ComboItem;
 	import com.gmrmarketing.utilities.components.ComboSlider;
-	import com.greensock.TweenMax;
-	
+	import com.greensock.TweenMax;	
 	
 	public class ComboBox extends Sprite
 	{	
@@ -343,6 +346,18 @@ package com.gmrmarketing.utilities.components
 		public function get selectedItem():Object
 		{
 			return selItem;
+		}
+		
+		
+		/**
+		 * Sets the currently selected item
+		 * item object should containe label and data properties
+		 */
+		public function set selectedItem(item:Object):void
+		{
+			selItem = item;
+			label.text = selItem.label;
+			label.setTextFormat(labelFormat);			
 		}
 		
 		

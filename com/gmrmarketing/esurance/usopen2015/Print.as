@@ -17,7 +17,7 @@ package com.gmrmarketing.esurance.usopen2015
 		public function Print(){}
 		
 		
-		public function doPrint(pic:BitmapData):void
+		public function doPrint(pic:BitmapData, num:int):void
 		{		
             var printJob:PrintJob = new PrintJob();           
 			
@@ -35,8 +35,9 @@ package com.gmrmarketing.esurance.usopen2015
 				//page.rotation = 180;
 				
 				try {
-					printJob.addPage(page, null, options);
-					//printJob.addPage(page, null, options);
+					for (var i:int = 0; i < num; i++ ) {
+						printJob.addPage(page, null, options);
+					}
 				}
 				catch(e:Error) {
 					dispatchEvent(new Event(ADD_ERROR));

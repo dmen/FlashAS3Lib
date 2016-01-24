@@ -61,7 +61,7 @@ package com.gmrmarketing.png.gifphotobooth
 					clip.email.visible = true;
 					clip.phone.visible = true;
 					clip.email.theCheck.visible = false;
-					clip.email.theCheck2.visible = false;
+					//clip.email.theCheck2.visible = false;//commented for Puffs Kiss Cry
 					clip.phone.theCheck.visible = false;
 					
 					kbd.setFocusFields([[clip.email.theText, 0],[clip.phone.theText, 12]]);
@@ -72,7 +72,7 @@ package com.gmrmarketing.png.gifphotobooth
 					clip.phone.visible = false;
 					clip.email.visible = true;
 					clip.email.theCheck.visible = false;
-					clip.email.theCheck2.visible = false;
+					//clip.email.theCheck2.visible = false; //commented for Puffs Kiss Cry
 					kbd.setFocusFields([[clip.email.theText, 0]]);
 					break;
 				case "text":
@@ -94,7 +94,7 @@ package com.gmrmarketing.png.gifphotobooth
 			clip.phone.theText.text = "";
 			
 			clip.email.btnCheck.addEventListener(MouseEvent.MOUSE_DOWN, toggleEmailAge, false, 0, true);
-			clip.email.btnCheck2.addEventListener(MouseEvent.MOUSE_DOWN, toggleEmailOptIn, false, 0, true);
+			//clip.email.btnCheck2.addEventListener(MouseEvent.MOUSE_DOWN, toggleEmailOptIn, false, 0, true); //commented for Puffs Kiss Cry
 			clip.phone.btnCheck.addEventListener(MouseEvent.MOUSE_DOWN, togglePhoneOptIn, false, 0, true);
 			
 			clip.btnAdd.addEventListener(MouseEvent.MOUSE_DOWN, addPerson, false, 0, true);
@@ -155,6 +155,7 @@ package com.gmrmarketing.png.gifphotobooth
 			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, doNext);
 			clip.btnBack.removeEventListener(MouseEvent.MOUSE_DOWN, doBack);
 			clip.email.btnCheck.removeEventListener(MouseEvent.MOUSE_DOWN, toggleEmailOptIn);
+			//clip.email.btnCheck2.removeEventListener(MouseEvent.MOUSE_DOWN, toggleEmailOptIn);//commented for Puffs Kiss Cry
 			clip.phone.btnCheck.removeEventListener(MouseEvent.MOUSE_DOWN, togglePhoneOptIn);
 		}
 		
@@ -227,14 +228,18 @@ package com.gmrmarketing.png.gifphotobooth
 			}
 			
 			if (good == 1) {
-				if(myData.length < 5){
-					var newEntry:Object = { email:clip.email.theText.text, phone:clip.phone.theText.text, opt:clip.email.theCheck2.visible };
+				if (myData.length < 5) {
+				
+					var ph:String = clip.phone.theText.text;
+					var clPh:String = ph.replace(/\-/g, "");
+					
+					var newEntry:Object = { email:clip.email.theText.text, phone:clPh };// , opt:clip.email.theCheck2.visible };//commented for Puffs Kiss Cry
 					myData.push(newEntry);
 					message("New Data Added");
 					clip.email.theText.text = "";
 					clip.phone.theText.text = "";
 					clip.email.theCheck.visible = false;//age > 13
-					clip.email.theCheck2.visible = false;//opt-in
+					//clip.email.theCheck2.visible = false;//opt-in //commented for Puffs Kiss Cry
 					clip.phone.theCheck.visible = false;//sms accept
 					kbd.setFocus(0);//reset to email
 				}else {
@@ -284,8 +289,12 @@ package com.gmrmarketing.png.gifphotobooth
 			}
 			
 			if (good == 1) {
-				if(myData.length < 5){
-					var newEntry:Object = { email:clip.email.theText.text, phone:clip.phone.theText.text, opt:clip.email.theCheck.visible };
+				if (myData.length < 5) {
+				
+					var ph:String = clip.phone.theText.text;
+					var clPh:String = ph.replace(/\-/g, "");
+					
+					var newEntry:Object = { email:clip.email.theText.text, phone:clPh, opt:clip.email.theCheck.visible };
 					myData.push(newEntry);
 					dispatchEvent(new Event(COMPLETE));
 				}else {

@@ -32,7 +32,6 @@ package com.gmrmarketing.reeses.gameday
 			isBusy = false;
 			
 			log = Logger.getInstance();
-			log.logger = new LoggerAIR();
 			
 			formLoader = new URLLoader();
 		}

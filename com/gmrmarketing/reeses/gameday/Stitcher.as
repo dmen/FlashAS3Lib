@@ -6,7 +6,7 @@
  * First converts the five user videos to quickTime's and copies
  * them to the applicationFolder
  * 
- * Then uses filter_complex to concatenate the twelve videos into an mp4
+ * Then uses filter_complex to concatenate the videos into an mp4
  * 
  * Dispathes COMPLETE event when finished - it output.mp4 is available in the applicationDirectory
  */
@@ -40,13 +40,12 @@ package com.gmrmarketing.reeses.gameday
 			outputPath = File.applicationStorageDirectory.nativePath + "\\";
 			
 			log = Logger.getInstance();
-			log.logger = new LoggerAIR();
 		}
 		
 		
 		/**
 		 * Called from Capture.stitchVideo()
-		 * questions array is intro, five questions, outro
+		 * questions array is intro, four questions, outro
 		 * outName is output file name with extension
 		 */
 		public function questions2(q:Array, outName:String):void
@@ -68,7 +67,7 @@ package com.gmrmarketing.reeses.gameday
 			args.push('-r');		
 			args.push('24');
 			args.push('-i');
-			args.push(userPath + "user1.flv");			
+			args.push(userPath + "user1.flv");//AMS4.5 _definst_ folder	
 			args.push('-vcodec');
 			args.push('libx264');
 			args.push('-acodec');
@@ -177,12 +176,13 @@ package com.gmrmarketing.reeses.gameday
 			nativeProcessStartupInfo.arguments = args;	
 			
 			//when conversion is completed
-			process.addEventListener(NativeProcessExitEvent.EXIT, user4Complete);
+			//process.addEventListener(NativeProcessExitEvent.EXIT, user4Complete);
+			process.addEventListener(NativeProcessExitEvent.EXIT, user5Complete);
     
 			//start the process
 			process.start(nativeProcessStartupInfo);			
 		}
-		
+		/*
 		private function user4Complete(e:NativeProcessExitEvent):void
 		{			
 			process.removeEventListener(NativeProcessExitEvent.EXIT, user4Complete);
@@ -214,7 +214,7 @@ package com.gmrmarketing.reeses.gameday
 			//start the process
 			process.start(nativeProcessStartupInfo);			
 		}
-		
+		*/
 		private function user5Complete(e:NativeProcessExitEvent):void
 		{		
 			process.removeEventListener(NativeProcessExitEvent.EXIT, user5Complete);
@@ -258,20 +258,26 @@ package com.gmrmarketing.reeses.gameday
 			args.push('-i');
 			args.push(outputPath + "user4.mov");
 			//q5
-			args.push('-i');
-			args.push(questions.shift());
+			//args.push('-i');
+			//args.push(questions.shift());
 			//user 5
-			args.push('-i');
-			args.push(outputPath + "user5.mov");
+			//args.push('-i');
+			//args.push(outputPath + "user5.mov");
 			//outro
 			args.push('-i');
 			args.push(questions.shift());			
 			//overlay
 			args.push('-i');
-			args.push(overlayPath + "overlay.png");
+			CONFIG::COLLEGE {
+				args.push(overlayPath + "overlay.png");
+			}
+			CONFIG::SENIOR {
+				args.push(overlayPath + "overlay_seniorBowl.png");
+			}
 			
 			args.push('-filter_complex');
-			args.push('[0:0][0:1][1:0][1:1][2:0][2:1][3:0][3:1][4:0][4:1][5:0][5:1][6:0][6:1][7:0][7:1][8:0][8:1][9:0][9:1][10:0][10:1][11:0][11:1]concat=n=12:v=1:a=1[bg][a];[bg][12:v]overlay=0:0[v]');
+			//args.push('[0:0][0:1][1:0][1:1][2:0][2:1][3:0][3:1][4:0][4:1][5:0][5:1][6:0][6:1][7:0][7:1][8:0][8:1][9:0][9:1][10:0][10:1][11:0][11:1]concat=n=12:v=1:a=1[bg][a];[bg][12:v]overlay=0:0[v]');
+			args.push('[0:0][0:1][1:0][1:1][2:0][2:1][3:0][3:1][4:0][4:1][5:0][5:1][6:0][6:1][7:0][7:1][8:0][8:1][9:0][9:1]concat=n=10:v=1:a=1[bg][a];[bg][10:v]overlay=0:0[v]');
 			
 			args.push('-map');
 			args.push('[v]');

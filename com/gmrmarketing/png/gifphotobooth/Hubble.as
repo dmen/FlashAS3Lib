@@ -8,7 +8,7 @@ package com.gmrmarketing.png.gifphotobooth
 	import com.gmrmarketing.utilities.Logger;
 	import com.gmrmarketing.utilities.LoggerAIR;
 	import com.greensock.TweenMax;
-	import com.gmrmarketing.utilities.Strings;//for timestamp
+	import com.gmrmarketing.utilities.Utility;
 	
 	
 	public class Hubble extends EventDispatcher
@@ -141,7 +141,7 @@ package com.gmrmarketing.png.gifphotobooth
 				}else{
 					//responseID = -1 form data has not been sent yet
 					
-					var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":230, "DeviceId":myGUID, "DeviceResponseId":formData.deviceResponseID, "ResponseDate":Strings.hubbleTimestamp(), "FieldResponses":[ { "FieldId":1667, "Response":formData.email }, { "FieldId":1668, "Response":formData.phone },{ "FieldId":1670, "Response":formData.opt1 }, { "FieldId":1673, "Response":formData.opt2 }, { "FieldId":1674, "Response":formData.opt3 }, { "FieldId":1675, "Response":formData.opt4 }, { "FieldId":1676, "Response":formData.opt5 }, { "FieldId":1682, "Response":true }], "Latitude":"0", "Longitude":"0" }};
+					var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":230, "DeviceId":myGUID, "DeviceResponseId":formData.deviceResponseID, "ResponseDate":Utility.hubbleTimeStamp, "FieldResponses":[ { "FieldId":1667, "Response":formData.email }, { "FieldId":1668, "Response":formData.phone },{ "FieldId":1670, "Response":formData.opt1 }, { "FieldId":1673, "Response":formData.opt2 }, { "FieldId":1674, "Response":formData.opt3 }, { "FieldId":1675, "Response":formData.opt4 }, { "FieldId":1676, "Response":formData.opt5 }, { "FieldId":1682, "Response":true }], "Latitude":"0", "Longitude":"0" }};
 					
 					var js:String = JSON.stringify(resp);
 					var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionresponse");
@@ -271,7 +271,7 @@ package com.gmrmarketing.png.gifphotobooth
 		
 		private function callPrintAPI():void
 		{	
-			var ts:String = Strings.hubbleTimestamp();
+			var ts:String = Utility.hubbleTimeStamp;
 			
 			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":230, "Label":"photoPrinted", "Value":"1", "Timestamp":ts, "DeviceResponseId":myGUID }};		
 			var js:String = JSON.stringify(resp);

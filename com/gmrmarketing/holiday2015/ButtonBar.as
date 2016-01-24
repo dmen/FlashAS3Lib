@@ -19,6 +19,7 @@ package com.gmrmarketing.holiday2015
 		private var myContainer:DisplayObjectContainer;
 		
 		
+		
 		public function ButtonBar()
 		{
 			clip = new mcButtonBar();
@@ -47,13 +48,13 @@ package com.gmrmarketing.holiday2015
 			clip.count.the2.alpha = 1;
 			
 			clip.count.the3.scaleX = clip.count.the3.scaleY = 1;
-			clip.count.the3.alpha = 1;
+			clip.count.the3.alpha = 1;			
 			
-			TweenMax.to(clip.choose, .5, { y:0, ease:Back.easeOut, delay:1 } );
-			TweenMax.to(clip.pose, .5, { y:0, ease:Back.easeOut, delay:1.1 } );
-			TweenMax.to(clip.take, .5, { y:0, ease:Back.easeOut, delay:1.2 } );
+			TweenMax.to(clip.take, .5, { y:0, ease:Back.easeOut, delay:1 } );
 			
 			clip.take.addEventListener(MouseEvent.MOUSE_DOWN, takePressed, false, 0, true);
+			
+			TweenMax.to(clip.take.theText, 1, { scaleX:1.2, scaleY:1.2, yoyo:true, repeat:-1});
 		}
 		
 		public function hide():void
@@ -62,9 +63,7 @@ package com.gmrmarketing.holiday2015
 			clip.retake.y = 100;
 			clip.cont.y = 100;
 			clip.email.y = 100;
-			clip.cancel.y = 100;
-			clip.choose.y = 100;
-			clip.pose.y = 100;
+			clip.cancel.y = 100;			
 			clip.take.y = 100;
 		}
 		
@@ -78,13 +77,15 @@ package com.gmrmarketing.holiday2015
 		
 		private function takePressed(e:MouseEvent):void
 		{
+			TweenMax.killTweensOf(clip.take.theText);
+			TweenMax.to(clip.take.theText, .3, { scaleX:1, scaleY:1 } );
 			dispatchEvent(new Event(TAKE));
 		}
 		
 		
 		public function startCountdown():void
 		{
-			TweenMax.to(clip.pose, .5, { y:100, ease:Back.easeIn } );
+			TweenMax.to(clip.take, .5, { y:100, ease:Back.easeIn } );
 			TweenMax.to(clip.count, .5, { y:0, ease:Back.easeOut, delay:.5 } );
 			
 			TweenMax.to(clip.count.the3, .3, { scaleX:1.2, scaleY:1.2, ease:Back.easeOut, delay:1.2 } );
@@ -120,10 +121,11 @@ package com.gmrmarketing.holiday2015
 		public function reset():void
 		{
 			TweenMax.to(clip.retake, .5, { y:100, ease:Back.easeIn } );
-			TweenMax.to(clip.cont, .5, { y:100, ease:Back.easeIn, delay:.1 } );
+			TweenMax.to(clip.cont, .5, { y:100, ease:Back.easeIn, delay:.1 } );			
 			
-			TweenMax.to(clip.pose, .5, { y:0, ease:Back.easeOut, delay:.5 } );
 			TweenMax.to(clip.take, .5, { y:0, ease:Back.easeOut, delay:.6 } );
+			
+			TweenMax.to(clip.take.theText, 1, { scaleX:1.2, scaleY:1.2, yoyo:true, repeat:-1});
 			
 			clip.count.the1.scaleX = clip.count.the1.scaleY = 1;
 			clip.count.the1.alpha = 1;
@@ -136,14 +138,17 @@ package com.gmrmarketing.holiday2015
 		}
 		
 		
+		public function hideRetakeCont():void
+		{
+			TweenMax.to(clip.retake, .5, { y:100, ease:Back.easeIn } );
+			TweenMax.to(clip.cont, .5, { y:100, ease:Back.easeIn, delay:.1 } );
+		}
+		
+		
 		public function showEmail():void
 		{
-			TweenMax.to(clip.choose, .5, { y:100, ease:Back.easeIn } );
-			TweenMax.to(clip.retake, .5, { y:100, ease:Back.easeIn, delay:.1 } );
-			TweenMax.to(clip.cont, .5, { y:100, ease:Back.easeIn, delay:.2 } );
-			
-			TweenMax.to(clip.cancel, .5, { y:0, ease:Back.easeOut, delay:.9 } );
-			TweenMax.to(clip.email, .5, { y:0, ease:Back.easeOut, delay:.8 } );
+			TweenMax.to(clip.cancel, .5, { y:0, ease:Back.easeOut, delay:.6 } );
+			TweenMax.to(clip.email, .5, { y:0, ease:Back.easeOut, delay:.5 } );
 			
 			clip.cancel.addEventListener(MouseEvent.MOUSE_DOWN, cancelPressed, false, 0, true);
 			clip.email.addEventListener(MouseEvent.MOUSE_DOWN, emailPressed, false, 0, true);

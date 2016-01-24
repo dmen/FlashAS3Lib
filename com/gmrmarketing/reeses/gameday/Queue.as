@@ -12,16 +12,25 @@ package com.gmrmarketing.reeses.gameday
 	
 	
 	public class Queue extends EventDispatcher  
-	{
-		private const DATA_FILE_NAME:String = "reesesGDQueue.csv";
+	{		
+		private var DATA_FILE_NAME:String
 		private var users:Array;//current queue				
 		private var curUpload:Object; //currently uploading user object - users[0] - set in uploadNext()	
 		
 		private var web:WebService;
 		private var log:Logger;
 		
+		
 		public function Queue()
 		{
+			CONFIG::COLLEGE {
+				DATA_FILE_NAME = "reesesGDQueue.csv";
+			}
+			CONFIG::SENIOR {
+				//change queue file name if it's for senior bowl
+				DATA_FILE_NAME = "reesesGDQueue_SB.csv";
+			}
+			
 			log = Logger.getInstance();
 			
 			web = new WebService();

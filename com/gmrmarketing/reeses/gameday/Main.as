@@ -1,3 +1,12 @@
+/**
+ * Uses Config constants for conditional compilation
+ * CONFIG::SENIOR 
+ * CONFIG::COLLEGE
+ * 
+ * One must be true and the other false
+ * 
+ * Changes the file name used in Queue.as and the overlay used in Stitcher.as
+ */
 package com.gmrmarketing.reeses.gameday
 {
 	import flash.display.*;
@@ -37,7 +46,14 @@ package com.gmrmarketing.reeses.gameday
 			Mouse.hide();
 			
 			log = Logger.getInstance();
-			log.logger = new LoggerAIR();
+			
+			CONFIG::COLLEGE {
+				log.logger = new LoggerAIR("reesesLog.txt");
+			}
+			CONFIG::SENIOR {
+				log.logger = new LoggerAIR("reesesLog_sb.txt");
+			}
+			
 			log.truncate();//limt to 2000 entries
 			log.log(Utility.timeStamp + " | Application Start");
 
@@ -89,6 +105,7 @@ package com.gmrmarketing.reeses.gameday
 			
 			intro.addEventListener(Intro.BEGIN, showInstructions, false, 0, true);
 			intro.show();
+			//email.show();
 		}
 		
 		

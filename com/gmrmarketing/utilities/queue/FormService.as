@@ -11,7 +11,7 @@
 	var q:Queue = new Queue();
 	q.fileName = "taco2";
 	q.service = new FormService("http://formURL");
-	q.add({email:"dmennenoh@gmrmarketing.com", fname:"Dave", lname:"Mennenoh"});
+	q.send({email:"dmennenoh@gmrmarketing.com", fname:"Dave", lname:"Mennenoh"});
 	
 	Note the object given to the Queue in Queue.add will be used
 	to define the data passed to the service in the Post. The
@@ -51,6 +51,17 @@ package com.gmrmarketing.utilities.queue
 			isBusy = false;
 			error = "FormService Started";
 			formLoader = new URLLoader();
+		}
+		
+		public function get authData():Object
+		{
+			return { };
+		}
+		
+		
+		public function get ready():Boolean
+		{
+			return true;
 		}
 		
 		//These functions exist because you can't define String Constants in the Interface

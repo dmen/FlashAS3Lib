@@ -32,9 +32,12 @@ package com.gmrmarketing.png.gifphotobooth
 			animTimer = new Timer(150);//150ms per frame - 
 			animTimer.addEventListener(TimerEvent.TIMER, advanceFrame);
 			
+			//commented for puffs kiss cry
+			/*
 			over = new Bitmap(new overlayLarge());//library
 			over.x = 575;
 			over.y = 214;
+			*/
 			
 			bmp = new Bitmap();			
 			bmp.x = 575;
@@ -68,7 +71,7 @@ package com.gmrmarketing.png.gifphotobooth
 			}
 			
 			clip.addChildAt(bmp, 0);
-			clip.addChild(over);
+			//clip.addChild(over);//commented for puffs kiss cry
 			
 			frames = f;
 			
@@ -104,9 +107,12 @@ package com.gmrmarketing.png.gifphotobooth
 			if(clip.contains(bmp)){
 				clip.removeChild(bmp);
 			}
+			//commented for puffs kiss cry
+			/*
 			if(clip.contains(over)){
 				clip.removeChild(over);
 			}
+			*/
 		}
 		
 		/**

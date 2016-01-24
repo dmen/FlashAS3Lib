@@ -34,7 +34,6 @@ package com.gmrmarketing.holiday2015
 		
 		private var tim:TimeoutHelper;
 		
-		
 		public function Take():void
 		{			
 			clip = new mcTakePhoto();
@@ -46,7 +45,8 @@ package com.gmrmarketing.holiday2015
 			display.x = 537;
 			display.y = 57;
 			
-			overlay = new Bitmap();
+			overlay = new Bitmap(); 
+			overlay.smoothing = true;
 			overlay.x = 537;
 			overlay.y = 57;
 			
@@ -65,9 +65,7 @@ package com.gmrmarketing.holiday2015
 			cam.setMode(1280, 865, 24);	
 			
 			theVideo = new Video(1280, 865);
-			theVideo.attachCamera(cam);
-			
-			theEgg = new easterEgg();					
+					
 			eggShowing = false;
 			
 			tim = TimeoutHelper.getInstance();
@@ -98,6 +96,7 @@ package com.gmrmarketing.holiday2015
 			
 			eggShowing = false;
 			
+			theVideo.attachCamera(cam);
 			camTimer.start();//call camUpdate()
 			
 			clip.th1.scaleX = clip.th1.scaleY = 0;
@@ -106,6 +105,16 @@ package com.gmrmarketing.holiday2015
 			clip.th4.scaleX = clip.th4.scaleY = 0;
 			clip.th5.scaleX = clip.th5.scaleY = 0;
 			clip.th6.scaleX = clip.th6.scaleY = 0;
+			
+			display.alpha = 0;
+			
+			clip.chooseFrame.alpha = 0;
+			clip.chooseFrame.y = 914;
+			
+			clip.share.alpha = 0;
+			clip.share.y = 900;
+			
+			clip.highlighter.alpha = 0;
 			
 			TweenMax.to(clip.th1, .5, { scaleX:1, scaleY:1, ease:Back.easeOut } );
 			TweenMax.to(clip.th2, .5, { scaleX:1, scaleY:1, ease:Back.easeOut, delay:.2} );
@@ -127,21 +136,19 @@ package com.gmrmarketing.holiday2015
 			if (!clip.contains(display)) {
 				clip.addChild(display);
 			}			
-			display.alpha = 0;
+			
 			TweenMax.to(display, .5, { alpha:1, delay:1 } );
+			
 			if (!clip.contains(overlay)) {
 				clip.addChild(overlay);
-			}
+			}			
 			
-			clip.chooseFrame.alpha = 0;
-			clip.chooseFrame.y = 914;
-			TweenMax.to(clip.chooseFrame, .5, { y:874, alpha:1, ease:Back.easeOut, delay:1.5 } );
+			TweenMax.to(clip.chooseFrame, .5, { y:874, alpha:1, ease:Back.easeOut, delay:1.5 } );			
 			
-			clip.share.alpha = 0;
-			clip.share.y = 900;
 			TweenMax.to(clip.share, .5, { y:860, alpha:1, ease:Back.easeOut, delay:1.7 } );
 			
-			showOverlay1();
+			clip.highlighter.alpha = 0;
+			TweenMax.delayedCall(1, showOverlay1);
 		}
 		
 		
@@ -159,39 +166,54 @@ package com.gmrmarketing.holiday2015
 					myContainer.removeChild(clip);
 				}
 			}
+			overlay.bitmapData.dispose();
+			theVideo.attachCamera(null);
 			camTimer.reset();
 			dispatchEvent(new Event(HIDDEN));
 		}
 		
 		
 		private function showOverlay1(e:MouseEvent = null):void
-		{			
-			overlay.bitmapData = new over1();			
+		{		
+			clip.highlighter.alpha = 1;
+			theEgg = new dan1();
+			overlay.bitmapData = new over1();
+			overlay.smoothing = true;
 			updateHighlight(clip.th1.x, clip.th1.y);
 		}
 		private function showOverlay2(e:MouseEvent = null):void
 		{
+			theEgg = new dan2();
 			overlay.bitmapData = new over2();
+			overlay.smoothing = true;
 			updateHighlight(clip.th2.x, clip.th2.y);
 		}
 		private function showOverlay3(e:MouseEvent = null):void
 		{
+			theEgg = new dan3();
 			overlay.bitmapData = new over3();
+			overlay.smoothing = true;
 			updateHighlight(clip.th3.x, clip.th3.y);
 		}
 		private function showOverlay4(e:MouseEvent = null):void
 		{
+			theEgg = new dan4();
 			overlay.bitmapData = new over4();
+			overlay.smoothing = true;
 			updateHighlight(clip.th4.x, clip.th4.y);
 		}
 		private function showOverlay5(e:MouseEvent = null):void
 		{
+			theEgg = new dan5();
 			overlay.bitmapData = new over5();
+			overlay.smoothing = true;
 			updateHighlight(clip.th5.x, clip.th5.y);
 		}
 		private function showOverlay6(e:MouseEvent = null):void
 		{
+			theEgg = new dan6();
 			overlay.bitmapData = new over6();
+			overlay.smoothing = true;
 			updateHighlight(clip.th6.x, clip.th6.y);
 		}
 		
@@ -225,6 +247,7 @@ package com.gmrmarketing.holiday2015
 			//im.copyPixels(overlay.bitmapData, new Rectangle(0, 0, 870, 865), new Point(0, 0), null, null, true);		
 			
 			if (eggShowing) {
+				
 				im.copyPixels(theEgg, new Rectangle(0, 0,870, 865), new Point(0,0), null, null, true);
 			}
 			

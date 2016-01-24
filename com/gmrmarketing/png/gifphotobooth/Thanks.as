@@ -23,14 +23,14 @@ package com.gmrmarketing.png.gifphotobooth
 		private var queue:Queue;
 		private var userData:Object;
 		
-		private var overlay:BitmapData;
+		//private var overlay:BitmapData;//commented for puffs kiss cry
 		
 		
 		public function Thanks()
 		{
 			encoder = new GIFEncoder();
 			queue = new Queue();
-			overlay = new overlaySmall();//lib
+			//overlay = new overlaySmall();//lib//commented for puffs kiss cry
 			clip = new mcThanks();
 		}
 		
@@ -112,7 +112,7 @@ package com.gmrmarketing.png.gifphotobooth
 				m.scale(500 / 749, 439 / 657);
 				var b:BitmapData = new BitmapData(500, 439);
 				b.draw(frames.shift(), m, null, null, null, true);			
-				b.copyPixels(overlay, new Rectangle(0, 0, 500, 439), new Point(0, 0), null, null, true);		
+				//b.copyPixels(overlay, new Rectangle(0, 0, 500, 439), new Point(0, 0), null, null, true);		//commented for puffs kiss cry
 				encoder.addFrame(b);
 			}else {
 				myContainer.removeEventListener(Event.ENTER_FRAME, encFrame);
