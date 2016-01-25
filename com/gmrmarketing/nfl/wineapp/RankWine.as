@@ -26,6 +26,8 @@ package com.gmrmarketing.nfl.wineapp
 		private var whichClip:int; //1,2,3 - circle being dragged
 		private var buckets:Array;//tracks which circle (1,2,3) is in which bucket
 		
+		private var rankTop:int = 1276;//y position for the rank buckets at the bottom
+		
 		
 		public function RankWine()
 		{
@@ -99,7 +101,7 @@ package com.gmrmarketing.nfl.wineapp
 			clip.circ2.scaleX = clip.circ2.scaleY = 0;
 			clip.circ3.scaleX = clip.circ3.scaleY = 0;
 			
-			clip.rank1.y = 1824;//bottom
+			clip.rank1.y = 1824;//off bottom of screen
 			clip.rank2.y = 1824;
 			clip.rank3.y = 1824;
 			
@@ -114,9 +116,9 @@ package com.gmrmarketing.nfl.wineapp
 			TweenMax.to(clip.circ2, .4, { scaleX:circleScale, scaleY:circleScale, alpha:.8, ease:Back.easeOut, delay:1.2} );
 			TweenMax.to(clip.circ3, .4, { scaleX:circleScale, scaleY:circleScale, alpha:.8, ease:Back.easeOut, delay:1.4} );
 			
-			TweenMax.to(clip.rank1, .5, { y:1276, ease:Back.easeOut, delay:1.6 } );
-			TweenMax.to(clip.rank2, .5, { y:1276, ease:Back.easeOut, delay:1.8 } );
-			TweenMax.to(clip.rank3, .5, { y:1276, ease:Back.easeOut, delay:2, onComplete:addListeners } );
+			TweenMax.to(clip.rank1, .5, { y:rankTop, ease:Back.easeOut, delay:1.6 } );
+			TweenMax.to(clip.rank2, .5, { y:rankTop, ease:Back.easeOut, delay:1.8 } );
+			TweenMax.to(clip.rank3, .5, { y:rankTop, ease:Back.easeOut, delay:2, onComplete:addListeners } );
 		}
 			
 			
@@ -137,7 +139,6 @@ package com.gmrmarketing.nfl.wineapp
 			myContainer.stage.removeEventListener(MouseEvent.MOUSE_UP, stopDragging);
 			myContainer.removeEventListener(Event.ENTER_FRAME, updateDragging);
 			
-			//TweenMax.to(clip, 1, { x: -2736, ease:Back.easeIn, onComplete:kill } );
 			TweenMax.to(clip, .5, { x: -2736, ease:Linear.easeNone, onComplete:kill } );
 		}
 		
@@ -197,22 +198,22 @@ package com.gmrmarketing.nfl.wineapp
 			if (clipDragging.y > 1000) {
 				//in lower portion of screen
 				if (clipDragging.x < 900) {
-					TweenMax.to(clip.rank1, .25, { y:1226 } );
-					TweenMax.to(clip.rank2, .25, { y:1276 } );
-					TweenMax.to(clip.rank3, .25, { y:1276 } );					
+					TweenMax.to(clip.rank1, .25, { y:rankTop - 50 } );
+					TweenMax.to(clip.rank2, .25, { y:rankTop } );
+					TweenMax.to(clip.rank3, .25, { y:rankTop } );					
 				}else if (clipDragging.x < 1815) {
-					TweenMax.to(clip.rank2, .25, { y:1226 } );
-					TweenMax.to(clip.rank1, .25, { y:1276 } );
-					TweenMax.to(clip.rank3, .25, { y:1276 } );	
+					TweenMax.to(clip.rank2, .25, { y:rankTop - 50 } );
+					TweenMax.to(clip.rank1, .25, { y:rankTop } );
+					TweenMax.to(clip.rank3, .25, { y:rankTop } );	
 				}else {
-					TweenMax.to(clip.rank3, .25, { y:1226 } );
-					TweenMax.to(clip.rank1, .25, { y:1276 } );
-					TweenMax.to(clip.rank2, .25, { y:1276 } );	
+					TweenMax.to(clip.rank3, .25, { y:rankTop - 50 } );
+					TweenMax.to(clip.rank1, .25, { y:rankTop } );
+					TweenMax.to(clip.rank2, .25, { y:rankTop } );	
 				}
 			}else {
-				TweenMax.to(clip.rank3, .25, { y:1276 } );
-				TweenMax.to(clip.rank1, .25, { y:1276 } );
-				TweenMax.to(clip.rank2, .25, { y:1276 } );
+				TweenMax.to(clip.rank3, .25, { y:rankTop } );
+				TweenMax.to(clip.rank1, .25, { y:rankTop } );
+				TweenMax.to(clip.rank2, .25, { y:rankTop } );
 			}
 		}
 				
@@ -238,7 +239,7 @@ package com.gmrmarketing.nfl.wineapp
 				//need to scale down circle to fit hole...
 				//whichClip == 1,2,3 the circle we started with
 				var toX:int;
-				var toY:int = 1476;
+				var toY:int = rankTop + 200;
 				
 				if (clipDragging.x < 900) {
 					toX = clip.rank1.x + 454;
@@ -300,9 +301,9 @@ package com.gmrmarketing.nfl.wineapp
 				TweenMax.to(clipDragging, .5, { x:toX, y:toY, scaleX:.45, scaleY:.45 } );
 				
 				//move rank boxes down
-				TweenMax.to(clip.rank3, .25, { y:1276 } );
-				TweenMax.to(clip.rank1, .25, { y:1276 } );
-				TweenMax.to(clip.rank2, .25, { y:1276 } );
+				TweenMax.to(clip.rank3, .25, { y:rankTop } );
+				TweenMax.to(clip.rank1, .25, { y:rankTop } );
+				TweenMax.to(clip.rank2, .25, { y:rankTop } );
 			}
 			
 			myContainer.removeEventListener(Event.ENTER_FRAME, updateDragging);

@@ -39,7 +39,7 @@ package com.gmrmarketing.nfl.wineapp
 		 */
 		public function get data():Object
 		{
-			return {name:clip.inputs.thaName.text, email:clip.inputs.theEmail.text};
+			return {name:clip.inputs.theName.text, email:clip.inputs.theEmail.text};
 		}
 		
 		

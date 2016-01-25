@@ -167,11 +167,11 @@ package com.gmrmarketing.utilities.queue
 		
 		
 		/**
-		 * calls uploadNext in 5 seconds
+		 * calls uploadNext in 30 seconds
 		 */
 		private function delayNext():void
 		{
-			var a:Timer = new Timer(5000, 1);
+			var a:Timer = new Timer(30000, 1);
 			a.addEventListener(TimerEvent.TIMER, callUploadNext, false, 0, true);
 			a.start();
 		}		

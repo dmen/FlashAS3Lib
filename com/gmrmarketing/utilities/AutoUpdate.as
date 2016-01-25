@@ -3,7 +3,8 @@
  * 
  * Requires mcAutoUpdate movieClip in the library
  * 
- * 
+ * Used by:	Microsoft Halo 5 armor app
+ * 			NFL House Wine app
  * 
  */
 package com.gmrmarketing.utilities
@@ -44,6 +45,7 @@ package com.gmrmarketing.utilities
 		{
 			return lastError;
 		}
+		
 		
 		/**
 		 * Initializes the framework

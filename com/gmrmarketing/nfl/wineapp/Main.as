@@ -5,7 +5,8 @@ package com.gmrmarketing.nfl.wineapp
 	import flash.events.Event;
 	import flash.desktop.NativeApplication;
 	import com.gmrmarketing.utilities.queue.Queue;
-	import com.gmrmarketing.utilities.queue.FormService;
+	import com.gmrmarketing.utilities.queue.JSONService;
+	import com.gmrmarketing.utilities.AutoUpdate;
 	
 	
 	public class Main extends MovieClip
@@ -33,6 +34,7 @@ package com.gmrmarketing.nfl.wineapp
 		private var quitCorner:CornerQuit;
 		
 		private var q:Queue;
+		private var autoUpdate:AutoUpdate;
 		
 		
 		public function Main()
@@ -91,16 +93,32 @@ package com.gmrmarketing.nfl.wineapp
 			
 			q = new Queue();
 			q.fileName = "nflHouseWine";
-			q.service = new FormService("http://someWebPlace");
+			q.service = new JSONService("http://soso");
+			
+			autoUpdate = new AutoUpdate();
+			autoUpdate.container = cornerContainer;
 			
 			init();
 		}
 		
 		
 		private function init():void
-		{
+		{			
+			autoUpdate.addEventListener(AutoUpdate.UPDATE_ERROR, showAutoUpdateError, false, 0, true);
+			autoUpdate.init("http://design.gmrmarketing.com/nfl/wine/autoupdate.xml");
+			
 			home.show();
 			home.addEventListener(Home.COMPLETE, hideHome, false, 0, true);
+		}
+		
+		
+		private function showAutoUpdateError(e:Event):void
+		{
+			
+			if (autoUpdate.error != "No update") {
+				//some error occured - if there is an update it will show its own dialog
+				trace(autoUpdate.error);
+			}
 		}
 		
 		
@@ -193,7 +211,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function showResults(e:Event):void
 		{
-			email.addEventListener(Email.HIDDEN, showResults);
+			email.removeEventListener(Email.HIDDEN, showResults);
 			challenge.removeEventListener(Challenge.HIDDEN, showResults);
 			
 			results.addEventListener(Results.COMPLETE, hideResults, false, 0, true);
