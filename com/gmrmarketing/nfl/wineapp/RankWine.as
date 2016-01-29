@@ -5,6 +5,7 @@ package com.gmrmarketing.nfl.wineapp
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import com.gmrmarketing.utilities.Utility;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	import flash.geom.Point;
 	
 	
@@ -28,11 +29,13 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private var rankTop:int = 1276;//y position for the rank buckets at the bottom
 		
+		private var tim:TimeoutHelper;
+		
 		
 		public function RankWine()
 		{
 			clip = new mcRankWine();
-			
+			tim = TimeoutHelper.getInstance();
 			originalLoc1 = new Point(clip.circ1.x, clip.circ1.y);
 			originalLoc2 = new Point(clip.circ2.x, clip.circ2.y);
 			originalLoc3 = new Point(clip.circ3.x, clip.circ3.y);			
@@ -67,6 +70,8 @@ package com.gmrmarketing.nfl.wineapp
 		
 		public function show():void
 		{
+			tim.buttonClicked();
+			
 			clip.x = 0;
 			clip.title.alpha = 0;
 			clip.subTitle.alpha = 0;
@@ -143,8 +148,15 @@ package com.gmrmarketing.nfl.wineapp
 		}
 		
 		
-		private function kill():void
-		{			
+		public function kill():void
+		{		
+			clip.circ1.removeEventListener(MouseEvent.MOUSE_DOWN, startDragging1);
+			clip.circ2.removeEventListener(MouseEvent.MOUSE_DOWN, startDragging2);
+			clip.circ3.removeEventListener(MouseEvent.MOUSE_DOWN, startDragging3);
+			
+			myContainer.stage.removeEventListener(MouseEvent.MOUSE_UP, stopDragging);
+			myContainer.removeEventListener(Event.ENTER_FRAME, updateDragging);
+			
 			if (myContainer) {
 				if (myContainer.contains(clip)) {
 					myContainer.removeChild(clip);
@@ -156,6 +168,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function startDragging1(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			clipDragging = MovieClip(e.currentTarget);
 			whichClip = 1;
 			doDrag();
@@ -164,6 +177,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function startDragging2(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			clipDragging = MovieClip(e.currentTarget);
 			whichClip = 2;
 			doDrag();
@@ -172,6 +186,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function startDragging3(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			clipDragging = MovieClip(e.currentTarget);
 			whichClip = 3;
 			doDrag();
@@ -220,6 +235,8 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function stopDragging(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			if (clipDragging.y < 1000) {
 				
 				//let go above a bucket - put back to original loc

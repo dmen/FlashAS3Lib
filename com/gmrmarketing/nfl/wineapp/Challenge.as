@@ -5,6 +5,7 @@ package com.gmrmarketing.nfl.wineapp
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import com.gmrmarketing.utilities.Utility;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	import flash.geom.Point;
 	
 	
@@ -32,6 +33,8 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private var answerText:Array; //filled in show() - used by Results to show answers under circles
 		
+		private var tim:TimeoutHelper;
+		
 		
 		public function Challenge()
 		{
@@ -39,7 +42,9 @@ package com.gmrmarketing.nfl.wineapp
 			
 			originalLoc1 = new Point(clip.circ1.x, clip.circ1.y);
 			originalLoc2 = new Point(clip.circ2.x, clip.circ2.y);
-			originalLoc3 = new Point(clip.circ3.x, clip.circ3.y);			
+			originalLoc3 = new Point(clip.circ3.x, clip.circ3.y);
+			
+			tim = TimeoutHelper.getInstance();
 		}
 		
 		
@@ -89,6 +94,8 @@ package com.gmrmarketing.nfl.wineapp
 		 */
 		public function show(theLevel:String, theWines:Array, qData:Object):void
 		{
+			tim.buttonClicked();
+			
 			buckets = [0, 0, 0];		
 			answerText = [];
 			
@@ -320,8 +327,15 @@ package com.gmrmarketing.nfl.wineapp
 		}		
 		
 		
-		private function kill():void
-		{			
+		public function kill():void
+		{	
+			clip.circ1.removeEventListener(MouseEvent.MOUSE_DOWN, startDragging1);
+			clip.circ2.removeEventListener(MouseEvent.MOUSE_DOWN, startDragging2);
+			clip.circ3.removeEventListener(MouseEvent.MOUSE_DOWN, startDragging3);
+			
+			myContainer.stage.removeEventListener(MouseEvent.MOUSE_UP, stopDragging);
+			myContainer.removeEventListener(Event.ENTER_FRAME, updateDragging);
+			
 			if (myContainer) {
 				if (myContainer.contains(clip)) {
 					myContainer.removeChild(clip);
@@ -341,6 +355,8 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function startDragging1(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			clipDragging = MovieClip(e.currentTarget);
 			whichClip = 1;
 			doDrag();
@@ -349,6 +365,8 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function startDragging2(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			clipDragging = MovieClip(e.currentTarget);
 			whichClip = 2;
 			doDrag();
@@ -357,6 +375,8 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function startDragging3(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			clipDragging = MovieClip(e.currentTarget);
 			whichClip = 3;
 			doDrag();
@@ -435,6 +455,8 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function stopDragging(e:MouseEvent):void
 		{
+			tim.buttonClicked();			
+			
 			if (clipDragging.y < 1000) {
 				
 				//let go above a bucket - put back to original loc
@@ -471,7 +493,7 @@ package com.gmrmarketing.nfl.wineapp
 							TweenMax.to(clip.circ3, .5, { x:originalLoc3.x, y:originalLoc3.y,  scaleX:.728973388671875, scaleY:.728973388671875, ease:Back.easeOut } );
 						}
 					}
-					trace("buckets[" + rankOrder[0] + "] = " + whichClip);
+					//trace("buckets[" + rankOrder[0] + "] = " + whichClip);
 					buckets[rankOrder[0]] = whichClip;
 					cleaner(rankOrder[0], whichClip);//removes whichClip from previous bucket
 					
@@ -490,7 +512,7 @@ package com.gmrmarketing.nfl.wineapp
 							TweenMax.to(clip.circ3, .5, { x:originalLoc3.x, y:originalLoc3.y,  scaleX:.728973388671875, scaleY:.728973388671875, ease:Back.easeOut } );
 						}
 					}
-					trace("buckets[" + rankOrder[1] + "] = " + whichClip);
+					//trace("buckets[" + rankOrder[1] + "] = " + whichClip);
 					buckets[rankOrder[1]] = whichClip;
 					cleaner(rankOrder[1], whichClip);
 					
@@ -509,7 +531,7 @@ package com.gmrmarketing.nfl.wineapp
 							TweenMax.to(clip.circ3, .5, { x:originalLoc3.x, y:originalLoc3.y,  scaleX:.728973388671875, scaleY:.728973388671875, ease:Back.easeOut } );
 						}
 					}
-					trace("buckets[" + rankOrder[2] + "] = " + whichClip);
+					//trace("buckets[" + rankOrder[2] + "] = " + whichClip);
 					buckets[rankOrder[2]] = whichClip;
 					cleaner(rankOrder[2], whichClip);
 				}

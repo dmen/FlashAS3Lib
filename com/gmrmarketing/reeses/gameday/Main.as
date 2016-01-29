@@ -204,7 +204,8 @@ package com.gmrmarketing.reeses.gameday
 		{			
 			capture.removeEventListener(Capture.VID_READY, videoDoneProcessing);
 			
-			queue.add( { video:File.applicationStorageDirectory.nativePath + "\\" + capture.fileName, email:email.email, guid:aGUID, timestamp:Utility.hubbleTimeStamp } );
+			var emd:Array = email.email; //array - email, boolean for follow up email check
+			queue.add( { video:File.applicationStorageDirectory.nativePath + "\\" + capture.fileName, email:emd[0], followUp:emd[1], guid:aGUID, timestamp:Utility.hubbleTimeStamp } );
 			
 			thanks.hide();
 			intro.addEventListener(Intro.BEGIN, showInstructions, false, 0, true);

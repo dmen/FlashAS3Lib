@@ -5,6 +5,7 @@ package com.gmrmarketing.nfl.wineapp
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;	
 	import com.gmrmarketing.utilities.Utility;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	
 	public class Results extends EventDispatcher 
@@ -23,13 +24,15 @@ package com.gmrmarketing.nfl.wineapp
 		private var theWines:Array;
 		private var infoDialog:MovieClip;
 		
+		private var tim:TimeoutHelper;
+		
 		
 		public function Results()
 		{
 			clip = new mcResults();
 			arcContainer = new Sprite();
 			clip.addChild(arcContainer);
-			
+			tim = TimeoutHelper.getInstance();
 			infoDialog = new mcInfoDialog();
 		}
 		
@@ -46,7 +49,9 @@ package com.gmrmarketing.nfl.wineapp
 		 * @param	userRank Array of three items - 1,2,3
 		 */
 		public function show(answers:Array, answersText:Array, wines:Array, userRank:Array)
-		{			
+		{	
+			tim.buttonClicked();
+			
 			theAnswers = answers;
 			theWines = wines;
 			
@@ -64,8 +69,8 @@ package com.gmrmarketing.nfl.wineapp
 			clip.answer2.alpha = 0;
 			clip.answer3.alpha = 0;
 			
-			clip.title.theText.text = "HERE'S HOW YOU DID";
-			clip.subTitle.theText.text = "Tap on each wine to learn a little more about them.";
+			clip.title.theText.text = "BLIND TASTE TEST";
+			clip.subTitle.theText.text = "Here are your results. Get more details by tapping each wine.";
 			
 			clip.circ1.theText.text = "1";
 			clip.circ2.theText.text = "2";
@@ -87,6 +92,19 @@ package com.gmrmarketing.nfl.wineapp
 			clip.circ2.scaleX = clip.circ2.scaleY = 0;
 			clip.circ3.scaleX = clip.circ3.scaleY = 0;
 			
+			clip.pointer1.alpha = 0;
+			clip.pointer1.scaleX = clip.pointer1.scaleY = .8;
+			clip.pointer2.alpha = 0;
+			clip.pointer2.scaleX = clip.pointer2.scaleY = .8;
+			clip.pointer3.alpha = 0;
+			clip.pointer2.scaleX = clip.pointer2.scaleY = .8;
+			clip.pointer1.mouseEnabled = false;
+			clip.pointer1.mouseChildren = false;
+			clip.pointer2.mouseEnabled = false;
+			clip.pointer2.mouseChildren = false;
+			clip.pointer3.mouseEnabled = false;
+			clip.pointer3.mouseChildren = false;
+			
 			clip.btnEmail.alpha = 0;
 			clip.skipText.alpha = 0;
 			
@@ -106,6 +124,18 @@ package com.gmrmarketing.nfl.wineapp
 		}
 		
 		
+		//called from drawArcs when arcs are complete
+		private function showFingerPointers():void
+		{	
+			TweenMax.to(clip.pointer1, 1, { alpha:1, scaleX:1, scaleY:1, ease:Back.easeOut } );
+			TweenMax.to(clip.pointer2, 1, { alpha:1, scaleX:1, scaleY:1, ease:Back.easeOut} );
+			TweenMax.to(clip.pointer3, 1, { alpha:1, scaleX:1, scaleY:1, ease:Back.easeOut} );
+			
+			TweenMax.to(clip.pointer1, 1, { alpha:0,  scaleX:.8, scaleY:.8, delay:2, ease:Back.easeIn } );
+			TweenMax.to(clip.pointer2, 1, { alpha:0, scaleX:.8, scaleY:.8, delay:2, ease:Back.easeIn} );
+			TweenMax.to(clip.pointer3, 1, { alpha:0, scaleX:.8, scaleY:.8, delay:2, ease:Back.easeIn } );
+		}
+		
 		public function hide():void
 		{
 			clip.circ1.removeEventListener(MouseEvent.MOUSE_DOWN, showInfo1);
@@ -118,8 +148,14 @@ package com.gmrmarketing.nfl.wineapp
 		}		
 		
 		
-		private function kill():void
+		public function kill():void
 		{			
+			clip.circ1.removeEventListener(MouseEvent.MOUSE_DOWN, showInfo1);
+			clip.circ2.removeEventListener(MouseEvent.MOUSE_DOWN, showInfo2);
+			clip.circ3.removeEventListener(MouseEvent.MOUSE_DOWN, showInfo3);
+			clip.btnEmail.removeEventListener(MouseEvent.MOUSE_DOWN, emailSelected);
+			clip.btnSkip.removeEventListener(MouseEvent.MOUSE_DOWN, skipSelected);
+			
 			if (myContainer) {
 				if (myContainer.contains(clip)) {
 					myContainer.removeChild(clip);
@@ -145,6 +181,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function emailSelected(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			clip.btnEmail.removeEventListener(MouseEvent.MOUSE_DOWN, emailSelected);
 			dispatchEvent(new Event(COMPLETE));
 		}
@@ -152,24 +189,29 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function skipSelected(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			clip.btnSkip.removeEventListener(MouseEvent.MOUSE_DOWN, skipSelected);
 			dispatchEvent(new Event(SKIP));
 		}
 		
 		
 		private function showInfo1(e:MouseEvent):void
-		{			
+		{		
+			tim.buttonClicked();
 			showInfoDialog(0);
 		}
 		
 		
 		private function showInfo2(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			showInfoDialog(1);
 		}
 		
+		
 		private function showInfo3(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			showInfoDialog(2);
 		}
 		
@@ -179,6 +221,7 @@ package com.gmrmarketing.nfl.wineapp
 			infoDialog.l1answer.text = theWines[index].l1Answer;
 			infoDialog.producer.text = theWines[index].producer;
 			infoDialog.variety.text = theWines[index].variety;
+			infoDialog.geo.text = theWines[index].geo;
 			infoDialog.notes.text = theWines[index].notes;
 			infoDialog.scentsOf.text = theWines[index].l3AnswerA + ", " + theWines[index].l3AnswerB + ", " + theWines[index].l3AnswerC;
 			infoDialog.pairsWith.text = theWines[index].l2AnswerA + ", " + theWines[index].l2AnswerB + ", " + theWines[index].l2AnswerC;
@@ -196,6 +239,15 @@ package com.gmrmarketing.nfl.wineapp
 				infoDialog.ratingName.text = "";
 			}
 			
+			if (infoDialog.ratingName.textHeight < 30) {
+				//single line
+				infoDialog.ratingName.y = 1083;
+			}else {
+				//double line
+				infoDialog.ratingName.y = 1063;
+			}
+			
+			
 			infoDialog.alpha = 0;
 			if (!myContainer.contains(infoDialog)) {
 				myContainer.addChild(infoDialog);
@@ -208,6 +260,8 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function closeInfoDialog(e:MouseEvent = null):void
 		{
+			tim.buttonClicked();
+			
 			infoDialog.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, closeInfoDialog);
 			
 			if (myContainer) {
@@ -243,6 +297,7 @@ package com.gmrmarketing.nfl.wineapp
 			angleTo += 10 ;
 			if (angleTo > 360) {
 				clip.removeEventListener(Event.ENTER_FRAME, drawArcs);
+				showFingerPointers();
 			}
 			
 		}

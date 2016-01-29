@@ -2,11 +2,13 @@ package com.gmrmarketing.nfl.wineapp
 {
 	import flash.display.*;
 	import com.gmrmarketing.utilities.components.ComboBox;	
-	import flash.events.MouseEvent;
+	import flash.events.*;
 	import flash.net.SharedObject;
 	
-	public class ConfigDialog
+	
+	public class ConfigDialog extends EventDispatcher 
 	{
+		public static const COMPLETE:String = "CONFIGCOMPLETE";
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		
@@ -18,8 +20,7 @@ package com.gmrmarketing.nfl.wineapp
 		private var red2Combo:ComboBox;
 		private var red3Combo:ComboBox;
 		
-		private var so:SharedObject;
-		
+		private var so:SharedObject;		
 		
 		
 		public function ConfigDialog()
@@ -119,7 +120,7 @@ package com.gmrmarketing.nfl.wineapp
 			
 			clip.addChild(red1Combo);
 			clip.addChild(red2Combo);
-			clip.addChild(red3Combo);
+			clip.addChild(red3Combo);			
 		}
 		
 		
@@ -210,6 +211,7 @@ package com.gmrmarketing.nfl.wineapp
 			
 			clip.btnCancel.removeEventListener(MouseEvent.MOUSE_DOWN, hide);
 			clip.btnSave.removeEventListener(MouseEvent.MOUSE_DOWN, doSave);
+			dispatchEvent(new Event(COMPLETE));
 		}		
 		
 		

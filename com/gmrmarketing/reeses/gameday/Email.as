@@ -31,9 +31,9 @@ package com.gmrmarketing.reeses.gameday
 		}
 		
 		
-		public function get email():String
+		public function get email():Array
 		{
-			return clip.email.theText.text;
+			return [clip.email.theText.text, clip.check3.currentFrame == 2 ? true : false];
 		}
 		
 		
@@ -56,6 +56,8 @@ package com.gmrmarketing.reeses.gameday
 			clip.check1.gotoAndStop(1);//unchecked
 			clip.check2.scaleX = clip.check2.scaleY = 0;
 			clip.check2.gotoAndStop(1);//unchecked
+			clip.check3.scaleX = clip.check3.scaleY = 0;
+			clip.check3.gotoAndStop(1);//unchecked
 			clip.mainText.alpha = 0;
 			clip.checkText.alpha = 0;
 			
@@ -63,7 +65,8 @@ package com.gmrmarketing.reeses.gameday
 			
 			TweenMax.to(clip.whiteBox, .5, { scaleX:1, ease:Back.easeOut } );
 			TweenMax.to(clip.check1, .5, { scaleX:1, scaleY:1, delay:.2, ease:Back.easeOut } );
-			TweenMax.to(clip.check2, .5, { scaleX:1, scaleY:1, delay:.3, ease:Back.easeOut } );
+			TweenMax.to(clip.check3, .5, { scaleX:1, scaleY:1, delay:.3, ease:Back.easeOut } );
+			TweenMax.to(clip.check2, .5, { scaleX:1, scaleY:1, delay:.4, ease:Back.easeOut } );
 			TweenMax.to(clip.mainText, .75, { alpha:1, delay:.5 } );
 			TweenMax.to(clip.checkText, .75, { alpha:1, delay:.75 } );			
 			TweenMax.to(clip.title, .5, { alpha:1, delay:1 } );
@@ -72,6 +75,7 @@ package com.gmrmarketing.reeses.gameday
 			clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, nextPressed, false, 0, true);
 			clip.btnCheck1.addEventListener(MouseEvent.MOUSE_DOWN, toggleCheck1, false, 0, true);
 			clip.btnCheck2.addEventListener(MouseEvent.MOUSE_DOWN, toggleCheck2, false, 0, true);
+			clip.btnCheck3.addEventListener(MouseEvent.MOUSE_DOWN, toggleCheck3, false, 0, true);
 			clip.btnPublicity.addEventListener(MouseEvent.MOUSE_DOWN, showPublicity, false, 0, true);
 			
 			kbd.setFocusFields([[clip.email.theText, 40]]);
@@ -148,6 +152,7 @@ package com.gmrmarketing.reeses.gameday
 			}
 		}
 		
+		
 		private function toggleCheck2(e:MouseEvent):void
 		{
 			if (clip.check2.currentFrame == 1) {
@@ -158,11 +163,21 @@ package com.gmrmarketing.reeses.gameday
 		}
 		
 		
+		private function toggleCheck3(e:MouseEvent):void
+		{
+			if (clip.check3.currentFrame == 1) {
+				clip.check3.gotoAndStop(2);
+			}else {
+				clip.check3.gotoAndStop(1);
+			}
+		}
+		
+		
 		private function submitPressed(e:Event = null):void
 		{
 			if (Validator.isValidEmail(clip.email.theText.text)) {				
 				if (clip.check1.currentFrame == 1 || clip.check2.currentFrame == 1) {
-					doError("You must check both check boxes.");				
+					doError("You must check the required check boxes.");				
 				}else{
 					dispatchEvent(new Event(COMPLETE));
 				}

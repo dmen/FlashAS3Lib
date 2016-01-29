@@ -47,7 +47,7 @@ package com.gmrmarketing.reeses.gameday
 		 * Called from Main.videoDoneProcessing()
 		 * Adds a user data object to the csv file
 		 * Called from Main
-		 * @param data Object with email, video, guid, timestamp keys
+		 * @param data Object with email, followUp, video, guid, timestamp keys
 		 * video is just a string path to the video file
 		 * guid is the file name - minus the .mp4 extension
 		 */

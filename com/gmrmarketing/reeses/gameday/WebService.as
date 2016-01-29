@@ -60,6 +60,7 @@ package com.gmrmarketing.reeses.gameday
 				
 				var vars:URLVariables = new URLVariables();		
 				vars.email = upload.email;
+				vars.followUpEmail = upload.followUp;
 				vars.guid = upload.guid;
 				vars.timestamp = upload.timestamp;
 			

@@ -8,6 +8,8 @@ package com.gmrmarketing.nfl.wineapp
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import com.gmrmarketing.utilities.Utility;	
+	import com.gmrmarketing.utilities.TimeoutHelper;
+	
 	
 	public class Home extends EventDispatcher
 	{
@@ -24,9 +26,12 @@ package com.gmrmarketing.nfl.wineapp
 		private var arcX:int;
 		private var arcY:int;
 		
+		private var tim:TimeoutHelper;
+		
 		
 		public function Home()
 		{
+			tim = TimeoutHelper.getInstance();			
 			clip = new mcHome();
 			arcContainer = new Sprite();
 			clip.addChild(arcContainer);
@@ -50,6 +55,8 @@ package com.gmrmarketing.nfl.wineapp
 		
 		public function show()
 		{
+			tim.buttonClicked();
+			
 			theLevel = "";//not selected
 			
 			if (!myContainer.contains(clip)) {
@@ -130,8 +137,15 @@ package com.gmrmarketing.nfl.wineapp
 		}
 		
 		
-		private function kill():void
-		{			
+		public function kill():void
+		{	
+			clip.btnNovice.removeEventListener(MouseEvent.MOUSE_DOWN, noviceSelected);
+			clip.btnSeasoned.removeEventListener(MouseEvent.MOUSE_DOWN, seasonedSelected);
+			clip.btnAdvanced.removeEventListener(MouseEvent.MOUSE_DOWN, advancedSelected);
+			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, doNext);
+			
+			clip.removeEventListener(Event.ENTER_FRAME, updateArc);
+			
 			if (myContainer) {
 				if (myContainer.contains(clip)) {
 					myContainer.removeChild(clip);
@@ -144,6 +158,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function noviceSelected(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			angleTo = 0;
 			TweenMax.to(clip.btnNext, 1, { alpha:1 } );
 			arcX = clip.circNovice.x;
@@ -154,6 +169,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function seasonedSelected(e:MouseEvent):void
 		{	
+			tim.buttonClicked();
 			angleTo = 0;
 			TweenMax.to(clip.btnNext, 1, { alpha:1 } );
 			arcX = clip.circSeasoned.x;
@@ -164,6 +180,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function advancedSelected(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			angleTo = 0;
 			TweenMax.to(clip.btnNext, 1, { alpha:1 } );
 			arcX = clip.circAdvanced.x;
@@ -174,6 +191,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function doNext(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			if (theLevel != "") {
 				dispatchEvent(new Event(COMPLETE));
 			}

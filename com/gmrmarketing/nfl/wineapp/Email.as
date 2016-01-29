@@ -6,7 +6,7 @@ package com.gmrmarketing.nfl.wineapp
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;	
 	import com.gmrmarketing.utilities.Validator;
-	
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	public class Email extends EventDispatcher
 	{
@@ -19,9 +19,14 @@ package com.gmrmarketing.nfl.wineapp
 		private var kbd:KeyBoard;
 		private var emailHolder:String;
 		
+		private var tim:TimeoutHelper;
+		
+		
 		public function Email()
 		{
 			clip = new mcEmail();
+			tim = TimeoutHelper.getInstance();
+			
 			kbd = new KeyBoard();
 			//kbd.addEventListener(KeyBoard.KEYFILE_LOADED, init, false, 0, true);
 			kbd.loadKeyFile("kbd.xml");
@@ -45,6 +50,8 @@ package com.gmrmarketing.nfl.wineapp
 		
 		public function show():void
 		{
+			tim.buttonClicked();
+			
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
@@ -72,6 +79,7 @@ package com.gmrmarketing.nfl.wineapp
 			TweenMax.to(clip.textCancel, 1.5, { alpha:.8, delay:1.5 } );
 			
 			kbd.addEventListener(KeyBoard.SUBMIT, submitPressed, false, 0, true);
+			kbd.addEventListener(KeyBoard.KBD, keyPress, false, 0, true);
 			clip.btnCancel.addEventListener(MouseEvent.MOUSE_DOWN, cancelEmail, false, 0, true);
 		}
 		
@@ -79,13 +87,19 @@ package com.gmrmarketing.nfl.wineapp
 		public function hide():void
 		{
 			kbd.removeEventListener(KeyBoard.SUBMIT, submitPressed);
+			kbd.removeEventListener(KeyBoard.KBD, keyPress);
 			clip.btnCancel.removeEventListener(MouseEvent.MOUSE_DOWN, cancelEmail);
+			
 			TweenMax.to(clip, .5, { x: -2736, ease:Linear.easeNone, onComplete:kill } );
 		}
 		
 		
-		private function kill():void
-		{			
+		public function kill():void
+		{	
+			kbd.removeEventListener(KeyBoard.SUBMIT, submitPressed);
+			kbd.removeEventListener(KeyBoard.KBD, keyPress);
+			clip.btnCancel.removeEventListener(MouseEvent.MOUSE_DOWN, cancelEmail);
+			
 			if (myContainer) {
 				if (myContainer.contains(clip)) {
 					myContainer.removeChild(clip);
@@ -98,8 +112,16 @@ package com.gmrmarketing.nfl.wineapp
 		}
 		
 		
+		private function keyPress(e:Event):void
+		{
+			tim.buttonClicked();
+		}
+		
+		
 		private function submitPressed(e:Event):void
 		{
+			tim.buttonClicked();
+			
 			if (Validator.isValidEmail(clip.inputs.theEmail.text)) {
 				kbd.removeEventListener(KeyBoard.SUBMIT, submitPressed);
 				dispatchEvent(new Event(COMPLETE));
@@ -120,6 +142,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function cancelEmail(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			clip.btnCancel.removeEventListener(MouseEvent.MOUSE_DOWN, cancelEmail);
 			dispatchEvent(new Event(CANCEL));
 		}

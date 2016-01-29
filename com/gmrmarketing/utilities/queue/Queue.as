@@ -38,7 +38,9 @@ package com.gmrmarketing.utilities.queue
 	public class Queue extends EventDispatcher
 	{
 		public static const LOG_ENTRY:String = "newLogEntryAvailable";
+		private const MAX_TRIES:int = 10;
 		private var queueFileName:String;
+		private var errorFileName:String;
 		private var data:Array;//current queue
 		private var myService:IQueueService;//web/hubble service		
 		
@@ -71,6 +73,7 @@ package com.gmrmarketing.utilities.queue
 		public function set fileName(fn:String):void
 		{
 			queueFileName = fn + ".que";
+			errorFileName = fn + "_error.que";
 			data = getAllData();
 		}
 		
@@ -109,11 +112,19 @@ package com.gmrmarketing.utilities.queue
 		
 		/**
 		 * Adds a data item to the queue
+		 * Creates a new object with a userData property
+		 * The userData object is what is used by any services implementing the IQueueService interface
 		 * @param item Object
 		 */
 		public function add(item:Object):void
 		{
-			data.push(item);//add to queue
+			var newItem:Object = { };
+			newItem.userData = item;//original user data object
+			
+			//used by Queue only to track number of tries the object has been sent to the service
+			newItem.numTries = 0;
+			
+			data.push(newItem);//add to queue
 			rewriteQueue();
 			data = getAllData();
 			uploadNext();			
@@ -127,7 +138,7 @@ package com.gmrmarketing.utilities.queue
 		private function uploadNext():void
 		{
 			if (data.length > 0 && myService && !myService.busy) {
-				myService.send(data.shift());//removes item from the users array
+				myService.send(data.shift());//removes item from the data array
 			}
 		}
 	
@@ -143,9 +154,21 @@ package com.gmrmarketing.utilities.queue
 			trace(myService.lastError);
 			dispatchEvent(new Event(LOG_ENTRY));
 			
-			data.push(myService.data);
-			rewriteQueue();
-			data = getAllData();
+			var o:Object = myService.data;//full object with userData and numTries
+			o.numTries = o.numTries + 1;
+			if (o.numTries >= MAX_TRIES) {
+				
+				writeErrorData(o);//remove from queue and place in error file
+				
+				rewriteQueue();
+				data = getAllData();
+				
+			}else {
+				
+				data.push(o);
+				rewriteQueue();
+				data = getAllData();
+			}
 			
 			delayNext();
 		}
@@ -270,5 +293,24 @@ package com.gmrmarketing.utilities.queue
 			return obs;
 		}
 		
+		
+		/**
+		 * Appends a single error data item to the error queue file
+		 * @param	obj
+		 */
+		private function writeErrorData(obj:Object):void
+		{
+			var file:File = File.documentsDirectory.resolvePath( errorFileName );
+			var stream:FileStream = new FileStream();
+			
+			try{				
+				stream.open( file, FileMode.APPEND );
+				stream.writeObject(obj);
+				stream.close();				
+			}catch (e:Error) {}
+			
+			file = null;
+			stream = null;
+		}		
 	}	
 }

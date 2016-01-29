@@ -8,7 +8,7 @@ package com.gmrmarketing.nfl.wineapp
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	import com.gmrmarketing.utilities.Utility;
-	
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	public class SelectPreference extends EventDispatcher
 	{
@@ -25,9 +25,12 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private var preference:String;
 		
+		private var tim:TimeoutHelper;
+		
 		
 		public function SelectPreference()
 		{
+			tim = TimeoutHelper.getInstance();
 			clip = new mcSelectPreference();
 			arcContainer = new Sprite();
 			clip.addChild(arcContainer);
@@ -53,14 +56,17 @@ package com.gmrmarketing.nfl.wineapp
 		 * @param	level String Novice,Seasoned,Sommelier
 		 */
 		public function show(level:String):void
-		{		
+		{
+			tim.buttonClicked();
+			
 			preference = "";
 			
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);	
 			}
 			clip.x = 0;
-			clip.subTitle.theText.text = "To Begin the " + level + " Blind Taste Test";
+			clip.title.theText.text = level.toUpperCase() + " BLIND TASTE TEST"; 
+			//clip.subTitle.theText.text = "To Begin the " + level + " Blind Taste Test";
 			
 			clip.circWhite.theText.text = "WHITE";
 			clip.circRed.theText.text = "RED";
@@ -108,8 +114,14 @@ package com.gmrmarketing.nfl.wineapp
 		}
 		
 		
-		private function kill():void
-		{			
+		public function kill():void
+		{		
+			clip.btnWhite.removeEventListener(MouseEvent.MOUSE_DOWN, whiteSelected);
+			clip.btnRed.removeEventListener(MouseEvent.MOUSE_DOWN, redSelected);
+			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, doNext);
+			
+			clip.removeEventListener(Event.ENTER_FRAME, updateArc);		
+			
 			if (myContainer) {
 				if (myContainer.contains(clip)) {
 					myContainer.removeChild(clip);
@@ -123,6 +135,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function whiteSelected(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			arcX = clip.circWhite.x;
 			arcY = clip.circWhite.y;			
 			angleTo = 0;
@@ -133,6 +146,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function redSelected(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			arcX = clip.circRed.x;
 			arcY = clip.circRed.y;
 			angleTo = 0;
@@ -143,6 +157,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function doNext(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			if(preference != ""){
 				dispatchEvent(new Event(COMPLETE));
 			}

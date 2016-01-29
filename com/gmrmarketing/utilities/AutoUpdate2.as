@@ -14,24 +14,22 @@ package com.gmrmarketing.utilities
 	import flash.events.*;
 	import flash.display.*;
 	
-	public class AutoUpdate extends EventDispatcher
+	public class AutoUpdate2 extends EventDispatcher
 	{
 		public static const UPDATE_ERROR:String = "autoUpdateError";
 		
 		private var appUpdater:ApplicationUpdater;
-		private var clip:MovieClip;
+		private var dialog:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		private var lastError:String;
 	
 		
-		public function AutoUpdate() 
+		public function AutoUpdate2(dlg:MovieClip) 
 		{
 			appUpdater = new ApplicationUpdater();
 			lastError = "";
 			
-			clip = new mcAutoUpdate();
-			clip.x = 968;
-			clip.y = 312;
+			dialog = dlg;
 		}
 		
 		
@@ -95,18 +93,18 @@ package com.gmrmarketing.utilities
 			
 			if (e.available) {
 				
-				clip.infoText.text = e.details[0][1];//description in XML
+				dialog.infoText.text = e.details[0][1];//description in XML
 				
-				clip.btn1.theText.text = "cancel";
-				clip.btn2.theText.text = "update";
-				clip.btn2.alpha = 1;
-				clip.btn1.addEventListener(MouseEvent.MOUSE_DOWN, closeUpdater, false, 0, true);
-				clip.btn2.addEventListener(MouseEvent.MOUSE_DOWN, startDownload, false, 0, true);
-				clip.progBar.bar.scaleX = 0;
+				dialog.btn1.theText.text = "cancel";
+				dialog.btn2.theText.text = "update";
+				dialog.btn2.alpha = 1;
+				dialog.btn1.addEventListener(MouseEvent.MOUSE_DOWN, closeUpdater, false, 0, true);
+				dialog.btn2.addEventListener(MouseEvent.MOUSE_DOWN, startDownload, false, 0, true);
+				dialog.progBar.bar.scaleX = 0;
 				
 				if (myContainer) {
-					if (!myContainer.contains(clip)) {
-						myContainer.addChild(clip);
+					if (!myContainer.contains(dialog)) {
+						myContainer.addChild(dialog);
 					}
 				}
 			}else {
@@ -126,12 +124,12 @@ package com.gmrmarketing.utilities
 		
 		private function closeUpdater(e:MouseEvent = null):void
 		{
-			clip.btn1.removeEventListener(MouseEvent.MOUSE_DOWN, closeUpdater);
-			clip.btn2.removeEventListener(MouseEvent.MOUSE_DOWN, startDownload);	
+			dialog.btn1.removeEventListener(MouseEvent.MOUSE_DOWN, closeUpdater);
+			dialog.btn2.removeEventListener(MouseEvent.MOUSE_DOWN, startDownload);	
 			
 			if (myContainer) {
-				if (myContainer.contains(clip)) {
-					myContainer.removeChild(clip);
+				if (myContainer.contains(dialog)) {
+					myContainer.removeChild(dialog);
 				}
 			}
 		}
@@ -139,10 +137,10 @@ package com.gmrmarketing.utilities
 		
 		private function startDownload(e:MouseEvent):void
 		{
-			clip.btn1.removeEventListener(MouseEvent.MOUSE_DOWN, closeUpdater);
-			clip.btn1.addEventListener(MouseEvent.MOUSE_DOWN, cancelUpdate, false, 0, true);
-			clip.btn2.alpha = .4;
-			clip.btn2.removeEventListener(MouseEvent.MOUSE_DOWN, startDownload);
+			dialog.btn1.removeEventListener(MouseEvent.MOUSE_DOWN, closeUpdater);
+			dialog.btn1.addEventListener(MouseEvent.MOUSE_DOWN, cancelUpdate, false, 0, true);
+			dialog.btn2.alpha = .4;
+			dialog.btn2.removeEventListener(MouseEvent.MOUSE_DOWN, startDownload);
 			
 			appUpdater.addEventListener(ProgressEvent.PROGRESS, downloadProgress);		   
 			appUpdater.addEventListener(UpdateEvent.DOWNLOAD_COMPLETE, downloadComplete);
@@ -155,15 +153,15 @@ package com.gmrmarketing.utilities
 		private function cancelUpdate(e:MouseEvent):void
 		{
 			appUpdater.cancelUpdate();
-			clip.infoText.text = "Update cancelled by user";
-			clip.btn1.removeEventListener(MouseEvent.MOUSE_DOWN, cancelUpdate);
-			clip.btn1.addEventListener(MouseEvent.MOUSE_DOWN, closeUpdater, false, 0, true);
+			dialog.infoText.text = "Update cancelled by user";
+			dialog.btn1.removeEventListener(MouseEvent.MOUSE_DOWN, cancelUpdate);
+			dialog.btn1.addEventListener(MouseEvent.MOUSE_DOWN, closeUpdater, false, 0, true);
 		}
 
 		
 		private function downloadProgress(e:ProgressEvent):void
 		{
-			clip.progBar.bar.scaleX = e.bytesLoaded / e.bytesTotal;
+			dialog.progBar.bar.scaleX = e.bytesLoaded / e.bytesTotal;
 		}
 		
 		
@@ -181,7 +179,7 @@ package com.gmrmarketing.utilities
 		private function downloadError(e:DownloadErrorEvent):void
 		{
 			lastError = "Download Error:\n" + e;
-			clip.infoText.text = lastError;
+			dialog.infoText.text = lastError;
 			dispatchEvent(new Event(UPDATE_ERROR));
 		}
    

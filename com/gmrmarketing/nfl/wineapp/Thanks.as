@@ -4,7 +4,7 @@ package com.gmrmarketing.nfl.wineapp
 	import flash.events.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
-	
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	public class Thanks extends EventDispatcher
 	{
@@ -12,10 +12,12 @@ package com.gmrmarketing.nfl.wineapp
 		public static const HIDDEN:String = "thanksHidden";
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
+		private var tim:TimeoutHelper;
 		
 		
 		public function Thanks()
 		{
+			tim = TimeoutHelper.getInstance();
 			clip = new mcThanks();
 		}
 		
@@ -27,7 +29,9 @@ package com.gmrmarketing.nfl.wineapp
 		
 		
 		public function show(didEmail:Boolean):void
-		{			
+		{		
+			tim.buttonClicked();
+			
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
@@ -56,8 +60,10 @@ package com.gmrmarketing.nfl.wineapp
 			TweenMax.to(clip, .5, { x: -2736, ease:Linear.easeNone, onComplete:kill } );
 		}
 		
-		private function kill():void
-		{			
+		public function kill():void
+		{	
+			clip.btnPlayAgain.removeEventListener(MouseEvent.MOUSE_DOWN, doPlayAgain);
+			
 			if (myContainer) {
 				if (myContainer.contains(clip)) {
 					myContainer.removeChild(clip);
@@ -74,6 +80,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function doPlayAgain(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			clip.btnPlayAgain.removeEventListener(MouseEvent.MOUSE_DOWN, doPlayAgain);
 			dispatchEvent(new Event(COMPLETE));
 		}

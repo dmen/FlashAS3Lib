@@ -10,7 +10,7 @@ package com.gmrmarketing.utilities.queue
 		private var formLoader:URLLoader;
 		private var upload:Object;		
 		private var isBusy:Boolean;		
-		private var serverString:String;
+		private var serverResponse:Object;//what we're expecting from the server on a successful post
 		private var error:String;
 		
 		private var hdr:URLRequestHeader;//headers for sending and receiving JSON
@@ -20,12 +20,12 @@ package com.gmrmarketing.utilities.queue
 		/**
 		 * Constructor
 		 * @param	url URL of the service - used in send()
-		 * @param servrString What the server sends back on successful post - used in dataPosted()
+		 * @param servResp JSON the server sends back on successful post - used in dataPosted()
 		 */
-		public function JSONService(url:String, servrString:String = "Success=true")
+		public function JSONService(url:String, servResp:Object)
 		{
 			serviceURL = url;
-			serverString = servrString;
+			serverResponse = servResp;
 			isBusy = false;
 			error = "JSONService Started";
 			formLoader = new URLLoader();
@@ -69,12 +69,16 @@ package com.gmrmarketing.utilities.queue
 		}
 		
 	
+		/**
+		 * Called from Queue
+		 * @param	data Object with userData property which is the original object passed to the queue
+		 */
 		public function send(data:Object):void
 		{
 			isBusy = true;
-			upload = data;
+			upload = data;//keep this so Queue can retrieve if an error occurs
 			
-			var js:String = JSON.stringify(data);
+			var js:String = JSON.stringify(data.userData);
 			var req:URLRequest = new URLRequest(serviceURL);
 			req.method = URLRequestMethod.POST;
 			req.data = js;
@@ -108,11 +112,13 @@ package com.gmrmarketing.utilities.queue
 		{
 			isBusy = false;
 			
-			if (e.target.data == serverString) {
+			var j:Object = JSON.parse(e.currentTarget.data);
+			
+			if (JSON.stringify(j) == JSON.stringify(serverResponse)) {
 				error = "JSONService.dataPosted success";
 				dispatchEvent(new Event(completeEvent));				
 			}else {				
-				error = "Error in JSONService.dataPosted - server response: " + e.target.data + " expected serverString: " + serverString;
+				error = "Error in JSONService.dataPosted - server response: " + JSON.stringify(j) + " expected serverString: " + JSON.stringify(serverResponse);
 				dispatchEvent(new Event(errorEvent));	
 			}
 		}

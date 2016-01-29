@@ -3,10 +3,12 @@ package com.gmrmarketing.nfl.wineapp
 	import flash.display.*;
 	import com.gmrmarketing.utilities.CornerQuit;
 	import flash.events.Event;
+	import flash.ui.Mouse;
 	import flash.desktop.NativeApplication;
 	import com.gmrmarketing.utilities.queue.Queue;
 	import com.gmrmarketing.utilities.queue.JSONService;
 	import com.gmrmarketing.utilities.AutoUpdate;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	
 	public class Main extends MovieClip
@@ -36,13 +38,15 @@ package com.gmrmarketing.nfl.wineapp
 		private var q:Queue;
 		private var autoUpdate:AutoUpdate;
 		
+		private var tim:TimeoutHelper;
+		
 		
 		public function Main()
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-			//stage.scaleMode = StageScaleMode.SHOW_ALL;
-			stage.scaleMode = StageScaleMode.EXACT_FIT;
-			//Mouse.hide();
+			//stage.scaleMode = StageScaleMode.SHOW_ALL; //maintain original aspect
+			stage.scaleMode = StageScaleMode.EXACT_FIT; //just scale to the screen
+			Mouse.hide();
 			
 			mainContainer = new Sprite();
 			addChild(mainContainer);
@@ -93,10 +97,16 @@ package com.gmrmarketing.nfl.wineapp
 			
 			q = new Queue();
 			q.fileName = "nflHouseWine";
-			q.service = new JSONService("http://soso");
+			q.service = new JSONService("https://nflwineapp.thesocialtab.net/api/WineRegistrant/SubmitRegistrant", {"message":"Wine added","success":true});
+			q.start();
 			
 			autoUpdate = new AutoUpdate();
 			autoUpdate.container = cornerContainer;
+			
+			tim = TimeoutHelper.getInstance();
+			tim.addEventListener(TimeoutHelper.TIMED_OUT, doReset, false, 0, true);
+			tim.init(60000);
+			tim.startMonitoring();
 			
 			init();
 		}
@@ -114,7 +124,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function showAutoUpdateError(e:Event):void
 		{
-			
+			trace(autoUpdate.error);
 			if (autoUpdate.error != "No update") {
 				//some error occured - if there is an update it will show its own dialog
 				trace(autoUpdate.error);
@@ -140,7 +150,16 @@ package com.gmrmarketing.nfl.wineapp
 		 */
 		private function showWineConfig(e:Event):void
 		{
+			tim.stopMonitoring();
+			configDialog.addEventListener(ConfigDialog.COMPLETE, configClosed, false, 0, true);
 			configDialog.show();
+		}
+		
+		
+		private function configClosed(e:Event):void
+		{
+			configDialog.removeEventListener(ConfigDialog.COMPLETE, configClosed);
+			tim.startMonitoring();
 		}
 		
 		
@@ -201,9 +220,8 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function hideChallenge(e:Event):void
 		{
-			challenge.removeEventListener(Challenge.COMPLETE, hideChallenge);
+			challenge.removeEventListener(Challenge.COMPLETE, hideChallenge);			
 			
-			trace(challenge.selection);
 			challenge.addEventListener(Challenge.HIDDEN, showResults, false, 0, true);
 			challenge.hide();
 		}
@@ -316,7 +334,24 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private function doReset(e:Event):void
 		{
+			home.removeEventListener(Home.HIDDEN, showSelectPreference);
+			selectPreference.removeEventListener(SelectPreference.HIDDEN, showRankWine);
+			rankWine.removeEventListener(RankWine.HIDDEN, showChallenge);
+			challenge.removeEventListener(Challenge.HIDDEN, showResults);
 			thanks.removeEventListener(Thanks.HIDDEN, doReset);
+			results.removeEventListener(Results.HIDDEN, showThanks);
+			results.removeEventListener(Results.HIDDEN, showEmail);
+			email.removeEventListener(Email.HIDDEN, showThanks);
+			
+			configDialog.hide();
+			challenge.kill();
+			email.kill();
+			home.kill();
+			rankWine.kill();
+			results.kill();
+			selectPreference.kill();
+			thanks.kill();
+			
 			init();
 		}
 		
