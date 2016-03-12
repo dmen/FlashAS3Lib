@@ -18,12 +18,12 @@ package com.gmrmarketing.esurance.sxsw_2014
 		{
 			cam = Camera.getCamera();
 			cam.setQuality(0, 100);
-			cam.setMode(640, 352, 29.97, false);
+			cam.setMode(640, 352, 24, false);
 			cam.setKeyFrameInterval(12);
 			
 			mic = Microphone.getMicrophone();
 			mic.setSilenceLevel(0);
-			mic.rate = 22; //KHz
+			mic.rate = 44; //KHz
 		}		
 		
 		

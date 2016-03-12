@@ -25,6 +25,7 @@ package com.gmrmarketing.nfl.wineapp
 		private var infoDialog:MovieClip;
 		
 		private var tim:TimeoutHelper;
+		private var isPostThanks:Boolean; //true if results is being shown after thanks - for user review...
 		
 		
 		public function Results()
@@ -47,13 +48,15 @@ package com.gmrmarketing.nfl.wineapp
 		 * @param	answers three element array with 0 or 1
 		 * @param 	wines Array of wine objects from the json
 		 * @param	userRank Array of three items - 1,2,3
+		 * @param 	postThanks - true if results is shown after the thanks screen - changes buttons
 		 */
-		public function show(answers:Array, answersText:Array, wines:Array, userRank:Array)
+		public function show(answers:Array, answersText:Array, wines:Array, userRank:Array, postThanks:Boolean = false)
 		{	
 			tim.buttonClicked();
 			
 			theAnswers = answers;
 			theWines = wines;
+			isPostThanks = postThanks;
 			
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
@@ -69,8 +72,13 @@ package com.gmrmarketing.nfl.wineapp
 			clip.answer2.alpha = 0;
 			clip.answer3.alpha = 0;
 			
-			clip.title.theText.text = "BLIND TASTE TEST";
-			clip.subTitle.theText.text = "Here are your results. Get more details by tapping each wine.";
+			if(!isPostThanks){
+				clip.title.theText.text = "BLIND TASTE TEST";
+				clip.subTitle.theText.text = "Here are your results. Get more details by tapping each wine.";
+			}else {
+				clip.title.theText.text = "FINAL REVIEW";
+				clip.subTitle.theText.text = "Here are your results one more time for review.";
+			}
 			
 			clip.circ1.theText.text = "1";
 			clip.circ2.theText.text = "2";
@@ -105,6 +113,12 @@ package com.gmrmarketing.nfl.wineapp
 			clip.pointer3.mouseEnabled = false;
 			clip.pointer3.mouseChildren = false;
 			
+			if (isPostThanks) {
+				clip.btnEmail.theText.text = "FINISH";
+			}else {
+				clip.btnEmail.theText.text = "Email Results";
+			}
+			
 			clip.btnEmail.alpha = 0;
 			clip.skipText.alpha = 0;
 			
@@ -119,7 +133,11 @@ package com.gmrmarketing.nfl.wineapp
 			TweenMax.to(clip.answer2, .4, { alpha:1, delay:1.4 } );
 			TweenMax.to(clip.answer3, .4, { alpha:1, delay:1.6 } );
 			
-			TweenMax.to(clip.skipText, .5, { alpha:1, delay:1.5 } );
+			//don't show skip button post thanks
+			if (!isPostThanks) {			
+				TweenMax.to(clip.skipText, .5, { alpha:1, delay:1.5 } );
+			}
+			
 			TweenMax.to(clip.btnEmail, .5, { alpha:1, delay:1.5, onComplete:addListeners } );			
 		}
 		
@@ -136,12 +154,14 @@ package com.gmrmarketing.nfl.wineapp
 			TweenMax.to(clip.pointer3, 1, { alpha:0, scaleX:.8, scaleY:.8, delay:2, ease:Back.easeIn } );
 		}
 		
+		
 		public function hide():void
 		{
 			clip.circ1.removeEventListener(MouseEvent.MOUSE_DOWN, showInfo1);
 			clip.circ2.removeEventListener(MouseEvent.MOUSE_DOWN, showInfo2);
 			clip.circ3.removeEventListener(MouseEvent.MOUSE_DOWN, showInfo3);
 			clip.btnEmail.removeEventListener(MouseEvent.MOUSE_DOWN, emailSelected);
+			clip.btnEmail.removeEventListener(MouseEvent.MOUSE_DOWN, skipSelected);
 			clip.btnSkip.removeEventListener(MouseEvent.MOUSE_DOWN, skipSelected);
 			
 			TweenMax.to(clip, .5, { x: -2736, ease:Linear.easeNone, onComplete:kill } );
@@ -154,6 +174,7 @@ package com.gmrmarketing.nfl.wineapp
 			clip.circ2.removeEventListener(MouseEvent.MOUSE_DOWN, showInfo2);
 			clip.circ3.removeEventListener(MouseEvent.MOUSE_DOWN, showInfo3);
 			clip.btnEmail.removeEventListener(MouseEvent.MOUSE_DOWN, emailSelected);
+			clip.btnEmail.removeEventListener(MouseEvent.MOUSE_DOWN, skipSelected);
 			clip.btnSkip.removeEventListener(MouseEvent.MOUSE_DOWN, skipSelected);
 			
 			if (myContainer) {
@@ -174,8 +195,13 @@ package com.gmrmarketing.nfl.wineapp
 			clip.circ1.addEventListener(MouseEvent.MOUSE_DOWN, showInfo1, false, 0, true);
 			clip.circ2.addEventListener(MouseEvent.MOUSE_DOWN, showInfo2, false, 0, true);
 			clip.circ3.addEventListener(MouseEvent.MOUSE_DOWN, showInfo3, false, 0, true);
-			clip.btnEmail.addEventListener(MouseEvent.MOUSE_DOWN, emailSelected, false, 0, true);
-			clip.btnSkip.addEventListener(MouseEvent.MOUSE_DOWN, skipSelected, false, 0, true);
+			if(!isPostThanks){
+				clip.btnEmail.addEventListener(MouseEvent.MOUSE_DOWN, emailSelected, false, 0, true);
+				clip.btnSkip.addEventListener(MouseEvent.MOUSE_DOWN, skipSelected, false, 0, true);
+			}else {
+				//showing 'finished' text
+				clip.btnEmail.addEventListener(MouseEvent.MOUSE_DOWN, skipSelected, false, 0, true);
+			}
 		}
 		
 		
@@ -190,6 +216,7 @@ package com.gmrmarketing.nfl.wineapp
 		private function skipSelected(e:MouseEvent):void
 		{
 			tim.buttonClicked();
+			clip.btnEmail.removeEventListener(MouseEvent.MOUSE_DOWN, skipSelected);
 			clip.btnSkip.removeEventListener(MouseEvent.MOUSE_DOWN, skipSelected);
 			dispatchEvent(new Event(SKIP));
 		}
@@ -247,7 +274,6 @@ package com.gmrmarketing.nfl.wineapp
 				infoDialog.ratingName.y = 1063;
 			}
 			
-			
 			infoDialog.alpha = 0;
 			if (!myContainer.contains(infoDialog)) {
 				myContainer.addChild(infoDialog);
@@ -264,6 +290,12 @@ package com.gmrmarketing.nfl.wineapp
 			
 			infoDialog.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, closeInfoDialog);
 			
+			TweenMax.to(infoDialog, .5, { alpha:0, onComplete:killInfoDialog } );
+		}
+		
+		
+		private function killInfoDialog():void
+		{
 			if (myContainer) {
 				if (myContainer.contains(infoDialog)) {
 					myContainer.removeChild(infoDialog);

@@ -42,7 +42,7 @@ package com.gmrmarketing.nfl.wineapp
 				clip.title.theText.text = "THANKS FOR PLAYING!";
 			}
 			
-			clip.subTitle.theText.text = "Please inquire about our live tastings held at the\nexclusive NFL House through Super Bowl City Week.\n\nSee any One Market staff member for more details.\n\nAre you up for another challenge?\nTaste again and put your knowledge to the test!";
+			clip.subTitle.theText.text = "Want more wine fun?\nSee any One Market staff member about live tastings at NFL HOUSE throughout Super Bowl City Week.\n\nIf you're ready right now, why not start up another tasting to test your skills again?";
 			
 			clip.title.alpha = 0;
 			clip.subTitle.alpha = 0;

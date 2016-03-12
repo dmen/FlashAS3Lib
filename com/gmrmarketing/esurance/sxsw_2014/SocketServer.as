@@ -100,7 +100,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 		 * Get the last client message
 		 * @return String message
 		 */
-		public function getMessage():String
+		public function get message():String
 		{
 			return lastMessage;
 		}

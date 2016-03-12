@@ -134,7 +134,7 @@ package com.gmrmarketing.utilities
 			}		
 			
 			displayData = new BitmapData(displayWidth, displayHeight, false, 0x000000);
-			displayBMP = new Bitmap(displayData); //shown on stage
+			displayBMP = new Bitmap(displayData, "auto", true); //shown on stage
 			
 			//for copying theVideo into the display / preview bitmap
 			if(mirror){

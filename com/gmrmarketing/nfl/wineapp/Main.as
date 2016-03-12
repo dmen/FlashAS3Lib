@@ -15,7 +15,7 @@ package com.gmrmarketing.nfl.wineapp
 	{
 		private var mainContainer:Sprite;
 		private var cornerContainer:Sprite;
-		private var dialogContainer:Sprite;
+		private var dialogContainer:Sprite;		
 		
 		private var bg:MovieClip; //lib clip background
 		
@@ -34,6 +34,7 @@ package com.gmrmarketing.nfl.wineapp
 		
 		private var dialogCorner:CornerQuit;
 		private var quitCorner:CornerQuit;
+		private var restartCorner:CornerQuit;
 		
 		private var q:Queue;
 		private var autoUpdate:AutoUpdate;
@@ -62,8 +63,12 @@ package com.gmrmarketing.nfl.wineapp
 			dialogCorner.addEventListener(CornerQuit.CORNER_QUIT, showWineConfig);
 			
 			quitCorner = new CornerQuit();
-			quitCorner.init(cornerContainer, "ul");
+			quitCorner.init(cornerContainer, "ll");
 			quitCorner.addEventListener(CornerQuit.CORNER_QUIT, closeApp);
+			
+			restartCorner = new CornerQuit();
+			restartCorner.init(cornerContainer, "ul");
+			restartCorner.addEventListener(CornerQuit.CORNER_QUIT, doReset);
 			
 			bg = new mcBackground();
 			mainContainer.addChild(bg);
@@ -105,7 +110,7 @@ package com.gmrmarketing.nfl.wineapp
 			
 			tim = TimeoutHelper.getInstance();
 			tim.addEventListener(TimeoutHelper.TIMED_OUT, doReset, false, 0, true);
-			tim.init(60000);
+			tim.init(600000);//ten minutes
 			tim.startMonitoring();
 			
 			init();
@@ -265,6 +270,14 @@ package com.gmrmarketing.nfl.wineapp
 			results.hide();
 		}
 		
+		private function hideResultsPreThanks(e:Event):void
+		{
+			results.removeEventListener(Results.COMPLETE, hideResults);
+			results.removeEventListener(Results.SKIP, hideResultsPreThanks);			
+			results.addEventListener(Results.HIDDEN, showThanks, false, 0, true);
+			results.hide();
+		}
+		
 		
 		private function showEmail(e:Event):void
 		{
@@ -281,7 +294,8 @@ package com.gmrmarketing.nfl.wineapp
 			email.removeEventListener(Email.COMPLETE, hideEmail);
 			email.removeEventListener(Email.CANCEL, cancelEmail);
 			didEmail = true;
-			email.addEventListener(Email.HIDDEN, showThanks, false, 0, true);
+			email.addEventListener(Email.HIDDEN, showResultsPreThanks, false, 0, true);
+			//email.addEventListener(Email.HIDDEN, showThanks, false, 0, true);
 			email.hide();
 		}
 		
@@ -295,12 +309,22 @@ package com.gmrmarketing.nfl.wineapp
 		}
 		
 		
+		private function showResultsPreThanks(e:Event):void
+		{
+			email.removeEventListener(Email.HIDDEN, showResultsPreThanks);
+			
+			results.addEventListener(Results.SKIP, hideResultsPreThanks, false, 0, true);
+			results.show(challenge.selection, challenge.answersText, wineData.getWineDataFromSelections(configDialog.selectedWines(selectPreference.selection)), rankWine.selection, true);
+		}
+		
+		
 		private function showThanks(e:Event):void
 		{
 			email.removeEventListener(Email.HIDDEN, showThanks);
 			results.removeEventListener(Results.HIDDEN, showThanks);
 			
 			if (didEmail) {
+				trace("didEmail... queueing");
 				//send data to web service
 				var o:Object = email.data; //object with name and email properties
 				

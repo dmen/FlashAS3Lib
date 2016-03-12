@@ -1,39 +1,62 @@
-package com.gmrmarketing.reeses.gameday
+/**
+ * Example of a Web Service used with Queue.as
+ * 
+ * Modify per project
+ * 
+ * Sends form data to the FORM_URL and then sends a Video
+ * using the File class' upload method to the VIDEO_URL
+ */
+package com.gmrmarketing.comcast.nascar.broadcaster
 {
-	import com.adobe.air.logging.FileTarget;
+	import com.gmrmarketing.utilities.queue.IQueueService;
 	import flash.filesystem.File;
 	import flash.events.*;
 	import flash.net.*;	
-	import com.gmrmarketing.utilities.Logger;
-	import com.gmrmarketing.utilities.LoggerAIR;
 	import com.gmrmarketing.utilities.Utility;
 	
 	
-	public class WebService extends EventDispatcher
+	public class WebService extends EventDispatcher implements IQueueService 
 	{
-		public static const DATA_ERROR:String = "errorPostingFormData";
-		public static const VIDEO_ERROR:String = "errorPostingVideo";
-		public static const USER_COMPLETE:String = "uploadComplete";
-		
-		private const FORM_URL:String = "https://reesesfacebookvideo.thesocialtab.net/service";
-		private const VIDEO_URL:String = "https://reesesfacebookvideo.thesocialtab.net/service/video";
+		private const FORM_URL:String = "http://xfinitynascartour.thesocialtab.net/service/MediaInformation";
+		private const VIDEO_URL:String = "http://xfinitynascartour.thesocialtab.net/service/VideoBooth";
 	
 		private var formLoader:URLLoader;
 		private var videoLoader:File;
 		private var upload:Object;
 		
-		private var log:Logger;
-		
 		private var isBusy:Boolean;		
+		private var error:String;
 		
 		
 		public function WebService()
 		{
-			isBusy = false;
-			
-			log = Logger.getInstance();
-			
+			error = "Web Service Started";
+			isBusy = false;			
 			formLoader = new URLLoader();
+		}
+		
+		
+		public function get authData():Object
+		{
+			return { };
+		}
+		
+		
+		public function get ready():Boolean
+		{
+			return true;
+		}
+		
+		
+		public function get errorEvent():String
+		{
+			return "serviceError";
+		}
+		
+		
+		public function get completeEvent():String
+		{
+			return "serviceComplete";
 		}
 		
 		
@@ -43,15 +66,22 @@ package com.gmrmarketing.reeses.gameday
 		}
 		
 		
-		public function send(o:Object):void
+		/**
+		 * data has rfid, video, pubRelease properties 
+		 * @param	data
+		 */
+		public function send(data:Object):void
 		{
 			isBusy = true;
 			
-			upload = o;
+			upload = data;
 			
-			if (upload.videoError) {
-				
-				log.log(Utility.timeStamp + " | WebService.send() - upload.videoError = true");
+			//dataPosted();//don't send form - only video
+			
+			
+			//videoError is set true in ioError() and securityErrorHandler()
+			if (upload.videoError == true) {				
+				//data was already posted
 				dataPosted();
 				
 			}else{
@@ -59,11 +89,10 @@ package com.gmrmarketing.reeses.gameday
 				var request:URLRequest = new URLRequest(FORM_URL);			
 				
 				var vars:URLVariables = new URLVariables();		
-				vars.email = upload.email;
-				vars.followUpEmail = upload.followUp;
-				vars.guid = upload.guid;
-				vars.timestamp = upload.timestamp;
-			
+				vars.RFID = upload.rfid;
+				vars.privacy = upload.pubRelease;
+				vars.filename = upload.video + ".mp4";
+				
 				request.data = vars;			
 				request.method = URLRequestMethod.POST;
 				
@@ -71,16 +100,29 @@ package com.gmrmarketing.reeses.gameday
 				formLoader.addEventListener(IOErrorEvent.IO_ERROR, dataError, false, 0, true);
 				formLoader.addEventListener(Event.COMPLETE, dataPosted, false, 0, true);
 				formLoader.load(request);
-			}
+			}			
+		}
+		
+		
+		public function get data():Object
+		{
+			return upload;
+		}
+		
+		
+		public function get lastError():String
+		{
+			return error;
 		}
 		
 		
 		private function dataError(e:IOErrorEvent):void
 		{
+			error = "IOError posting form data: " + e.toString();
 			isBusy = false;
 			formLoader.removeEventListener(IOErrorEvent.IO_ERROR, dataError);
 			formLoader.removeEventListener(Event.COMPLETE, dataPosted);
-			dispatchEvent(new Event(DATA_ERROR));
+			dispatchEvent(new Event(errorEvent));
 		}
 		
 		
@@ -90,15 +132,9 @@ package com.gmrmarketing.reeses.gameday
 		 */
 		private function dataPosted(e:Event = null):void
 		{
-			if(e != null){
-				log.log(Utility.timeStamp + " | WebService.dataPosted() " + e.target.data);
-			}else {
-				log.log(Utility.timeStamp + " | WebService.dataPosted() - videoError = true");
-			}
-			
-			if(!e || e.target.data == "Success=true"){
+			if(!e || e.target.data == "success=true"){
 				
-				videoLoader = File.applicationStorageDirectory.resolvePath(upload.guid + ".mp4");
+				videoLoader = File.applicationStorageDirectory.resolvePath(upload.video + ".mp4");
 				
 				videoLoader.addEventListener(IOErrorEvent.IO_ERROR, ioError, false, 0, true);
 				videoLoader.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, doneUploading, false, 0, true);
@@ -108,34 +144,31 @@ package com.gmrmarketing.reeses.gameday
 				videoLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler, false, 0, true);
 				
 				videoLoader.upload(new URLRequest(VIDEO_URL));
-				//}
 			}else {
+				error = "Error in dataPosted - server response: " + e.target.data;
 				isBusy = false;
-				dispatchEvent(new Event(DATA_ERROR));	
+				dispatchEvent(new Event(errorEvent));	
 			}
 		}
 		
 		
 		private function doneUploading(e:DataEvent):void
 		{
-			isBusy = false;			
+			isBusy = false;
 			
-			log.log(Utility.timeStamp + " | WebService.doneUploading() " + e.data);
-			
-			if(e.data == "Success=true"){
+			if(e.data == "success=true"){
 				//delete video
-				var f:File = File.applicationStorageDirectory.resolvePath(upload.guid + ".mp4");
+				var f:File = File.applicationStorageDirectory.resolvePath(upload.video + ".mp4");
 				try {
-					log.log(Utility.timeStamp + " | WebService.doneUploading - delete video");
 					f.deleteFile();
-				}catch (e:Error) {log.log(Utility.timeStamp + " | WebService.doneUploading - delete video failed" + e.message);}
+				}catch (e:Error) {}
 				
 				
-				dispatchEvent(new Event(USER_COMPLETE));
+				dispatchEvent(new Event(completeEvent));
 				
 			}else {
-				
-				dispatchEvent(new Event(VIDEO_ERROR));
+				error = "Error in doneUploading - server response = " + e.data;
+				dispatchEvent(new Event(errorEvent));
 				
 			}
 		}
@@ -156,9 +189,10 @@ package com.gmrmarketing.reeses.gameday
 		
 		private function securityErrorHandler(e:SecurityErrorEvent):void 
 		{
-			log.log(Utility.timeStamp + " | WebService.securityErrorHandler() " + e.toString());
+			error = "SecurityError uploading video";
 			isBusy = false;
-            dispatchEvent(new Event(VIDEO_ERROR));
+			upload.videoError = true;
+            dispatchEvent(new Event(errorEvent));
         }
 		
 		
@@ -170,9 +204,10 @@ package com.gmrmarketing.reeses.gameday
 		
 		private function ioError(e:IOErrorEvent):void
 		{
-			log.log(Utility.timeStamp + " | WebService.ioError() " + e.toString());
+			error = "IOError uploading video";
 			isBusy = false;
-			dispatchEvent(new Event(VIDEO_ERROR));
+			upload.videoError = true;
+			dispatchEvent(new Event(errorEvent));
 		}
 		
 	}

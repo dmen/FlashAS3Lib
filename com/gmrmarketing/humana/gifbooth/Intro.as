@@ -1,4 +1,4 @@
-package com.gmrmarketing.png.gifphotobooth
+package com.gmrmarketing.humana.gifbooth
 {
 	import flash.events.*;
 	import flash.display.*;
@@ -38,7 +38,7 @@ package com.gmrmarketing.png.gifphotobooth
 			//TweenMax.to(clip, 1, { alpha:1, delay:.5, onComplete:showing } );
 			
 			clip.addEventListener(MouseEvent.MOUSE_DOWN, begin);
-			//dispatchEvent(new Event(SHOWING));
+			dispatchEvent(new Event(SHOWING));
 		}
 		
 		

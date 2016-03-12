@@ -113,7 +113,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 		
 		private function clientMessage(e:Event):void
 		{
-			var m:String = Strings.removeLineBreaks(server.getMessage());
+			var m:String = Strings.removeLineBreaks(server.message);
 			
 			if(fmsConnector.isConnected()){
 				if (m == "start") {

@@ -1,6 +1,5 @@
 /**
  * Generic Queue Class
- * Version 1 - 09/22/2015
  * 
  * Stores data objects in a specified local file
  * File is located in the users Documents folder - extension is .que auto appended
@@ -32,22 +31,27 @@ package com.gmrmarketing.utilities.queue
 {
 	import flash.filesystem.*;	
 	import flash.events.*;	
-	import flash.utils.Timer;
+	import flash.utils.Timer;	
+	import com.gmrmarketing.utilities.ConnectionMonitor;
 	
 	
 	public class Queue extends EventDispatcher
 	{
-		public static const LOG_ENTRY:String = "newLogEntryAvailable";
+		public static const LOG_ENTRY:String = "newServiceLogEntryAvailable";
 		private const MAX_TRIES:int = 10;
 		private var queueFileName:String;
 		private var errorFileName:String;
 		private var data:Array;//current queue
 		private var myService:IQueueService;//web/hubble service		
+		private var lastError:String = "";
+		
+		private var connectionMonitor:ConnectionMonitor;
 		
 		
 		public function Queue()
 		{
 			data = [];
+			connectionMonitor = new ConnectionMonitor();			
 		}
 		
 		
@@ -58,8 +62,7 @@ package com.gmrmarketing.utilities.queue
 		{
 			myService = s;
 			myService.addEventListener(myService.errorEvent, serviceError);
-			myService.addEventListener(myService.completeEvent, uploadComplete);
-			dispatchEvent(new Event(LOG_ENTRY));
+			myService.addEventListener(myService.completeEvent, uploadComplete);			
 		}
 		
 		
@@ -82,6 +85,10 @@ package com.gmrmarketing.utilities.queue
 		{
 			return myService.lastError;
 		}
+		public function get qLogEntry():String 
+		{
+			return lastError;
+		}
 		
 		
 		/**
@@ -103,7 +110,7 @@ package com.gmrmarketing.utilities.queue
 			if (myService.ready){
 				uploadNext();
 			}else {
-				var a:Timer = new Timer(2000, 1);
+				var a:Timer = new Timer(10000, 1);
 				a.addEventListener(TimerEvent.TIMER, start, false, 0, true);
 				a.start();
 			}
@@ -112,22 +119,17 @@ package com.gmrmarketing.utilities.queue
 		
 		/**
 		 * Adds a data item to the queue
-		 * Creates a new object with a userData property
-		 * The userData object is what is used by any services implementing the IQueueService interface
+		 * and a qNumTries property
 		 * @param item Object
 		 */
 		public function add(item:Object):void
 		{
-			var newItem:Object = { };
-			newItem.userData = item;//original user data object
+			item.qNumTries = 0; //add new queue property for keeping track of upload attempts
 			
-			//used by Queue only to track number of tries the object has been sent to the service
-			newItem.numTries = 0;
-			
-			data.push(newItem);//add to queue
+			data.push(item);//add item to queue
 			rewriteQueue();
 			data = getAllData();
-			uploadNext();			
+			uploadNext();//send to service	
 		}		
 	
 		
@@ -137,8 +139,12 @@ package com.gmrmarketing.utilities.queue
 		 */
 		private function uploadNext():void
 		{
-			if (data.length > 0 && myService && !myService.busy) {
-				myService.send(data.shift());//removes item from the data array
+			if(connectionMonitor.connected){
+				if (data.length > 0 && myService && !myService.busy) {
+					myService.send(data.shift());//remove from queue... get it back from service later if an error occurs
+				}
+			}else {
+				delayNext();//call uploadNext() again in 30 seconds
 			}
 		}
 	
@@ -151,14 +157,14 @@ package com.gmrmarketing.utilities.queue
 		 */
 		private function serviceError(e:Event):void
 		{
-			trace(myService.lastError);
+			var o:Object = myService.data;//full object
+			
 			dispatchEvent(new Event(LOG_ENTRY));
 			
-			var o:Object = myService.data;//full object with userData and numTries
-			o.numTries = o.numTries + 1;
-			if (o.numTries >= MAX_TRIES) {
+			o.qNumTries = o.qNumTries + 1;
+			if (o.qNumTries >= MAX_TRIES) {
 				
-				writeErrorData(o);//remove from queue and place in error file
+				writeErrorData(o);//place in separate error file
 				
 				rewriteQueue();
 				data = getAllData();
@@ -180,9 +186,7 @@ package com.gmrmarketing.utilities.queue
 		 * @param	e IQueueService.completeEvent
 		 */
 		private function uploadComplete(e:Event):void
-		{		
-			dispatchEvent(new Event(LOG_ENTRY));
-			
+		{
 			rewriteQueue();
 			data = getAllData();
 			delayNext();
@@ -213,7 +217,7 @@ package com.gmrmarketing.utilities.queue
 		 * users array is emptied - call getAllUsers() to repopulate users
 		 */
 		private function rewriteQueue():void
-		{
+		{			
 			var file:File = File.documentsDirectory.resolvePath( queueFileName );
 			
 			try{				
@@ -252,7 +256,7 @@ package com.gmrmarketing.utilities.queue
 		 * @return Array of data objects
 		 */
 		public function getAllData():Array
-		{			
+		{	
 			var obs:Array = new Array();
 			var a:Object = { };
 		

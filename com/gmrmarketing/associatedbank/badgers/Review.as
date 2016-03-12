@@ -94,13 +94,14 @@ package com.gmrmarketing.associatedbank.badgers
 			clip.btnRetake.addEventListener(MouseEvent.MOUSE_DOWN, retakePhoto, false, 0, true);
 			clip.btnSave.addEventListener(MouseEvent.MOUSE_DOWN, savePhoto, false, 0, true);
 			
-			TweenMax.delayedCall(.25, makeString);
+			//TweenMax.delayedCall(.25, makeString);
 		}
 		
-		private function makeString():void
+		public function makeString():String
 		{
 			var jpeg:ByteArray = getJpeg(bmd);
 			imageString = getBase64(jpeg);
+			return imageString;
 		}
 		
 		private function limitToTen(e:Event):void
@@ -131,13 +132,14 @@ package com.gmrmarketing.associatedbank.badgers
 		
 		private function retakePhoto(e:MouseEvent):void
 		{
+			clip.btnRetake.removeEventListener(MouseEvent.MOUSE_DOWN, retakePhoto);
 			dispatchEvent(new Event(RETAKE));
 		}
 		
 		
 		private function savePhoto(e:MouseEvent):void
-		{	
-			
+		{		
+			clip.btnSave.removeEventListener(MouseEvent.MOUSE_DOWN, savePhoto);	
 			dispatchEvent(new Event(SAVE));
 		}
 		

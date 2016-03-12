@@ -7,6 +7,10 @@ package com.gmrmarketing.associatedbank.badgers
 	import com.gmrmarketing.utilities.queue.Queue;
 	import flash.desktop.NativeApplication;
 	import com.gmrmarketing.esurance.usopen2015.Print;
+	import com.gmrmarketing.utilities.Logger;
+	import com.gmrmarketing.utilities.LoggerAIR;
+	import com.greensock.TweenMax;
+	
 	
 	public class Main extends MovieClip
 	{
@@ -22,6 +26,7 @@ package com.gmrmarketing.associatedbank.badgers
 		private var cq:CornerQuit;
 		private var queue:Queue;
 		private var print:Print;
+		private var log:Logger;
 		
 		
 		public function Main()
@@ -58,12 +63,27 @@ package com.gmrmarketing.associatedbank.badgers
 			cq.init(cornerContainer, "ul");
 			cq.addEventListener(CornerQuit.CORNER_QUIT, exitApp);
 			
+			log = Logger.getInstance();
+			log.logger = new LoggerAIR();
+			
 			queue = new Queue();
 			queue.fileName = "abBadgersQueue";
 			queue.service = new HubbleServiceExtender();
+			queue.addEventListener(Queue.LOG_ENTRY, writeToLog);
+			queue.addEventListener(Queue.QLOG_ENTRY, writeToLog2);
 			queue.start();
 			
 			init();
+		}
+		
+		
+		private function writeToLog(e:Event):void
+		{
+			log.log(queue.logEntry);
+		}
+		private function writeToLog2(e:Event):void
+		{
+			log.log(queue.qLogEntry);
 		}
 		
 		
@@ -100,16 +120,23 @@ package com.gmrmarketing.associatedbank.badgers
 		
 		
 		private function showThanks(e:Event):void
-		{
+		{			
 			review.removeEventListener(Review.RETAKE, showTakePhoto);
 			review.removeEventListener(Review.SAVE, showThanks);		
 			review.hide();
 			
 			thanks.addEventListener(Thanks.COMPLETE, reset, false, 0, true);
-			thanks.show();			
+			thanks.show();	
 			
+			TweenMax.delayedCall(.2, sendData);
+		}
+		
+		private function sendData():void
+		{			
 			var qo:Object = form.data;
-			qo.image = review.pic;
+			qo.image = review.makeString();
+			
+			trace("Main.sendData" + String(qo.image).substr(0,50));
 			
 			print.doPrint(review.picData, review.numPrints);
 			

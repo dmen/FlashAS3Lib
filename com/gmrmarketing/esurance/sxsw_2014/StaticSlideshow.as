@@ -3,6 +3,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 	import flash.display.*;	
 	import flash.events.*;	
 	import com.greensock.TweenMax;
+	import flash.geom.Matrix;
 	import flash.net.URLRequest;
 	
 	
@@ -69,17 +70,24 @@ package com.gmrmarketing.esurance.sxsw_2014
 		
 		private function imageLoaded(e:Event):void
 		{
-			var b:Bitmap = Bitmap(e.target.content);
+			var b:Bitmap = Bitmap(e.target.content);			
 			b.smoothing = true;
 			
-			b.alpha = 0;
-			imageContainer.addChild(b);
-			TweenMax.to(b, 1, { alpha:1, onComplete:waitForNext } );
+			var res:BitmapData = new BitmapData(1920, 1080);
+			var m:Matrix = new Matrix();
+			m.scale(1920 / b.width, 1080 / b.height);
+			res.draw(b.bitmapData, m, null, null, null, true);
+			var disp:Bitmap = new Bitmap(res, "auto", true);
+			
+			disp.alpha = 0;
+			imageContainer.addChild(disp);
+			TweenMax.to(disp, 1, { alpha:1, onComplete:waitForNext } );
 		}
 		
 		
 		private function waitForNext():void
 		{
+			//remove previous one behind the new one
 			if (imageContainer.numChildren > 1) {
 				imageContainer.removeChildAt(0);
 			}

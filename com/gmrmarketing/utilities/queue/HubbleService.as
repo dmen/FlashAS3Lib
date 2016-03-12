@@ -26,6 +26,7 @@ package com.gmrmarketing.utilities.queue
 {
 	import flash.events.*;
 	import flash.net.*;
+	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	import com.gmrmarketing.utilities.Utility;
 	import com.gmrmarketing.utilities.queue.AutoIncrement;
@@ -45,12 +46,11 @@ package com.gmrmarketing.utilities.queue
 		private var isBusy:Boolean; //true when submitting data
 		private var autoInc:AutoIncrement;//used for unique machine ID (GUID) and auto inc integer for deviceResponseID in send()
 		private var upload:Object;//current object being uploaded
-		private var interactionID:int; //Hubble ID - set in send()
-		private var photoFieldID:int;//for sending in submitPhoto() set in send()
-		private var photoFieldID2:int;//for sending in submitPhoto2() set in send()
+		private var interactionID:int; //Hubble ID - set in send()		
 		private var error:String;//last error - retrieved in lastError()
 		
 		private var auth:Object;//contains user and pwd keys - set in Constructor - used in getToken()
+		
 		
 		
 		/**
@@ -73,7 +73,7 @@ package com.gmrmarketing.utilities.queue
 			error = "HubbleService Started";
 			
 			hdr = new URLRequestHeader("Content-type", "application/json");
-			hdr2 = new URLRequestHeader("Accept", "application/json");
+			hdr2 = new URLRequestHeader("Accept", "application/json");			
 			
 			getToken();
 		}
@@ -165,8 +165,7 @@ package com.gmrmarketing.utilities.queue
 		 * @param	e
 		 */
 		private function tokenError(e:IOErrorEvent = null):void
-		{
-			error = "HubbleService.tokenError";
+		{			
 			token = "";
 			var a:Timer = new Timer(10000, 1);
 			a.addEventListener(TimerEvent.TIMER, delayedToken, false, 0, true);
@@ -179,6 +178,14 @@ package com.gmrmarketing.utilities.queue
 			getToken();
 		}
 		
+		private function clone(o:Object):Object 
+		{
+			var temp:ByteArray = new ByteArray();
+			temp.writeObject(o);
+			temp.position = 0;
+			return temp.readObject();
+		}
+		
 		
 		/**
 		 * Sends the data object to Hubble
@@ -186,30 +193,29 @@ package com.gmrmarketing.utilities.queue
 		 * set to the response ID from the server in formPosted is the status = 1
 		 * DeviceResponseId is the unique record number from this machine
 		 * 
-		 * @param	data - has data, resp and photoFieldID properties
-		 * data is the original data object as passed to Queue
-		 * resp is the unique response object created in the overridden version of this send() in the extender
-		 * 
+		 * data.responseObject is the unique response object created in the overridden version of this send() in the extender - the form data
 		 */
 		public function send(data:Object):void
-		{	
-			upload = data.data;//original data object sent to the service extender
+		{			
+			upload = clone(data);
 			
-			data.resp.AccessToken = token;
-			data.resp.MethodData.DeviceId = autoInc.guid;
-			data.resp.MethodData.DeviceResponseId = autoInc.nextNum;
-			data.resp.MethodData.ResponseDate = Utility.hubbleTimeStamp;
-			data.resp.MethodData.Latitude = "0";
-			data.resp.MethodData.Longitude = "0";
+			//add NowPik JSON data into the response object built in the extender
+			upload.responseObject.AccessToken = token;
+			upload.responseObject.MethodData.DeviceId = autoInc.guid;
+			upload.responseObject.MethodData.DeviceResponseId = autoInc.nextNum;
+			upload.responseObject.MethodData.ResponseDate = Utility.hubbleTimeStamp;
+			upload.responseObject.MethodData.Latitude = "0";
+			upload.responseObject.MethodData.Longitude = "0";
 			
-			interactionID = data.resp.MethodData.InteractionId;//The main interactionID - used in callPrintAPI()
-			photoFieldID = data.photoFieldID;//used in submitPhoto()
-			photoFieldID2 = data.photoFieldID2;//used in submitPhoto2() if defined -- will be 0 if photoFieldID2 is undefined in the object
-			//trace("HS.send()", upload.error, token, upload.responseID);
+			interactionID = upload.responseObject.MethodData.InteractionId;//The main interactionID - used in callPrintAPI()			
+			
 			if (upload.responseID == undefined || upload.responseID == 0) {
 				//first time trying to send
 				upload.responseID = -1;
-			}			
+			}
+			if (upload.photoFieldID2 == undefined) {
+				upload.photoFieldID2 = 0;//checked in photoPosted()
+			}
 			
 			if (token != "") {
 				
@@ -218,7 +224,7 @@ package com.gmrmarketing.utilities.queue
 				//responseID is returned from NowPik after the form data (initial reponse object) is posted
 				if (upload.responseID == -1) {
 					
-					var js:String = JSON.stringify(data.resp);//the response object built in overridden send()
+					var js:String = JSON.stringify(upload.responseObject);//the response object built in overridden send()
 					var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionresponse");
 					req.method = URLRequestMethod.POST;
 					req.data = js;
@@ -231,15 +237,15 @@ package com.gmrmarketing.utilities.queue
 					lo.load(req);
 					
 				}else{					
-					
-					if (upload.error == -1) {
+					//responseID set - form data already posted
+					if (upload.error == -1) {						
 						submitPhoto();
-					}else if (upload.error == -4) {
+					}else if (upload.error == -4) {						
 						submitPhoto2();
-					}else if (upload.error == -2) {	
+					}else if (upload.error == -2) {						
 						processFollowups();
 					}else {		
-						//upload.error == -3
+						//upload.error == -3						
 						callPrintAPI();
 					}
 					
@@ -282,6 +288,7 @@ package com.gmrmarketing.utilities.queue
 		/**
 		 * Called if an IOError occurs
 		 * No need to set error state in the upload object as the whole process will repeat
+		 * because responseID hasn't been set
 		 * @param	e
 		 */
 		private function formError(e:IOErrorEvent):void
@@ -299,7 +306,7 @@ package com.gmrmarketing.utilities.queue
 		{		
 			upload.error = 0;
 			
-			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":upload.responseID, "FieldId":photoFieldID, "Response":upload.image }};			
+			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":upload.responseID, "FieldId":upload.photoFieldID, "Response":upload.image }};			
 			var js:String = JSON.stringify(resp);
 			
 			var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionfieldresponse");
@@ -320,7 +327,7 @@ package com.gmrmarketing.utilities.queue
 			var j:Object = JSON.parse(e.currentTarget.data);
 			
 			if (j.Status == 1) {
-				if (photoFieldID2 != 0) {//set to 0 in send() if incoming object had photoFieldID2 undefined
+				if (upload.photoFieldID2 != 0) {//set to 0 in send() if incoming object had photoFieldID2 undefined
 					submitPhoto2();
 				}else {
 					processFollowups();
@@ -355,7 +362,7 @@ package com.gmrmarketing.utilities.queue
 		{		
 			upload.error = 0;
 			
-			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":upload.responseID, "FieldId":photoFieldID2, "Response":upload.image2 }};			
+			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":upload.responseID, "FieldId":upload.photoFieldID2, "Response":upload.image2 }};			
 			var js:String = JSON.stringify(resp);
 			
 			var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionfieldresponse");
@@ -436,7 +443,7 @@ package com.gmrmarketing.utilities.queue
 					dispatchEvent(new Event(completeEvent));
 				}				
 			}else {
-				error = "HubbleService.followupsProcessed - server Status = " + String(j.Status);				
+				error = "HubbleService.followupsProcessed - setting error to -2  Status from server = " + String(j.Status);				
 				upload.error = -2;
 				dispatchEvent(new Event(errorEvent));
 			}
@@ -445,7 +452,7 @@ package com.gmrmarketing.utilities.queue
 		
 		private function followupError(e:IOErrorEvent):void
 		{
-			error = "HubbleService.followupError: " + e.toString();
+			error = "HubbleService.followupError: setting error to -2 " + e.toString();
 			isBusy = false;
 			upload.error = -2;
 			dispatchEvent(new Event(errorEvent));
