@@ -124,6 +124,8 @@ package com.gmrmarketing.comcast.nascar.broadcaster
 			o.rfid = intro.RFID;			
 			o.video = capture.fileName;//GUID + RFID
 			o.pubRelease = review.pubRelease; //boolean
+			//new 4/2016
+			o.type = select.selection;
 			queue.add(o);
 			
 			review.removeEventListener(Review.COMPLETE, saveVideo);

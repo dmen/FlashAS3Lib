@@ -1,5 +1,6 @@
 package com.gmrmarketing.miller.gifphotobooth
 {
+	import flash.ui.*;
 	import com.gmrmarketing.htc.movies.Overlay;
 	import flash.display.*;
 	import flash.events.*;
@@ -69,7 +70,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			}
 			
 			clip.addChild(bmp);
-			//clip.addChild(over);
+			clip.addChild(over);
 			
 			frames = f;
 			
@@ -89,11 +90,12 @@ package com.gmrmarketing.miller.gifphotobooth
 			dispatchEvent(new Event(SHOWING));
 		}
 		
+		
 		public function hide():void
 		{
 			clip.removeEventListener(Event.ENTER_FRAME, updateCaps);
 			clip.btnRetake.removeEventListener(MouseEvent.MOUSE_DOWN, doRetake);
-			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, doNext);
+			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, doNext);			
 			
 			animTimer.stop();
 			if(myContainer){
@@ -134,14 +136,14 @@ package com.gmrmarketing.miller.gifphotobooth
 		}
 		
 		
-		private function doRetake(e:MouseEvent):void
+		private function doRetake(e:MouseEvent = null ):void
 		{
 			tim.buttonClicked();
 			dispatchEvent(new Event(RETAKE));
 		}
 		
 		
-		private function doNext(e:MouseEvent):void
+		private function doNext(e:MouseEvent = null):void
 		{
 			tim.buttonClicked();
 			dispatchEvent(new Event(NEXT));

@@ -8,7 +8,7 @@ package com.gmrmarketing.utilities.queue
 	
 	public interface IQueueService extends IEventDispatcher
 	{		
-		function get errorEvent():String;//Event constants
+		function get errorEvent():String;//"Event constants" - these because you can't define string constants here in the interface
 		function get completeEvent():String;
 		
 		function get authData():Object;//for Hubble this returns an object with an AccessToken key - not yet implemented for FormService

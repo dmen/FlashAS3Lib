@@ -1,6 +1,7 @@
 package com.gmrmarketing.humana.gifbooth
 {
 	import flash.events.*;
+	
 	import flash.display.*;
 	import com.greensock.TweenMax;
 	
@@ -38,6 +39,7 @@ package com.gmrmarketing.humana.gifbooth
 			//TweenMax.to(clip, 1, { alpha:1, delay:.5, onComplete:showing } );
 			
 			clip.addEventListener(MouseEvent.MOUSE_DOWN, begin);
+			
 			dispatchEvent(new Event(SHOWING));
 		}
 		
@@ -62,11 +64,9 @@ package com.gmrmarketing.humana.gifbooth
 		
 		private function begin(e:MouseEvent):void
 		{
-			clip.removeEventListener(MouseEvent.MOUSE_DOWN, begin)
+			clip.removeEventListener(MouseEvent.MOUSE_DOWN, begin);			
 			dispatchEvent(new Event(BEGIN));
-		}
-		
-		
+		}		
 		
 	}
 	

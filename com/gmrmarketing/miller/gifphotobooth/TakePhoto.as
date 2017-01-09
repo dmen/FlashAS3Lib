@@ -1,5 +1,6 @@
 package com.gmrmarketing.miller.gifphotobooth
 {	
+	import flash.ui.*;
 	import flash.events.*;
 	import flash.display.*;
 	import com.greensock.TweenMax;
@@ -81,7 +82,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			clip.addEventListener(Event.ENTER_FRAME, updateCap);
 			clip.progBar.progress.scaleX = 0;
 			clip.theCount.visible = false;
-			clip.theCount.theText.text = "3";
+			clip.theCount.theText.text = "3";			
 			
 			clip.alpha = 0;
 			TweenMax.to(clip, .5, { alpha:1, onComplete:showComplete } );
@@ -90,7 +91,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		
 		public function hide():void
 		{
-			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, startCounting);
+			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, startCounting);			
 			camPic.pause();
 			//camPic.removeEventListener(CamPic.CAMERA_UPDATE, updatePreview);
 			if(myContainer){
@@ -136,10 +137,10 @@ package com.gmrmarketing.miller.gifphotobooth
 		
 		
 		//called by pressing the take photos cap
-		private function startCounting(e:MouseEvent):void
+		private function startCounting(e:MouseEvent = null):void
 		{
 			tim.buttonClicked();
-			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, startCounting);
+			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, startCounting);			
 			
 			clip.theCount.visible = true;
 			clip.theCount.theText.text = "3";
@@ -180,7 +181,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			if (frameCount % EVERY_NTH == 0) {
 				//crop
 				var a:BitmapData = new BitmapData(812, 610);
-				a.copyPixels(camPic.getCapture(), new Rectangle(234, 55, 812, 610), new Point(0, 0));
+				a.copyPixels(camPic.getCaptureImage(), new Rectangle(234, 55, 812, 610), new Point(0, 0));
 				frames.push(a);
 			}
 			if (frames.length >= MAX_FRAMES) {

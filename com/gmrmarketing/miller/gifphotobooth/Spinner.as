@@ -3,7 +3,7 @@
  * Typically used for choosing birthdates and such.
  * 
  * Requires a library clip with the linkage spinChoice 
- * containing a dynamic text field with an instance name of theText
+ * containing a dynamic text field with an instance name of: theText
  * 
  * useage:
  *	var a:Spinner = new Spinner();
@@ -221,13 +221,27 @@ package com.gmrmarketing.miller.gifphotobooth
 		}
 		
 		
+		public function cursorMove(moveUp:Boolean):void
+		{
+			var scrollTo:Number;
+			if (moveUp){				
+				scrollTo = Math.round((choicesContainer.y + 50) / CHOICE_TEXT_FIELD_HEIGHT) * CHOICE_TEXT_FIELD_HEIGHT;				
+				TweenMax.to(choicesContainer, 1, { y:scrollTo, onUpdate:checkPos } );	
+			}else{
+				scrollTo = Math.round((choicesContainer.y - 50) / CHOICE_TEXT_FIELD_HEIGHT) * CHOICE_TEXT_FIELD_HEIGHT;				
+				TweenMax.to(choicesContainer, 1, { y:scrollTo, onUpdate:checkPos } );	
+			}
+		}
+		
+		
 		/**
 		 * Limits dragging the vertical extents of the spinner past the midpoint marker
 		 */
 		private function checkPos():void
 		{	
 			var theY:int;
-			if (choicesContainer.y + choicesContainer.height < CENTER_Y + (CHOICE_TEXT_FIELD_HEIGHT * .5)) {				
+			
+			if (choicesContainer.y + (CHOICE_TEXT_FIELD_HEIGHT * myChoices.length) < CENTER_Y + (CHOICE_TEXT_FIELD_HEIGHT * .5)) {
 				theY = CENTER_Y - (CHOICE_TEXT_FIELD_HEIGHT * myChoices.length) + (CHOICE_TEXT_FIELD_HEIGHT * .5);
 				TweenMax.killTweensOf(choicesContainer);
 				TweenMax.to(choicesContainer, .5, { y:theY } );

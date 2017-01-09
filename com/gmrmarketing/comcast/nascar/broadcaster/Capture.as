@@ -100,6 +100,26 @@ package com.gmrmarketing.comcast.nascar.broadcaster
 			
 			if (whichOption == 3) {
 				//show the race clip
+				timeRemaining = 30; //length of sample clip
+				
+				vid.width = 640
+				vid.height = 360;
+				vid.x = 1096; 
+				vid.y = 0;								
+				
+				clip.recordingTime.x = 1581;
+				clip.recordingTime.y = 388;
+				
+				clip.beginRecording.x = 1310;
+				clip.beginRecording.y = 0;
+				
+				clip.raceClip.source = "assets/raceClip_d.mp4";
+				//clip.raceClip.play();
+				TweenMax.to(clip.raceClip, 1, { alpha:1, delay:.5 } );
+				
+			}else if (whichOption == 2){
+				
+				//show the race clip
 				timeRemaining = 16; //length of sample clip
 				
 				vid.width = 640
@@ -110,9 +130,11 @@ package com.gmrmarketing.comcast.nascar.broadcaster
 				clip.recordingTime.x = 1581;
 				clip.recordingTime.y = 388;
 				
-				clip.beginRecording.x = 1300;
-				clip.beginRecording.y = 575;
+				clip.beginRecording.x = 1310;
+				clip.beginRecording.y = 0;
 				
+				clip.raceClip.source = "assets/raceClip_c.mp4";
+				//clip.raceClip.play();
 				TweenMax.to(clip.raceClip, 1, { alpha:1, delay:.5 } );
 				
 			}else {
@@ -156,6 +178,7 @@ package com.gmrmarketing.comcast.nascar.broadcaster
 				countdownTimer.reset();
 				TweenMax.to(clip.beginRecording, .5, { alpha:0 } );
 				TweenMax.to(clip.recording, .5, { alpha:1 } );
+				clip.raceClip.play();
 				doRecordUser();
 			}
 		}

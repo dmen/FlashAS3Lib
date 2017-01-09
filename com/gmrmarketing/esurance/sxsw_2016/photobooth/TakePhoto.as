@@ -40,13 +40,13 @@ package com.gmrmarketing.esurance.sxsw_2016.photobooth
 			clip = new mcTakePhoto();
 			
 			cam = Camera.getCamera();
-			cam.setMode(538, 720, 30);
-			vid = new Video(538, 720);
+			cam.setMode(960, 720, 30);
+			vid = new Video(960, 720);
 			
 			whiteFlash = new WhiteFlash(1600, 900);
 			whiteFlash.container = clip;
 			
-			over = new overlay();
+			over = new overlay();//960x620
 			
 			tim = TimeoutHelper.getInstance();
 			
@@ -87,8 +87,8 @@ package com.gmrmarketing.esurance.sxsw_2016.photobooth
 			
 			vid.attachCamera(cam);
 			clip.addChildAt(vid, 0);
-			vid.x = 527;
-			vid.y = 64;
+			vid.x = 545;
+			vid.y = 90;
 			
 			if (e == null) {
 				//called from Main instead of retake button
@@ -134,16 +134,16 @@ package com.gmrmarketing.esurance.sxsw_2016.photobooth
 		
 		private function showPhoto():void
 		{	
-			var temp:BitmapData = new BitmapData(538, 720);
-			temp.draw(vid);
+			var temp:BitmapData = new BitmapData(960, 720);
+			temp.draw(vid,null,null,null,null,true);//camera image
 			
-			currPhoto = new BitmapData(502, 720);
-			currPhoto.copyPixels(temp, new Rectangle(18, 0, 502, 720), new Point(0, 0));
-			currPhoto.copyPixels(over, new Rectangle(0, 0, 502, 720), new Point(0, 0), null, null, true);
+			currPhoto = new BitmapData(960, 620);
+			currPhoto.copyPixels(temp, new Rectangle(0, 50, 960, 620), new Point(0, 0));
+			currPhoto.copyPixels(over, new Rectangle(0, 0, 960, 620), new Point(0, 0), null, null, true);
 			
 			displayPhoto = new Bitmap(currPhoto);
 			displayPhoto.x = 545;
-			displayPhoto.y = 64;
+			displayPhoto.y = 140;
 			myContainer.addChild(displayPhoto);
 			
 			clip.btnTake.visible = false;

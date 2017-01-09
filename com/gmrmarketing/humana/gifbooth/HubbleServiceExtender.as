@@ -29,7 +29,7 @@ package com.gmrmarketing.humana.gifbooth
 		 */
 		override public function send(data:Object):void
 		{	
-			var resp:Object = { "MethodData": { "InteractionId":289, "FieldResponses":[ { "FieldId":2239, "Response":data.email }, { "FieldId":2240, "Response":data.phone }, { "FieldId":2242, "Response":data.opt1 }, { "FieldId":2243, "Response":data.opt2 }, { "FieldId":2244, "Response":data.opt3 }, { "FieldId":2245, "Response":data.opt4 }, { "FieldId":2246, "Response":data.opt5 }, { "FieldId":2241, "Response":true }, { "FieldId":2247, "Response":data.phone == "" ? false : true } ]}};
+			var resp:Object = { "MethodData": { "InteractionId":289, "FieldResponses":[ { "FieldId":2239, "Response":data.original.email }, { "FieldId":2240, "Response":data.original.phone }, { "FieldId":2242, "Response":data.original.opt1 }, { "FieldId":2243, "Response":data.original.opt2 }, { "FieldId":2244, "Response":data.original.opt3 }, { "FieldId":2245, "Response":data.original.opt4 }, { "FieldId":2246, "Response":data.original.opt5 }, { "FieldId":2241, "Response":true }, { "FieldId":2247, "Response":data.original.phone == "" ? false : true } ]}};
 			
 			data.responseObject = resp;
 			

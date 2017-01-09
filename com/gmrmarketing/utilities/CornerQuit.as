@@ -258,7 +258,7 @@ package com.gmrmarketing.utilities
 		 * @param	e CLICK
 		 */
 		private function cornerClick(e:MouseEvent):void
-		{
+		{			
 			if (singleClick) {
 				dispatchEvent(new Event(CORNER_QUIT));
 				resetArray();

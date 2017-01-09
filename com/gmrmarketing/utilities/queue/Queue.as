@@ -37,8 +37,8 @@ package com.gmrmarketing.utilities.queue
 	
 	public class Queue extends EventDispatcher
 	{
-		public static const LOG_ENTRY:String = "newServiceLogEntryAvailable";
-		private const MAX_TRIES:int = 10;
+		public static const LOG_ENTRY:String = "newServiceLogEntryAvailable";//listen for this then call logEntry to get the string
+		private const MAX_TRIES:int = 50;//maximum number of upload attempts
 		private var queueFileName:String;
 		private var errorFileName:String;
 		private var data:Array;//current queue
@@ -76,7 +76,7 @@ package com.gmrmarketing.utilities.queue
 		public function set fileName(fn:String):void
 		{
 			queueFileName = fn + ".que";
-			errorFileName = fn + "_error.que";
+			errorFileName = fn + "_error.que";//used if max_tries is reached for an upload item
 			data = getAllData();
 		}
 		
@@ -85,6 +85,8 @@ package com.gmrmarketing.utilities.queue
 		{
 			return myService.lastError;
 		}
+		
+		
 		public function get qLogEntry():String 
 		{
 			return lastError;
@@ -107,7 +109,7 @@ package com.gmrmarketing.utilities.queue
 		public function start(e:TimerEvent = null):void
 		{
 			//need to wait until the service is ready...
-			if (myService.ready){
+			if (myService && myService.ready){
 				uploadNext();
 			}else {
 				var a:Timer = new Timer(10000, 1);
@@ -118,15 +120,18 @@ package com.gmrmarketing.utilities.queue
 		
 		
 		/**
-		 * Adds a data item to the queue
-		 * and a qNumTries property
+		 * Adds a data object to the queue
+		 * original incoming object is stored in the 'original' property of the new object
+		 * adds a qNumTries property to track the number of upload attempts
 		 * @param item Object
 		 */
 		public function add(item:Object):void
 		{
-			item.qNumTries = 0; //add new queue property for keeping track of upload attempts
+			var o:Object = new Object();
+			o.original = item;//data portion used by the service - original data sent to queue
+			o.qNumTries = 0; //add new queue property for keeping track of upload attempts
 			
-			data.push(item);//add item to queue
+			data.push(o);//add item to queue
 			rewriteQueue();
 			data = getAllData();
 			uploadNext();//send to service	
@@ -136,12 +141,13 @@ package com.gmrmarketing.utilities.queue
 		/**
 		 * Uploads the next data object
 		 * Will call uploadComplete() once data is posted
+		 * Will only try to upload the item if connection status is true
 		 */
 		private function uploadNext():void
 		{
 			if(connectionMonitor.connected){
 				if (data.length > 0 && myService && !myService.busy) {
-					myService.send(data.shift());//remove from queue... get it back from service later if an error occurs
+					myService.send(data.shift());//remove object from queue... get it back from service later if an error occurs
 				}
 			}else {
 				delayNext();//call uploadNext() again in 30 seconds
@@ -157,7 +163,7 @@ package com.gmrmarketing.utilities.queue
 		 */
 		private function serviceError(e:Event):void
 		{
-			var o:Object = myService.data;//full object
+			var o:Object = myService.data;//get full object back from the service
 			
 			dispatchEvent(new Event(LOG_ENTRY));
 			
@@ -242,7 +248,7 @@ package com.gmrmarketing.utilities.queue
 			
 			try{				
 				stream.open( file, FileMode.APPEND );
-				stream.writeObject(obj);
+				stream.writeObject(obj);				
 				stream.close();				
 			}catch (e:Error) {}
 			
@@ -277,7 +283,7 @@ package com.gmrmarketing.utilities.queue
 				
 				while (a) {
 				
-					obs.push(a);
+					obs.push(a);					
 					
 					try{
 						a = stream.readObject();

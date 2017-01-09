@@ -1,6 +1,5 @@
 package com.gmrmarketing.miller.gifphotoboothnew
-{
-	import com.gmrmarketing.htc.movies.Overlay;
+{	
 	import flash.display.*;
 	import flash.events.*;
 	import com.greensock.TweenMax;
@@ -69,7 +68,7 @@ package com.gmrmarketing.miller.gifphotoboothnew
 			}
 			
 			clip.addChild(bmp);
-			//clip.addChild(over);
+			clip.addChild(over);
 			
 			frames = f;
 			

@@ -25,6 +25,8 @@ package com.gmrmarketing.miller.gifphotoboothnew
 		private var queue:Queue;
 		private var userData:Object;
 		
+		private var over:BitmapData;
+		
 		private var tim:TimeoutHelper;
 		
 		
@@ -79,11 +81,11 @@ package com.gmrmarketing.miller.gifphotoboothnew
 		
 		private function processFrames():void
 		{
-			//var over:BitmapData = new overlay();//lib
+			over = new overlay();//lib
 			
 			encoder.setRepeat(0);
 			encoder.setDelay(150);
-			encoder.setQuality(8);//default is 10 - lower = slower/better
+			encoder.setQuality(6);//default is 10 - lower = slower/better
 			
 			encoder.start();//returns a boolean... 
 			myContainer.addEventListener(Event.ENTER_FRAME, encFrame, false, 0, true);
@@ -116,7 +118,7 @@ package com.gmrmarketing.miller.gifphotoboothnew
 				m.scale(320 / 812, 240 / 610);
 				var b:BitmapData = new BitmapData(320, 240);
 				b.draw(frames.shift(), m, null, null, null, true);			
-				//b.copyPixels(over, new Rectangle(0, 0, 320, 240), new Point(0, 0), null, null, true);		
+				b.copyPixels(over, new Rectangle(0, 0, 320, 240), new Point(0, 0), null, null, true);		
 				encoder.addFrame(b);
 			}else {
 				myContainer.removeEventListener(Event.ENTER_FRAME, encFrame);

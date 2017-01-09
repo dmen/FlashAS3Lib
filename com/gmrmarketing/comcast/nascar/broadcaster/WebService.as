@@ -22,7 +22,7 @@ package com.gmrmarketing.comcast.nascar.broadcaster
 	
 		private var formLoader:URLLoader;
 		private var videoLoader:File;
-		private var upload:Object;
+		private var upload:Object;//original data object set in send()
 		
 		private var isBusy:Boolean;		
 		private var error:String;
@@ -68,6 +68,7 @@ package com.gmrmarketing.comcast.nascar.broadcaster
 		
 		/**
 		 * data has rfid, video, pubRelease properties 
+		 * new 4/2016 - type property 1,2,3 - index of video selection
 		 * @param	data
 		 */
 		public function send(data:Object):void
@@ -91,7 +92,11 @@ package com.gmrmarketing.comcast.nascar.broadcaster
 				var vars:URLVariables = new URLVariables();		
 				vars.RFID = upload.rfid;
 				vars.privacy = upload.pubRelease;
+				vars.type = upload.type;
 				vars.filename = upload.video + ".mp4";
+				
+				//new vars 4/2016
+				vars.datePlayed = Utility.timeStamp;
 				
 				request.data = vars;			
 				request.method = URLRequestMethod.POST;
@@ -128,7 +133,7 @@ package com.gmrmarketing.comcast.nascar.broadcaster
 		
 		/**
 		 * 
-		 * @param	e Will be null if called from send - user.videoError = true
+		 * @param	e Will be null if called from send() - upload.videoError = true
 		 */
 		private function dataPosted(e:Event = null):void
 		{

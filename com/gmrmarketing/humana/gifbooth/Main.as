@@ -87,6 +87,7 @@ package com.gmrmarketing.humana.gifbooth
 		
 		private function init(e:Event = null):void
 		{	
+			trace("init");
 			intro.addEventListener(Intro.BEGIN, showTakePhoto, false, 0, true);
 			intro.show();
 		}

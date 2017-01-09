@@ -180,7 +180,7 @@ package com.gmrmarketing.miller.gifphotoboothnew
 			if (frameCount % EVERY_NTH == 0) {
 				//crop
 				var a:BitmapData = new BitmapData(812, 610);
-				a.copyPixels(camPic.getCapture(), new Rectangle(234, 55, 812, 610), new Point(0, 0));
+				a.copyPixels(camPic.getCaptureImage(), new Rectangle(234, 55, 812, 610), new Point(0, 0));
 				frames.push(a);
 			}
 			if (frames.length >= MAX_FRAMES) {

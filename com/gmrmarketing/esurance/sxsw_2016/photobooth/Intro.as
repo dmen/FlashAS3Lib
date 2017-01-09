@@ -27,8 +27,7 @@ package com.gmrmarketing.esurance.sxsw_2016.photobooth
 		
 		
 		public function show():void
-		{
-			trace("intro.show");
+		{			
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
@@ -47,12 +46,11 @@ package com.gmrmarketing.esurance.sxsw_2016.photobooth
 			if (e.charCode == 13) {
 				//got enter in field
 				rfid = Strings.removeLineBreaks(clip.rfid.text);
-				trace("rfid:", rfid);
+				//trace("rfid:", rfid);
 				if (rfid.length < 50 && rfid.length > 0) {				
 					dispatchEvent(new Event(RFID));
 				}else {
-					clip.rfid.text = "";
-					
+					clip.rfid.text = "";					
 				}
 			}		
 		}

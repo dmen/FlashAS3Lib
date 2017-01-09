@@ -301,12 +301,13 @@ package com.gmrmarketing.utilities.queue
 		
 		/**
 		 * Called from formPosted() if response.Status == 1
+		 * Note here the response uses data.original.image - original is the original data object added using Queue.add
 		 */
 		private function submitPhoto():void
 		{		
 			upload.error = 0;
 			
-			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":upload.responseID, "FieldId":upload.photoFieldID, "Response":upload.image }};			
+			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":upload.responseID, "FieldId":upload.photoFieldID, "Response":upload.original.image }};			
 			var js:String = JSON.stringify(resp);
 			
 			var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionfieldresponse");
@@ -362,7 +363,7 @@ package com.gmrmarketing.utilities.queue
 		{		
 			upload.error = 0;
 			
-			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":upload.responseID, "FieldId":upload.photoFieldID2, "Response":upload.image2 }};			
+			var resp:Object = { "AccessToken":token, "MethodData": { "InteractionResponseId":upload.responseID, "FieldId":upload.photoFieldID2, "Response":upload.original.image2 }};			
 			var js:String = JSON.stringify(resp);
 			
 			var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionfieldresponse");

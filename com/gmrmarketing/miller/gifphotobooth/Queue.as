@@ -200,7 +200,7 @@ package  com.gmrmarketing.miller.gifphotobooth
 		 */
 		private function writeUser(obj:Object):void
 		{
-			obj.timeAdded = Utility.getTimeStamp();
+			obj.timeAdded = Utility.timeStamp;
 			try{
 				//var file:File = File.applicationStorageDirectory.resolvePath( DATA_FILE_NAME );
 				var file:File = File.documentsDirectory.resolvePath( DATA_FILE_NAME );
@@ -224,7 +224,7 @@ package  com.gmrmarketing.miller.gifphotobooth
 		private function writeSavedUser(obj:Object):void
 		{
 			//add a timestamp
-			obj.timeAdded = Utility.getTimeStamp();
+			obj.timeAdded = Utility.timeStamp;
 			try{
 				//var file:File = File.applicationStorageDirectory.resolvePath( SAVED_FILE_NAME );
 				var file:File = File.documentsDirectory.resolvePath( SAVED_FILE_NAME );

@@ -11,7 +11,7 @@
   
   function init(e:Event):void{
     addChild(kbd);
-    kbd.setFocusFields([theText]);
+    kbd.setFocusFields[([theText,0]]);
   }
   
   
@@ -48,7 +48,7 @@ package com.dmennenoh.keyboard
 	public class KeyBoard extends Sprite
 	{
 		public static const KBD:String = "KBD_KEY_PRESSED"; //Dispatched anytime any key is pressed
-		public static const SUBMIT:String = "SUBMIT_PRESSED"; //Special - dispatched only when a key with the value Submit or Send is pressed
+		public static const SUBMIT:String = "SUBMIT_PRESSED"; //Special - dispatched only when a key with the value Submit, Send, or Save is pressed
 		public static const KEYFILE_LOADED:String = "keyFileLoaded"; //Dispatched when keyFileLoaded() is called, ie when loadKeyFile() is used
 		
 		private const IS_ANDROID:Boolean = false; //if true hacks are employed to deselect the text fields...
@@ -63,7 +63,7 @@ package com.dmennenoh.keyboard
 		
 		private var numbers:Array;//for checking restrict
 		private var focusFields:Array; //array of fields to keep focus on - set in setFocusFields()		
-		private var focusLengths:Array; //array of max ield lengths
+		private var focusLengths:Array; //array of max field lengths
 		private var focusTimer:Timer; //calls autoFocus every 100ms
 		
 		private var num:int; //just a predefined int for use in for loops
@@ -152,7 +152,7 @@ package com.dmennenoh.keyboard
 				TextField(fields[i][0]).maxChars = fields[i][1];
 				TextField(fields[i][0]).addEventListener(MouseEvent.MOUSE_DOWN, focusChanged, false, 0, true);
 			}
-			targetField = focusFields[0];
+			//targetField = focusFields[0];
 			/*
 			if(stage){
 				stage.focus = targetField;
@@ -175,10 +175,21 @@ package com.dmennenoh.keyboard
 		}
 		
 		
+		
+		
+		/**
+		 * Sets focus to a specific field
+		 * @param	ind Index of the field in fields list
+		 */
 		public function setFocus(ind:int):void
 		{	
-			targetField = focusFields[ind];			
-			stage.focus = targetField;			
+			if (ind == -1){
+				stage.focus = null;
+				targetField = null;
+			}else{
+				targetField = focusFields[ind];			
+				stage.focus = targetField;
+			}
 		}
 		
 		
@@ -389,7 +400,7 @@ package com.dmennenoh.keyboard
 					}else {
 						tabToNextField();
 					}
-				}else if (lastChar.toLowerCase() == "submit" || lastChar.toLowerCase() == "send") {
+				}else if (lastChar.toLowerCase() == "submit" || lastChar.toLowerCase() == "send" || lastChar.toLowerCase() == "save") {
 					dispatchEvent(new Event(SUBMIT));
 				}else {
 					if (targetField) {					
@@ -425,11 +436,12 @@ package com.dmennenoh.keyboard
 								Key(keyContainer.getChildAt(j)).toggleShift(keyboardShifted);
 							}
 						}
+						//autoTab?
+						if (targetField.length == targetField.maxChars) {
+							tabToNextField();
+						}
 					}
-					//autoTab?
-					if (targetField.length == targetField.maxChars) {
-						tabToNextField();
-					}
+					
 				}
 				//targetField.setSelection(targetField.selectionEndIndex, targetField.selectionEndIndex);				
 				dispatchEvent(new Event(KBD));

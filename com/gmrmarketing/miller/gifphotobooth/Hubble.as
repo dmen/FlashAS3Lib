@@ -8,8 +8,8 @@ package com.gmrmarketing.miller.gifphotobooth
 	import com.gmrmarketing.utilities.Logger;
 	import com.gmrmarketing.utilities.LoggerAIR;
 	import com.greensock.TweenMax;
-	import com.gmrmarketing.utilities.Strings;//for timestamp
-	import com.gmrmarketing.utilities.Logger;
+	import com.gmrmarketing.utilities.Strings;
+	import com.gmrmarketing.utilities.Utility;
 	
 	
 	public class Hubble extends EventDispatcher
@@ -146,7 +146,7 @@ package com.gmrmarketing.miller.gifphotobooth
 				
 					//no prior hubble responseID - New full form post
 					
-					var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":209, "DeviceId":myGUID, "DeviceResponseId":formData[9], "ResponseDate":Strings.hubbleTimestamp(), "FieldResponses":[ { "FieldId":1484, "Response":formData[0] }, { "FieldId":1485, "Response":formData[1] },{ "FieldId":1486, "Response":formData[2] }, { "FieldId":1488, "Response":formData[4] }, { "FieldId":1489, "Response":true }, { "FieldId":1490, "Response":formData[5] }, { "FieldId":1491, "Response":formData[6] }, { "FieldId":1504, "Response":formData[7] }, { "FieldId":1505, "Response":formData[8] }], "Latitude":"0", "Longitude":"0" }};
+					var resp:Object = { "AccessToken":token, "MethodData": { "InteractionId":209, "DeviceId":myGUID, "DeviceResponseId":formData[9], "ResponseDate":Utility.hubbleTimeStamp, "FieldResponses":[ { "FieldId":1484, "Response":formData[0] }, { "FieldId":1485, "Response":formData[1] },{ "FieldId":1486, "Response":formData[2] }, { "FieldId":1488, "Response":formData[4] }, { "FieldId":1489, "Response":true }, { "FieldId":1490, "Response":formData[5] }, { "FieldId":1491, "Response":formData[6] }, { "FieldId":1504, "Response":formData[7] }, { "FieldId":1505, "Response":formData[8] }], "Latitude":"0", "Longitude":"0" }};
 					
 					var js:String = JSON.stringify(resp);
 					var req:URLRequest = new URLRequest(BASE_URL + "interaction/interactionresponse");

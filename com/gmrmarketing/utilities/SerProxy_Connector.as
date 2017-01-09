@@ -128,6 +128,7 @@ package com.gmrmarketing.utilities
 		private function log(m:String):void
 		{
 			logMessage = m;
+			trace(m);
 			dispatchEvent(new Event(SER_LOG));
 		}
 		

@@ -1,20 +1,25 @@
+/**
+ * Replicates Time Magazines logo matching game:
+ * http://time.com/3743739/company-logo-quiz/
+ * 
+ * 
+ */
 package com.gmrmarketing.testing
 {
-	import com.gmrmarketing.patternmaker.BrushDot;
 	import flash.display.*;
 	import flash.events.*;
 	import flash.geom.*;
 	
 	public class Draw extends MovieClip
 	{
-		private var logo:BitmapData;
+		private var logo:BitmapData;//image to be traced
 		private var canvasData:BitmapData;
 		private var canvas:Bitmap;
 		private var lastX:int;
 		private var lastY:int;		
 		private var debugData:BitmapData;//debug image
 		private var debug:Bitmap;//bitmap of debugData
-		private var gridSize:int = 20;
+		private var gridSize:int = 20;//sampling size when image is broken into grid
 		
 		
 		public function Draw()
@@ -257,7 +262,7 @@ package com.gmrmarketing.testing
 		
 		
 		/**
-		 * Produces a 2d array from the input image
+		 * Produces a 2d array of *'s from the input image
 		 * Number of rows (arrays) in the array = image.height / sampleSize
 		 * Number of columns in each sub-array = image.width / sampleSize
 		 * @param	image

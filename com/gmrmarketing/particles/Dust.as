@@ -22,7 +22,7 @@ package com.gmrmarketing.particles
 			angInc = .005 + Math.random() * .02;
 			alpha = 0;
 			
-			graphics.beginFill(0xFFFFFF, .05 + Math.random() * .1);
+			graphics.beginFill(0x000000, .05 + Math.random() * .1);
 			
 			xVel = .05 + Math.random() * .25;
 			if (Math.random() < .5) {

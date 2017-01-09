@@ -1,5 +1,6 @@
 package com.gmrmarketing.miller.gifphotobooth
 {
+	import flash.ui.*;
 	import flash.events.*;
 	import flash.display.*;
 	import com.greensock.TweenMax;
@@ -17,6 +18,9 @@ package com.gmrmarketing.miller.gifphotobooth
 		private var tim:TimeoutHelper;
 		
 		private var spinContainer:Sprite;
+		
+		private var whichSpinner:int;
+		
 		
 		public function AgeGate()
 		{
@@ -63,7 +67,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			//clip.cacheAsBitmap = true;
 			//myContainer.cacheAsBitmap = true;
 			
-			clip.theText.text = "PLEASE ENTER YOUR DATE OF BIRTH";
+			clip.theText.text = "PLEASE ENTER YOUR DATE OF BIRTH";			
 			
 			monthSpinner.show(597, 445);
 			daySpinner.show(857, 445);			
@@ -79,7 +83,68 @@ package com.gmrmarketing.miller.gifphotobooth
 			TweenMax.to(clip, 1, { alpha:1 } );
 			TweenMax.to(clip.theBlack, 1, { alpha:.85, delay:.5 } );
 		}
-		
+		/*
+		private function keyPressed(e:KeyboardEvent):void
+		{
+			if (e.keyCode == Keyboard.RIGHT || e.keyCode == Keyboard.LEFT)
+			{
+				if (e.keyCode == Keyboard.RIGHT){
+					whichSpinner++;
+					if (whichSpinner > 3){
+						whichSpinner = 3;
+					}
+				}
+				if (e.keyCode == Keyboard.LEFT){
+					whichSpinner--;
+					if (whichSpinner < 1){
+						whichSpinner = 1;
+					}
+				}
+				
+				switch(whichSpinner){
+					case 1:
+						clip.indicator.x = 722;
+						break;
+					case 2:
+						clip.indicator.x = 982;
+						break;
+					case 3:
+						clip.indicator.x = 1242;
+						break;
+				}
+			}
+				
+			if (e.keyCode == Keyboard.UP){
+				switch(whichSpinner){
+					case 1:
+						monthSpinner.cursorMove(true);
+						break;
+					case 2:
+						daySpinner.cursorMove(true);
+						break;
+					case 3:
+						yearSpinner.cursorMove(true);
+						break;
+				}
+			}else if (e.keyCode == Keyboard.DOWN){
+				switch(whichSpinner){
+					case 1:
+						monthSpinner.cursorMove(false);
+						break;
+					case 2:
+						daySpinner.cursorMove(false);
+						break;
+					case 3:
+						yearSpinner.cursorMove(false);
+						break;
+				}
+			}
+			
+			if (e.keyCode == Keyboard.ENTER){
+				submit();
+			}
+		}
+		*/
 		
 		public function hide():void
 		{
@@ -93,13 +158,15 @@ package com.gmrmarketing.miller.gifphotobooth
 			daySpinner.hide();
 			yearSpinner.hide();
 			
-			clip.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, submit);
+			clip.btnSubmit.removeEventListener(MouseEvent.MOUSE_DOWN, submit);			
 		}
+		
 		
 		public function get defaultDOB():String 
 		{
 			return "1900-01-01";
 		}
+		
 		
 		public function get dob():String
 		{
@@ -107,7 +174,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		}
 		
 		
-		private function submit(e:MouseEvent):void
+		private function submit(e:MouseEvent = null):void
 		{
 			tim.buttonClicked();
 			var bday:Date = new Date(yearSpinner.getIndexChoice() + 1920, monthSpinner.getIndexChoice(), daySpinner.getIndexChoice() + 1);

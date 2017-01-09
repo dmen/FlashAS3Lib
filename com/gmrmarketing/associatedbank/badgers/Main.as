@@ -17,7 +17,7 @@ package com.gmrmarketing.associatedbank.badgers
 		private var mainContainer:Sprite;
 		private var cornerContainer:Sprite;
 		
-		private var form:Form;
+		private var form:Form_nov;
 		private var take:TakePhoto;
 		private var review:Review;
 		private var thanks:Thanks;
@@ -41,9 +41,9 @@ package com.gmrmarketing.associatedbank.badgers
 			addChild(mainContainer);
 			addChild(cornerContainer);
 			
-			form = new Form();
+			form = new Form_nov();
 			form.container = mainContainer;
-			form.addEventListener(Form.COMPLETE, showTakePhoto, false, 0, true);
+			form.addEventListener(Form_nov.COMPLETE, showTakePhoto, false, 0, true);
 			
 			take = new TakePhoto();
 			take.container = mainContainer;
@@ -68,9 +68,8 @@ package com.gmrmarketing.associatedbank.badgers
 			
 			queue = new Queue();
 			queue.fileName = "abBadgersQueue";
-			queue.service = new HubbleServiceExtender();
-			queue.addEventListener(Queue.LOG_ENTRY, writeToLog);
-			queue.addEventListener(Queue.QLOG_ENTRY, writeToLog2);
+			queue.service = new HubbleServiceExtender_nov();
+			queue.addEventListener(Queue.LOG_ENTRY, writeToLog);			
 			queue.start();
 			
 			init();
@@ -81,15 +80,12 @@ package com.gmrmarketing.associatedbank.badgers
 		{
 			log.log(queue.logEntry);
 		}
-		private function writeToLog2(e:Event):void
-		{
-			log.log(queue.qLogEntry);
-		}
+		
 		
 		
 		private function init():void
 		{
-			form.addEventListener(Form.FORM_ERROR, showError, false, 0, true);
+			form.addEventListener(Form_nov.FORM_ERROR, showError, false, 0, true);
 			form.show();
 		}
 		
@@ -100,7 +96,7 @@ package com.gmrmarketing.associatedbank.badgers
 			review.removeEventListener(Review.SAVE, showThanks);
 			review.hide();
 			
-			form.removeEventListener(Form.FORM_ERROR, showError);
+			form.removeEventListener(Form_nov.FORM_ERROR, showError);
 			form.hide();
 			
 			take.show();

@@ -26,7 +26,7 @@
  * 
  * timeoutHelper = TimeoutHelper.getInstance();
  * 
- * timeoutHelper.buttonClicked()
+ * timeoutHelper.buttonClicked();
  */
 
 package com.gmrmarketing.utilities

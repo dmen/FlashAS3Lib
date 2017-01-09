@@ -18,6 +18,7 @@ package com.gmrmarketing.comcast.nascar.broadcaster
 		private var mySelection:int; //1,2,3
 		private var tim:TimeoutHelper;
 		
+		
 		public function Select()
 		{
 			clip = new mcSelect();
@@ -187,7 +188,7 @@ package com.gmrmarketing.comcast.nascar.broadcaster
 					clip.modalPlayer.theVid.source = "assets\\opt2.mp4";
 					break;
 				case 3:
-					clip.modalPlayer.theTitle.text = "Chris Buescher Title Win";
+					clip.modalPlayer.theTitle.text = "Closest 500 Finish Ever";
 					clip.modalPlayer.theVid.source = "assets\\opt3.mp4";
 					break;
 			}

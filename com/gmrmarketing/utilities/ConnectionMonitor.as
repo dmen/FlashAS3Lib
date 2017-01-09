@@ -1,3 +1,8 @@
+/**
+ * Connection Monitor
+ * Pings google.com every five minutes in order to monitor
+ * connection status.
+ */
 package com.gmrmarketing.utilities
 {
 	import flash.net.*;
@@ -14,12 +19,12 @@ package com.gmrmarketing.utilities
 		
 		public function ConnectionMonitor()
 		{
-			request = new URLRequest('http://google.com');
+			request = new URLRequest("http://google.com");
 			loader = new URLLoader();
 			loader.addEventListener(Event.COMPLETE, pingComplete);
 			loader.addEventListener(IOErrorEvent.IO_ERROR, onFail);
 			
-			interval = new Timer(180000);
+			interval = new Timer(300000);
 			interval.addEventListener(TimerEvent.TIMER, doPing);
 			interval.start();
 			
@@ -37,7 +42,7 @@ package com.gmrmarketing.utilities
 		{
 			loader.load(request);
 		}
-			
+		
 		
 		private function pingComplete(e:Event):void
 		{			

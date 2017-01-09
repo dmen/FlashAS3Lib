@@ -21,8 +21,9 @@ package com.gmrmarketing.utilities.queue
 		 * Constructor
 		 * @param	url URL of the service - used in send()
 		 * @param servResp JSON the server sends back on successful post - used in dataPosted()
+		 * if servResp is null then dataPosted() will only check if returnedObject.Success = true
 		 */
-		public function JSONService(url:String, servResp:Object)
+		public function JSONService(url:String, servResp:Object = null)
 		{
 			serviceURL = url;
 			serverResponse = servResp;
@@ -71,14 +72,18 @@ package com.gmrmarketing.utilities.queue
 	
 		/**
 		 * Called from Queue
-		 * @param	data Object with userData property which is the original object passed to the queue
+		 * @param	data Object with original and qNumTries properties
 		 */
 		public function send(data:Object):void
 		{
 			isBusy = true;
-			upload = data;//keep this so Queue can retrieve if an error occurs
 			
-			var js:String = JSON.stringify(data.userData);
+			//keep this so Queue can retrieve if an error occurs
+			upload = data;
+			
+			//original property contains the original data passed to the Queue
+			var js:String = JSON.stringify(data.original);
+			
 			var req:URLRequest = new URLRequest(serviceURL);
 			req.method = URLRequestMethod.POST;
 			req.data = js;
@@ -91,10 +96,12 @@ package com.gmrmarketing.utilities.queue
 			lo.load(req);
 		}
 		
+		
 		/**
 		 * Returns the data object
 		 * Called by Queue if an error is generated
 		 * allows the data to be put back on the queue
+		 * contains original and qNumTries properties
 		 */
 		public function get data():Object
 		{
@@ -114,7 +121,16 @@ package com.gmrmarketing.utilities.queue
 			
 			var j:Object = JSON.parse(e.currentTarget.data);
 			
-			if (JSON.stringify(j) == JSON.stringify(serverResponse)) {
+			if (serverResponse == null){
+				
+				if(j.Success){
+					error = "JSONService.dataPosted success";
+					dispatchEvent(new Event(completeEvent));
+				}else{
+					error = "Error in JSONService.dataPosted - server response: " + JSON.stringify(j);
+					dispatchEvent(new Event(errorEvent));	
+				}
+			}else if (JSON.stringify(j) == JSON.stringify(serverResponse)) {
 				error = "JSONService.dataPosted success";
 				dispatchEvent(new Event(completeEvent));				
 			}else {				

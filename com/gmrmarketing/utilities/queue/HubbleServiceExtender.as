@@ -7,7 +7,7 @@
  * email, name, etc. Any properties used to construct the JSON in the send() method
  * printed - If printed == true then the PrintAPI will be called
  */
-package com.gmrmarketing.associatedbank.badgers
+package com.gmrmarketing.utilities.queue
 {
 	import com.gmrmarketing.utilities.Utility;
 	import com.gmrmarketing.utilities.queue.HubbleService;

@@ -1,5 +1,6 @@
 package com.gmrmarketing.miller.gifphotobooth
 {
+	import flash.ui.*;
 	import flash.events.*;
 	import flash.display.*;
 	import com.greensock.TweenMax;
@@ -38,6 +39,7 @@ package com.gmrmarketing.miller.gifphotobooth
 			//TweenMax.to(clip, 1, { alpha:1, delay:.5, onComplete:showing } );
 			
 			clip.addEventListener(MouseEvent.MOUSE_DOWN, begin);
+			//clip.stage.addEventListener(KeyboardEvent.KEY_DOWN, beginKey);
 			dispatchEvent(new Event(SHOWING));
 		}
 		
@@ -62,11 +64,19 @@ package com.gmrmarketing.miller.gifphotobooth
 		
 		private function begin(e:MouseEvent):void
 		{
-			clip.removeEventListener(MouseEvent.MOUSE_DOWN, begin)
+			clip.removeEventListener(MouseEvent.MOUSE_DOWN, begin);
+			//clip.stage.removeEventListener(KeyboardEvent.KEY_DOWN, beginKey);
 			dispatchEvent(new Event(BEGIN));
 		}
 		
-		
+		private function beginKey(e:KeyboardEvent):void
+		{
+			if(e.keyCode == Keyboard.ENTER){
+				clip.removeEventListener(MouseEvent.MOUSE_DOWN, begin);
+				//clip.stage.removeEventListener(KeyboardEvent.KEY_DOWN, beginKey);
+				dispatchEvent(new Event(BEGIN));
+			}
+		}
 		
 	}
 	
