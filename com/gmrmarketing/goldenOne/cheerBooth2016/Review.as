@@ -27,7 +27,7 @@
 			video = new Video(960, 540);
 			video.x = 156;
 			video.y = 370;
-			clip.addChild(video);
+			clip.addChild(video);			
 			
             connection = new NetConnection();
             connection.addEventListener(NetStatusEvent.NET_STATUS, connectionStatusHandler);
@@ -53,6 +53,8 @@
 			clip.title.x = 1920;
 			clip.subTitle.text = 1920;
 			
+			video.addEventListener(MouseEvent.MOUSE_DOWN, replayVideo, false, 0, true);
+			
 			TweenMax.to(clip.title, .5, {x:146, ease:Expo.easeOut});
 			TweenMax.to(clip.subTitle, .5, {x:150, ease:Expo.easeOut, delay:.1});
 		}
@@ -63,8 +65,17 @@
 			stream.dispose();
 			video.attachNetStream(null);
 			
+			video.removeEventListener(MouseEvent.MOUSE_DOWN, replayVideo);
+			
 			TweenMax.to(clip.title, .5, {x:-1500, ease:Expo.easeIn});
 			TweenMax.to(clip.subTitle, .5, {x:-1500, ease:Expo.easeIn, delay:.1, onComplete:kill});
+		}
+		
+		
+		public function replayVideo():void
+		{
+			stream.seek(0);
+			stream.play(videoFile);
 		}
 		
 		

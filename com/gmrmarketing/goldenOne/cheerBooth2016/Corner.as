@@ -14,6 +14,7 @@ package com.gmrmarketing.goldenOne.cheerBooth2016
 		public static const CORNERCLICKED:String = "cornerButtonClicked";//base button at bottom right
 		public static const CANCELCLICKED:String = "cancelButtonClicked";//record again, etc		
 		public static const COUNTERELAPSED:String = "countdownExpired";
+		public static const VIDEOREPLAY:String = "btnVideoPressed";		
 		
 		private var clip:MovieClip;
 		private var drawing:Sprite;//for drawing the arc into
@@ -71,7 +72,7 @@ package com.gmrmarketing.goldenOne.cheerBooth2016
 		
 		
 		private function screenClicked(e:MouseEvent):void
-		{			
+		{
 			dispatchEvent(new Event(SCREENTOUCHED));
 		}
 		
@@ -154,7 +155,7 @@ package com.gmrmarketing.goldenOne.cheerBooth2016
 				clip.removeEventListener(Event.ENTER_FRAME, updateArc);
 				dispatchEvent(new Event(COUNTERELAPSED));
 			}else{
-				clip.theCircle.recTime.text = int((timeRemaining - delta) / 1000);				
+				clip.theCircle.recTime.text = 1 + int((timeRemaining - delta) / 1000);				
 				Utility.drawArc(drawing.graphics, 1601, 981, 35, 0, anglePerMS * delta, 3, 0xff0000, 1);
 			}
 		}
@@ -184,13 +185,19 @@ package com.gmrmarketing.goldenOne.cheerBooth2016
 			}
 			TweenMax.to(clip.theCorner, 2, {colorTransform:{tintAmount:0}});//back to blue
 			clip.theCircle.btnRecordAgain.addEventListener(MouseEvent.MOUSE_DOWN, cancelSave, false, 0, true);
+			clip.theCircle.btnVideo.addEventListener(MouseEvent.MOUSE_DOWN, replayVideo, false, 0, true);
 			clip.theCircle.cornerButton.addEventListener(MouseEvent.MOUSE_DOWN, cornerClicked, false, 0, true);	
 		}
 		
+		private function replayVideo(e:MouseEvent):void
+		{
+			dispatchEvent(new Event(VIDEOREPLAY));
+		}
 		
 		private function cancelSave(e:MouseEvent):void
 		{
 			clip.theCircle.btnRecordAgain.removeEventListener(MouseEvent.MOUSE_DOWN, cancelSave);
+			clip.theCircle.btnVideo.removeEventListener(MouseEvent.MOUSE_DOWN, replayVideo);
 			dispatchEvent(new Event(CANCELCLICKED));
 		}
 		
@@ -205,6 +212,7 @@ package com.gmrmarketing.goldenOne.cheerBooth2016
 		public function showFinish(isVideo:Boolean):void
 		{			
 			clip.theCircle.btnRecordAgain.removeEventListener(MouseEvent.MOUSE_DOWN, cancelSave);
+			clip.theCircle.btnVideo.removeEventListener(MouseEvent.MOUSE_DOWN, replayVideo);
 			clip.theCircle.gotoAndStop(6);
 			clip.theCircle.btnCancel.addEventListener(MouseEvent.MOUSE_DOWN, cancelEmail, false, 0, true);
 			if(isVideo){

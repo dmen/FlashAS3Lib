@@ -193,6 +193,7 @@ package com.gmrmarketing.goldenOne.cheerBooth2016
 				liveBG.stopRecording();//encodes user.flv to an mp4
 				corner.stopRecording();
 				review.show();//displays user.flv
+				corner.addEventListener(Corner.VIDEOREPLAY, replayVid, false, 0, true);
 			}
 			else{
 				liveBG.unPause();
@@ -209,6 +210,11 @@ package com.gmrmarketing.goldenOne.cheerBooth2016
 			corner.addEventListener(Corner.CANCELCLICKED, retakeCapture, false, 0, true);//TODO - fix for photo
 		}
 		
+		
+		private function replayVid(e:Event):void
+		{
+			review.replayVideo();
+		}
 		
 		/**
 		 * save the photo or video
