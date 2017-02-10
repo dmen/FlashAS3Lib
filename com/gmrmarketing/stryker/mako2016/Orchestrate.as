@@ -17,7 +17,7 @@ package com.gmrmarketing.stryker.mako2016
 		private var jsonHeader2:URLRequestHeader;	
 		
 		private var baseURL:String;
-		private var gates:Array; //these are the gates the info kiosk cares about 
+		private var _gates:Array; //these are the gates the info kiosk cares about 
 		
 		private var userData:Object;
 		
@@ -27,14 +27,39 @@ package com.gmrmarketing.stryker.mako2016
 			jsonHeader1 = new URLRequestHeader("Content-type", "application/json");
 			jsonHeader2 = new URLRequestHeader("Accept", "application/json");
 			
-			gates = [{"name":"Demo 1", "id":0}, {"name":"Demo 2", "id":0}, {"name":"Demo 3", "id":0}, {"name":"Demo 4", "id":0}, {"name":"Demo 5", "id":0}, {"name":"Demo 6", "id":0}, {"name":"Demo 7", "id":0}, {"name":"Predictability game", "id":0}, {"name":"Operation game", "id":0}, {"name":"Virtual Reality", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Info kiosk 1", "id":0}, {"name":"Info kiosk 2", "id":0}, {"name":"Info kiosk 3", "id":0}, {"name":"Info kiosk 4", "id":0}, {"name":"Info kiosk 5", "id":0}, {"name":"Info kiosk 6", "id":0}, {"name":"Info kiosk 7", "id":0}, {"name":"Info kiosk 8", "id":0}];
+			//name is the gate name as returned from the call to GetGates
+			//clip is the name of the background clip for that section - for coloring when it's been visited
+			_gates = [
+						{"name":"Demo 1", "icon":"holder1", "id":0},
+						{"name":"Demo 2", "icon":"holder2", "id":0},
+						{"name":"Demo 3", "icon":"holder3", "id":0},
+						{"name":"Demo 4", "icon":"holder4", "id":0},
+						{"name":"Demo 5", "icon":"holder5", "id":0},
+						{"name":"Demo 6", "icon":"holder6", "id":0},
+						{"name":"Demo 7", "icon":"holder7", "id":0},
+						{"name":"Predictability game", "clip":"expPredict", "icon":"holderExp", "id":0}, 
+						{"name":"Operation game",  "clip":"operation", "icon":"holderOp", "id":0}, 
+						{"name":"Virtual Reality",  "clip":"vr", "icon":"holderVR", "id":0}, 
+						{"name":"Performance solutions",  "clip":"performance", "icon":"holderPerf", "id":0},
+						{"name":"Kneet! entry", "clip":"kneet", "icon":"holderKneet", "id":0},
+						{"name":"A Cut Above entry", "clip":"cutAbove", "icon":"holderAbove", "id":0},
+						{"name":"Kneedeep entry", "clip":"kneedeep1", "icon":"holderAbove", "id":0},
+						{"name":"Info kiosk 1", "id":0},
+						{"name":"Info kiosk 2", "id":0},
+						{"name":"Info kiosk 3", "id":0},
+						{"name":"Info kiosk 4", "id":0},
+						{"name":"Info kiosk 5", "id":0},
+						{"name":"Info kiosk 6", "id":0},
+						{"name":"Info kiosk 7", "id":0},
+						{"name":"Info kiosk 8", "id":0}
+			];
 			
 		}
 		
 		
 		/**
 		 * Called from Main.rfidScanned()
-		 * @param	scanID
+		 * @param	scanID String - long integer from scan
 		 */
 		public function getUser(scanID:String):void
 		{
@@ -58,19 +83,69 @@ package com.gmrmarketing.stryker.mako2016
 		}
 
 		
+		/**
+		 * gets the user details
+		 * @param	e
+		 */
 		private function getUserData(e:Event):void
 		{
-			userData = JSON.parse(e.currentTarget.data);
+			userData = JSON.parse(e.currentTarget.data)[0];
+			
+			switch (userData.namePrefix) 
+			{
+				case "Hospital Administrator":
+				case "MD, MHA":
+				case "MD":
+				case "DO":
+					userData.profileType = 1;
+					break;
+
+				case "MD, PhD":
+				case "PhD":
+				case "DDS, MD":
+				case "DPM":
+				case "MD, Resident":
+				case "DO, Resident":
+					userData.profileType = 2;
+					break;
+
+				case "CRNA":
+				case "APRN":
+				case "DO, Fellow":
+				case "RN":
+				case "CST":
+				case "LPN":
+				case "PA":
+				case "NP":
+				case "MD, Fellow":
+				case "N/A":
+				case "Other":
+					userData.profileType = 3;
+					break;
+
+				case null:
+					userData.profileType = 4;
+					break;
+					
+				default:
+					 userData.profileType = 1;
+            }
+			
 			dispatchEvent(new Event(GOT_USER_DATA));
 		}
 		
 		
 		/**
-		 * the userData JSON is an array - with the single user data object in it
+		 * returns the userData object
 		 */
 		public function get user():Object
 		{
-			return userData[0];
+			return userData;
+		}
+		
+		public function get gates():Array
+		{
+			return _gates;
 		}
 		
 		
@@ -172,11 +247,11 @@ package com.gmrmarketing.stryker.mako2016
 			//array of objects
 			var js:Object = JSON.parse(e.currentTarget.data);
 			
-			for (var i:int = 0; i < gates.length; i++){
+			for (var i:int = 0; i < _gates.length; i++){
 				
 				for (var j:int = 0; j < js.length; j++){
-					if (js[j].name == gates[i].name){
-						gates[i].id = js[j].id;
+					if (js[j].name == _gates[i].name){
+						_gates[i].id = js[j].id;
 						break;
 					}
 				}

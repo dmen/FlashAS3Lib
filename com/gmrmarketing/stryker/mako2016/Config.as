@@ -71,8 +71,10 @@ package com.gmrmarketing.stryker.mako2016
 		}
 		
 		
-		private function doSave():void
+		private function doSave(e:MouseEvent):void
 		{
+			clip.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, doSave);
+			
 			myKioskName = clip.gateName.text;
 			so.data.kioskName = clip.gateName.text;
 			so.flush();

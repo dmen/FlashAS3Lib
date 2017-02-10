@@ -1,3 +1,7 @@
+/**
+ * Intro screen that does the attract loop and RFID scan
+ */
+
 package com.gmrmarketing.stryker.mako2016
 {
 	import flash.display.*	
@@ -41,13 +45,11 @@ package com.gmrmarketing.stryker.mako2016
 		private function checkRFID(e:KeyboardEvent):void
 		{
 			myContainer.stage.removeEventListener(KeyboardEvent.KEY_DOWN, checkRFID);
-			trace("checkRFID");
-			if (e.charCode == 13) {
-				trace("gotenter");
+			
+			if (e.charCode == 13) {				
 				//got enter in field				
 				if (clip.rfid.text == ""){
-					rfid = "1131511456743553";
-					trace("manual");
+					rfid = "1389847433464192";					
 					dispatchEvent(new Event(GOT_RFID));
 				}else{
 					rfid = Strings.removeLineBreaks(clip.rfid.text);
