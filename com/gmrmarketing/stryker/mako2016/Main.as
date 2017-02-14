@@ -4,6 +4,7 @@ package com.gmrmarketing.stryker.mako2016
 	import flash.events.*;
 	import flash.ui.Mouse;
 	
+	
 	public class Main extends MovieClip  
 	{
 		private var orchestrate:Orchestrate;
@@ -12,10 +13,11 @@ package com.gmrmarketing.stryker.mako2016
 		private var welcome:Welcome;
 		private var map:Map;
 		
-		private var screenText:ScreenText;
 		private var mapContainer:Sprite;
 		private var mainContainer:Sprite;
 		private var currentUser:Object;
+		
+		private var recommendedItems:RecommendedItems;
 		
 		
 		public function Main()
@@ -39,9 +41,9 @@ package com.gmrmarketing.stryker.mako2016
 			intro.container = mainContainer;
 			
 			welcome = new Welcome();
-			welcome.container = mainContainer;
+			welcome.container = mainContainer;	
 			
-			screenText = new ScreenText();
+			recommendedItems = new RecommendedItems();//this is a sprite
 			
 			orchestrate.addEventListener(Orchestrate.GOT_BASE_URL, gotBaseURL, false, 0, true);
 			orchestrate.getBaseURL();
@@ -98,17 +100,31 @@ package com.gmrmarketing.stryker.mako2016
 		}
 		
 		
-		
+		/**
+		 * callback from retrieving the user data object from orchestrate
+		 * @param	e
+		 */
 		private function gotUserData(e:Event):void
 		{
-			currentUser = orchestrate.user;
-			intro.hide();
+			//submit the kiosk use for tracking
+			//orchestrate.submitKioskUser(config.kioskName, intro.RFID);
 			
-			var welcomeText:Object = screenText.getWelcome(currentUser.profileType);
-			welcome.show(currentUser.firstName, welcomeText.greeting, welcomeText.message);	
+			currentUser = orchestrate.user;
+			intro.hide();			
+			
+			welcome.show(currentUser);	
 			
 			map.show(config.loginName);//sends Kiosk2, Kiosk3, etc. for the You Are Here
 			map.setVisited(currentUser, orchestrate.gates);
+			map.setDemoReminders(currentUser, orchestrate.gates);
+			map.showRecommendedGates(currentUser, orchestrate.gates, config.loginName);
+			
+			//can call map.appointments and map.recommendations to get those lists and display them
+			
+			recommendedItems.populate(map.recommenations);
+			mainContainer.addChild(recommendedItems);
+			recommendedItems.x = 58;
+			recommendedItems.y = 680;			
 		}
 		
 	}

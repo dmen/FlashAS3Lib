@@ -29,21 +29,31 @@ package com.gmrmarketing.stryker.mako2016
 			
 			//name is the gate name as returned from the call to GetGates
 			//clip is the name of the background clip for that section - for coloring when it's been visited
+			//holder is the icon holder for the area or demo
 			_gates = [
-						{"name":"Demo 1", "icon":"holder1", "id":0},
-						{"name":"Demo 2", "icon":"holder2", "id":0},
-						{"name":"Demo 3", "icon":"holder3", "id":0},
-						{"name":"Demo 4", "icon":"holder4", "id":0},
-						{"name":"Demo 5", "icon":"holder5", "id":0},
-						{"name":"Demo 6", "icon":"holder6", "id":0},
-						{"name":"Demo 7", "icon":"holder7", "id":0},
-						{"name":"Predictability game", "clip":"expPredict", "icon":"holderExp", "id":0}, 
-						{"name":"Operation game",  "clip":"operation", "icon":"holderOp", "id":0}, 
-						{"name":"Virtual Reality",  "clip":"vr", "icon":"holderVR", "id":0}, 
-						{"name":"Performance solutions",  "clip":"performance", "icon":"holderPerf", "id":0},
-						{"name":"Kneet! entry", "clip":"kneet", "icon":"holderKneet", "id":0},
-						{"name":"A Cut Above entry", "clip":"cutAbove", "icon":"holderAbove", "id":0},
-						{"name":"Kneedeep entry", "clip":"kneedeep1", "icon":"holderAbove", "id":0},
+						{"name":"Kneedeep entry", "clip":"kneedeep", "id":0},
+						{"name":"Demo 1", "prettyName":"Mako Partial Knee #1", "icon":"holder1", "id":0},
+						{"name":"Demo 2", "prettyName":"Mako Total Knee #2", "icon":"holder2", "id":0},
+						
+						{"name":"Hipnotic entry", "clip":"hipnotic", "id":0},
+						{"name":"Demo 3", "prettyName":"Mako Total Hip #3", "icon":"holder3", "id":0},
+						
+						{"name":"Kneet! entry", "prettyName":"Kneet! - Triath10n", "clip":"kneet", "icon":"holderKneet", "id":0},
+						{"name":"A Cut Above entry", "prettyName":"A Cut Above - New Technologies", "clip":"aCutAbove",  "icon":"holderAbove", "id":0},
+						
+						{"name":"The Balconknee", "clip":"theBalconKnee", "id":0},
+						{"name":"Demo 4", "prettyName":"Mako Total Knee #4", "icon":"holder4", "id":0},
+						{"name":"Demo 5", "prettyName":"Mako Total Knee #5", "icon":"holder5", "id":0},
+						
+						{"name":"The Joint entry", "clip":"theJoint", "id":0},
+						{"name":"Demo 6", "prettyName":"Mako Total Knee #6", "icon":"holder6", "id":0},
+						{"name":"Demo 7", "prettyName":"Mako Total Knee #7", "icon":"holder7", "id":0},
+						
+						{"name":"Predictability game", "prettyName":"Experience Predicatbility", "clip":"experiencePredictability", "icon":"holderExp", "id":0}, 
+						{"name":"Operation game",  "prettyName":"Operation Mako", "clip":"operation", "icon":"holderOp", "id":0}, 
+						{"name":"Virtual Reality",  "prettyName":"Virtual Reality", "clip":"vr", "icon":"holderVR", "id":0}, 
+						{"name":"Performance solutions",  "prettyName":"Performance Solutions", "clip":"performance", "icon":"holderPerf", "id":0},						
+						
 						{"name":"Info kiosk 1", "id":0},
 						{"name":"Info kiosk 2", "id":0},
 						{"name":"Info kiosk 3", "id":0},
@@ -52,8 +62,7 @@ package com.gmrmarketing.stryker.mako2016
 						{"name":"Info kiosk 6", "id":0},
 						{"name":"Info kiosk 7", "id":0},
 						{"name":"Info kiosk 8", "id":0}
-			];
-			
+			];			
 		}
 		
 		
@@ -124,7 +133,14 @@ package com.gmrmarketing.stryker.mako2016
 					break;
 
 				case null:
-					userData.profileType = 4;
+					switch(userData.packageTypeName) {
+						case "Media partner":
+						case "Stryker employee":
+							userData.profileType = 4;
+							break;
+						default:
+							userData.profileType = 1;//Health care professional
+					}
 					break;
 					
 				default:

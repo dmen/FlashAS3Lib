@@ -23,15 +23,14 @@ package com.gmrmarketing.stryker.mako2016
 		}
 		
 		
-		public function show(fName:String, greeting:String, message:String):void
+		public function show(user:Object):void
 		{
 			if (!myContainer.contains(clip)) {
 				myContainer.addChild(clip);
 			}
 			
-			clip.greeting.text = greeting;
-			clip.fname.text = fName;
-			clip.message.text = message;
+			clip.gotoAndStop(user.profileType);//frame 1,2,3,4
+			clip.fname.text = user.firstName;
 		}
 	}
 	
