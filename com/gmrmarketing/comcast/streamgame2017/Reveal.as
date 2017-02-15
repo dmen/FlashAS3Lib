@@ -22,24 +22,24 @@ package com.gmrmarketing.comcast.streamgame2017
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			
 			myMask = new Sprite();
+			myMask.name = "mask";//used by main when finding clips being displayed
 			myMask.graphics.beginFill(0x00ff00, 1);
 			myMask.graphics.drawRect(0, 0, width, height);
 			myMask.graphics.endFill();
 			myMask.x = x;
 			myMask.y = y;
-			//trace("mask at:", myMask.x, ",", myMask.y, " height:", myMask.height, "width:", myMask.width);
 			
-			parent.addChild(myMask);
+			parent.addChild(myMask);//adds into top,middle,bottom clips
 			
 			mask = myMask;
 			
 			origX = x;
 			
-			if (x < 540){
-				x -= width;
+			if (x < 470){
+				x -= width-5;
 			}
-			if (x > 500){
-				x += width;
+			if (x >= 470){
+				x += width+5;
 				
 			}
 			
@@ -70,14 +70,17 @@ package com.gmrmarketing.comcast.streamgame2017
 			var pos:Point = new Point(x, y);
 			pos = parent.localToGlobal(pos);
 			
-			if (pos.y < 0){
+			if (pos.y < -height){
 				removeEventListener(Event.ENTER_FRAME, checkOffPos);
-				if (x < 540){
-					TweenMax.to(this, 1, {x: x - width, onComplete:hidden});
+				
+				if (x < 470){
+					x -= width-5;
 				}
-				if (x > 500){
-					TweenMax.to(this, 1, {x: x + width, onComplete:hidden});
+				if (x >= 470){
+					x += width+5;					
 				}
+				
+				addEventListener(Event.ENTER_FRAME, checkOnPos);
 			}
 		}
 		
@@ -85,8 +88,7 @@ package com.gmrmarketing.comcast.streamgame2017
 		private function hidden():void
 		{
 			addEventListener(Event.ENTER_FRAME, checkOnPos);
-		}
-		
+		}		
 		
 	}
 	

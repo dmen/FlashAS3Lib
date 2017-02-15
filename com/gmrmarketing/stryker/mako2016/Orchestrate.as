@@ -173,7 +173,7 @@ package com.gmrmarketing.stryker.mako2016
 		public function submitKioskUse(kioskName:String, guestID:String):void
 		{
 			var req:URLRequest = new URLRequest(baseURL + "SubmitGuestFacilityAccess");			
-			var js:String = JSON.stringify({"deviceUUID":"unknown", "station":"unknown", "guestId": guestID, "gateName": kioskName, "timestamp": Utility.hubbleTimeStamp, "inOut": "in"});
+			var js:String = JSON.stringify({"deviceUUID":"unknown", "station":"unknown", "guestId": guestID, "gateName": kioskName, "timestamp":Utility.UTCTimeStamp("-08:00"), "inOut": "in"});
 			
 			req.data = js;
 			req.requestHeaders.push(authHeader);

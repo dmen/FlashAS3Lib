@@ -202,6 +202,49 @@ package com.gmrmarketing.utilities
 		
 		
 		/**
+		 * Returns an ISO 8601 Timestamp for the given time zone
+		 * @param	zoneString UTC Time Zone like "-08:00" for Pacific Time (US & Canada)
+		 * @return
+		 */
+		public static function UTCTimeStamp(zoneString:String):String
+		{
+			var a:Date = new Date();
+			var yr:String = String(a.fullYear);
+			var m:String = String(a.month + 1);
+			if(m.length < 2){
+				m = "0" + m;
+			}
+			var d:String = String(a.date);
+			if(d.length < 2){
+				d = "0" + d;
+			}
+
+			var h:String = String(a.hours);
+			if(h.length < 2){
+				h = "0" + h;
+			}
+			var min:String = String(a.minutes);
+			if(min.length < 2){
+				min = "0" + min;
+			}
+			var sec:String = String(a.seconds);
+			if(sec.length < 2){
+				sec = "0" + sec;
+			}
+			var ms:String= String(a.milliseconds);
+			if(ms.length < 3){
+				if(ms.length < 2){
+					ms = "00" + ms;
+				}else{
+					ms = "0" + ms;
+				}
+			}
+			var ts:String = yr + "-" + m + "-" + d + "T" + h + ":" + min + ":" + sec + zoneString;
+			
+			return ts;
+		}
+		
+		/**
 		 * Gets the actual pixel width and height of a textField
 		 * @param	textField
 		 * @return Object with width and height properties
