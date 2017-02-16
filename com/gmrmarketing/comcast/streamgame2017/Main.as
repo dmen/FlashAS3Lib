@@ -24,7 +24,7 @@ package com.gmrmarketing.comcast.streamgame2017
 		
 		private var config:Config;
 		private var win:Win;
-		
+		private var restartTimer:Timer;
 		
 		public function Main()
 		{
@@ -57,7 +57,10 @@ package com.gmrmarketing.comcast.streamgame2017
 			configCorner.addEventListener(CornerQuit.CORNER_QUIT, showConfig, false, 0, true);
 			
 			middle.y = top.y + top.height + 8;
-			bottom.y = middle.y + middle.height + 8;			
+			bottom.y = middle.y + middle.height + 8;	
+			
+			restartTimer = new Timer(20000, 1);
+			restartTimer.addEventListener(TimerEvent.TIMER, doRestart);
 			
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, checkKey, false, 0, true);
 			addEventListener(Event.ENTER_FRAME, scrollUp);
@@ -86,6 +89,7 @@ package com.gmrmarketing.comcast.streamgame2017
 		{
 			if (e.charCode == 65 || e.charCode == 97){
 				//a
+				stage.removeEventListener(KeyboardEvent.KEY_DOWN, checkKey);
 				removeEventListener(Event.ENTER_FRAME, scrollUp);
 				TweenMax.killAll(true);//makes all the sliding anims finish
 				
@@ -162,12 +166,75 @@ package com.gmrmarketing.comcast.streamgame2017
 				TweenMax.to(m, .2 + (visCount * .05), {alpha:0, onComplete:blueOn});
 				TweenMax.to(m.image, .2 + (visCount * .05), {alpha:.4});
 			}else{
-				//done show winner screen
-				var n:int = pickStar();
-				win.show(n);
+				
+				TweenMax.to(m, .5, {alpha:0});				
+				TweenMax.to(m, .5, {alpha:1, delay:.5});
+				TweenMax.to(m, .5, {alpha:0, delay:1});
+				TweenMax.to(m, .5, {alpha:1, delay:1.5});	
+				TweenMax.to(m, .5, {alpha:0, delay:2, onComplete:showWin});
+				
 			}
 		}
 		
+		
+		private function showWin():void
+		{
+			//done show winner screen
+			var n:int = pickStar();
+			win.addEventListener(Win.COMPLETE, restartGame, false, 0, true);
+			win.show(n);
+		}
+		
+		
+		
+		private function restartGame(e:Event):void
+		{
+			win.removeEventListener(Win.COMPLETE, restartGame);
+			//start 20 second timer - and listen for A press again
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, checkRestart, false, 0, true);
+			restartTimer.reset();
+			restartTimer.start();
+		}
+		
+		private function checkRestart(e:KeyboardEvent):void
+		{
+			if (e.charCode == 65 || e.charCode == 97){
+				doRestart();
+			}
+		}
+		
+		private function doRestart(e:TimerEvent = null):void
+		{
+			restartTimer.reset();
+			stage.removeEventListener(KeyboardEvent.KEY_DOWN, checkRestart);
+			win.hide();
+			
+			stage.addEventListener(KeyboardEvent.KEY_DOWN, checkKey, false, 0, true);
+			addEventListener(Event.ENTER_FRAME, scrollUp);
+			
+			while (blueRects.numChildren){
+				blueRects.removeChildAt(0);
+			}
+			
+			var n:int;
+			var i:int;
+			var m:DisplayObject;
+			n = top.numChildren;				
+			for (i = 0; i < n; i++){
+				m = top.getChildAt(i);
+				m.alpha = 1;
+			}
+			n = middle.numChildren;				
+			for (i = 0; i < n; i++){
+				m = middle.getChildAt(i);
+				m.alpha = 1;
+			}
+			n = bottom.numChildren;				
+			for (i = 0; i < n; i++){
+				m = bottom.getChildAt(i);
+				m.alpha = 1;
+			}
+		}
 		
 		
 		private function pickStar():int

@@ -23,8 +23,8 @@ package com.gmrmarketing.comcast.streamgame2017
 			
 			myMask = new Sprite();
 			myMask.name = "mask";//used by main when finding clips being displayed
-			myMask.graphics.beginFill(0x00ff00, 1);
-			myMask.graphics.drawRect(0, 0, width, height);
+			myMask.graphics.beginFill(0x00ff00, .5);
+			myMask.graphics.drawRect(0, 0, width, height);			
 			myMask.graphics.endFill();
 			myMask.x = x;
 			myMask.y = y;
@@ -36,11 +36,10 @@ package com.gmrmarketing.comcast.streamgame2017
 			origX = x;
 			
 			if (x < 470){
-				x -= width-5;
+				x = -width;
 			}
 			if (x >= 470){
-				x += width+5;
-				
+				x = x + width;				
 			}
 			
 			addEventListener(Event.ENTER_FRAME, checkOnPos);
@@ -74,10 +73,10 @@ package com.gmrmarketing.comcast.streamgame2017
 				removeEventListener(Event.ENTER_FRAME, checkOffPos);
 				
 				if (x < 470){
-					x -= width-5;
+					x = -width;
 				}
 				if (x >= 470){
-					x += width+5;					
+					x = x + width;				
 				}
 				
 				addEventListener(Event.ENTER_FRAME, checkOnPos);

@@ -8,6 +8,7 @@ package com.gmrmarketing.comcast.streamgame2017
 	
 	public class Win extends EventDispatcher
 	{
+		public static const COMPLETE:String = "winComplete";
 		private var clip:MovieClip;
 		private var _container:DisplayObjectContainer;
 		
@@ -24,34 +25,64 @@ package com.gmrmarketing.comcast.streamgame2017
 		}
 		
 		
+		public function hide():void
+		{
+			if (_container.contains(clip)){
+				_container.removeChild(clip);
+			}
+		}
+		
+		
 		public function show(numStars:int):void
 		{
 			if (!_container.contains(clip)){
 				_container.addChild(clip);
 			}
 			
-			clip.star1.alpha = .3;
-			clip.star2.alpha = .3;
-			clip.star3.alpha = .3;
+			clip.star1.alpha = 0;
+			clip.star2.alpha = 0;
+			clip.star3.alpha = 0;
+			clip.logo.alpha = 0;
 			
-			clip.bg.alpha = 0;
+			clip.bg.x = 1080;
 			clip.youWin.x = 1080;
 			clip.pleaseSee.x = 1080;
 			
-			TweenMax.to(clip.bg, .5, {alpha:1});
-			TweenMax.to(clip.youWin, .5, {x:4, delay:.5, ease:Back.easeOut});
-			TweenMax.to(clip.pleaseSee, .5, {x:4, delay:.75, ease:Back.easeOut});
-			TweenMax.to(clip.logo, 1, {alpha:1, delay:1});
+			clip.pleaseSee.theText.text = "Please see XFINITY expert\nto redeem your level " + numStars.toString() + " prize."
+			
+			TweenMax.to(clip.bg, .5, {x:0});
+			TweenMax.to(clip.youWin, .4, {x:4, delay:.5, ease:Back.easeOut});
+			TweenMax.to(clip.pleaseSee, .4, {x:4, delay:.75, ease:Back.easeOut});
+			TweenMax.to(clip.logo, 3, {alpha:1, delay:1});
 			
 			if (numStars == 3){
-				TweenMax.to(clip.star1, 1, {alpha:1, delay:1});
-				TweenMax.to(clip.star2, 1, {alpha:1, delay:1.25});
-				TweenMax.to(clip.star3, 1, {alpha:1, delay:1.5});
+				
+				TweenMax.to(clip.star1, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2});
+				TweenMax.to(clip.star1, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:2.3});
+				
+				TweenMax.to(clip.star2, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2.6});
+				TweenMax.to(clip.star2, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:2.9});
+				
+				TweenMax.to(clip.star3, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2.9});
+				TweenMax.to(clip.star3, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:3.2});
+				
 			}else if (numStars == 2){
-				TweenMax.to(clip.star1, 1, {alpha:1, delay:1});
-				TweenMax.to(clip.star2, 1, {alpha:1, delay:1.25});
+				
+				TweenMax.to(clip.star1, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2});
+				TweenMax.to(clip.star1, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:2.3});
+				
+				TweenMax.to(clip.star2, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2.6});
+				TweenMax.to(clip.star2, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:2.9});
+				
+				TweenMax.to(clip.star3, .5, {alpha:.1, delay:3});
+				
 			}else{
-				TweenMax.to(clip.star1, 1, {alpha:1, delay:1});				
+				
+				TweenMax.to(clip.star1, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2});				
+				TweenMax.to(clip.star1, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:2.3});
+				
+				TweenMax.to(clip.star2, .5, {alpha:.1, delay:2.5});
+				TweenMax.to(clip.star3, .5, {alpha:.1, delay:3});
 			}			
 			
 			var request:URLRequest = new URLRequest("http://xfinitynascartour.thesocialtab.net/service/prizewheel");
@@ -73,12 +104,14 @@ package com.gmrmarketing.comcast.streamgame2017
 		{
 			var lo:URLLoader = URLLoader(e.target);
 			//trace(lo.data);//success
+			dispatchEvent(new Event(COMPLETE));
 		}
 		
 		
 		private function dataError(e:IOErrorEvent):void
 		{
 			trace("IOError");
+			dispatchEvent(new Event(COMPLETE));
 		}
 		
 	}
