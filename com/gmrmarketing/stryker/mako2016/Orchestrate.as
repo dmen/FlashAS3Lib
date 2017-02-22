@@ -50,9 +50,9 @@ package com.gmrmarketing.stryker.mako2016
 						{"name":"Demo 7", "prettyName":"Mako Total Knee #7", "icon":"holder7", "id":0},
 						
 						{"name":"Predictability game", "prettyName":"Experience Predicatbility", "clip":"experiencePredictability", "icon":"holderExp", "id":0}, 
-						{"name":"Operation game",  "prettyName":"Operation Mako", "clip":"operation", "icon":"holderOp", "id":0}, 
-						{"name":"Virtual Reality",  "prettyName":"Virtual Reality", "clip":"vr", "icon":"holderVR", "id":0}, 
-						{"name":"Performance solutions",  "prettyName":"Performance Solutions", "clip":"performance", "icon":"holderPerf", "id":0},						
+						{"name":"Operation game",  "prettyName":"Operation Mako", "clip":"operationMako", "icon":"holderOp", "id":0}, 
+						{"name":"Virtual Reality",  "prettyName":"Virtual Reality", "clip":"virtualReality", "icon":"holderVR", "id":0}, 
+						{"name":"Performance solutions",  "prettyName":"Performance Solutions", "clip":"performanceSolutions", "icon":"holderPerf", "id":0},						
 						
 						{"name":"Info kiosk 1", "id":0},
 						{"name":"Info kiosk 2", "id":0},

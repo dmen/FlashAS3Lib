@@ -32,6 +32,14 @@ package com.gmrmarketing.stryker.mako2016
 			clip.gotoAndStop(user.profileType);//frame 1,2,3,4
 			clip.fname.text = user.firstName;
 		}
+		
+		
+		public function hide():void
+		{
+			if (myContainer.contains(clip)){
+				myContainer.removeChild(clip);
+			}
+		}
 	}
 	
 }

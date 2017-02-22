@@ -4,8 +4,7 @@ package com.gmrmarketing.comcast.streamgame2017
 	import flash.events.*;
 	import flash.geom.Point;
 	import com.greensock.TweenMax;
-	import flash.utils.Timer;
-	import com.gmrmarketing.utilities.CornerQuit;
+	import flash.utils.Timer; 
 	
 	
 	public class Main extends MovieClip
@@ -17,9 +16,8 @@ package com.gmrmarketing.comcast.streamgame2017
 		private var bottom:MovieClip;
 		private var posTop:Point;
 		private var blueRects:Sprite;
-		private var visCount:int;
+		private var visCount:int;		
 		
-		private var configCorner:CornerQuit;
 		private var topContainer:Sprite;
 		
 		private var config:Config;
@@ -50,11 +48,7 @@ package com.gmrmarketing.comcast.streamgame2017
 			config.container = this;
 			
 			win = new Win();
-			win.container = this;
-			
-			configCorner = new CornerQuit();
-			configCorner.init(topContainer, "ul");
-			configCorner.addEventListener(CornerQuit.CORNER_QUIT, showConfig, false, 0, true);
+			win.container = this;			
 			
 			middle.y = top.y + top.height + 8;
 			bottom.y = middle.y + middle.height + 8;	
@@ -151,6 +145,8 @@ package com.gmrmarketing.comcast.streamgame2017
 				//animate the blue rects for a selector looking thingy
 				visCount = 0;
 				blueOn();
+			}else if (e.charCode == 67 || e.charCode == 99){
+				showConfig();
 			}
 		}
 		
@@ -239,9 +235,25 @@ package com.gmrmarketing.comcast.streamgame2017
 		
 		private function pickStar():int
 		{
-			var percents:Array = config.data;			
-			
 			var n:Number = Math.random();
+			var percents:Array = config.data;
+			
+			if (percents[0] == 1){
+				return 3;
+			}else if (percents[1] == 1){
+				return 2;
+			}else if (percents[0] == 0 && percents[1] == 0){
+				return 1;
+			}
+			
+			if (percents[0] + percents[1] == 1){
+				//no chance of one stars
+				if (n < percents[0]){
+					return 3;
+				}else{
+					return 2;
+				}
+			}			
 			
 			if (n < percents[0]){
 				return 3;
@@ -253,7 +265,7 @@ package com.gmrmarketing.comcast.streamgame2017
 		}
 		
 		
-		private function showConfig(e:Event):void
+		private function showConfig():void
 		{
 			stage.removeEventListener(KeyboardEvent.KEY_DOWN, checkKey);
 			config.addEventListener(Config.CLOSED, relisten, false, 0, true);

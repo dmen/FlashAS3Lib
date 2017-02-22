@@ -57,29 +57,29 @@ package com.gmrmarketing.comcast.streamgame2017
 			
 			if (numStars == 3){
 				
-				TweenMax.to(clip.star1, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2});
-				TweenMax.to(clip.star1, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:2.3});
+				TweenMax.to(clip.star1, .3, {alpha:1, scaleX:1.75, scaleY:1.75, colorTransform:{tint:0xffffff, tintAmount:1}, delay:2});
+				TweenMax.to(clip.star1, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, colorTransform:{tint:0x00b6f1, tintAmount:1}, delay:2.3});
 				
-				TweenMax.to(clip.star2, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2.6});
-				TweenMax.to(clip.star2, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:2.9});
+				TweenMax.to(clip.star2, .3, {alpha:1, scaleX:1.75, scaleY:1.75, colorTransform:{tint:0xffffff, tintAmount:1}, delay:2.6});
+				TweenMax.to(clip.star2, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, colorTransform:{tint:0x00b6f1, tintAmount:1}, delay:2.9});
 				
-				TweenMax.to(clip.star3, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2.9});
-				TweenMax.to(clip.star3, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:3.2});
+				TweenMax.to(clip.star3, .3, {alpha:1, scaleX:1.75, scaleY:1.75, colorTransform:{tint:0xffffff, tintAmount:1}, delay:2.9});
+				TweenMax.to(clip.star3, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, colorTransform:{tint:0x00b6f1, tintAmount:1}, delay:3.2});
 				
 			}else if (numStars == 2){
 				
-				TweenMax.to(clip.star1, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2});
-				TweenMax.to(clip.star1, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:2.3});
+				TweenMax.to(clip.star1, .3, {alpha:1, scaleX:1.75, scaleY:1.75, colorTransform:{tint:0xffffff, tintAmount:1}, delay:2});
+				TweenMax.to(clip.star1, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, colorTransform:{tint:0x00b6f1, tintAmount:1}, delay:2.3});
 				
-				TweenMax.to(clip.star2, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2.6});
-				TweenMax.to(clip.star2, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:2.9});
+				TweenMax.to(clip.star2, .3, {alpha:1, scaleX:1.75, scaleY:1.75, colorTransform:{tint:0xffffff, tintAmount:1}, delay:2.6});
+				TweenMax.to(clip.star2, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, colorTransform:{tint:0x00b6f1, tintAmount:1}, delay:2.9});
 				
 				TweenMax.to(clip.star3, .5, {alpha:.1, delay:3});
 				
 			}else{
 				
-				TweenMax.to(clip.star1, .3, {alpha:1, scaleX:1.5, scaleY:1.5, delay:2});				
-				TweenMax.to(clip.star1, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:2.3});
+				TweenMax.to(clip.star1, .3, {alpha:1, scaleX:1.75, scaleY:1.75, colorTransform:{tint:0xffffff, tintAmount:1}, delay:2});				
+				TweenMax.to(clip.star1, .5, {scaleX:1, scaleY:1, ease:Back.easeOut, colorTransform:{tint:0x00b6f1, tintAmount:1}, delay:2.3});
 				
 				TweenMax.to(clip.star2, .5, {alpha:.1, delay:2.5});
 				TweenMax.to(clip.star3, .5, {alpha:.1, delay:3});

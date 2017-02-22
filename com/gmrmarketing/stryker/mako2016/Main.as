@@ -12,9 +12,12 @@ package com.gmrmarketing.stryker.mako2016
 		private var intro:Intro;
 		private var welcome:Welcome;
 		private var map:Map;
+		private var detail:Detail;
 		
 		private var mapContainer:Sprite;
 		private var mainContainer:Sprite;
+		private var detailContainer:Sprite;
+		
 		private var currentUser:Object;
 		
 		private var recommendedItems:RecommendedItems;
@@ -28,8 +31,11 @@ package com.gmrmarketing.stryker.mako2016
 
 			mapContainer = new Sprite();
 			mainContainer = new Sprite();
+			detailContainer = new Sprite();
+			
 			addChild(mapContainer);
 			addChild(mainContainer);
+			addChild(detailContainer);
 			
 			orchestrate = new Orchestrate();
 			config = new Config();
@@ -41,7 +47,10 @@ package com.gmrmarketing.stryker.mako2016
 			intro.container = mainContainer;
 			
 			welcome = new Welcome();
-			welcome.container = mainContainer;	
+			welcome.container = mainContainer;
+			
+			detail = new Detail();
+			detail.container = detailContainer;
 			
 			recommendedItems = new RecommendedItems();//this is a sprite
 			
@@ -119,12 +128,30 @@ package com.gmrmarketing.stryker.mako2016
 			map.setDemoReminders(currentUser, orchestrate.gates);
 			map.showRecommendedGates(currentUser, orchestrate.gates, config.loginName);
 			
+			map.addListeners();
+			map.addEventListener(Map.DETAIL, showMapDetail, false, 0, true);
 			//can call map.appointments and map.recommendations to get those lists and display them
 			
-			recommendedItems.populate(map.recommenations);
+			recommendedItems.populate(map.recommendations);//this is the full list - can be more than two
 			mainContainer.addChild(recommendedItems);
 			recommendedItems.x = 58;
 			recommendedItems.y = 680;			
+		}
+		
+		
+		/**
+		 * Callback from clicking on map area - shows the detail for the area
+		 * @param	e
+		 */
+		private function showMapDetail(e:Event):void
+		{
+			welcome.hide();
+			
+			while (detailContainer.numChildren){
+				detailContainer.removeChildAt(0);
+			}
+			
+			detail.show(map.detail, currentUser);
 		}
 		
 	}

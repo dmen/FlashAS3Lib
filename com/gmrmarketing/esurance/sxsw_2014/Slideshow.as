@@ -39,7 +39,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 		{
 			container = $container;
 			file = new File();
-			file.nativePath = "C:\\Program Files\\Adobe\\Adobe Media Server 5\\applications\\esurance\\streams\\_definst_\\";
+			file.nativePath = "C:\\Program Files\\Adobe\\Flash Media Server 4.5\\applications\\esurance\\streams\\_definst_\\";
 			currIndex = 0;
 			checkFolder();//populate vids array
 		}

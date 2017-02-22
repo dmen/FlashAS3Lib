@@ -9,7 +9,11 @@ package com.gmrmarketing.stryker.mako2016
 	
 	public class Map extends EventDispatcher
 	{
-		private var clip:MovieClip;
+		//dispatched when an event area is clicked (like kneedeep)
+		public static const DETAIL:String = "detailClicked";
+		private var _detail:String; //clip name of the clicked detail area
+		
+		private var clip:MovieClip;//instance of mcMap
 		private var myContainer:DisplayObjectContainer;
 		
 		//ids of gates that have been visited - populated in setVisited - used when setting demo reminders so that a reminder
@@ -35,7 +39,7 @@ package com.gmrmarketing.stryker.mako2016
 		
 		
 		/**
-		 * 
+		 * Called from Main.gotUserData() once the rfid is scanned and data is retrieved from orchestrate
 		 * @param	kioskLogin String Info Kiosk login name - like Kiosk2
 		 */
 		public function show(kioskLogin:String):void
@@ -322,7 +326,7 @@ package com.gmrmarketing.stryker.mako2016
 				}
 			}
 			
-			//make a copy
+			//make a copy of the full list
 			_recommendations = realRecommendations.concat();
 			
 			//realRecommendations now contains only those gates not visited - may need to further work out TotalKnee...need testing to be sure
@@ -342,11 +346,53 @@ package com.gmrmarketing.stryker.mako2016
 		/**
 		 * Returns the full list of recommendations for this user - only the first two are displayed on the map
 		 * _recommendations is an array of objects with name (gate name), prettyName and id properties
+		 * used by Main when creating the recommendations on the left side- the blue bars
 		 */
-		public function get recommenations():Array
+		public function get recommendations():Array
 		{
 			return _recommendations;
 		}
+		
+		
+		/**
+		 * Called from Main.gotUserData()
+		 * adds mouse listeners to the clickable detail areas - these are the clips
+		 * on the coloredBacks layer in the map
+		 */
+		public function addListeners():void
+		{
+			clip.kneedeep.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.hipnotic.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.kneet.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.aCutAbove.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.theBalconKnee.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.theJoint.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.experiencePredictability.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.operationMako.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.virtualReality.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.performanceSolutions.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+		}
+		
+		
+		private function detailClick(e:MouseEvent):void
+		{
+			_detail = MovieClip(e.currentTarget).name;
+			dispatchEvent(new Event(DETAIL));
+		}
+		
+		
+		/**
+		 * returns the clip name of the clicked area
+		 * 
+		 * Possible values: kneedeep, hipnotic, kneet, aCutAbove, theBalconKnee, theJoint, experiencePredictability, operationMako, virtualReality, performanceSolutions
+		 * 
+		 * these values match the clip value in the gates array from orchestrate
+		 */
+		public function get detail():String
+		{
+			return _detail;
+		}
+		
 		
 		
 		/**
