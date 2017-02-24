@@ -14,6 +14,9 @@ package com.gmrmarketing.stryker.mako2016
 		private var _detail:String; //clip name of the clicked detail area
 		
 		private var clip:MovieClip;//instance of mcMap
+		private var clipMask:MovieClip;//instance of mcMapMask
+		private var clipCircle:Sprite;
+		
 		private var myContainer:DisplayObjectContainer;
 		
 		//ids of gates that have been visited - populated in setVisited - used when setting demo reminders so that a reminder
@@ -28,7 +31,13 @@ package com.gmrmarketing.stryker.mako2016
 		public function Map()
 		{
 			clip = new mcMap();
-			clip.x = 620;
+			clipMask = new mcMapMask();
+			clipCircle = new Sprite();
+			
+			clip.x = 640;
+			clip.y = 50;
+			clipMask.x = clip.x + clip.width * .5;
+			clipMask.y = clip.y + clip.height * .5;
 		}
 		
 		
@@ -46,7 +55,13 @@ package com.gmrmarketing.stryker.mako2016
 		{
 			if (!myContainer.contains(clip)){
 				myContainer.addChild(clip);
+				myContainer.addChild(clipMask);
+				myContainer.addChild(clipCircle);
+				
+				clip.mask = clipMask;
 			}
+			myContainer.x = 0;
+			myContainer.y = 0;
 			
 			clip.kiosk1.redOutline.alpha = 0;
 			clip.kiosk2.redOutline.alpha = 0;
@@ -87,6 +102,8 @@ package com.gmrmarketing.stryker.mako2016
 		{
 			if (myContainer.contains(clip)){
 				myContainer.removeChild(clip);
+				myContainer.removeChild(clipMask);
+				myContainer.removeChild(clipCircle);
 			}
 			TweenMax.killTweensOf(pulse);
 		}
@@ -376,8 +393,41 @@ package com.gmrmarketing.stryker.mako2016
 		
 		private function detailClick(e:MouseEvent):void
 		{
-			_detail = MovieClip(e.currentTarget).name;
+			var m:MovieClip = MovieClip(e.currentTarget);
+			_detail = m.name;
+			clipMask.x = clip.x + (m.x + m.width * .5);//center mask on the clicked area
+			clipMask.y = clip.y + (m.y + m.height * .5);
+			
+			TweenMax.to(clipMask, 1, {scaleX:.35, scaleY:.35, onUpdate:drawCirc});
+			
+			//need to move the container so that the circled location is centered on screen
+			//map is originally at 640,50 in the container - container at 0,0
+			//circle should be at 1650,480...so
+			//deltaX = 1650 - clipMask.x
+			//deltaY = 480 - clipMask.y
+			//tween the container by these deltas...
+			TweenMax.to(myContainer, 1, {x:1620 - clipMask.x, y:480 - clipMask.y});
+			
 			dispatchEvent(new Event(DETAIL));
+		}
+		
+		
+		public function removeDetail():void
+		{
+			clipCircle.graphics.clear();
+			TweenMax.to(clipMask, 1, {x:clip.x + clip.width * .5, y:clip.y + clip.height * .5, scaleX:1, scaleY:1});
+			TweenMax.to(myContainer, 1, {x:0, y:0});
+		}
+		
+		
+		/**
+		 * draws a circle around the mask as it scales down - makes the black outline
+		 */
+		private function drawCirc():void
+		{
+			clipCircle.graphics.clear();
+			clipCircle.graphics.lineStyle(2, 0x000000, 1);
+			clipCircle.graphics.drawCircle(clipMask.x, clipMask.y, clipMask.width * .5);
 		}
 		
 		

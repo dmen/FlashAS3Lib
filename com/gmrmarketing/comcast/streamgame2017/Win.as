@@ -48,7 +48,7 @@ package com.gmrmarketing.comcast.streamgame2017
 			clip.youWin.x = 1080;
 			clip.pleaseSee.x = 1080;
 			
-			clip.pleaseSee.theText.text = "Please see XFINITY expert\nto redeem your level " + numStars.toString() + " prize."
+			clip.pleaseSee.theText.text = "Please see an XFINITY expert\nto redeem your level " + numStars.toString() + " prize."
 			
 			TweenMax.to(clip.bg, .5, {x:0});
 			TweenMax.to(clip.youWin, .4, {x:4, delay:.5, ease:Back.easeOut});

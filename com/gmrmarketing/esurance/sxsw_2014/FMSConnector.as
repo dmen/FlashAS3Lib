@@ -51,8 +51,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 		
 			
 		private function onNetStatus(e:NetStatusEvent):void
-		{
-			trace("FMSCOnnector.netStatus():",e.info.code);
+		{			
 			if(e.info.code == "NetConnection.Connect.Success"){				
 				dispatchEvent(new Event(FMS_CONNECTED));
 				connected = true;

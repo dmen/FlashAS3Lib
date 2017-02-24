@@ -8,6 +8,7 @@ package com.gmrmarketing.stryker.mako2016
 	import flash.events.*;
 	import com.greensock.TweenMax;
 	import com.gmrmarketing.utilities.Strings;
+	import flash.utils.Timer;
 	
 	
 	public class Intro extends EventDispatcher 
@@ -16,11 +17,14 @@ package com.gmrmarketing.stryker.mako2016
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		private var rfid:String;
+		private var curFrame:int;
+		private var frameTimer:Timer;
 		
 		
 		public function Intro()
 		{
-			clip = new mcIntro();			
+			clip = new mcIntro();
+			frameTimer = new Timer(8000);			
 		}
 		
 		
@@ -38,7 +42,13 @@ package com.gmrmarketing.stryker.mako2016
 			
 			clip.rfid.text = "";
 			myContainer.stage.focus = clip.rfid;
-			myContainer.stage.addEventListener(KeyboardEvent.KEY_DOWN, checkRFID, false, 0, true);			
+			myContainer.stage.addEventListener(KeyboardEvent.KEY_DOWN, checkRFID, false, 0, true);
+			
+			curFrame = 1;
+			clip.sideBar.gotoAndStop(1);
+			clip.sideBar.x = 1283;
+			frameTimer.addEventListener(TimerEvent.TIMER, newFrame, false, 0, true);
+			frameTimer.start();
 		}
 		
 		
@@ -68,11 +78,33 @@ package com.gmrmarketing.stryker.mako2016
 		
 		public function hide():void
 		{
+			frameTimer.reset();
 			
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
 			}
-		}	
+		}
+		
+		
+		private function newFrame(e:TimerEvent):void
+		{
+			frameTimer.stop();
+			
+			curFrame++;
+			if (curFrame > 5){
+				curFrame = 1;
+			}
+			
+			TweenMax.to(clip.sideBar, .5, {x:1920, onComplete:showBar});
+		}
+		
+		
+		private function showBar():void
+		{
+			clip.sideBar.gotoAndStop(curFrame);
+			TweenMax.to(clip.sideBar, .5, {x:1283});
+			frameTimer.start();
+		}		
 	}
 	
 }

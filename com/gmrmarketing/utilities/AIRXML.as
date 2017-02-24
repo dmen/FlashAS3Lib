@@ -25,7 +25,6 @@ package com.gmrmarketing.utilities
 	  
 		public function AIRXML(fName:String = "config.xml")
 		{
-			//prefsFile = File.desktopDirectory.resolvePath("config.xml");
 			prefsFile = File.applicationDirectory.resolvePath(fName);
 		}
 		

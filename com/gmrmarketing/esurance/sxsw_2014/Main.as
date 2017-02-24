@@ -53,7 +53,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 			dialog = new Dialog();
 			dialog.setContainer(this);
 			
-			config = new AIRXML();//gets the image list for the slideshow
+			config = new AIRXML();//reads config.xml - gets the image list for the slideshow
 			config.addEventListener(Event.COMPLETE, init, false, 0, true);
 			config.addEventListener(AIRXML.NOT_FOUND, noXML, false, 0, true);
 			config.readXML();			
@@ -84,7 +84,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 		
 		private function FMSAvailable(e:Event):void
 		{			
-			//slideshow.init(fmsConnector.getConnection());
+			//slideshow.init(fmsConnector.getConnection());			
 			slideshow.show();
 		}
 		

@@ -23,6 +23,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 			imageContainer = new Sprite();			
 			loader = new Loader();
 			loader.contentLoaderInfo.addEventListener(Event.COMPLETE, imageLoaded);
+			loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, badImage);
 		}
 		
 		
@@ -34,7 +35,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 		
 		public function setXML($slides:XMLList):void
 		{
-			slides = $slides;
+			slides = $slides;			
 		}
 		
 		
@@ -82,6 +83,12 @@ package com.gmrmarketing.esurance.sxsw_2014
 			disp.alpha = 0;
 			imageContainer.addChild(disp);
 			TweenMax.to(disp, 1, { alpha:1, onComplete:waitForNext } );
+		}
+		
+		
+		private function badImage(e:IOErrorEvent):void
+		{
+			trace("Image was not found - check XML",e.toString());
 		}
 		
 		

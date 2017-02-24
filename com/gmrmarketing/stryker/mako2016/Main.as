@@ -31,11 +31,12 @@ package com.gmrmarketing.stryker.mako2016
 
 			mapContainer = new Sprite();
 			mainContainer = new Sprite();
-			detailContainer = new Sprite();
+			detailContainer = new Sprite();			
 			
+			
+			addChild(detailContainer);
 			addChild(mapContainer);
 			addChild(mainContainer);
-			addChild(detailContainer);
 			
 			orchestrate = new Orchestrate();
 			config = new Config();
@@ -52,7 +53,7 @@ package com.gmrmarketing.stryker.mako2016
 			detail = new Detail();
 			detail.container = detailContainer;
 			
-			recommendedItems = new RecommendedItems();//this is a sprite
+			recommendedItems = new RecommendedItems();//this is a sprite with the items in it - blue rects at lower left
 			
 			orchestrate.addEventListener(Orchestrate.GOT_BASE_URL, gotBaseURL, false, 0, true);
 			orchestrate.getBaseURL();
@@ -151,7 +152,26 @@ package com.gmrmarketing.stryker.mako2016
 				detailContainer.removeChildAt(0);
 			}
 			
+			recommendedItems.hide();
+			
 			detail.show(map.detail, currentUser);
+			detail.addEventListener(Detail.CLOSE_DETAIL, showFullMap, false, 0, true);
+		}
+		
+		
+		/**
+		 * callback for View Full Map button in Detail
+		 * @param	e
+		 */
+		private function showFullMap(e:Event):void
+		{
+			detail.removeEventListener(Detail.CLOSE_DETAIL, showFullMap);
+			detail.hide();
+			
+			map.removeDetail();
+			welcome.show(currentUser);
+		
+			recommendedItems.populate(map.recommendations);//this is the full list - can be more than two
 		}
 		
 	}

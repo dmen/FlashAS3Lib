@@ -30,7 +30,7 @@ package com.gmrmarketing.stryker.mako2016
 			
 			myKioskName = so.data.kioskName;
 			if (myKioskName == null){
-				myKioskName = "Info Kiosk 1";				
+				myKioskName = "Info Kiosk 1";//matches kiosk gate names in orchestrate		
 			}
 		}
 		

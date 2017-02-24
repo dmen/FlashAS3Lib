@@ -8,6 +8,7 @@ package com.gmrmarketing.stryker.mako2016
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
 	
+	
 	public class RecommendedItems extends Sprite
 	{		
 		public function RecommendedItems(){}
@@ -27,11 +28,19 @@ package com.gmrmarketing.stryker.mako2016
 				//prettyName is hardcoded into the gates array in the Orchestrate class
 				newItem.theText.text = items[i].prettyName;
 				newItem.y = i * 86;
-				addChild(newItem);				
+				newItem.x = -newItem.width;
+				addChild(newItem);
+				TweenMax.to(newItem, .5, {x:0, delay:.1 * i});
 			}
 		}
 		
 		
+		public function hide():void
+		{
+			while (numChildren){
+				removeChildAt(0);
+			}
+		}
 		
 	}
 	
