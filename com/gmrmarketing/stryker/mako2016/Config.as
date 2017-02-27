@@ -65,15 +65,17 @@ package com.gmrmarketing.stryker.mako2016
 			if (!myContainer.contains(clip)){
 				myContainer.addChild(clip);
 			}
+			clip.x = 200;
+			clip.y = 200;
 			
 			clip.gateName.text = myKioskName;
-			clip.btnClose.addEventListener(MouseEvent.MOUSE_DOWN, doSave, false, 0, true);
+			clip.btnSave.addEventListener(MouseEvent.MOUSE_DOWN, doSave, false, 0, true);
 		}
 		
 		
 		private function doSave(e:MouseEvent):void
 		{
-			clip.btnClose.removeEventListener(MouseEvent.MOUSE_DOWN, doSave);
+			clip.btnSave.removeEventListener(MouseEvent.MOUSE_DOWN, doSave);
 			
 			myKioskName = clip.gateName.text;
 			so.data.kioskName = clip.gateName.text;

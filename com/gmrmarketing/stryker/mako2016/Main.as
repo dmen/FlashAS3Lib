@@ -3,6 +3,9 @@ package com.gmrmarketing.stryker.mako2016
 	import flash.display.*;
 	import flash.events.*;
 	import flash.ui.Mouse;
+	import com.gmrmarketing.utilities.CornerQuit;
+	import com.greensock.TweenMax;
+	import flash.desktop.NativeApplication;
 	
 	
 	public class Main extends MovieClip  
@@ -17,10 +20,18 @@ package com.gmrmarketing.stryker.mako2016
 		private var mapContainer:Sprite;
 		private var mainContainer:Sprite;
 		private var detailContainer:Sprite;
+		private var logoContainer:Sprite;
+		private var cornerContainer:Sprite;
 		
 		private var currentUser:Object;
 		
 		private var recommendedItems:RecommendedItems;
+		
+		private var configCorner:CornerQuit;
+		private var quitCorner:CornerQuit;
+		
+		private var logo:MovieClip;//instance of mcLogo - located upper right
+		private var logout:MovieClip;//instance of mcSignOut - appears on full map view
 		
 		
 		public function Main()
@@ -31,15 +42,20 @@ package com.gmrmarketing.stryker.mako2016
 
 			mapContainer = new Sprite();
 			mainContainer = new Sprite();
-			detailContainer = new Sprite();			
-			
+			detailContainer = new Sprite();
+			logoContainer = new Sprite();
+			cornerContainer = new Sprite();
 			
 			addChild(detailContainer);
 			addChild(mapContainer);
 			addChild(mainContainer);
+			addChild(logoContainer);
+			addChild(cornerContainer);
 			
 			orchestrate = new Orchestrate();
+			
 			config = new Config();
+			config.container = cornerContainer;
 			
 			map = new Map();
 			map.container = mapContainer;
@@ -53,7 +69,25 @@ package com.gmrmarketing.stryker.mako2016
 			detail = new Detail();
 			detail.container = detailContainer;
 			
+			logo = new mcLogo();//1695,63
+			logo.x = 1695;
+			logo.y = 63;
+			
+			logout = new mcSignOut();
+			logout.x = 1564;
+			logout.y = 970;
+			
+			configCorner = new CornerQuit();
+			configCorner.init(cornerContainer, "ul");
+			configCorner.addEventListener(CornerQuit.CORNER_QUIT, showConfig);
+			
+			quitCorner = new CornerQuit();
+			quitCorner.init(cornerContainer, "ll");
+			quitCorner.addEventListener(CornerQuit.CORNER_QUIT, quitApp);
+			
 			recommendedItems = new RecommendedItems();//this is a sprite with the items in it - blue rects at lower left
+			recommendedItems.x = 58;
+			recommendedItems.y = 650;
 			
 			orchestrate.addEventListener(Orchestrate.GOT_BASE_URL, gotBaseURL, false, 0, true);
 			orchestrate.getBaseURL();
@@ -92,8 +126,7 @@ package com.gmrmarketing.stryker.mako2016
 		{
 			orchestrate.removeEventListener(Orchestrate.GOT_GATES, showIntro);
 			
-			intro.addEventListener(Intro.GOT_RFID, rfidScanned, false, 0, true);
-			intro.show();
+			logoutUser();
 		}
 		
 		
@@ -104,6 +137,7 @@ package com.gmrmarketing.stryker.mako2016
 		private function rfidScanned(e:Event):void
 		{
 			intro.removeEventListener(Intro.GOT_RFID, rfidScanned);
+			intro.scanning();
 			
 			orchestrate.addEventListener(Orchestrate.GOT_USER_DATA, gotUserData, false, 0, true);
 			orchestrate.getUser(intro.RFID);
@@ -131,12 +165,15 @@ package com.gmrmarketing.stryker.mako2016
 			
 			map.addListeners();
 			map.addEventListener(Map.DETAIL, showMapDetail, false, 0, true);
-			//can call map.appointments and map.recommendations to get those lists and display them
+			//can call map.appointments and map.recommendations to get those lists and display them			
 			
-			recommendedItems.populate(map.recommendations);//this is the full list - can be more than two
-			mainContainer.addChild(recommendedItems);
-			recommendedItems.x = 58;
-			recommendedItems.y = 680;			
+			if (!logoContainer.contains(logo)){
+				logoContainer.addChild(logo);
+				logo.alpha = 0;
+				TweenMax.to(logo, 2, {alpha:1});
+			}
+			
+			showFullMap();
 		}
 		
 		
@@ -152,9 +189,15 @@ package com.gmrmarketing.stryker.mako2016
 				detailContainer.removeChildAt(0);
 			}
 			
-			recommendedItems.hide();
+			if (mainContainer.contains(recommendedItems)){
+				mainContainer.removeChild(recommendedItems);
+			}
+			if (cornerContainer.contains(logout)){
+				cornerContainer.removeChild(logout);				
+			}
 			
-			detail.show(map.detail, currentUser);
+			//map.detail is the string gate name of what the user clicked on - matches the clip value in the orchestate gate array
+			detail.show(map.detail, currentUser, map.recommendations, map.appointments);
 			detail.addEventListener(Detail.CLOSE_DETAIL, showFullMap, false, 0, true);
 		}
 		
@@ -163,7 +206,7 @@ package com.gmrmarketing.stryker.mako2016
 		 * callback for View Full Map button in Detail
 		 * @param	e
 		 */
-		private function showFullMap(e:Event):void
+		private function showFullMap(e:Event = null):void
 		{
 			detail.removeEventListener(Detail.CLOSE_DETAIL, showFullMap);
 			detail.hide();
@@ -171,7 +214,48 @@ package com.gmrmarketing.stryker.mako2016
 			map.removeDetail();
 			welcome.show(currentUser);
 		
-			recommendedItems.populate(map.recommendations);//this is the full list - can be more than two
+			mainContainer.addChild(recommendedItems);
+			recommendedItems.populate(map.recommendations, map.appointments);//this is the full list - can be more than two
+			
+			if (!cornerContainer.contains(logout)){
+				cornerContainer.addChild(logout);				
+			}
+			
+			logout.x = 1920;
+			TweenMax.to(logout, .5, {x:1564});
+			logout.addEventListener(MouseEvent.MOUSE_DOWN, logoutUser, false, 0, true);
+		}
+		
+		
+		private function logoutUser(e:MouseEvent = null):void
+		{
+			if (cornerContainer.contains(logout)){
+				cornerContainer.removeChild(logout);				
+			}
+			logout.removeEventListener(MouseEvent.MOUSE_DOWN, logoutUser);
+			
+			intro.addEventListener(Intro.GOT_RFID, rfidScanned, false, 0, true);
+			intro.show();
+			
+			//remove logo on the intro/rfid page
+			if (logoContainer.contains(logo)){
+				logoContainer.removeChild(logo);
+			}
+			
+			map.hide();
+			
+		}
+		
+		
+		private function showConfig(e:Event):void
+		{
+			config.show();
+		}
+		
+		
+		private function quitApp(e:Event):void
+		{
+			NativeApplication.nativeApplication.exit();
 		}
 		
 	}

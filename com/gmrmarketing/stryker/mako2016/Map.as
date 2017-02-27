@@ -81,8 +81,8 @@ package com.gmrmarketing.stryker.mako2016
 			clip.youAreHere.y = pt.y + 9;
 			clip.youAreHere.scaleX = clip.youAreHere.scaleY = 1.5;
 			
-			TweenMax.to(clip.youAreHere, 1, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:.5});
-			TweenMax.to(clip.youAreHere, 1, {scaleX:0, scaleY:0, delay:1.5, onComplete:startPulse });
+			TweenMax.to(clip.youAreHere, 1, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:1});
+			TweenMax.to(clip.youAreHere, 1, {scaleX:0, scaleY:0, delay:2, onComplete:startPulse });
 		}
 		
 		
@@ -221,7 +221,7 @@ package com.gmrmarketing.stryker.mako2016
 									h -= 12;
 								}
 								
-								_appointments.push({"name":gates[i].name, "id":gates[i].id, "time":h + ":" + m + " pm"});
+								_appointments.push({"name":gates[i].name, "prettyName":gates[i].prettyName, "id":gates[i].id, "time":h + ":" + m + "pm"});
 								
 								var bell:MovieClip = new iconBell();
 								clip[gates[i].icon].addChild(bell);
@@ -252,7 +252,7 @@ package com.gmrmarketing.stryker.mako2016
 		
 		/**
 		 * Returns the appointments, for this user, that fall within the next hour
-		 * each appointment is an object with name (gate name), id and time properties
+		 * each appointment is an object with name (gate name), prettyName, id and time properties
 		 * time is already converted to regular local time - like 7:30pm
 		 * 
 		 */
@@ -262,7 +262,12 @@ package com.gmrmarketing.stryker.mako2016
 		}
 		
 		
-		
+		/**
+		 * 
+		 * @param	user
+		 * @param	gates
+		 * @param	kioskLoginName
+		 */
 		public function showRecommendedGates(user:Object, gates:Array, kioskLoginName:String):void
 		{
 			var profile:int = user.profileType;
@@ -329,7 +334,7 @@ package com.gmrmarketing.stryker.mako2016
 					{
 						rec[i].id = gates[j].id;
 						rec[i].icon = gates[j].icon; //inject icon... for star placement
-						rec[i].prettyName = gates[j].prettyName;
+						rec[i].prettyName = gates[j].prettyName;						
 						break;
 					}
 				}
@@ -378,23 +383,23 @@ package com.gmrmarketing.stryker.mako2016
 		 */
 		public function addListeners():void
 		{
-			clip.kneedeep.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
-			clip.hipnotic.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
-			clip.kneet.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
-			clip.aCutAbove.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
-			clip.theBalconKnee.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
-			clip.theJoint.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
-			clip.experiencePredictability.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
-			clip.operationMako.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
-			clip.virtualReality.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
-			clip.performanceSolutions.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.click_kneedeep.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.click_hipnotic.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.click_kneet.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.click_aCutAbove.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.click_theBalconKnee.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.click_theJoint.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.click_experiencePredictability.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.click_operationMako.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.click_virtualReality.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
+			clip.click_performanceSolutions.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
 		}
 		
 		
 		private function detailClick(e:MouseEvent):void
 		{
 			var m:MovieClip = MovieClip(e.currentTarget);
-			_detail = m.name;
+			_detail = m.name.substr(6);//remove click_ from the front
 			clipMask.x = clip.x + (m.x + m.width * .5);//center mask on the clicked area
 			clipMask.y = clip.y + (m.y + m.height * .5);
 			

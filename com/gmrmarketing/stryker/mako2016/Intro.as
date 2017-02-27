@@ -24,7 +24,7 @@ package com.gmrmarketing.stryker.mako2016
 		public function Intro()
 		{
 			clip = new mcIntro();
-			frameTimer = new Timer(8000);			
+			frameTimer = new Timer(7000);			
 		}
 		
 		
@@ -79,10 +79,41 @@ package com.gmrmarketing.stryker.mako2016
 		public function hide():void
 		{
 			frameTimer.reset();
-			
+			clip.removeEventListener(Event.ENTER_FRAME, spinSpinner);
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
 			}
+		}
+		
+		
+		/**
+		 * Called from Main.rfidScanned()
+		 * animates the scan message while user data is being retrieved from orchestrate
+		 */
+		public function scanning():void
+		{
+			TweenMax.killTweensOf(clip.sideBar);
+			clip.sideBar.x = 1283;
+			frameTimer.reset();
+			
+			clip.sideBar.gotoAndStop(6);//checking...
+			clip.addEventListener(Event.ENTER_FRAME, spinSpinner, false, 0, true);
+			
+			var w1:Array = ["recalibrating", "initializing", "finalizing", "locking", "fueling", "extracting", "binding", "aligning", "calibrating", "acquiring", "integrating"];
+			var w2:Array = ["flux", "data", "satellite", "spline", "cache", "storage", "laser", "electron", "plasma", "matter", "anti-matter", "warp"];
+			var w3:Array = ["capacitor", "conductor", "detector", "exchange", "drives", "container", "bay"];
+			
+			var word1:String = w1[Math.floor(Math.random() * (w1.length - 1))];
+			var word2:String = w1[Math.floor(Math.random() * (w2.length - 1))];
+			var word3:String = w1[Math.floor(Math.random() * (w3.length - 1))];
+			
+			clip.sideBar.theText.text = word1 + " " + word2 + " " + word3;
+		}
+		
+		
+		private function spinSpinner(e:Event):void
+		{
+			clip.sideBar.spinner.rotation += 2;
 		}
 		
 		
