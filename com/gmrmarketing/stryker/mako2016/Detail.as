@@ -12,6 +12,7 @@ package com.gmrmarketing.stryker.mako2016
 		private var clip:MovieClip;
 		private var _container:DisplayObjectContainer;
 		private var _reminders:Array;
+		private var clickClip:String;
 		
 		
 		public function Detail()
@@ -35,6 +36,8 @@ package com.gmrmarketing.stryker.mako2016
 		 */
 		public function show(whichClip:String, user:Object, recommendations:Array, appointments:Array):void
 		{
+			clickClip = whichClip;
+			
 			//uses the index of the gate name to figure out the frame number in the detail clip
 			var clips:Array = ["aCutAbove", "kneet",  "hipnotic", "kneedeep", "theBalconKnee", "theJoint", "experiencePredictability", "operationMako", "virtualReality", "performanceSolutions"];
 			var i:int;
@@ -130,10 +133,7 @@ package com.gmrmarketing.stryker.mako2016
 			
 			
 			//CHECK FOR APPOINTMENTS - can only have appointments for Demos
-			_reminders = appointments;
-			
-			
-			
+			_reminders = appointments;			
 			
 			if (!_container.contains(clip)){
 				_container.addChild(clip);
@@ -152,7 +152,7 @@ package com.gmrmarketing.stryker.mako2016
 			
 			clip.x = -clip.width;
 			TweenMax.to(clip, .5, {x:0});
-			TweenMax.to(clip.detail, .5, {x:666, delay:.5, onComplete:showReminders});
+			TweenMax.to(clip.detail, .5, {x:666, delay:.5, onStart:showReminders});
 			TweenMax.to(clip.btnBack, .5, {x:1564, alpha:1, delay:1, ease:Back.easeOut});
 		}
 		
@@ -178,72 +178,80 @@ package com.gmrmarketing.stryker.mako2016
 		 */
 		private function showReminders():void
 		{
-			
-			if (whichClip == "hipnotic"){
+			var i:int;
+			if (clickClip == "hipnotic"){
+				
+				clip.detail.reminder3.alpha = 0;
+				
 				for (i = 0; i < _reminders.length; i++){
-					if (_reminders[i].name == "Demo 3"){
-						clip.reminder3.y = 504;
-						clip.reminder3.alpha = 0;
-						clip.reminder3.theText.text = "You're registered for " + _reminders[i].time;
-						TweenMax.to(clip.reminder3, 1, {alpha:1});
-						TweenMax.to(clip.reminder3.bell, .5, {colorTransform:{tint:0x4c7d7a, tintAmount:1}});//green
+					if (_reminders[i].name == "Demo 3"){						
+						clip.detail.reminder3.theText.text = "You're registered for " + _reminders[i].time;
+						TweenMax.to(clip.detail.reminder3, 1, {alpha:1, delay:.5});
+						TweenMax.to(clip.detail.reminder3.circ, .5, {colorTransform:{tint:0x4c7d7a, tintAmount:1}});//green
 						break;
 					}
 				}
 			}
-			if (whichClip == "kneedeep"){
+			if (clickClip == "kneedeep"){
+				
+				clip.detail.reminder1.alpha = 0;
+				clip.detail.reminder2.alpha = 0;
+				
 				for (i = 0; i < _reminders.length; i++){
 					if (_reminders[i].name == "Demo 1"){
-						clip.reminder1.y = 964;
-						clip.reminder1.alpha = 0;
-						clip.reminder1.theText.text = "You're registered for " + _reminders[i].time;
-						TweenMax.to(clip.reminder1, 1, {alpha:1});
-						TweenMax.to(clip.reminder1.bell, .5, {colorTransform:{tint:0x86468b, tintAmount:1}});//purple
+						
+						clip.detail.reminder1.theText.text = "You're registered for " + _reminders[i].time;
+						TweenMax.to(clip.detail.reminder1, 1, {alpha:1, delay:.5});
+						TweenMax.to(clip.detail.reminder1.circ, .5, {colorTransform:{tint:0x86468b, tintAmount:1}});//purple
 						break;
 					}else if(_reminders[i].name == "Demo 2"){
-						clip.reminder2.y = 486;
-						clip.reminder2.alpha = 0;
-						clip.reminder2.theText.text = "You're registered for " + _reminders[i].time;
-						TweenMax.to(clip.reminder2, 1, {alpha:1});
-						TweenMax.to(clip.reminder2.bell, .5, {colorTransform:{tint:0xffb500, tintAmount:1}});//yellow
+						
+						clip.detail.reminder2.theText.text = "You're registered for " + _reminders[i].time;
+						TweenMax.to(clip.detail.reminder2, 1, {alpha:1, delay:.5});
+						TweenMax.to(clip.detail.reminder2.circ, .5, {colorTransform:{tint:0xffb500, tintAmount:1}});//yellow
 						break;
 					}
 				}
 			}
-			if (whichClip == "theBalconKnee"){
+			if (clickClip == "theBalconKnee"){
+				
+				clip.detail.reminder4.alpha = 0;
+				clip.detail.reminder5.alpha = 0;
+				
 				for (i = 0; i < _reminders.length; i++){
 					if (_reminders[i].name == "Demo 4"){
-						clip.reminder4.y = 964;
-						clip.reminder4.alpha = 0;
-						clip.reminder4.theText.text = "You're registered for " + _reminders[i].time;
-						TweenMax.to(clip.reminder4, 1, {alpha:1});
-						TweenMax.to(clip.reminder4.bell, .5, {colorTransform:{tint:0xffb500, tintAmount:1}});//yellow
+						
+						clip.detail.reminder4.theText.text = "You're registered for " + _reminders[i].time;
+						TweenMax.to(clip.detail.reminder4, 1, {alpha:1, delay:.5});
+						TweenMax.to(clip.detail.reminder4.circ, .5, {colorTransform:{tint:0xffb500, tintAmount:1}});//yellow
 						break;
 					}else if(_reminders[i].name == "Demo 5"){
-						clip.reminder5.y = 486;
-						clip.reminder5.alpha = 0;
-						clip.reminder5.theText.text = "You're registered for " + _reminders[i].time;
-						TweenMax.to(clip.reminder5, 1, {alpha:1});
-						TweenMax.to(clip.reminder5.bell, .5, {colorTransform:{tint:0xffb500, tintAmount:1}});//yellow
+						
+						clip.detail.reminder5.theText.text = "You're registered for " + _reminders[i].time;
+						TweenMax.to(clip.detail.reminder5, 1, {alpha:1, delay:.5});
+						TweenMax.to(clip.detail.reminder5.circ, .5, {colorTransform:{tint:0xffb500, tintAmount:1}});//yellow
 						break;
 					}
 				}
-			}
-			if (whichClip == "theJoint"){
+			}			
+			
+			if (clickClip == "theJoint"){
+				
+				clip.detail.reminder6.alha = 0;
+				clip.detail.reminder7.alpha = 0;
+				
 				for (i = 0; i < _reminders.length; i++){
 					if (_reminders[i].name == "Demo 6"){
-						clip.reminder6.y = 968;
-						clip.reminder6.alpha = 0;
-						clip.reminder6.theText.text = "You're registered for " + _reminders[i].time;
-						TweenMax.to(clip.reminder6, 1, {alpha:1});
-						TweenMax.to(clip.reminder6.bell, .5, {colorTransform:{tint:0xffb500, tintAmount:1}});//yellow
+						
+						clip.detail.reminder6.theText.text = "You're registered for " + _reminders[i].time;
+						TweenMax.to(clip.detail.reminder6, 1, {alpha:1, delay:.5});
+						TweenMax.to(clip.detail.reminder6.circ, .5, {colorTransform:{tint:0xffb500, tintAmount:1}});//yellow
 						break;
 					}else if(_reminders[i].name == "Demo 7"){
-						clip.reminder7.y = 486;
-						clip.reminder7.alpha = 0;
-						clip.reminder7.theText.text = "You're registered for " + _reminders[i].time;
-						TweenMax.to(clip.reminder7, 1, {alpha:1});
-						TweenMax.to(clip.reminder7.bell, .5, {colorTransform:{tint:0xffb500, tintAmount:1}});//yellow
+						
+						clip.detail.reminder7.theText.text = "You're registered for " + _reminders[i].time;
+						TweenMax.to(clip.detail.reminder7, 1, {alpha:1, delay:.5});
+						TweenMax.to(clip.detail.reminder7.circ, .5, {colorTransform:{tint:0xffb500, tintAmount:1}});//yellow
 						break;
 					}
 				}

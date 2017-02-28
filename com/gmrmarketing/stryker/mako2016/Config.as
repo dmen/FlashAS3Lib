@@ -30,7 +30,7 @@ package com.gmrmarketing.stryker.mako2016
 			
 			myKioskName = so.data.kioskName;
 			if (myKioskName == null){
-				myKioskName = "Info Kiosk 1";//matches kiosk gate names in orchestrate		
+				myKioskName = "Info kiosk 1";//matches kiosk gate names in orchestrate		
 			}
 		}
 		
@@ -68,7 +68,7 @@ package com.gmrmarketing.stryker.mako2016
 			clip.x = 200;
 			clip.y = 200;
 			
-			clip.gateName.text = myKioskName;
+			clip.combo.selectedIndex = parseInt(myKioskName.substr(11)) - 1;
 			clip.btnSave.addEventListener(MouseEvent.MOUSE_DOWN, doSave, false, 0, true);
 		}
 		
@@ -77,8 +77,8 @@ package com.gmrmarketing.stryker.mako2016
 		{
 			clip.btnSave.removeEventListener(MouseEvent.MOUSE_DOWN, doSave);
 			
-			myKioskName = clip.gateName.text;
-			so.data.kioskName = clip.gateName.text;
+			myKioskName = clip.combo.selectedItem.data;			
+			so.data.kioskName = myKioskName;
 			so.flush();
 			if (myContainer.contains(clip)){
 				myContainer.removeChild(clip);

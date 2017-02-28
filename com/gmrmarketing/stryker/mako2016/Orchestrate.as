@@ -93,6 +93,7 @@ package com.gmrmarketing.stryker.mako2016
 
 		
 		/**
+		 * Callback for Orchestarte GetGuests
 		 * gets the user details
 		 * @param	e
 		 */
@@ -179,7 +180,18 @@ package com.gmrmarketing.stryker.mako2016
 			req.requestHeaders.push(authHeader);
 			req.requestHeaders.push(jsonHeader1);
 			req.requestHeaders.push(jsonHeader2);//accept
-
+			req.method = URLRequestMethod.POST;
+			
+			var lo:URLLoader = new URLLoader();
+			lo.addEventListener(IOErrorEvent.IO_ERROR, orchestrateError, false, 0, true);
+			lo.addEventListener(Event.COMPLETE, submitComplete, false, 0, true);
+			lo.load(req);
+		}
+		
+		
+		private function submitComplete(e:Event):void
+		{			
+			trace("submit complete");
 		}
 		
 		

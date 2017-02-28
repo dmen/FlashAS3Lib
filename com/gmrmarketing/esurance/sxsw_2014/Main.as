@@ -64,7 +64,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 		{
 			var params:XML = config.getXML();
 			slideshow.setXML(params.slideshow.image);
-			
+			trace("listening on port", params.port);
 			server = new SocketServer(parseInt(params.port));
 			server.addEventListener(SocketServer.CONNECT, clientConnected, false, 0, true);
 			server.addEventListener(SocketServer.DISCONNECT, clientDisconnected, false, 0, true);
@@ -84,6 +84,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 		
 		private function FMSAvailable(e:Event):void
 		{			
+			trace("connected to FMS");
 			//slideshow.init(fmsConnector.getConnection());			
 			slideshow.show();
 		}
@@ -114,7 +115,7 @@ package com.gmrmarketing.esurance.sxsw_2014
 		private function clientMessage(e:Event):void
 		{
 			var m:String = Strings.removeLineBreaks(server.message);
-			
+			trace("message:",m);
 			if(fmsConnector.isConnected()){
 				if (m == "start") {
 					slideshow.hide();

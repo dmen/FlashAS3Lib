@@ -6,6 +6,7 @@ package com.gmrmarketing.stryker.mako2016
 	import com.gmrmarketing.utilities.CornerQuit;
 	import com.greensock.TweenMax;
 	import flash.desktop.NativeApplication;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	
 	public class Main extends MovieClip  
@@ -32,6 +33,9 @@ package com.gmrmarketing.stryker.mako2016
 		
 		private var logo:MovieClip;//instance of mcLogo - located upper right
 		private var logout:MovieClip;//instance of mcSignOut - appears on full map view
+		
+		private var tim:TimeoutHelper;
+		
 		
 		
 		public function Main()
@@ -89,6 +93,10 @@ package com.gmrmarketing.stryker.mako2016
 			recommendedItems.x = 58;
 			recommendedItems.y = 650;
 			
+			tim = TimeoutHelper.getInstance();
+			tim.addEventListener(TimeoutHelper.TIMED_OUT, logoutUser);
+			tim.init(90000);
+			
 			orchestrate.addEventListener(Orchestrate.GOT_BASE_URL, gotBaseURL, false, 0, true);
 			orchestrate.getBaseURL();
 		}
@@ -124,8 +132,7 @@ package com.gmrmarketing.stryker.mako2016
 		 */
 		private function showIntro(e:Event):void
 		{
-			orchestrate.removeEventListener(Orchestrate.GOT_GATES, showIntro);
-			
+			orchestrate.removeEventListener(Orchestrate.GOT_GATES, showIntro);			
 			logoutUser();
 		}
 		
@@ -150,8 +157,10 @@ package com.gmrmarketing.stryker.mako2016
 		 */
 		private function gotUserData(e:Event):void
 		{
+			tim.startMonitoring();
+			
 			//submit the kiosk use for tracking
-			//orchestrate.submitKioskUser(config.kioskName, intro.RFID);
+			orchestrate.submitKioskUse(config.kioskName, intro.RFID);
 			
 			currentUser = orchestrate.user;
 			intro.hide();			
@@ -183,6 +192,8 @@ package com.gmrmarketing.stryker.mako2016
 		 */
 		private function showMapDetail(e:Event):void
 		{
+			tim.buttonClicked();
+			
 			welcome.hide();
 			
 			while (detailContainer.numChildren){
@@ -208,6 +219,8 @@ package com.gmrmarketing.stryker.mako2016
 		 */
 		private function showFullMap(e:Event = null):void
 		{
+			tim.buttonClicked();
+			
 			detail.removeEventListener(Detail.CLOSE_DETAIL, showFullMap);
 			detail.hide();
 			
@@ -227,8 +240,15 @@ package com.gmrmarketing.stryker.mako2016
 		}
 		
 		
-		private function logoutUser(e:MouseEvent = null):void
+		/**
+		 * closes the map
+		 * shows the intro - get RFID screen
+		 * @param	e
+		 */
+		private function logoutUser(e:Event = null):void
 		{
+			tim.stopMonitoring();
+			
 			if (cornerContainer.contains(logout)){
 				cornerContainer.removeChild(logout);				
 			}

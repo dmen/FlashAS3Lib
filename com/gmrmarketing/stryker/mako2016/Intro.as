@@ -49,21 +49,36 @@ package com.gmrmarketing.stryker.mako2016
 			clip.sideBar.x = 1283;
 			frameTimer.addEventListener(TimerEvent.TIMER, newFrame, false, 0, true);
 			frameTimer.start();
+			
+			rfidOff();
+		}
+		
+		private function rfidOff():void
+		{
+			TweenMax.to(clip.rfid1, 1, {alpha:0});
+			TweenMax.to(clip.rfid2, 1, {alpha:0, delay:.5});
+			TweenMax.to(clip.rfid3, 1, {alpha:0, delay:1, onComplete:rfidOn});
+		}
+		
+		private function rfidOn():void
+		{
+			TweenMax.to(clip.rfid1, 1, {alpha:1});
+			TweenMax.to(clip.rfid2, 1, {alpha:1, delay:.5});
+			TweenMax.to(clip.rfid3, 1, {alpha:1, delay:1, onComplete:rfidOff});
 		}
 		
 		
 		private function checkRFID(e:KeyboardEvent):void
 		{
-			myContainer.stage.removeEventListener(KeyboardEvent.KEY_DOWN, checkRFID);
-			
-			if (e.charCode == 13) {				
+			if (e.charCode == 13) {	
+				myContainer.stage.removeEventListener(KeyboardEvent.KEY_DOWN, checkRFID);
 				//got enter in field				
 				if (clip.rfid.text == ""){
-					rfid = "1389847433464192";					
+					rfid = "1131511456743553";					
 					dispatchEvent(new Event(GOT_RFID));
 				}else{
 					rfid = Strings.removeLineBreaks(clip.rfid.text);
-					rfid = parseInt(rfid, 16).toString();//convert the hex to a long int
+					rfid = parseInt(rfid, 16).toString();//convert the hex to a long int					
 					dispatchEvent(new Event(GOT_RFID));
 				}
 			}
@@ -78,6 +93,7 @@ package com.gmrmarketing.stryker.mako2016
 		
 		public function hide():void
 		{
+			TweenMax.killTweensOf(clip.rfid3);//stops onComplete
 			frameTimer.reset();
 			clip.removeEventListener(Event.ENTER_FRAME, spinSpinner);
 			if (myContainer.contains(clip)) {
@@ -98,16 +114,6 @@ package com.gmrmarketing.stryker.mako2016
 			
 			clip.sideBar.gotoAndStop(6);//checking...
 			clip.addEventListener(Event.ENTER_FRAME, spinSpinner, false, 0, true);
-			
-			var w1:Array = ["recalibrating", "initializing", "finalizing", "locking", "fueling", "extracting", "binding", "aligning", "calibrating", "acquiring", "integrating"];
-			var w2:Array = ["flux", "data", "satellite", "spline", "cache", "storage", "laser", "electron", "plasma", "matter", "anti-matter", "warp"];
-			var w3:Array = ["capacitor", "conductor", "detector", "exchange", "drives", "container", "bay"];
-			
-			var word1:String = w1[Math.floor(Math.random() * (w1.length - 1))];
-			var word2:String = w1[Math.floor(Math.random() * (w2.length - 1))];
-			var word3:String = w1[Math.floor(Math.random() * (w3.length - 1))];
-			
-			clip.sideBar.theText.text = word1 + " " + word2 + " " + word3;
 		}
 		
 		

@@ -53,7 +53,7 @@ package com.gmrmarketing.comcast.streamgame2017
 			middle.y = top.y + top.height + 8;
 			bottom.y = middle.y + middle.height + 8;	
 			
-			restartTimer = new Timer(20000, 1);
+			restartTimer = new Timer(10000, 1);
 			restartTimer.addEventListener(TimerEvent.TIMER, doRestart);
 			
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, checkKey, false, 0, true);

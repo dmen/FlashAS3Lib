@@ -25,7 +25,9 @@ package com.gmrmarketing.stryker.mako2016
 		
 		private var _recommendations:Array;
 		private var _appointments:Array;
-		private var pulse:MovieClip;//red outline around the kiosk
+		
+		private var lastTint:Number;
+		private var detailClip:MovieClip;
 		
 		
 		public function Map()
@@ -63,38 +65,42 @@ package com.gmrmarketing.stryker.mako2016
 			myContainer.x = 0;
 			myContainer.y = 0;
 			
-			clip.kiosk1.redOutline.alpha = 0;
-			clip.kiosk2.redOutline.alpha = 0;
-			clip.kiosk3.redOutline.alpha = 0;
-			clip.kiosk4.redOutline.alpha = 0;
-			clip.kiosk5.redOutline.alpha = 0;
-			clip.kiosk6.redOutline.alpha = 0;
-			clip.kiosk7.redOutline.alpha = 0;
-			clip.kiosk8.redOutline.alpha = 0;
+			clip.goldGlow.alpha = 0;
 			
 			var pt:Point = new Point();			
 			pt.x = clip[kioskLogin.toLowerCase()].x;
-			pt.y = clip[kioskLogin.toLowerCase()].y;
-			pulse = clip[kioskLogin.toLowerCase()].redOutline;
+			pt.y = clip[kioskLogin.toLowerCase()].y;			
 			
 			clip.youAreHere.x = pt.x + 8;//kiosk sprites are 16x18 so this gets the pt on center
 			clip.youAreHere.y = pt.y + 9;
 			clip.youAreHere.scaleX = clip.youAreHere.scaleY = 1.5;
 			
+			startGoldGlow();
+			
 			TweenMax.to(clip.youAreHere, 1, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:1});
-			TweenMax.to(clip.youAreHere, 1, {scaleX:0, scaleY:0, delay:2, onComplete:startPulse });
+			TweenMax.to(clip.youAreHere, 1, {scaleX:.3, scaleY:.3, delay:2, onComplete:startBounce });
 		}
 		
 		
-		private function startPulse():void
+		private function startBounce():void
 		{
-			TweenMax.to(pulse, .5, {alpha:1, onComplete:endPulse});
+			TweenMax.to(clip.youAreHere, .75, {y:"-10", onComplete:endBounce});
 		}
 		
 		
-		private function endPulse():void
+		private function endBounce():void
 		{
-			TweenMax.to(pulse, .5, {alpha:0, onComplete:startPulse});
+			TweenMax.to(clip.youAreHere, .75, {y:"10", onComplete:startBounce});
+		}
+		
+		
+		private function startGoldGlow():void
+		{
+			TweenMax.to(clip.goldGlow, 2, {alpha:.6, delay:1, onComplete:endGoldGlow});
+		}
+		private function endGoldGlow():void
+		{
+			TweenMax.to(clip.goldGlow, 2, {alpha:0, onComplete:startGoldGlow});
 		}
 		
 		
@@ -105,7 +111,8 @@ package com.gmrmarketing.stryker.mako2016
 				myContainer.removeChild(clipMask);
 				myContainer.removeChild(clipCircle);
 			}
-			TweenMax.killTweensOf(pulse);
+			TweenMax.killTweensOf(clip.youAreHere);
+			TweenMax.killTweensOf(clip.goldGlow);
 		}
 		
 		
@@ -121,28 +128,41 @@ package com.gmrmarketing.stryker.mako2016
 			var hist:Array = user.history;
 			
 			clearIcons(gates);
+			var today:int = new Date().date;
 			
 			for (var i:int = 0; i < gates.length; i++){
 				
-				for (var j:int = 0; j < hist.length; j++){
+				//reset backgrounds to white
+				if (gates[i].hasOwnProperty("clip")){						
+					TweenMax.to(clip[gates[i].clip], 0, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});
+				}
+				
+				for (var j:int = 0; j < hist.length; j++){						
 					
 					if (gates[i].id == hist[j].gateId){
 						//user has been here - need to see if it's an entry point or a demo area
 						//if entry point we turn the clip gray - if demo we put a check in the icon
 						
-						visitedIDs.push( hist[j].gateId);
+						//discard the history item if it wasn't created 'today' - dateOfScan property
+						var scanDay:int = parseInt(hist[j].dateOfScan.substr(8, 2));
 						
-						if (gates[i].hasOwnProperty("clip")){
-							//entry point - turn the clip gray
-							TweenMax.to(clip[gates[i].clip], 1, {colorTransform:{tint:0xE4E5E3, tintAmount:1}, delay:.25 * i});
-						}						
+						if(scanDay == today){
 						
-						if (gates[i].hasOwnProperty("icon")){
-							//demo - turn the clip gray
-							clip[gates[i].icon].addChild(new iconCheck());
+							visitedIDs.push(hist[j].gateId);
+							
+							if (gates[i].hasOwnProperty("clip")){
+								//entry point - turn the clip gray
+								TweenMax.to(clip[gates[i].clip], 1, {colorTransform:{tint:0xE4E5E3, tintAmount:1}, delay:.25 * i});
+							}						
+							
+							if (gates[i].hasOwnProperty("icon")){
+								//demo - turn the clip gray
+								clip[gates[i].icon].addChild(new iconCheck());
+							}
+						
 						}
-						
 						break;
+						
 					}
 				}
 			}
@@ -290,29 +310,30 @@ package com.gmrmarketing.stryker.mako2016
 			
 			 //have the recommendations for this profile... if there's a totalKnee entry = that needs to change to Demo 2, Demo 4, Demo 5, Demo 6, Demo 7 based on proximity to this kiosk			
 			var demoName:String;
+			
 			switch(kioskLoginName){
-				case "Kiosk1":
+				case "kiosk1":
 					demoName = "Demo 2";
 					break;
-				case "Kiosk2":
+				case "kiosk2":
 					demoName = "Demo 6";
 					break;
-				case "Kiosk3":
+				case "kiosk3":
 					demoName = "Demo 2";
 					break;
-				case "Kiosk4":
+				case "kiosk4":
 					demoName = "Demo 7";
 					break;
-				case "Kiosk5":
+				case "kiosk5":
 					demoName = "Demo 4";
 					break;
-				case "Kiosk6":
+				case "kiosk6":
 					demoName = "Demo 5";
 					break;
-				case "Kiosk7":
+				case "kiosk7":
 					demoName = "Demo 4";
 					break;
-				case "Kiosk8":
+				case "kiosk8":
 					demoName = "Demo 5";
 					break;
 			}
@@ -400,6 +421,23 @@ package com.gmrmarketing.stryker.mako2016
 		{
 			var m:MovieClip = MovieClip(e.currentTarget);
 			_detail = m.name.substr(6);//remove click_ from the front
+			
+			//click another area while still in detail view...
+			if(detailClip && detailClip.name !=  MovieClip(clip[_detail]).name){
+				TweenMax.to(detailClip, 1, {colorTransform:{tint:lastTint, tintAmount:1}});
+			}
+			
+			TweenMax.killTweensOf(clip.goldGlow);
+			clip.goldGlow.alpha = 0;
+			
+			//tint the bg of the clicked are to slight orange...
+			detailClip = MovieClip(clip[_detail]);
+			
+			if(detailClip.transform.colorTransform.color != 0xf9e7be){
+				lastTint = detailClip.transform.colorTransform.color;
+				TweenMax.to(clip[_detail], 1, {colorTransform:{tint:0xf9e7be, tintAmount:1}});
+			}
+			
 			clipMask.x = clip.x + (m.x + m.width * .5);//center mask on the clicked area
 			clipMask.y = clip.y + (m.y + m.height * .5);
 			
@@ -419,9 +457,13 @@ package com.gmrmarketing.stryker.mako2016
 		
 		public function removeDetail():void
 		{
+			if(detailClip){
+				TweenMax.to(detailClip, 1, {colorTransform:{tint:lastTint, tintAmount:1}});
+			}
+			
 			clipCircle.graphics.clear();
 			TweenMax.to(clipMask, 1, {x:clip.x + clip.width * .5, y:clip.y + clip.height * .5, scaleX:1, scaleY:1});
-			TweenMax.to(myContainer, 1, {x:0, y:0});
+			TweenMax.to(myContainer, 1, {x:0, y:0, onComplete:startGoldGlow});
 		}
 		
 		
