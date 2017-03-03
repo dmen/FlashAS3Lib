@@ -8,11 +8,12 @@ package com.gmrmarketing.stryker.mako2016
 {
 	import flash.net.*;
 	import flash.display.*;
-	import flash.events.MouseEvent;
+	import flash.events.*;
 
 	
-	public class Config
+	public class Config extends EventDispatcher
 	{
+		public static const CONFIG_COMPLETE:String = "configDone";
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
 		
@@ -83,6 +84,8 @@ package com.gmrmarketing.stryker.mako2016
 			if (myContainer.contains(clip)){
 				myContainer.removeChild(clip);
 			}
+			
+			dispatchEvent(new Event(CONFIG_COMPLETE));
 		}
 	}
 	

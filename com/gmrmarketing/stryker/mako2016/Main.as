@@ -42,7 +42,7 @@ package com.gmrmarketing.stryker.mako2016
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.SHOW_ALL;
-			//Mouse.hide();
+			Mouse.hide();
 
 			mapContainer = new Sprite();
 			mainContainer = new Sprite();
@@ -160,7 +160,7 @@ package com.gmrmarketing.stryker.mako2016
 			tim.startMonitoring();
 			
 			//submit the kiosk use for tracking
-			orchestrate.submitKioskUse(config.kioskName, intro.RFID);
+			orchestrate.submitKioskUse(config.kioskName, orchestrate.user.id);
 			
 			currentUser = orchestrate.user;
 			intro.hide();			
@@ -168,7 +168,7 @@ package com.gmrmarketing.stryker.mako2016
 			welcome.show(currentUser);	
 			
 			map.show(config.loginName);//sends Kiosk2, Kiosk3, etc. for the You Are Here
-			map.setVisited(currentUser, orchestrate.gates);
+			map.setVisited(currentUser, orchestrate.gates);//creates the visitedID's array
 			map.setDemoReminders(currentUser, orchestrate.gates);
 			map.showRecommendedGates(currentUser, orchestrate.gates, config.loginName);
 			
@@ -228,7 +228,10 @@ package com.gmrmarketing.stryker.mako2016
 			welcome.show(currentUser);
 		
 			mainContainer.addChild(recommendedItems);
-			recommendedItems.populate(map.recommendations, map.appointments);//this is the full list - can be more than two
+			if(map.recommendations.length > 0 || map.appointments.length > 0){
+				recommendedItems.populate(map.recommendations, map.appointments);//this is the full list - can be more than two
+				recommendedItems.addEventListener(RecommendedItems.ITEM_CLICK, recItemClicked, false, 0, true);
+			}
 			
 			if (!cornerContainer.contains(logout)){
 				cornerContainer.addChild(logout);				
@@ -237,6 +240,46 @@ package com.gmrmarketing.stryker.mako2016
 			logout.x = 1920;
 			TweenMax.to(logout, .5, {x:1564});
 			logout.addEventListener(MouseEvent.MOUSE_DOWN, logoutUser, false, 0, true);
+		}
+		
+		
+		//need to call showMapDetail... with this gate name
+		private function recItemClicked(e:Event):void
+		{	
+			var clipName:String;
+			//gate name - need clip name
+			switch(recommendedItems.clickItem){
+				case "Demo 1":
+				case "Demo 2":
+					clipName = "kneedeep";
+					break;
+				case "Demo 3":
+					clipName = "hipnotic";
+					break;
+				case "Demo 4":
+				case "Demo 5":
+					clipName = "theBalconKnee";
+					break;
+				case "Demo 6":
+				case "Demo 7":
+					clipName = "theJoint";
+					break;
+				case "Operation game":
+					clipName = "operationMako";
+					break;
+				case "Predictability game":
+					clipName = "experiencePredictability";
+					break;
+				case "Virtual Reality":
+					clipName = "virtualReality";
+					break;
+				case "Performance solutions":
+					clipName = "performanceSolutions";
+					break;
+			}
+			
+			//need to give this to map to trigger just like a click on the clip would
+			map.recItemClick(clipName);
 		}
 		
 		
@@ -269,7 +312,15 @@ package com.gmrmarketing.stryker.mako2016
 		
 		private function showConfig(e:Event):void
 		{
+			config.addEventListener(Config.CONFIG_COMPLETE, resetFocus, false, 0, true);
 			config.show();
+		}
+		
+		
+		private function resetFocus(e:Event):void
+		{
+			config.removeEventListener(Config.CONFIG_COMPLETE, resetFocus);
+			logoutUser();
 		}
 		
 		

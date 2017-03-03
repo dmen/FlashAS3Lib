@@ -29,6 +29,8 @@ package com.gmrmarketing.stryker.mako2016
 		private var lastTint:Number;
 		private var detailClip:MovieClip;
 		
+		private var didTotalKnee:Boolean;		
+		
 		
 		public function Map()
 		{
@@ -67,6 +69,14 @@ package com.gmrmarketing.stryker.mako2016
 			
 			clip.goldGlow.alpha = 0;
 			
+			clip.time1.text = "";
+			clip.time2.text = "";
+			clip.time3.text = "";
+			clip.time4.text = "";
+			clip.time5.text = "";
+			clip.time6.text = "";
+			clip.time7.text = "";
+			
 			var pt:Point = new Point();			
 			pt.x = clip[kioskLogin.toLowerCase()].x;
 			pt.y = clip[kioskLogin.toLowerCase()].y;			
@@ -76,6 +86,7 @@ package com.gmrmarketing.stryker.mako2016
 			clip.youAreHere.scaleX = clip.youAreHere.scaleY = 1.5;
 			
 			startGoldGlow();
+			detailClip = null;
 			
 			TweenMax.to(clip.youAreHere, 1, {scaleX:1, scaleY:1, ease:Back.easeOut, delay:1});
 			TweenMax.to(clip.youAreHere, 1, {scaleX:.3, scaleY:.3, delay:2, onComplete:startBounce });
@@ -123,6 +134,8 @@ package com.gmrmarketing.stryker.mako2016
 		 */
 		public function setVisited(user:Object, gates:Array):void
 		{
+			didTotalKnee = false;
+			
 			visitedIDs = [];
 			
 			var hist:Array = user.history;
@@ -150,9 +163,14 @@ package com.gmrmarketing.stryker.mako2016
 						
 							visitedIDs.push(hist[j].gateId);
 							
+							//set a flag if they went to a total knee demo already
+							if (gates[i].name == "Demo 2" || gates[i].name == "Demo 4" || gates[i].name == "Demo 5" || gates[i].name == "Demo 6" || gates[i].name == "Demo 7"){
+								didTotalKnee = true;
+							}
+							
 							if (gates[i].hasOwnProperty("clip")){
 								//entry point - turn the clip gray
-								TweenMax.to(clip[gates[i].clip], 1, {colorTransform:{tint:0xE4E5E3, tintAmount:1}, delay:.25 * i});
+								TweenMax.to(clip[gates[i].clip], 1, {colorTransform:{tint:0xE4E5E3, tintAmount:1}});
 							}						
 							
 							if (gates[i].hasOwnProperty("icon")){
@@ -197,7 +215,7 @@ package com.gmrmarketing.stryker.mako2016
 					
 					showBell = false;
 					
-					if (gates[i].name == demos[j].title){
+					if (gates[i].name == demos[j].title && demos[j].guestAssigned == true){
 						
 						if (visitedIDs.indexOf(gates[i].id) == -1){							
 							
@@ -206,12 +224,22 @@ package com.gmrmarketing.stryker.mako2016
 							var a:String = demos[j].startTime;
 							var t:String = a.substr(11);//just the time portion
 							var h:int = parseInt(t.substr(0,2));//the hour
-							var m:int = parseInt(t.substr(3, 2));//the minute
+							var m:int = parseInt(t.substr(3, 2));//the minute							
 							
 							//if it's less than 0 then we're past the appointment time
 							var diff:int = h - nh;							
-							if(diff >= 0 && diff < 2){
-								
+							if(diff > 0){
+							//if (diff >= 0 && diff < 2){
+								showBell = true;										
+								visitedIDs.push(gates[i].id);//add this id to visited so it's not recommended...
+							}else if (diff == 0){
+								//demo in the same hour - make sure now min is not > than demo min
+								if (nm <= m){
+									showBell = true;										
+									visitedIDs.push(gates[i].id);//add this id to visited so it's not recommended...
+								}
+							}
+							/*
 								//either 0 or 1
 								if(diff == 0){		
 									
@@ -233,15 +261,24 @@ package com.gmrmarketing.stryker.mako2016
 									}		
 								}
 							}
-							
+							*/
 							if (showBell){
 								
 								//convert to 12 hour time
+								
+								var intTime:Number = h + (m / 60.0);//for time sorting
+								
 								if (h > 12){
 									h -= 12;
 								}
+								//make sure minute is 2 characters long - ie 6:05pm not 6:5pm
+								var mi:String = m.toString();
+								if (mi.length < 2){
+									mi = "0" + mi;
+								}
 								
-								_appointments.push({"name":gates[i].name, "prettyName":gates[i].prettyName, "id":gates[i].id, "time":h + ":" + m + "pm"});
+								_appointments.push({"name":gates[i].name, "prettyName":gates[i].prettyName, "id":gates[i].id, "time":h + ":" + mi + "pm", "intTime":intTime});
+								clip["time" + gates[i].name.substr(5)].text = h + ":" + mi + "pm";
 								
 								var bell:MovieClip = new iconBell();
 								clip[gates[i].icon].addChild(bell);
@@ -268,6 +305,50 @@ package com.gmrmarketing.stryker.mako2016
 				
 			}//gates for
 			
+			//test
+			/*
+			trace("ORIGINAL");
+			for (i = 0; i < _appointments.length; i++ ){
+				trace(_appointments[i].prettyName, appointments[i].time, appointments[i].intTime);
+			}
+			*/
+			var sorted:Array = [];			
+			
+			//sort appointments by time use the intTime property
+			while (_appointments.length){
+				//trace(_appointments.length);
+				var item:Object = _appointments.shift();
+				
+				if (sorted.length == 0){
+					sorted.push(item);
+				}else{
+					
+					var inserted:Boolean = false;
+					
+					for (i = 0; i < sorted.length; i++){
+						if (item.intTime < sorted[i].intTime){
+							sorted.splice(i, 0, item);
+							inserted = true;
+							break;
+						}
+					}
+					
+					if (!inserted){
+						sorted.push(item);
+					}
+					
+				}				
+			}
+			
+			_appointments = sorted.concat();//copy
+			
+			//test
+			/*
+			trace("NEW");
+			for (i = 0; i < _appointments.length; i++ ){
+				trace(_appointments[i].prettyName, appointments[i].time, appointments[i].intTime);
+			}
+			*/
 		}
 		
 		/**
@@ -293,20 +374,37 @@ package com.gmrmarketing.stryker.mako2016
 			var profile:int = user.profileType;
 			
 			var rec:Array; //recommendations
-			 switch(profile){
-				case 1:
-					rec = [{"name":"totalKnee", "id":0}, {"name":"Operation game", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Predictability game", "id":0}, {"name":"Demo 1", "id":0}, {"name":"Demo 3", "id":0}, {"name":"A Cut Above entry", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Virtual Reality", "id":0}];
-					break;
-				case 2:
-					rec = [{"name":"A Cut Above entry", "id":0}, {"name":"totalKnee", "id":0}, {"name":"Demo 1", "id":0}, {"name":"Demo 3", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Operation game", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Predictability game", "id":0}, {"name":"Virtual Reality", "id":0}];
-					break;
-				case 3:
-					rec = [{"name":"Operation game", "id":0}, {"name":"Predictability game", "id":0},  {"name":"totalKnee", "id":0}, {"name":"Demo 1", "id":0}, {"name":"Demo 3", "id":0}, {"name":"A Cut Above entry", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Virtual Reality", "id":0}];
-					break;
-				case 4:
-					rec = [{"name":"A Cut Above entry", "id":0}, {"name":"Virtual Reality", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Operation game", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Predictability game", "id":0}];
-					break;
-			 }
+			if (didTotalKnee){
+				switch(profile){
+					case 1:
+						rec = [{"name":"Operation game", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Predictability game", "id":0}, {"name":"Demo 1", "id":0}, {"name":"Demo 3", "id":0}, {"name":"A Cut Above entry", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Virtual Reality", "id":0}];
+						break;
+					case 2:
+						rec = [{"name":"A Cut Above entry", "id":0}, {"name":"Demo 1", "id":0}, {"name":"Demo 3", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Operation game", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Predictability game", "id":0}, {"name":"Virtual Reality", "id":0}];
+						break;
+					case 3:
+						rec = [{"name":"Operation game", "id":0}, {"name":"Predictability game", "id":0}, {"name":"Demo 1", "id":0}, {"name":"Demo 3", "id":0}, {"name":"A Cut Above entry", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Virtual Reality", "id":0}];
+						break;
+					case 4:
+						rec = [{"name":"A Cut Above entry", "id":0}, {"name":"Virtual Reality", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Operation game", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Predictability game", "id":0}];
+						break;
+					}
+			}else{
+				 switch(profile){
+					case 1:
+						rec = [{"name":"totalKnee", "id":0}, {"name":"Operation game", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Predictability game", "id":0}, {"name":"Demo 1", "id":0}, {"name":"Demo 3", "id":0}, {"name":"A Cut Above entry", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Virtual Reality", "id":0}];
+						break;
+					case 2:
+						rec = [{"name":"A Cut Above entry", "id":0}, {"name":"totalKnee", "id":0}, {"name":"Demo 1", "id":0}, {"name":"Demo 3", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Operation game", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Predictability game", "id":0}, {"name":"Virtual Reality", "id":0}];
+						break;
+					case 3:
+						rec = [{"name":"Operation game", "id":0}, {"name":"Predictability game", "id":0},  {"name":"totalKnee", "id":0}, {"name":"Demo 1", "id":0}, {"name":"Demo 3", "id":0}, {"name":"A Cut Above entry", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Virtual Reality", "id":0}];
+						break;
+					case 4:
+						rec = [{"name":"A Cut Above entry", "id":0}, {"name":"Virtual Reality", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Operation game", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Predictability game", "id":0}];
+						break;
+					}
+			}
 			
 			 //have the recommendations for this profile... if there's a totalKnee entry = that needs to change to Demo 2, Demo 4, Demo 5, Demo 6, Demo 7 based on proximity to this kiosk			
 			var demoName:String;
@@ -338,12 +436,14 @@ package com.gmrmarketing.stryker.mako2016
 					break;
 			}
 			
-			if (profile == 1){
-				rec[0].name = demoName;
-			}else if (profile == 2){
-				rec[1].name = demoName;
-			}else if (profile == 3){
-				rec[2].name = demoName;
+			if(!didTotalKnee){
+				if (profile == 1){
+					rec[0].name = demoName;
+				}else if (profile == 2){
+					rec[1].name = demoName;
+				}else if (profile == 3){
+					rec[2].name = demoName;
+				}
 			}
 			
 			//the rec list is now complete with proper gate names - now need to compare to the gate list to get the id's for each recommended gate
@@ -373,7 +473,7 @@ package com.gmrmarketing.stryker.mako2016
 			_recommendations = realRecommendations.concat();
 			
 			//realRecommendations now contains only those gates not visited - may need to further work out TotalKnee...need testing to be sure
-			while (realRecommendations.length > 2){
+			while (realRecommendations.length > 3){
 				realRecommendations.pop();
 			}
 			
@@ -416,11 +516,39 @@ package com.gmrmarketing.stryker.mako2016
 			clip.click_performanceSolutions.addEventListener(MouseEvent.MOUSE_DOWN, detailClick, false, 0, true);
 		}
 		
-		
-		private function detailClick(e:MouseEvent):void
+		public function removeListeners():void
 		{
-			var m:MovieClip = MovieClip(e.currentTarget);
-			_detail = m.name.substr(6);//remove click_ from the front
+			clip.click_kneedeep.removeEventListener(MouseEvent.MOUSE_DOWN, detailClick);
+			clip.click_hipnotic.removeEventListener(MouseEvent.MOUSE_DOWN, detailClick);
+			clip.click_kneet.removeEventListener(MouseEvent.MOUSE_DOWN, detailClick);
+			clip.click_aCutAbove.removeEventListener(MouseEvent.MOUSE_DOWN, detailClick);
+			clip.click_theBalconKnee.removeEventListener(MouseEvent.MOUSE_DOWN, detailClick);
+			clip.click_theJoint.removeEventListener(MouseEvent.MOUSE_DOWN, detailClick);
+			clip.click_experiencePredictability.removeEventListener(MouseEvent.MOUSE_DOWN, detailClick);
+			clip.click_operationMako.removeEventListener(MouseEvent.MOUSE_DOWN, detailClick);
+			clip.click_virtualReality.removeEventListener(MouseEvent.MOUSE_DOWN, detailClick);
+			clip.click_performanceSolutions.removeEventListener(MouseEvent.MOUSE_DOWN, detailClick);
+		}
+		
+		
+		public function recItemClick(clipName:String):void
+		{
+			_detail = clipName;
+			detailClick();
+		}
+		
+		private function detailClick(e:MouseEvent = null):void
+		{
+			
+			var m:MovieClip;
+			if (e == null){
+				//called from recItemClick
+				m = MovieClip(clip[_detail]);
+			}else{
+				m = MovieClip(e.currentTarget);
+				_detail = m.name.substr(6);//remove click_ from the front
+			}
+			
 			
 			//click another area while still in detail view...
 			if(detailClip && detailClip.name !=  MovieClip(clip[_detail]).name){
@@ -457,13 +585,21 @@ package com.gmrmarketing.stryker.mako2016
 		
 		public function removeDetail():void
 		{
+			removeListeners();
+			
 			if(detailClip){
 				TweenMax.to(detailClip, 1, {colorTransform:{tint:lastTint, tintAmount:1}});
 			}
 			
 			clipCircle.graphics.clear();
 			TweenMax.to(clipMask, 1, {x:clip.x + clip.width * .5, y:clip.y + clip.height * .5, scaleX:1, scaleY:1});
-			TweenMax.to(myContainer, 1, {x:0, y:0, onComplete:startGoldGlow});
+			TweenMax.to(myContainer, 1, {x:0, y:0, onComplete:resumeListeneing});
+		}
+		
+		private function resumeListeneing():void
+		{
+			addListeners();
+			startGoldGlow();
 		}
 		
 		

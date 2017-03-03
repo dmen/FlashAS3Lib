@@ -202,7 +202,7 @@ package com.gmrmarketing.utilities
 		
 		
 		/**
-		 * Returns an ISO 8601 Timestamp for the given time zone
+		 * Returns a non standard dumb ass orchestrate Timestamp for the given time zone
 		 * @param	zoneString UTC Time Zone like "-08:00" for Pacific Time (US & Canada)
 		 * @return
 		 */
@@ -239,7 +239,7 @@ package com.gmrmarketing.utilities
 					ms = "0" + ms;
 				}
 			}
-			var ts:String = yr + "-" + m + "-" + d + "T" + h + ":" + min + ":" + sec + zoneString;
+			var ts:String = yr + "-" + m + "-" + d + "T" + h + ":" + min + ":" + sec + ".000" + zoneString;
 			
 			return ts;
 		}

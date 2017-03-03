@@ -21,6 +21,9 @@ package com.gmrmarketing.stryker.mako2016
 		
 		private var userData:Object;
 		
+		private var log:FileSave;
+		private var logString:String;
+		
 		
 		public function Orchestrate()
 		{	
@@ -49,7 +52,7 @@ package com.gmrmarketing.stryker.mako2016
 						{"name":"Demo 6", "prettyName":"Mako Total Knee #6", "icon":"holder6", "id":0},
 						{"name":"Demo 7", "prettyName":"Mako Total Knee #7", "icon":"holder7", "id":0},
 						
-						{"name":"Predictability game", "prettyName":"Experience Predicatbility", "clip":"experiencePredictability", "icon":"holderExp", "id":0}, 
+						{"name":"Predictability game", "prettyName":"Experience Predictability", "clip":"experiencePredictability", "icon":"holderExp", "id":0}, 
 						{"name":"Operation game",  "prettyName":"Operation Mako", "clip":"operationMako", "icon":"holderOp", "id":0}, 
 						{"name":"Virtual Reality",  "prettyName":"Virtual Reality", "clip":"virtualReality", "icon":"holderVR", "id":0}, 
 						{"name":"Performance solutions",  "prettyName":"Performance Solutions", "clip":"performanceSolutions", "icon":"holderPerf", "id":0},						
@@ -62,7 +65,9 @@ package com.gmrmarketing.stryker.mako2016
 						{"name":"Info kiosk 6", "id":0},
 						{"name":"Info kiosk 7", "id":0},
 						{"name":"Info kiosk 8", "id":0}
-			];			
+			];
+			
+			log = new FileSave();
 		}
 		
 		
@@ -86,11 +91,25 @@ package com.gmrmarketing.stryker.mako2016
 			req.method = URLRequestMethod.GET;
 			
 			var lo:URLLoader = new URLLoader();
-			lo.addEventListener(IOErrorEvent.IO_ERROR, orchestrateError, false, 0, true);
+			lo.addEventListener(IOErrorEvent.IO_ERROR, getUserError, false, 0, true);
 			lo.addEventListener(Event.COMPLETE, getUserData, false, 0, true);
 			lo.load(req);
 		}
 
+		
+		/**
+		 * Bad or unregistered RFID... just present them with a default user
+		 * @param	e
+		 */
+		private function getUserError(e:IOErrorEvent):void
+		{
+			userData = {};
+			userData.profileType = 1;
+			user.firstName = "";
+			user.history = [];
+			user.optionalActivitySelections = [];
+			dispatchEvent(new Event(GOT_USER_DATA));
+		}
 		
 		/**
 		 * Callback for Orchestarte GetGuests
@@ -176,6 +195,8 @@ package com.gmrmarketing.stryker.mako2016
 			var req:URLRequest = new URLRequest(baseURL + "SubmitGuestFacilityAccess");			
 			var js:String = JSON.stringify({"deviceUUID":"unknown", "station":"unknown", "guestId": guestID, "gateName": kioskName, "timestamp":Utility.UTCTimeStamp("-08:00"), "inOut": "in"});
 			
+			logString = kioskName + "  |  " + guestID + "  |  " + Utility.UTCTimeStamp("-08:00") + "\r\n";
+			
 			req.data = js;
 			req.requestHeaders.push(authHeader);
 			req.requestHeaders.push(jsonHeader1);
@@ -183,7 +204,7 @@ package com.gmrmarketing.stryker.mako2016
 			req.method = URLRequestMethod.POST;
 			
 			var lo:URLLoader = new URLLoader();
-			lo.addEventListener(IOErrorEvent.IO_ERROR, orchestrateError, false, 0, true);
+			lo.addEventListener(IOErrorEvent.IO_ERROR, submitError, false, 0, true);
 			lo.addEventListener(Event.COMPLETE, submitComplete, false, 0, true);
 			lo.load(req);
 		}
@@ -191,7 +212,7 @@ package com.gmrmarketing.stryker.mako2016
 		
 		private function submitComplete(e:Event):void
 		{			
-			trace("submit complete");
+			//trace("submit complete");
 		}
 		
 		
@@ -289,12 +310,16 @@ package com.gmrmarketing.stryker.mako2016
 		}
 		
 		
+		
 		private function orchestrateError(e:IOErrorEvent):void
 		{
 			var j:Object = JSON.parse(e.currentTarget.data);			
 			trace("orchestrateError - ", j);
 		}
-		
+		private function submitError(e:IOErrorEvent):void
+		{
+			log.write(logString);
+		}
 		
 			
 		
