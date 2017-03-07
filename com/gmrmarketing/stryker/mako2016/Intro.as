@@ -59,7 +59,19 @@ package com.gmrmarketing.stryker.mako2016
 			frameTimer.addEventListener(TimerEvent.TIMER, newFrame, false, 0, true);
 			frameTimer.start();
 			
+			myContainer.addEventListener(Event.ENTER_FRAME, keepFocus, false, 0, true);
+			
 			rfidOff();
+		}
+		
+		
+		private function keepFocus(e:Event):void
+		{
+			myContainer.stage.focus = clip.rfid;
+		}
+		public function stopFocus():void
+		{
+			myContainer.removeEventListener(Event.ENTER_FRAME, keepFocus);
 		}
 		
 		//rfid pulsing animation
@@ -81,18 +93,19 @@ package com.gmrmarketing.stryker.mako2016
 		
 		private function checkRFID(e:KeyboardEvent):void
 		{
-			if (e.charCode == 13) {	
+			if (e.charCode == 13) {
+				
 				myContainer.stage.removeEventListener(KeyboardEvent.KEY_DOWN, checkRFID);
+				
 				//got enter in field				
 				if (clip.rfid.text == ""){
-					rfid = "1141091787557505 "; //slaw				
+					rfid = "1141091787557505 "; //test1				
 					//rfid = "139643362949542"; //domingo				
 					//rfid = "1131511456743553"; //mitchell			
 					dispatchEvent(new Event(GOT_RFID));
 				}else{
 					rfid = Strings.removeLineBreaks(clip.rfid.text);
 					rfid = parseInt(rfid, 16).toString();//convert the hex to a long int
-					
 					dispatchEvent(new Event(GOT_RFID));
 				}
 			}
@@ -111,6 +124,7 @@ package com.gmrmarketing.stryker.mako2016
 			TweenMax.killTweensOf(clip.theText2);
 			frameTimer.reset();
 			clip.removeEventListener(Event.ENTER_FRAME, spinSpinner);
+			myContainer.removeEventListener(Event.ENTER_FRAME, keepFocus);
 			if (myContainer.contains(clip)) {
 				myContainer.removeChild(clip);
 			}

@@ -9,6 +9,7 @@ package com.gmrmarketing.stryker.mako2016
 	import com.greensock.easing.*;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.filters.DropShadowFilter;
 	
 	
 	public class RecommendedItems extends Sprite

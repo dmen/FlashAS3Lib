@@ -188,14 +188,15 @@ package com.gmrmarketing.stryker.mako2016
 		/**
 		 * called from Main whenever a user scans their RFID
 		 * @param	kioskName
-		 * @param	guestID
+		 * @param	guestID Will be null if this user used a badge that was not yet registered in orchestrate - they see the default profile
 		 */
-		public function submitKioskUse(kioskName:String, guestID:String):void
+		public function submitKioskUse(kioskName:String, guestID:String, rfid:String):void
 		{
 			var req:URLRequest = new URLRequest(baseURL + "SubmitGuestFacilityAccess");			
 			var js:String = JSON.stringify({"deviceUUID":"unknown", "station":"unknown", "guestId": guestID, "gateName": kioskName, "timestamp":Utility.UTCTimeStamp("-08:00"), "inOut": "in"});
 			
-			logString = kioskName + "  |  " + guestID + "  |  " + Utility.UTCTimeStamp("-08:00") + "\r\n";
+			//written to file if the submit user fails - it will for sure if guestID is null
+			logString = kioskName + "  |  " + guestID + "  |  " + rfid + "  |  " + Utility.UTCTimeStamp("-08:00") + "\r\n";
 			
 			req.data = js;
 			req.requestHeaders.push(authHeader);

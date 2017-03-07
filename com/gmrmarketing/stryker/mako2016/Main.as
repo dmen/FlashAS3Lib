@@ -160,7 +160,7 @@ package com.gmrmarketing.stryker.mako2016
 			tim.startMonitoring();
 			
 			//submit the kiosk use for tracking
-			orchestrate.submitKioskUse(config.kioskName, orchestrate.user.id);
+			orchestrate.submitKioskUse(config.kioskName, orchestrate.user.id, intro.RFID);
 			
 			currentUser = orchestrate.user;
 			intro.hide();			
@@ -276,6 +276,12 @@ package com.gmrmarketing.stryker.mako2016
 				case "Performance solutions":
 					clipName = "performanceSolutions";
 					break;
+				case "A Cut Above entry":
+					clipName = "aCutAbove";
+					break;
+				case "Kneet! entry":
+					clipName = "kneet";
+					break;
 			}
 			
 			//need to give this to map to trigger just like a click on the clip would
@@ -306,12 +312,13 @@ package com.gmrmarketing.stryker.mako2016
 			}
 			
 			map.hide();
-			
+			recommendedItems.hide();
 		}
 		
 		
 		private function showConfig(e:Event):void
 		{
+			intro.stopFocus();
 			config.addEventListener(Config.CONFIG_COMPLETE, resetFocus, false, 0, true);
 			config.show();
 		}

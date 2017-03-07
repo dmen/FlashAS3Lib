@@ -278,6 +278,12 @@ package com.gmrmarketing.stryker.mako2016
 								}
 								
 								_appointments.push({"name":gates[i].name, "prettyName":gates[i].prettyName, "id":gates[i].id, "time":h + ":" + mi + "pm", "intTime":intTime});
+								
+								//set didTotalKnee to true if they have one booked - so it doesn't show in recommended
+								if (gates[i].name == "Demo 2" || gates[i].name == "Demo 4" || gates[i].name == "Demo 5" || gates[i].name == "Demo 6" || gates[i].name == "Demo 7"){
+									didTotalKnee = true;
+								}
+								
 								clip["time" + gates[i].name.substr(5)].text = h + ":" + mi + "pm";
 								
 								var bell:MovieClip = new iconBell();
@@ -374,7 +380,7 @@ package com.gmrmarketing.stryker.mako2016
 			var profile:int = user.profileType;
 			
 			var rec:Array; //recommendations
-			if (didTotalKnee){
+			if (didTotalKnee){//true if they did one - or they are booked for one
 				switch(profile){
 					case 1:
 						rec = [{"name":"Operation game", "id":0}, {"name":"Performance solutions", "id":0}, {"name":"Predictability game", "id":0}, {"name":"Demo 1", "id":0}, {"name":"Demo 3", "id":0}, {"name":"A Cut Above entry", "id":0}, {"name":"Kneet! entry", "id":0}, {"name":"Virtual Reality", "id":0}];
@@ -472,7 +478,7 @@ package com.gmrmarketing.stryker.mako2016
 			//make a copy of the full list
 			_recommendations = realRecommendations.concat();
 			
-			//realRecommendations now contains only those gates not visited - may need to further work out TotalKnee...need testing to be sure
+			//realRecommendations now contains only those gates not already visited
 			while (realRecommendations.length > 3){
 				realRecommendations.pop();
 			}
