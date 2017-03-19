@@ -101,8 +101,12 @@ package com.gmrmarketing.stryker.mako2016
 		
 		private function itemClick(e:MouseEvent):void
 		{
+			var n:int = numChildren;
+			for (var i:int = 0; i < n; i++){
+				MovieClip(getChildAt(i)).removeEventListener(MouseEvent.MOUSE_DOWN, itemClick);
+			}
 			clickName = MovieClip(e.currentTarget).name;			
-			dispatchEvent(new Event(ITEM_CLICK));
+			dispatchEvent(new Event(ITEM_CLICK));//received by Main.recItemClicked()
 		}
 		
 		

@@ -7,7 +7,7 @@ package com.gmrmarketing.stryker.mako2016
 	import com.greensock.TweenMax;
 	import flash.desktop.NativeApplication;
 	import com.gmrmarketing.utilities.TimeoutHelper;
-	
+	import flash.ui.*;
 	
 	public class Main extends MovieClip  
 	{
@@ -42,7 +42,10 @@ package com.gmrmarketing.stryker.mako2016
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.SHOW_ALL;
-			Mouse.hide();
+			
+			//Multitouch.inputMode = MultitouchInputMode.NONE;
+			
+			//Mouse.hide();
 
 			mapContainer = new Sprite();
 			mainContainer = new Sprite();
@@ -95,7 +98,7 @@ package com.gmrmarketing.stryker.mako2016
 			
 			tim = TimeoutHelper.getInstance();
 			tim.addEventListener(TimeoutHelper.TIMED_OUT, logoutUser);
-			tim.init(90000);
+			tim.init(60000);
 			
 			orchestrate.addEventListener(Orchestrate.GOT_BASE_URL, gotBaseURL, false, 0, true);
 			orchestrate.getBaseURL();
@@ -225,13 +228,11 @@ package com.gmrmarketing.stryker.mako2016
 			detail.hide();
 			
 			map.removeDetail();
+			map.addEventListener(Map.DETAIL_REMOVED, rePopulate, false, 0, true);
+			recommendedItems.hide();
 			welcome.show(currentUser);
 		
 			mainContainer.addChild(recommendedItems);
-			if(map.recommendations.length > 0 || map.appointments.length > 0){
-				recommendedItems.populate(map.recommendations, map.appointments);//this is the full list - can be more than two
-				recommendedItems.addEventListener(RecommendedItems.ITEM_CLICK, recItemClicked, false, 0, true);
-			}
 			
 			if (!cornerContainer.contains(logout)){
 				cornerContainer.addChild(logout);				
@@ -240,6 +241,18 @@ package com.gmrmarketing.stryker.mako2016
 			logout.x = 1920;
 			TweenMax.to(logout, .5, {x:1564});
 			logout.addEventListener(MouseEvent.MOUSE_DOWN, logoutUser, false, 0, true);
+		}
+		
+		
+		private function rePopulate(e:Event):void
+		{
+			//trace("repop");
+			map.removeEventListener(Map.DETAIL_REMOVED, rePopulate);
+			if(map.recommendations.length > 0 || map.appointments.length > 0){
+				recommendedItems.populate(map.recommendations, map.appointments);//this is the full list - can be more than two
+				recommendedItems.addEventListener(RecommendedItems.ITEM_CLICK, recItemClicked, false, 0, true);
+			}
+			
 		}
 		
 		

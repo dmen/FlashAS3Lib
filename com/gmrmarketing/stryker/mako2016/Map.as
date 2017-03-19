@@ -11,6 +11,7 @@ package com.gmrmarketing.stryker.mako2016
 	{
 		//dispatched when an event area is clicked (like kneedeep)
 		public static const DETAIL:String = "detailClicked";
+		public static const DETAIL_REMOVED:String = "detailRemoved";
 		private var _detail:String; //clip name of the clicked detail area
 		
 		private var clip:MovieClip;//instance of mcMap
@@ -539,8 +540,10 @@ package com.gmrmarketing.stryker.mako2016
 		
 		public function recItemClick(clipName:String):void
 		{
-			_detail = clipName;
-			detailClick();
+			if(!TweenMax.isTweening(clipMask)){
+				_detail = clipName;
+				detailClick();
+			}
 		}
 		
 		private function detailClick(e:MouseEvent = null):void
@@ -602,8 +605,10 @@ package com.gmrmarketing.stryker.mako2016
 			TweenMax.to(myContainer, 1, {x:0, y:0, onComplete:resumeListeneing});
 		}
 		
+		
 		private function resumeListeneing():void
 		{
+			dispatchEvent(new Event(DETAIL_REMOVED));
 			addListeners();
 			startGoldGlow();
 		}
