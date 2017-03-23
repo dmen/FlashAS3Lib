@@ -18,6 +18,8 @@ package com.gmrmarketing.metrx.photobooth2017
 		private var q5:Q5;
 		private var q6:Q6;
 		private var progress:QuizProgress;//progress bar for quiz
+		private var results:Results;
+		private var takePhoto:TakePhoto;
 		
 		
 		public function Main()
@@ -58,8 +60,15 @@ package com.gmrmarketing.metrx.photobooth2017
 			progress = new QuizProgress();
 			progress.container = progContainer;
 			
+			results = new Results();
+			results.container = mainContainer;
+			
+			takePhoto = new TakePhoto();
+			takePhoto.container = mainContainer;
+			
 			intro.addEventListener(Intro.COMPLETE, hideIntro, false, 0, true);
 			intro.show();
+			//test();
 		}
 		
 		
@@ -140,6 +149,7 @@ package com.gmrmarketing.metrx.photobooth2017
 			progress.question = 4;
 		}
 		
+		
 		private function hideQ3(e:Event):void
 		{
 			q3.removeEventListener(Q3.COMPLETE, hideQ3);
@@ -179,6 +189,7 @@ package com.gmrmarketing.metrx.photobooth2017
 			progress.question = 6;
 		}
 		
+		
 		private function hideQ5(e:Event):void
 		{
 			q5.removeEventListener(Q5.COMPLETE, hideQ5);
@@ -212,8 +223,39 @@ package com.gmrmarketing.metrx.photobooth2017
 		{
 			q6.removeEventListener(Q6.HIDDEN, showResults);
 			progress.hide();
+			
+			results.addEventListener(Results.COMPLETE, hideResults, false, 0, true);
+			results.show(q1.points + q2.points + q2b.points + q3.points + q4.points);
 		}
 		
+		
+		private function hideResults(e:Event):void
+		{
+			results.removeEventListener(Results.COMPLETE, hideResults);
+			results.addEventListener(Results.HIDDEN, showPhoto, false, 0, true);
+			results.hide();
+		}
+		
+		
+		private function showPhoto(e:Event):void
+		{
+			results.removeEventListener(Results.HIDDEN, showPhoto);
+			
+			takePhoto.addEventListener(TakePhoto.COMPLETE, reviewPhoto, false, 0, true);
+			takePhoto.show(results.ranking);
+		}
+		
+		
+		private function reviewPhoto(e:Event):void
+		{
+			
+		}
+		
+		
+		private function test():void
+		{
+			results.show(0);
+		}
 	}
 	
 }

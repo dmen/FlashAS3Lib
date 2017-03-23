@@ -27,6 +27,18 @@ package com.gmrmarketing.metrx.photobooth2017
 		}
 		
 		
+		public function get points():Number
+		{
+			var p:Number = 0;
+			for (var i:int = 0; i < 4; i++){
+				if (answers[i] == 1){
+					p += .5;
+				}
+			}
+			return p;
+		}
+		
+		
 		public function show():void
 		{
 			if (!_container.contains(clip)){
@@ -128,6 +140,7 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private function allWhite():void
 		{
+			answers = [0, 0, 0, 0];
 			TweenMax.to(clip.a1.bg, 0, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});
 			TweenMax.to(clip.a2.bg, 0, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});
 			TweenMax.to(clip.a3.bg, 0, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});

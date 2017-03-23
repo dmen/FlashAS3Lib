@@ -34,27 +34,29 @@ package com.gmrmarketing.metrx.photobooth2017
 			sr2 = new SlideReveal(new shoeTread2(), 6);
 			sr3 = new SlideReveal(new shoeTread3(), 6);
 			
-			sr1.x = 840;// 840;
+			sr1.x = 842;// 840;
 			sr1.y = 96;// 106;
-			sr1.rotation = -25;
+			sr1.rotation = -26;
 			sr1.scaleY = 1.01;
 			
-			sr2.x = 840;// 840;
+			sr2.x = 842;// 840;
 			sr2.y = 96;// 106;
-			sr2.rotation = -25;
+			sr2.rotation = -26;
 			sr2.scaleY = 1.01;
 			
-			sr3.x = 840;// 840;
+			sr3.x = 842;// 840;
 			sr3.y = 96;// 106;
-			sr3.rotation = -25;
+			sr3.rotation = -26;
 			sr3.scaleY = 1.01;
 			
 			badge1 = new mcBadgeRookie();
 			badge2 = new mcBadgeWeekend();
 			badge3 = new mcBadgeLegend();
+			
 			badge1.scaleX = badge1.scaleY = .8;
 			badge2.scaleX = badge2.scaleY = .8;
 			badge3.scaleX = badge3.scaleY = .8;
+			
 			badge1.x = 1420;
 			badge1.y = 300;
 			badge2.x = 1420;

@@ -27,6 +27,12 @@ package com.gmrmarketing.metrx.photobooth2017
 		}
 		
 		
+		public function get points():int
+		{
+			return [30, 20, 5, 1, 0][answer - 1];
+		}
+		
+		
 		public function show():void
 		{
 			if (!_container.contains(clip)){

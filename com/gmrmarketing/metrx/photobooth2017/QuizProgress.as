@@ -52,7 +52,7 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		public function set question(num:int):void
 		{
-			TweenMax.to(clip.orange, 2, {width:ratio * num, ease:Expo.easeOut});
+			TweenMax.to(clip.orange, 2, {width:ratio * num, ease:Expo.easeOut, onUpdate:setAnglePos});
 			
 			switch(num){
 				case 1:
@@ -77,6 +77,12 @@ package com.gmrmarketing.metrx.photobooth2017
 					clip.theText.text = "QUESTION 6";
 					break;
 			}
+		}
+		
+		
+		private function setAnglePos():void
+		{
+			clip.angle.x = clip.orange.width;
 		}
 	}
 	

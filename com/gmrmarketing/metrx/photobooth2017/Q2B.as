@@ -28,6 +28,14 @@ package com.gmrmarketing.metrx.photobooth2017
 		}
 		
 		
+		public function get points():int
+		{			
+			var a:int = [0, 1, 2, 3][answerA - 1];
+			var b:int = [0, 0, 0, 0, 0, 1, 2, 3][answerB - 1];
+			return a + b;
+		}
+		
+		
 		public function show():void
 		{
 			if (!_container.contains(clip)){
