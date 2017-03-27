@@ -13,6 +13,7 @@ package com.gmrmarketing.metrx.photobooth2017
 		private var clip:MovieClip;
 		private var _container:DisplayObjectContainer;
 		private var answers:Array;
+		private var btnEnabled:Boolean;
 		
 		
 		public function Q5()
@@ -34,7 +35,9 @@ package com.gmrmarketing.metrx.photobooth2017
 			}
 			
 			answers = [0, 0, 0, 0, 0, 0];
+			btnEnabled = false;
 			
+			clip.x = 0;
 			clip.tread.x = 1920;//216
 			clip.question.alpha = 0;
 			clip.sub.alpha = 0;
@@ -44,6 +47,13 @@ package com.gmrmarketing.metrx.photobooth2017
 			clip.a4.x = 1920;//932
 			clip.a5.x = 1920;//932
 			clip.a6.x = 1920;//932
+			
+			clip.a1.check.visible = false;
+			clip.a2.check.visible = false;
+			clip.a3.check.visible = false;
+			clip.a4.check.visible = false;
+			clip.a5.check.visible = false;
+			clip.a6.check.visible = false;
 			
 			clip.pic.x = 2500;//0
 			clip.pic.scaleX = clip.pic.scaleY = 1;
@@ -83,8 +93,33 @@ package com.gmrmarketing.metrx.photobooth2017
 			clip.a6.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
 			
 			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, nextPressed);
-			
+			TweenMax.to(clip.btnNext, .5, {alpha:0});
 			TweenMax.to(clip, .5, {x: -1920, onComplete:kill});
+		}
+		
+		
+		public function get choice():Array
+		{
+			return answers;
+		}
+		
+		
+		public function reset():void
+		{
+			
+			if (_container.contains(clip)){
+				_container.removeChild(clip);
+			}
+			TweenMax.killTweensOf(clip.pic);
+			
+			clip.a1.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			clip.a2.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			clip.a3.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			clip.a4.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			clip.a5.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			clip.a6.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			
+			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, nextPressed);
 		}
 		
 		
@@ -118,19 +153,26 @@ package com.gmrmarketing.metrx.photobooth2017
 			if (answers[n - 1] == 0){
 				TweenMax.to(m.bg, .5, {colorTransform:{tint:0xE55F25, tintAmount:1}});
 				answers[n - 1] = 1;
+				m.check.visible = true;
 			}else{
 				TweenMax.to(m.bg, .5, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});
 				answers[n - 1] = 0;
+				m.check.visible = false;
 			}
 			
 			if (answers.indexOf(1) == -1){
 				//nothing selected
+				btnEnabled = false;
 				TweenMax.to(clip.btnNext, 1, {alpha:0});
 				clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, nextPressed);
 			}else{
 				//at least one is selected
-				TweenMax.to(clip.btnNext, 1, {alpha:1});
-				clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, nextPressed, false, 0, true);
+				if(!btnEnabled){
+					clip.btnNext.scaleX = clip.btnNext.scaleY = .5;
+					TweenMax.to(clip.btnNext, .5, {scaleX:1, scaleY:1, alpha:1, ease:Back.easeOut});
+					clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, nextPressed, false, 0, true);
+					btnEnabled = true;
+				}
 			}
 			
 		}
@@ -144,6 +186,13 @@ package com.gmrmarketing.metrx.photobooth2017
 			TweenMax.to(clip.a4.bg, 0, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});
 			TweenMax.to(clip.a5.bg, 0, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});
 			TweenMax.to(clip.a6.bg, 0, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});
+			
+			clip.a1.check.visible = false;
+			clip.a2.check.visible = false;
+			clip.a3.check.visible = false;
+			clip.a4.check.visible = false;
+			clip.a5.check.visible = false;
+			clip.a6.check.visible = false;
 		}
 		
 		

@@ -14,7 +14,7 @@ package com.gmrmarketing.metrx.photobooth2017
 		private var _container:DisplayObjectContainer;
 		private var answerA:int; //1 - 4
 		private var answerB:int; //1 - 4
-		
+		private var btnEnabled:Boolean;
 		
 		public function Q2()
 		{
@@ -36,15 +36,23 @@ package com.gmrmarketing.metrx.photobooth2017
 		}
 		
 		
+		public function get choice():Array
+		{
+			return [answerA, answerB];
+		}		
+		
+		
 		public function show():void
 		{
 			if (!_container.contains(clip)){
 				_container.addChild(clip);
 			}
 			
+			btnEnabled = false;
 			answerA = undefined;
 			answerB = undefined;
 			
+			clip.x = 0;
 			clip.tread.x = 1920;//216
 			clip.question.alpha = 0;
 			clip.sub1.alpha = 0;
@@ -107,8 +115,31 @@ package com.gmrmarketing.metrx.photobooth2017
 			clip.a8.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
 			
 			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, nextPressed);
-			
+			TweenMax.to(clip.btnNext, .5, {alpha:0});
 			TweenMax.to(clip, .5, {x: -1920, onComplete:kill});
+		}
+		
+		
+		public function reset():void
+		{
+			
+			if (_container.contains(clip)){
+				_container.removeChild(clip);
+			}
+			
+			TweenMax.killTweensOf(clip.pic);
+			
+			clip.a1.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			clip.a2.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			clip.a3.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			clip.a4.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			
+			clip.a5.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			clip.a6.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			clip.a7.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			clip.a8.removeEventListener(MouseEvent.MOUSE_DOWN, quesAnswered);
+			
+			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, nextPressed);
 		}
 		
 		
@@ -150,9 +181,11 @@ package com.gmrmarketing.metrx.photobooth2017
 			}
 			
 			//enable the next button if both parts answered
-			if (answerA && answerB){				
-				TweenMax.to(clip.btnNext, 1, {alpha:1});
+			if (answerA && answerB && !btnEnabled){				
+				clip.btnNext.scaleX = clip.btnNext.scaleY = .5;
+				TweenMax.to(clip.btnNext, .5, {scaleX:1, scaleY:1, alpha:1, ease:Back.easeOut});
 				clip.btnNext.addEventListener(MouseEvent.MOUSE_DOWN, nextPressed, false, 0, true);
+				btnEnabled = true;
 			}
 			
 			

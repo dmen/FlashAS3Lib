@@ -78,9 +78,17 @@ package com.gmrmarketing.metrx.photobooth2017
 				_container.addChild(clip);
 			}
 			
-			clip.addChild(sr1);
-			clip.addChild(sr2);
-			clip.addChild(sr3);
+			if(!clip.contains(sr1)){
+				clip.addChild(sr1);
+			}
+			if(!clip.contains(sr2)){
+				clip.addChild(sr2);
+			}
+			if(!clip.contains(sr3)){
+				clip.addChild(sr3);
+			}
+			
+			clip.x = 0;
 			
 			clip.btnTake.addEventListener(MouseEvent.MOUSE_DOWN, introDone, false, 0, true);
 			
@@ -104,9 +112,7 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		
 		private function kill():void
-		{		
-			dispatchEvent(new Event(HIDDEN));
-			
+		{	
 			if (_container.contains(clip)){
 				_container.removeChild(clip);
 			}
@@ -131,6 +137,8 @@ package com.gmrmarketing.metrx.photobooth2017
 			sr1.kill();
 			sr2.kill();
 			sr3.kill();
+			
+			dispatchEvent(new Event(HIDDEN));
 		}
 		
 		
@@ -151,7 +159,7 @@ package com.gmrmarketing.metrx.photobooth2017
 				clip.addChild(badge1);
 			}
 			badge1.alpha = 0;
-			TweenMax.to(badge1, .75, {alpha:1, delay:.75});
+			TweenMax.to(badge1, .75, {alpha:1, delay:.25});
 			
 			wait.addEventListener(TimerEvent.TIMER, hideSr1, false, 0, true);
 			wait.start();
@@ -186,7 +194,7 @@ package com.gmrmarketing.metrx.photobooth2017
 				clip.addChild(badge2);
 			}
 			badge2.alpha = 0;
-			TweenMax.to(badge2, .75, {alpha:1, delay:.75});
+			TweenMax.to(badge2, .75, {alpha:1, delay:.25});
 			
 			wait.addEventListener(TimerEvent.TIMER, hideSr2, false, 0, true);
 			wait.start();
@@ -222,7 +230,7 @@ package com.gmrmarketing.metrx.photobooth2017
 			}
 			
 			badge3.alpha = 0;
-			TweenMax.to(badge3, .75, {alpha:1, delay:.75});
+			TweenMax.to(badge3, .75, {alpha:1, delay:.25});
 			
 			wait.addEventListener(TimerEvent.TIMER, hideSr3, false, 0, true);
 			wait.start();

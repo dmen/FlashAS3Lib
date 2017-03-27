@@ -2,6 +2,8 @@ package com.gmrmarketing.metrx.photobooth2017
 {
 	import flash.display.*;
 	import flash.events.*;
+	import flash.utils.Timer;
+	import com.gmrmarketing.utilities.queue.Queue;
 	
 	
 	public class Main extends MovieClip
@@ -20,6 +22,11 @@ package com.gmrmarketing.metrx.photobooth2017
 		private var progress:QuizProgress;//progress bar for quiz
 		private var results:Results;
 		private var takePhoto:TakePhoto;
+		private var flash:WhiteFlash;
+		private var form:Form;
+		private var fin:Final;
+		
+		private var queue:Queue;
 		
 		
 		public function Main()
@@ -66,9 +73,23 @@ package com.gmrmarketing.metrx.photobooth2017
 			takePhoto = new TakePhoto();
 			takePhoto.container = mainContainer;
 			
-			intro.addEventListener(Intro.COMPLETE, hideIntro, false, 0, true);
-			intro.show();
-			//test();
+			flash = new WhiteFlash();
+			flash.container = mainContainer;
+			
+			form = new Form();
+			form.container = mainContainer;
+			
+			fin = new Final();
+			fin.container = mainContainer;
+			
+			queue = new Queue();
+			queue.fileName = "metrx_booth";			
+			queue.service = new HubbleServiceExtender();
+			queue.start();
+			
+			//intro.addEventListener(Intro.COMPLETE, hideIntro, false, 0, true);
+			//intro.show();
+			test();
 		}
 		
 		
@@ -241,20 +262,121 @@ package com.gmrmarketing.metrx.photobooth2017
 		{
 			results.removeEventListener(Results.HIDDEN, showPhoto);
 			
-			takePhoto.addEventListener(TakePhoto.COMPLETE, reviewPhoto, false, 0, true);
+			takePhoto.addEventListener(TakePhoto.SHOW_WHITE, showFlash, false, 0, true);
+			takePhoto.addEventListener(TakePhoto.COMPLETE, hidePhoto, false, 0, true);
 			takePhoto.show(results.ranking);
 		}
 		
 		
-		private function reviewPhoto(e:Event):void
+		private function showFlash(e:Event):void
 		{
+			//takePhoto.removeEventListener(TakePhoto.SHOW_WHITE, showFlash);
+			flash.show();
 			
+			takePhoto.takePic();
+			takePhoto.reviewPic();
+		}
+		
+		
+		private function hidePhoto(e:Event):void
+		{
+			takePhoto.removeEventListener(TakePhoto.SHOW_WHITE, showFlash);
+			takePhoto.removeEventListener(TakePhoto.COMPLETE, hidePhoto);
+			
+			takePhoto.addEventListener(TakePhoto.HIDDEN, showForm, false, 0, true);
+			takePhoto.hide();
+		}
+		
+		
+		
+		private function showForm(e:Event):void
+		{
+			takePhoto.removeEventListener(TakePhoto.HIDDEN, showForm);
+			
+			form.addEventListener(Form.COMPLETE, hideForm, false, 0, true);
+			form.show();
+		}		
+		
+		
+		private function hideForm(e:Event):void
+		{
+			form.removeEventListener(Form.COMPLETE, hideForm);
+			form.addEventListener(Form.HIDDEN, showFinal, false, 0, true);
+			form.hide();			
+		}
+		
+		
+		private function showFinal(e:Event):void
+		{			
+			fin.addEventListener(Final.SHOWING, encodePic, false, 0, true);
+			fin.show();
+		}
+		
+		/**
+		 * once final is showing do the encode as this will interrupt animation
+		 * @param	e
+		 */
+		private function encodePic(e:Event):void
+		{
+			fin.removeEventListener(Final.SHOWING, encodePic);
+			
+			var encodeTimer:Timer = new Timer(10000, 1);
+			encodeTimer.addEventListener(TimerEvent.TIMER, encodeComplete, false, 0, true);
+			encodeTimer.start();
+			
+			takePhoto.encode();
+		}
+		
+		
+		private function encodeComplete(e:TimerEvent):void
+		{
+			var userData:Object = form.data; //object with fname,lname,email,optin properties - optin's value is "yes" or "no"
+			userData.image = takePhoto.pic;
+			userData.q1 = q1.choice; // 1 - 5
+			userData.q2 = q2.choice; //array with two ints 1-4 and 5-8
+			userData.q2b = q2b.choice; //array with two ints 1-4 and 5-8
+			userData.q3 = q3.choice;//array with 4 elements - 1 is selected, 0 is not
+			userData.q4 = q4.choice;//array with 4 elements - 1 is selected, 0 is not
+			userData.q5 = q5.choice;//array with 6 elements - 1 is selected, 0 is not
+			userData.q6 = q6.choice;//array with 4 elements - 1 is selected, 0 is not
+			
+			queue.add(userData);
+			
+			fin.addEventListener(Final.COMPLETE, restart, false, 0, true);
+			fin.hide();
+		}
+		
+		
+		private function restart(e:Event = null):void
+		{
+			q1.reset();
+			q2.reset();
+			q2b.reset();
+			q3.reset();
+			q4.reset();
+			q5.reset();
+			q6.reset();
+			progress.kill();
+			takePhoto.kill();
+			form.reset();
+			
+			fin.removeEventListener(Final.COMPLETE, restart);			
+			
+			intro.addEventListener(Intro.COMPLETE, hideIntro, false, 0, true);
+			intro.show();
 		}
 		
 		
 		private function test():void
 		{
+			//form.addEventListener(Form.COMPLETE, hideForm, false, 0, true);
+			//form.show();
+			
 			results.show(0);
+			/*
+			takePhoto.addEventListener(TakePhoto.SHOW_WHITE, showFlash, false, 0, true);
+			takePhoto.addEventListener(TakePhoto.COMPLETE, hidePhoto, false, 0, true);
+			takePhoto.show("legend");*/
 		}
 	}
 	

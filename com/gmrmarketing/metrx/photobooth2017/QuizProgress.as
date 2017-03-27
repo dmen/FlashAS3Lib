@@ -42,7 +42,7 @@ package com.gmrmarketing.metrx.photobooth2017
 		}
 		
 		
-		private function kill():void
+		public function kill():void
 		{
 			if (_container.contains(clip)){
 				_container.removeChild(clip);

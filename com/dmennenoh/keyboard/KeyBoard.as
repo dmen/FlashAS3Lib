@@ -11,13 +11,14 @@
   
   function init(e:Event):void{
     addChild(kbd);
-    kbd.setFocusFields[([theText,0]]);
+    kbd.setFocusFields([[theText,0]]);
   }
   
+  Listen for KBD event - dispatched anytime a key is pressed and/or
+  Listen for SUBMIT event - dispatched when a key with value Submit, Send or Save is pressed
   
-  NOTES: Use Input text fields, instead of dynamic, to be able to display the text cursor.
-  If publishing to AIR - use FULL_SCREEN_INTERACTIVE instead of just FULL_SCREEN or the 
-  text cursor will be inconsistent
+  NOTES:	Use Input text fields, instead of dynamic, to be able to display the text cursor.
+			If publishing to AIR - use FULL_SCREEN_INTERACTIVE instead of just FULL_SCREEN or the text cursor will be inconsistent
   
   Updates:
 	  6/26/14
