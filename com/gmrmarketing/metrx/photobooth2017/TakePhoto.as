@@ -10,6 +10,8 @@ package com.gmrmarketing.metrx.photobooth2017
 	import com.dynamicflash.util.Base64;
 	import flash.utils.*;
 	import com.adobe.images.JPEGEncoder;
+	import com.gmrmarketing.utilities.TimeoutHelper;
+	
 	
 	public class TakePhoto extends EventDispatcher
 	{
@@ -32,6 +34,7 @@ package com.gmrmarketing.metrx.photobooth2017
 		private var camScaler:Matrix;
 		private var badge:MovieClip;
 		private var userPic:String;//b64 encoded string
+		private var tim:TimeoutHelper;
 		
 		
 		public function TakePhoto()
@@ -57,6 +60,8 @@ package com.gmrmarketing.metrx.photobooth2017
 			
 			camScaler = new Matrix();
 			camScaler.scale(.736, .736);//scales 1280x720 to 942x529
+			
+			tim = TimeoutHelper.getInstance();
 			
 			theVideo.attachCamera(cam);	
 		}
@@ -179,6 +184,8 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private function showCountdown(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, showCountdown);
 			clip.btnTake.visible = false;
 			
@@ -240,6 +247,8 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private function doRetake(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			clip.btnRetake.removeEventListener(MouseEvent.MOUSE_DOWN, doRetake);
 			clip.btnSave.removeEventListener(MouseEvent.MOUSE_DOWN, doSave);
 			
@@ -257,6 +266,8 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private function doSave(e:MouseEvent):void
 		{			
+			tim.buttonClicked();
+			
 			clip.btnRetake.removeEventListener(MouseEvent.MOUSE_DOWN, doRetake);
 			clip.btnSave.removeEventListener(MouseEvent.MOUSE_DOWN, doSave);
 			

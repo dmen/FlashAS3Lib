@@ -134,9 +134,7 @@ package com.gmrmarketing.metrx.photobooth2017
 			if (clip.contains(sr3)){
 				clip.removeChild(sr3);
 			}
-			sr1.kill();
-			sr2.kill();
-			sr3.kill();
+			
 			
 			dispatchEvent(new Event(HIDDEN));
 		}
@@ -255,8 +253,22 @@ package com.gmrmarketing.metrx.photobooth2017
 		}
 		
 		
-		private function introDone(e:Event):void
+		private function introDone(e:MouseEvent):void
 		{
+			sr1.kill();
+			sr2.kill();
+			sr3.kill();
+			wait.reset();
+			
+			sr1.removeEventListener(SlideReveal.SHOWING, sr1Showing);
+			sr1.removeEventListener(SlideReveal.HIDDEN, sr1Hidden);
+			
+			sr2.removeEventListener(SlideReveal.SHOWING, sr2Showing);
+			sr2.removeEventListener(SlideReveal.HIDDEN, sr2Hidden);
+			
+			sr3.removeEventListener(SlideReveal.SHOWING, sr3Showing);
+			sr3.removeEventListener(SlideReveal.HIDDEN, sr3Hidden);
+			
 			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, introDone);
 			dispatchEvent(new Event(COMPLETE));
 		}

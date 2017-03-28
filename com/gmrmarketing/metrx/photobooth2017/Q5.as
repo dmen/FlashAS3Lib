@@ -4,6 +4,7 @@ package com.gmrmarketing.metrx.photobooth2017
 	import flash.events.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	
 	public class Q5 extends EventDispatcher
@@ -14,11 +15,13 @@ package com.gmrmarketing.metrx.photobooth2017
 		private var _container:DisplayObjectContainer;
 		private var answers:Array;
 		private var btnEnabled:Boolean;
+		private var tim:TimeoutHelper;
 		
 		
 		public function Q5()
 		{
 			clip = new quiz_q5();
+			tim = TimeoutHelper.getInstance();
 		}
 		
 		
@@ -147,13 +150,27 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private function quesAnswered(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			var m:MovieClip = MovieClip(e.currentTarget);
 			var n:int = parseInt(m.name.substr(1, 1));//a1 - a6 becomes 1 - 6
 			
 			if (answers[n - 1] == 0){
+				
+				if (n == 6){
+					allWhite();
+				}else{
+					//not 6 - make sure 6 is white
+					answers[5] = 0;
+					TweenMax.to(clip.a6.bg, 0, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});
+					clip.a6.check.visible = false;
+				}
+				
 				TweenMax.to(m.bg, .5, {colorTransform:{tint:0xE55F25, tintAmount:1}});
 				answers[n - 1] = 1;
 				m.check.visible = true;
+				
+				
 			}else{
 				TweenMax.to(m.bg, .5, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});
 				answers[n - 1] = 0;
@@ -180,6 +197,8 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private function allWhite():void
 		{
+			answers = [0, 0, 0, 0, 0, 0];
+				
 			TweenMax.to(clip.a1.bg, 0, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});
 			TweenMax.to(clip.a2.bg, 0, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});
 			TweenMax.to(clip.a3.bg, 0, {colorTransform:{tint:0xFFFFFF, tintAmount:1}});

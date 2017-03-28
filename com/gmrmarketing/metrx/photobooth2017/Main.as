@@ -2,14 +2,19 @@ package com.gmrmarketing.metrx.photobooth2017
 {
 	import flash.display.*;
 	import flash.events.*;
+	import flash.desktop.NativeApplication;
 	import flash.utils.Timer;
+	import flash.ui.Mouse;
 	import com.gmrmarketing.utilities.queue.Queue;
+	import com.gmrmarketing.utilities.CornerQuit;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	
 	public class Main extends MovieClip
 	{
 		private var mainContainer:Sprite;//for quiz
 		private var progContainer:Sprite;//for progress bar
+		private var topContainer:Sprite;//for fourtap
 		
 		private var intro:Intro;
 		private var q1:Q1;
@@ -27,18 +32,23 @@ package com.gmrmarketing.metrx.photobooth2017
 		private var fin:Final;
 		
 		private var queue:Queue;
+		private var cq:CornerQuit;
+		private var tim:TimeoutHelper;
 		
 		
 		public function Main()
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.SHOW_ALL;
+			//Mouse.hide();
 			
 			mainContainer = new Sprite();
-			progContainer = new Sprite();
+			progContainer = new Sprite();//progress bar
+			topContainer = new Sprite();
 			
 			addChild(mainContainer);
 			addChild(progContainer);
+			addChild(topContainer);
 			
 			intro = new Intro();
 			intro.container = mainContainer;
@@ -87,9 +97,18 @@ package com.gmrmarketing.metrx.photobooth2017
 			queue.service = new HubbleServiceExtender();
 			queue.start();
 			
-			//intro.addEventListener(Intro.COMPLETE, hideIntro, false, 0, true);
-			//intro.show();
-			test();
+			cq = new CornerQuit();
+			cq.init(topContainer, "ul");
+			cq.addEventListener(CornerQuit.CORNER_QUIT, quitApplication, false, 0, true);
+			
+			tim = TimeoutHelper.getInstance();
+			tim.addEventListener(TimeoutHelper.TIMED_OUT, restart, false, 0, true);
+			tim.init(120000);//2min			
+			
+			intro.addEventListener(Intro.COMPLETE, hideIntro, false, 0, true);
+			intro.show();
+			
+			//test();
 		}
 		
 		
@@ -103,6 +122,8 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private function beginQuiz(e:Event):void
 		{		
+			tim.startMonitoring();
+			
 			intro.removeEventListener(Intro.HIDDEN, beginQuiz);
 			
 			q1.addEventListener(Q1.COMPLETE, hideQ1, false, 0, true);
@@ -224,10 +245,16 @@ package com.gmrmarketing.metrx.photobooth2017
 		{
 			q5.removeEventListener(Q5.HIDDEN, showQ6);
 			
-			q6.addEventListener(Q6.COMPLETE, hideQ6, false, 0, true);
-			q6.show();
+			if(q5.choice[5] != 1){
 			
-			progress.question = 7;
+				q6.addEventListener(Q6.COMPLETE, hideQ6, false, 0, true);
+				q6.show();
+				
+				progress.question = 7;
+			}else{
+				//don't show q6 - they answered no supplements
+				showResults();
+			}
 		}
 		
 		
@@ -240,7 +267,7 @@ package com.gmrmarketing.metrx.photobooth2017
 		}
 		
 		
-		private function showResults(e:Event):void
+		private function showResults(e:Event = null):void
 		{
 			q6.removeEventListener(Q6.HIDDEN, showResults);
 			progress.hide();
@@ -357,10 +384,13 @@ package com.gmrmarketing.metrx.photobooth2017
 			q5.reset();
 			q6.reset();
 			progress.kill();
+			results.kill();
 			takePhoto.kill();
 			form.reset();
 			
-			fin.removeEventListener(Final.COMPLETE, restart);			
+			fin.removeEventListener(Final.COMPLETE, restart);
+			
+			tim.stopMonitoring();
 			
 			intro.addEventListener(Intro.COMPLETE, hideIntro, false, 0, true);
 			intro.show();
@@ -377,6 +407,12 @@ package com.gmrmarketing.metrx.photobooth2017
 			takePhoto.addEventListener(TakePhoto.SHOW_WHITE, showFlash, false, 0, true);
 			takePhoto.addEventListener(TakePhoto.COMPLETE, hidePhoto, false, 0, true);
 			takePhoto.show("legend");*/
+		}
+		
+		
+		private function quitApplication(e:Event):void
+		{
+			NativeApplication.nativeApplication.exit();
 		}
 	}
 	

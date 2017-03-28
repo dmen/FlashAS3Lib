@@ -4,6 +4,8 @@ package com.gmrmarketing.metrx.photobooth2017
 	import flash.display.*;
 	import com.greensock.TweenMax;
 	import com.greensock.easing.*;	
+	import com.gmrmarketing.utilities.TimeoutHelper;
+	
 	
 	public class Results extends EventDispatcher
 	{
@@ -15,6 +17,7 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private var treadPic:SlideReveal;
 		private var rank:String;
+		private var tim:TimeoutHelper;
 		
 		
 		public function Results()
@@ -27,6 +30,8 @@ package com.gmrmarketing.metrx.photobooth2017
 			treadPic.rotation = -25;
 			//treadPic.scaleX = 1.005;
 			treadPic.scaleY = 1.01;
+			
+			tim = TimeoutHelper.getInstance();
 		}
 		
 		
@@ -135,6 +140,8 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private function resultsComplete(e:MouseEvent):void
 		{			
+			tim.buttonClicked();
+			
 			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, resultsComplete);
 			dispatchEvent(new Event(COMPLETE));
 		}
@@ -147,8 +154,10 @@ package com.gmrmarketing.metrx.photobooth2017
 		}
 		
 		
-		private function kill():void
+		public function kill():void
 		{
+			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, resultsComplete);
+			
 			if (clip.contains(badge)){
 				clip.removeChild(badge);
 			}

@@ -3,8 +3,8 @@ package com.gmrmarketing.metrx.photobooth2017
 	import flash.display.*;
 	import flash.events.*;
 	import com.greensock.TweenMax;
-	import com.greensock.easing.*;
-	
+	import com.greensock.easing.*;	
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	public class Q1 extends EventDispatcher
 	{
@@ -13,11 +13,13 @@ package com.gmrmarketing.metrx.photobooth2017
 		private var clip:MovieClip;
 		private var _container:DisplayObjectContainer;
 		private var answer:int; //1 - 5
+		private var tim:TimeoutHelper;
 		
 		
 		public function Q1()
 		{
 			clip = new quiz_q1();
+			tim = TimeoutHelper.getInstance();
 		}
 		
 		
@@ -59,11 +61,7 @@ package com.gmrmarketing.metrx.photobooth2017
 			clip.a4.x = 1920;//932
 			clip.a5.x = 1920;//684
 			
-			clip.a1.check.visible = false;
-			clip.a2.check.visible = false;
-			clip.a3.check.visible = false;
-			clip.a4.check.visible = false;
-			clip.a5.check.visible = false;
+			allWhite();
 			
 			clip.pic.x = 2600;//0
 			clip.pic.scaleX = clip.pic.scaleY = 1;
@@ -139,6 +137,8 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private function quesAnswered(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			var m:MovieClip = MovieClip(e.currentTarget);
 			if (!answer){
 				//first time here

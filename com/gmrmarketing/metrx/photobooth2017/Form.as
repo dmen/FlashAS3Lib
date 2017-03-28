@@ -6,6 +6,7 @@ package com.gmrmarketing.metrx.photobooth2017
 	import com.greensock.easing.*;
 	import com.dmennenoh.keyboard.KeyBoard;
 	import com.gmrmarketing.utilities.Validator;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	
 	public class Form extends EventDispatcher
@@ -17,6 +18,7 @@ package com.gmrmarketing.metrx.photobooth2017
 		private var _container:DisplayObjectContainer;
 		
 		private var kbd:KeyBoard;
+		private var tim:TimeoutHelper;
 		
 		
 		public function Form()
@@ -26,6 +28,8 @@ package com.gmrmarketing.metrx.photobooth2017
 			clip.fname.title.text = "FIRST NAME";
 			clip.lname.title.text = "LAST NAME";
 			clip.email.title.text = "EMAIL";
+			
+			tim = TimeoutHelper.getInstance();
 			
 			kbd = new KeyBoard();
 			kbd.loadKeyFile("keyboard.xml"); 
@@ -75,22 +79,32 @@ package com.gmrmarketing.metrx.photobooth2017
 			}
 			kbd.setFocusFields([[clip.fname.theText, 0], [clip.lname.theText, 0], [clip.email.theText, 0]]);
 			kbd.addEventListener(KeyBoard.SUBMIT, validate, false, 0, true);
-			
+			kbd.addEventListener(KeyBoard.KBD, butClick, false, 0, true);
 			clip.stage.focus = clip.fname.theText;
 			
 			TweenMax.to(kbd, .5, {y:640, ease:Expo.easeOut, delay:.75});
 		}
 		
 		
+		private function butClick(e:Event):void
+		{
+			tim.buttonClicked();
+		}
+		
+		
 		public function hide():void
 		{
 			kbd.removeEventListener(KeyBoard.SUBMIT, validate);
+			kbd.removeEventListener(KeyBoard.KBD, butClick);
+			
 			TweenMax.to(clip, .5, {x: -1920, onComplete:kill});
 		}
 		
 		public function reset():void
 		{
 			kbd.removeEventListener(KeyBoard.SUBMIT, validate);
+			kbd.removeEventListener(KeyBoard.KBD, butClick);
+			
 			if (_container.contains(clip)){
 				_container.removeChild(clip);
 			}
@@ -121,6 +135,8 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private function toggleCheck(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			if (clip.check.check.visible){
 				clip.check.check.visible = false;
 			}else{
