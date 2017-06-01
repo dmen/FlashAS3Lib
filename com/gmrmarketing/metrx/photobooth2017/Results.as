@@ -64,7 +64,7 @@ package com.gmrmarketing.metrx.photobooth2017
 				clip.title3.text = "DON'T BE HELD BACK BY YOUR ROUTINE.\nLIVE LIFE WITH ZERO BOUNDARIES.";
 				clip.title3.y = 550;
 				
-			}else if (totalPoints > 20){
+			}else if (totalPoints >= 20){
 				badge = new mcResultWeekend();
 				rank = "weekend";
 				clip.title1.text = "CLEARLY, YOU KNOW";

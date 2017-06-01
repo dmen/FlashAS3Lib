@@ -106,6 +106,7 @@ package com.gmrmarketing.metrx.photobooth2017
 			TweenMax.to(clip, .5, {x: -1920, onComplete:kill});
 		}
 		
+		
 		public function reset():void
 		{
 			if (_container.contains(clip)){
@@ -197,6 +198,7 @@ package com.gmrmarketing.metrx.photobooth2017
 			clip.btnNext.removeEventListener(MouseEvent.MOUSE_DOWN, nextPressed);
 			dispatchEvent(new Event(COMPLETE));
 		}
+		
 	}
 	
 }

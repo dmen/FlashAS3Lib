@@ -77,7 +77,13 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		
 		public function kill():void
-		{
+		{			
+			var n:int = numChildren;
+			
+			for (var i:int = 0; i < n; i++){
+				getChildAt(i).y = imageHeight;			
+			}
+			
 			TweenMax.killDelayedCallsTo(showing);
 			TweenMax.killDelayedCallsTo(hidden);
 		}

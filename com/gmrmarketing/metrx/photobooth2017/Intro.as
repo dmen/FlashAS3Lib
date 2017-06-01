@@ -133,8 +133,7 @@ package com.gmrmarketing.metrx.photobooth2017
 			}
 			if (clip.contains(sr3)){
 				clip.removeChild(sr3);
-			}
-			
+			}			
 			
 			dispatchEvent(new Event(HIDDEN));
 		}
@@ -255,9 +254,10 @@ package com.gmrmarketing.metrx.photobooth2017
 		
 		private function introDone(e:MouseEvent):void
 		{
-			sr1.kill();
+			sr1.kill();//kills tweenmax delayed calls
 			sr2.kill();
 			sr3.kill();
+			
 			wait.reset();
 			
 			sr1.removeEventListener(SlideReveal.SHOWING, sr1Showing);
@@ -270,6 +270,7 @@ package com.gmrmarketing.metrx.photobooth2017
 			sr3.removeEventListener(SlideReveal.HIDDEN, sr3Hidden);
 			
 			clip.btnTake.removeEventListener(MouseEvent.MOUSE_DOWN, introDone);
+			
 			dispatchEvent(new Event(COMPLETE));
 		}
 		
