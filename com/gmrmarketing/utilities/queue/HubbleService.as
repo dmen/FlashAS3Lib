@@ -62,7 +62,7 @@ package com.gmrmarketing.utilities.queue
 		 * @param	user User name if different from default gmrdigital
 		 * @param	pwd Password if different from default d1gital
 		 */
-		public function HubbleService(user:String = "gmrdigital", pwd:String = "d1gital")
+		public function HubbleService(user:String = "gmrdigital", pwd:String = "n0s0upf0ru")
 		{
 			auth = { user:user, pwd:pwd };
 			
