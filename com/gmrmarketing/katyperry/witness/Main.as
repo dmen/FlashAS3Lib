@@ -44,19 +44,22 @@ package com.gmrmarketing.katyperry.witness
 		}
 
 
-		private function sampleColor(e:MouseEvent):void
+		private function sampleColor(e:MouseEvent = null):void
 		{
-			var col:Array = pm.hueValueAtPoint(new Point(mouseX,mouseY));
+			var col:Array = pm.hueValueAtPoint(new Point(mouseX, mouseY));
+			
 			hVal.text = col[0].toString();
-			trace("lum:", col[2]);
-			pm.setKeyValue(col[0], parseFloat(threshVal.text));
+			sVal.text = col[1].toString();
+			lVal.text = col[2].toString();
+			
+			pm.setKeyValue(col[0], parseFloat(hThresh.text), col[1], parseFloat(sThresh.text), col[2], parseFloat(lThresh.text));
 		}
 
 
 		private function takePic(e:MouseEvent):void
 		{
 			var wh:BitmapData = new BitmapData(960,540,false,0xffffff);
-			var pink:BitmapData = new pinkData();	//458x540
+			var pink:BitmapData = new pinkFade();	//458x540
 
 			//user image - crop to face circle
 			var im:BitmapData = pm.pic;//full size from camera - 960x540

@@ -22,6 +22,25 @@ package brfv4.as3 {
 			draw.clear();
 		}
 		
+		
+		public function drawLine(vertices : Vector.<Number>, clear:Boolean = false):void
+		{
+			var g : Graphics = draw;			
+			clear && g.clear();
+			
+			var i : int;
+			var l : int = vertices.length;
+			
+			g.lineStyle(4, 0x000000, .5);
+			g.moveTo(vertices[0], vertices[1]);
+			
+			for (i = 2; i < l; i++) {
+				g.lineTo(vertices[i], vertices[i + 1]);
+				i++;
+			}
+			g.lineStyle();
+		}
+		
 		public function drawVertices(vertices : Vector.<Number>, radius : Number = 2.0, 
 				clear : Boolean = false,
 				fillColor : uint = 0x00a0ff, fillAlpha : Number = 1.0) : void {
@@ -59,9 +78,7 @@ package brfv4.as3 {
 			g.lineStyle();
 		}
 		
-		public function fillTriangles(vertices : Vector.<Number>, triangles : Vector.<int>, 
-				clear : Boolean = false, 
-				fillColor : uint = 0x00a0ff, fillAlpha : Number = 0.85) : void {
+		public function fillTriangles(vertices : Vector.<Number>, triangles : Vector.<int> = null, clear : Boolean = false, fillColor : uint = 0x00a0ff, fillAlpha : Number = 0.85) : void {
 			
 			var g : Graphics = draw;
 			
@@ -72,13 +89,12 @@ package brfv4.as3 {
 			g.endFill();
 		}
 		
-		public function drawTexture(vertices : Vector.<Number>, triangles : Vector.<int>, 
-				uvData : Vector.<Number>, texture : BitmapData) : void {
+		public function drawTexture(vertices : Vector.<Number>, triangles : Vector.<int> = null, uvData : Vector.<Number> = null, texture : BitmapData = null) : void {
 			
 			var g : Graphics = draw;
 			
 			g.lineStyle();
-			g.beginBitmapFill(texture);
+			g.beginBitmapFill(texture,null, true, true);
 			g.drawTriangles(vertices, triangles, uvData);
 			g.endFill();
 		}

@@ -28,32 +28,19 @@ package com.gmrmarketing.katyperry.witness
 		private var zeroPoint:Point;
 		private var rect:Rectangle;
 		
-		//used in createMask()
-		private var r:Number;
-		private var g:Number;
-		private var b:Number;
-		private var col:uint;//rgb color from getPixel
-		private var hue:Number;//computed hue from the rgb value		
-		private var cMax:Number;//color max - whatever channel has the highest value
-		private var cMin:Number;//color min - channel with lowest value
-		private var cDelta:Number;//color delta - cMax - cMin
+		private const imWidth:int = 960;
+		private const imHeight:int = 540;		
 		
-		private var imWidth:int = 960;
-		private var imHeight:int = 540;
-		private var u:Number;
-		private var v:Number;
-		private var x:int;
-		private var y:int;
+		private var hueMin:Number;
+		private var hueMax:Number;
 		
-		private var delt:int;
+		private var satMin:Number;
+		private var satMax:Number;
 		
-		private var keyColor:Number = 209;//blue
-		private var threshold:Number = 30;
-		private var useMask:Boolean = true;
+		private var lumMin:Number;
+		private var lumMax:Number;
 		
-		private var saturation:Number;
-		private var luminance:Number;
-		
+		private var useMask:Boolean = true;		
 		
 		
 		public function Primatte()
@@ -111,7 +98,21 @@ package com.gmrmarketing.katyperry.witness
 			camImage.draw(theVideo);
 			
 			maskImage.fillRect(rect, 0xffffffff);
-			
+			var u:Number;
+			var v:Number;
+			var x:int;
+			var y:int;
+			var r:Number;
+			var g:Number;
+			var b:Number;
+			var col:uint;//rgb color from getPixel
+			var hue:Number;//computed hue from the rgb value			
+			var cMax:Number;//color max - whatever channel has the highest value
+			var cMin:Number;//color min - channel with lowest value
+			var cDelta:Number;//color delta - cMax - cMin
+			var saturation:Number;			
+			var luminance:Number;
+		
 			for(y = 0; y < imHeight; y++)
 			{
 				for(x = 0; x < imWidth; x++)
@@ -121,13 +122,11 @@ package com.gmrmarketing.katyperry.witness
 					//r,g,b in range 0-1
 					r = (( col >> 16 ) & 0xFF) * 0.003921568627451; //(1/255)
 					g = ((col >> 8) & 0xFF) * 0.003921568627451;
-					b = (col & 0xFF) * 0.003921568627451;			
+					b = (col & 0xFF) * 0.003921568627451;					
 					
-					//optimized math.max(r,g,b)
 					cMax = r > g ? r : g;
 					cMax = cMax > b ? cMax : b;
 					
-					//optimized math.min(r,g,b)
 					cMin = r < g ? r : g;
 					cMin = cMin < b ? cMin : b;
 					
@@ -143,18 +142,19 @@ package com.gmrmarketing.katyperry.witness
 					}
 					
 					//Saturation
-					saturation = cMax == 0 ? 0 : cDelta / cMax;
+					saturation = cMax == 0 ? 0 : cDelta / cMax;					
 					
 					//Luminance
-					luminance = (.299 * r) + (.587 * g) + (.114 * b);
+					luminance = (.299 * r) + (.587 * g) + (.114 * b);					
 					
-					if (((keyColor - threshold) < hue) && ((keyColor + threshold) > hue) && (saturation > .9) && (luminance > .1)){
+					if (((hue >= hueMin) && (hue <= hueMax)) && ((saturation >= satMin) && (saturation <= satMax)) && ((luminance >= lumMin) && (luminance <= lumMax))){
+					
 						maskImage.setPixel32(x, y, 0x00000000);
 					}										
 				}
 			}	
 			
-			//2 pixel inner black glow
+			//inner black glow
 			maskImage.applyFilter(maskImage, rect, zeroPoint, eroder);		
 			
 			//threshold the inner glow image to get only the white pixels - which effectively erodes the edges
@@ -180,17 +180,25 @@ package com.gmrmarketing.katyperry.witness
 		}
 		
 		
-		public function setKeyValue(newKey:Number, newThreshold:Number):void
+		public function setKeyValue(newHue:Number, newThresh:Number, newSat:Number, newSatThresh:Number, newLum:Number, newLumThresh:Number):void
 		{			
-			keyColor = newKey;
-			threshold = newThreshold;
+			hueMin = newHue - newThresh;
+			hueMax = newHue + newThresh;
+			
+			satMin = newSat - newSatThresh;
+			satMax = newSat + newSatThresh;			
+			
+			lumMin = newLum - newLumThresh;
+			lumMax = newLum + newLumThresh;
+			
+			trace(hueMin, hueMax, satMin, satMax, lumMin, lumMax);
 		}
 		
 		
 		/**
-		 * Returns the hue and saturation as a two element array
+		 * Returns hue,sat,lum as a 3 element array
 		 * @param	pt
-		 * @return Array hue and saturation. Saturation is 0-1
+		 * @return Array hue,sat,lum
 		 */
 		public function hueValueAtPoint(pt:Point):Array
 		{

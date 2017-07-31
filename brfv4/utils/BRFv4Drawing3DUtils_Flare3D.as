@@ -38,8 +38,8 @@ package brfv4.utils {
 		private var videoPlane : Plane;
 		private var light : Light3D;
 
-		public function BRFv4Drawing3DUtils_Flare3D(resolution : Rectangle) {
-			
+		public function BRFv4Drawing3DUtils_Flare3D(resolution : Rectangle) 
+		{			
 			scene = new Scene3D(this);
 			scene.antialias = 2;
 			scene.allowImportSettings = false;
@@ -97,7 +97,11 @@ package brfv4.utils {
 			}
 	
 			var baseNode : Pivot3D = baseNodes[index];
-			var occlusionNode : Pivot3D = occlusionNodes[index];
+			
+			var occlusionNode:Pivot3D;
+			if (occlusionNodes.length){
+				occlusionNode = occlusionNodes[index];
+			}
 			
 			if(!baseNode) return;
 	
@@ -113,6 +117,7 @@ package brfv4.utils {
 				var rz : Number = BRFv4PointUtils.toDegree(-face.rotationZ);
 				
 				// Some fiddling around with the angles to get a better rotated 3d model.
+				
 				if(rx > 0) {
 					rx = rx * 1.35 + 5;
 					rz = rz / 2.00;	
@@ -122,7 +127,9 @@ package brfv4.utils {
 				}
 				
 				baseNode.transform.identity();
+				//baseNode.setPosition(x, y*1.25, z+1);
 				baseNode.setPosition(x, y, z);
+				//baseNode.setScale(s*.85, s, s*.8);
 				baseNode.setScale(s, s, s);
 				baseNode.setRotation(rx, ry, rz);
 				
@@ -198,8 +205,8 @@ package brfv4.utils {
 				var holder : Pivot3D = getHolder();
 				
 				group = containers[i];
-				group.addChild(holder);
-
+				group.addChild(holder);				
+				
 				scene.addChildFromFile(url, holder);
 			}
 		}
@@ -207,8 +214,9 @@ package brfv4.utils {
 		private function getHolder() : Pivot3D {
 			var p : Pivot3D = new Pivot3D();
 		
-			p.setPosition(0, -10, -5);
-			p.setScale(1.9, 1.9, 1.9);
+			p.setPosition(-5, -20, 125);
+			p.setScale(1.5, 1.6, 1.2);
+			p.setRotation(-20, 0, 0);
 		
 			return p;
 		}
@@ -271,7 +279,9 @@ package brfv4.utils {
 		private function onRender(event : Event = null) : void {
 			
 			//first: draw the video plane in the background
-			videoPlane.draw();
+			if(videoPlaneTexture != null) {
+				videoPlane.draw();
+			}
 			
 			//if there is an occlusion object, ...
 			if(occlusionNodes.length > 0) {
@@ -299,13 +309,13 @@ package brfv4.utils {
 		
 
 		// need a screenshot of the scene?
-		public function getScreenshot() : BitmapData {
-			
-			var bmd : BitmapData = new BitmapData(scene.viewPort.width, scene.viewPort.height);
+		public function getScreenshot() : BitmapData 
+		{			
+			var bmd : BitmapData = new BitmapData(scene.viewPort.width, scene.viewPort.height, true, 0x00000000);
 			
 			scene.context.clear();
 			
-			onRender();
+			//onRender();
 			
 			scene.render();
 			scene.context.drawToBitmapData(bmd);
