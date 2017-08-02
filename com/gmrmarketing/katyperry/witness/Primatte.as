@@ -98,6 +98,7 @@ package com.gmrmarketing.katyperry.witness
 			camImage.draw(theVideo);
 			
 			maskImage.fillRect(rect, 0xffffffff);
+			
 			var u:Number;
 			var v:Number;
 			var x:int;

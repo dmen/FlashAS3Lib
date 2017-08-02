@@ -1,7 +1,8 @@
 package com.gmrmarketing.katyperry.witness
 {
 	import flash.display.*;
-	import flash.events.*;	
+	import flash.events.*;
+	import flash.net.*;
 	import flash.media.*;
 	import brfv4.BRFFace;//in the ANE
 	import brfv4.BRFManager;//in the ANE
@@ -15,8 +16,7 @@ package com.gmrmarketing.katyperry.witness
 	import com.chargedweb.utils.MatrixUtil;
 	import net.hires.debug.Stats;
 	
-	
-	public class BRFTest extends MovieClip
+	public class TripleFace extends EventDispatcher
 	{
 		private var brfManager:BRFManager;
 		private var drawing:DrawingUtils;
@@ -26,7 +26,7 @@ package com.gmrmarketing.katyperry.witness
 		
 		private var _baseNodes:Vector.<Sprite> = new Vector.<Sprite>();
 		
-		private var _width:Number = 1280;
+		private var _width:Number = 1280;//Camera
 		private var _height:Number = 720;
 		
 		private var camera:Camera;
@@ -46,7 +46,7 @@ package com.gmrmarketing.katyperry.witness
 		private var rDialog:MovieClip;
 		
 		private var photoFull:BitmapData;
-		private var photo:BitmapData; //cropped image from the camera
+		//private var photo:BitmapData; //cropped image from the camera
 		private var doTakePhoto:Boolean;
 		
 		private var f3d:BRFv4Drawing3DUtils_Flare3D;		
@@ -58,18 +58,52 @@ package com.gmrmarketing.katyperry.witness
 		
 		private var stats:Stats;
 		
-		//brfManager.reset() at end of each interaction
-		//brfManager.setFaceDetectionRoi( Rectangle roi )
+		private var clip:MovieClip;
+		private var myContainer:DisplayObjectContainer;
+		private var finalImage:Bitmap;
 		
 		
-		public function BRFTest()
+		public function TripleFace()
+		{	
+			clip = new triple();
+			rDialog = new rotDialog();
+			finalImage = new Bitmap();
+			stats = new Stats();
+		}
+		
+		
+		public function set container(c:DisplayObjectContainer):void
 		{
+			myContainer = c;
+		}
+		
+		
+		public function show():void
+		{
+			
+			if (!myContainer.contains(clip)){
+				myContainer.addChild(clip);
+			}
+			var l:URLLoader = new URLLoader();
+			l.addEventListener(Event.COMPLETE, uvsLoaded);
+			l.load(new URLRequest("assets/baseuvs.txt"));
+		}
+		
+		
+		private function uvsLoaded(e:Event):void 
+		{		
+			var a:Array = e.target.data.split(",");
+			faceUVs = new Vector.<Number>();
+			for (var i:int = 0; i < a.length; i++){
+				faceUVs.push(a[i]);
+			}
+			
 			brfManager = new BRFManager();
 			
 			drawSprite = new Sprite();
 			drawing	= new DrawingUtils(drawSprite);			
 			
-			photo = new BitmapData(350, 540, true, 0x00000000);
+			//photo = new BitmapData(350, 540, true, 0x00000000);
 			photoFull = new BitmapData(_width, _height, true, 0x00000000);
 			
 			faceMask = new BitmapData(_width, _height, true, 0x00000000);
@@ -89,17 +123,16 @@ package com.gmrmarketing.katyperry.witness
 			camMatrix.scale( -1, 1);//for flipping the camera image horizontally
 			camMatrix.translate(_width, 0);			
 			
-			camImage = new Bitmap(cameraData);
-			
-			//put behind any stage elements
+			camImage = new Bitmap(cameraData);			
 			
 			drawSprite.x = 320;
-			drawSprite.y = 180;			
+			drawSprite.y = 80;			
 			camImage.x = 320;
-			camImage.y = 180;
+			camImage.y = 80;
 			
-			addChildAt(drawSprite, 0);
-			addChildAt(camImage, 0);
+			//add behind faceHole on stage already in the clip
+			clip.addChildAt(drawSprite, 0);
+			clip.addChildAt(camImage, 0);
 			
 			maskDisplay = new Bitmap(new BitmapData(480, 270, true, 0x00000000));
 			maskDisplayMatrix = new Matrix();
@@ -107,22 +140,12 @@ package com.gmrmarketing.katyperry.witness
 			
 			doTakePhoto = true;
 			
-			//addChild(maskDisplay);
+			//clip.addChild(maskDisplay);
+			clip.addChild(rDialog);
 			
-			maskBlur = new BlurFilter(5, 5, 2);
+			maskBlur = new BlurFilter(5, 5, 2);			
 			
-			faceUVs = new Vector.<Number>();
-			faceUVs.push(0.000000, 0.122956, 0.008402, 0.264702, 0.018111, 0.410590, 0.035701, 0.550737, 0.079737, 0.689546, 0.152051, 0.802090, 0.248652, 0.891267, 0.351980, 0.972994, 0.475458, 0.999756, 0.605917, 0.983710, 0.718554, 0.907782, 0.823061, 0.832025, 0.903835, 0.729955, 0.957449, 0.595034, 0.978614, 0.449082, 0.992867, 0.302854, 1.000000, 0.154495, 0.083128, 0.095333, 0.145160, 0.017912, 0.241014, 0.000000, 0.342505, 0.018179, 0.440778, 0.054008, 0.600825, 0.055089, 0.701773, 0.024003, 0.795268, 0.011144, 0.887383, 0.036419, 0.938000, 0.111915, 0.511139, 0.142664, 0.503343, 0.230333, 0.497176, 0.318562, 0.489266, 0.413877, 0.391226, 0.482515, 0.438473, 0.504775, 0.495820, 0.522134, 0.546605, 0.503395, 0.598752, 0.485754, 0.181009, 0.173957, 0.240190, 0.143211, 0.308596, 0.143044, 0.371702, 0.172747, 0.307553, 0.192188, 0.242128, 0.195274, 0.642685, 0.176134, 0.702435, 0.144910, 0.772108, 0.153784, 0.825776, 0.182269, 0.769546, 0.206094, 0.703294, 0.200399, 0.311327, 0.673350, 0.379076, 0.650122, 0.448182, 0.637439, 0.498827, 0.652737, 0.551304, 0.636159, 0.615335, 0.652749, 0.683948, 0.680695, 0.616524, 0.720266, 0.550845, 0.737568, 0.498285, 0.739667, 0.442104, 0.736824, 0.377309, 0.714711, 0.337437, 0.673419, 0.447339, 0.672178, 0.498513, 0.677860, 0.552297, 0.673091, 0.655346, 0.678428, 0.552641, 0.676628, 0.501121, 0.683019, 0.448451, 0.673848);
-			
-			stats = new Stats();
-			addChild(stats);
-			
-			init();
-		}
-		
-		
-		private function init():void 		
-		{	
+			//was in init()
 			var resolution:Rectangle = new Rectangle(0, 0, _width, _height);
 			
 			brfManager.init(resolution, resolution, "com.gmrmarketing.brftest");
@@ -136,12 +159,15 @@ package com.gmrmarketing.katyperry.witness
 			
 			if(f3d == null) {
 				f3d = new BRFv4Drawing3DUtils_Flare3D(resolution);
-				addChild(f3d);
+				clip.addChild(f3d);
 			}
 			
-			loadModels();
+			clip.addChild(stats);
+			stats.x = 1500;
 			
-			addEventListener(Event.ENTER_FRAME, update);
+			loadModels();			
+			
+			clip.addEventListener(Event.ENTER_FRAME, update);
 		}
 		
 		
@@ -181,30 +207,57 @@ package com.gmrmarketing.katyperry.witness
 						b.threshold(faceMask, new Rectangle(0, 0, _width, _height), new Point(), ">", 0x00000000, 0xffffffff, 0x00ffffff);
 						
 						//fill right half of the mask with white
-						b.fillRect(new Rectangle(_width * .5, 0, width * .5, _height), 0xffffffff);
+						b.fillRect(new Rectangle(_width * .5, 0, _width * .5, _height), 0xffffffff);
 						
 						b.applyFilter(b, new Rectangle(0, 0, _width, _height), new Point(), maskBlur);
 						
+						//TESTING
 						//maskDisplay.bitmapData.fillRect(new Rectangle(0, 0, _width, _height), 0x00000000);
-						maskDisplay.bitmapData.draw(cameraData, maskDisplayMatrix, null, null, null, true);
-						maskDisplay.bitmapData.draw(b, maskDisplayMatrix, null, BlendMode.DIFFERENCE, null, true);
-					}					
+						//maskDisplay.bitmapData.draw(cameraData, maskDisplayMatrix, null, null, null, true);
+						//maskDisplay.bitmapData.draw(b, maskDisplayMatrix, null, BlendMode.DIFFERENCE, null, true);
+						//TESTING						
+						
+						rDialog.sc.text = face.scale;
+						rDialog.ry.text = face.rotationY;
+					}
 					
-					if (doTakePhoto && face.scale > 200 && face.scale < 220 && face.rotationY > .35 && face.rotationY < .5){
+					if (face.scale < 260){
+						clip.scaleText.text = "Come Closer";
+					}else if (face.scale > 280){
+						clip.scaleText.text = "Too Close";
+					}else{
+						clip.scaleText.text = "Good";
+					}
+					
+					//rotation goes above 0 when looking left... doesn't seem to work when looking right
+					if (face.rotationY < .35){
+						clip.turnText.text = "Turn to your left more";
+					}else if (face.rotationY > .5){
+						clip.turnText.text = "Turned too far";
+					}else{
+						clip.turnText.text = "Good";
+					}
+					
+					if (doTakePhoto && face.scale > 260 && face.scale < 280 && face.rotationY > .2 && face.rotationY < .5){//was > .35
 						
 						//FACE IN CORRECT SPOT - TAKE THE PIC
-						faceHole.visible = false;
+						clip.faceHole.visible = false;
+						clip.noseLine.visible = false;
 						
-						var sPic:BitmapData = new BitmapData(_width, _height);						
-						sPic.draw(stage);
+						var sPic:BitmapData = new BitmapData(1920,1080);						
+						sPic.draw(clip);
 						
-						photoFull.copyPixels(sPic, new Rectangle(0,0,_width,_height), new Point(), b, new Point(), true);						
+						//gets the 1280x720 cam/makeup image from the full screen image
+						photoFull.copyPixels(sPic, new Rectangle(camImage.x, camImage.y, _width, _height), new Point(), b, new Point(), true);						
 						
 						doTakePhoto = false;
 						
 						createTriple();
 						
-						faceHole.visible = true;
+						clip.faceHole.visible = true;
+						clip.noseLine.visible = true;
+						
+						clip.addEventListener(KeyboardEvent.KEY_DOWN, checkKey, false, 0, true);
 					}	
 				}
 			}
@@ -220,15 +273,27 @@ package com.gmrmarketing.katyperry.witness
 		}
 		
 		
-		//uses photoFull
+		private function checkKey(e:KeyboardEvent):void
+		{
+			if (e.charCode == 32) {
+				doTakePhoto = true;
+				finalImage.bitmapData.dispose();
+			}
+		}
+		
+		
+		//uses photoFull - 1280x720
 		private function createTriple():void
 		{
-			var wh:BitmapData = new BitmapData(1080,1080,false,0xffffff);
-			var pink:BitmapData = new pinkFade();	//458x540
+			//final is 1080x1080 for Instagram
+			var wh:BitmapData = new BitmapData(1080, 1080, false, 0xffffff);
+			
+			var pink:BitmapData = new pinkFade();	//458x650
 
-			//user image - crop to face circle			
-			var userCrop:BitmapData = new BitmapData(440,540,true,0x00000000);
-			userCrop.copyPixels(photoFull, new Rectangle(260, 0, 440, 540), new Point(0, 0), null, null, true);
+			//user image - crop to face circle - from 700 to 1220		
+			var userCrop:BitmapData = new BitmapData(520, 720, true, 0x00000000);
+			//crop starting at x=380 - camImage is at 320 - 380+320 = 700
+			userCrop.copyPixels(photoFull, new Rectangle(380, 0, 520, 720), new Point(0, 0), null, null, true);
 			
 			userCrop.applyFilter(userCrop, userCrop.rect, new Point(),  MatrixUtil.setContrast(10));
 			userCrop.applyFilter(userCrop, userCrop.rect, new Point(),  MatrixUtil.setBrightness(10));
@@ -238,7 +303,7 @@ package com.gmrmarketing.katyperry.witness
 			sm1.scale(.96, .96);		
 			
 			var sm2:Matrix = new Matrix();
-			sm2.scale(.98,.98);
+			sm2.scale(.98, .98);
 			
 			var userEighty:BitmapData = new BitmapData(userCrop.width * sm1.a, userCrop.height * sm1.d, true, 0x00000000);
 			var pinkEighty:BitmapData = new BitmapData(userCrop.width * sm2.a, userCrop.height * sm2.d, true, 0x00000000);
@@ -252,18 +317,22 @@ package com.gmrmarketing.katyperry.witness
 			userNinety.draw(userCrop, sm2, null, null, null, true);
 			pinkNinety.draw(pink, sm2, null, null, null, true);			
 			
-			wh.copyPixels(pink, pink.rect, new Point(230, 0), null, null, true);
-			wh.copyPixels(userEighty, userEighty.rect, new Point(210, 20), null, null, true);
-			wh.copyPixels(pink, pink.rect, new Point(303, 0), null, null, true);
-			wh.copyPixels(userNinety, userNinety.rect, new Point(283, 10), null, null, true);
-			wh.copyPixels(pink, pink.rect, new Point(370, 0), null, null, true);
-			wh.copyPixels(userCrop, userCrop.rect, new Point(350, 0), null, null, true);
+			var top:int = 50;
+			wh.copyPixels(pink, pink.rect, new Point(210, top + 70), null, null, true);
+			wh.copyPixels(userEighty, userEighty.rect, new Point(210, top + 20), null, null, true);
+			wh.copyPixels(pink, pink.rect, new Point(283, top + 70), null, null, true);
+			wh.copyPixels(userNinety, userNinety.rect, new Point(283, top + 10), null, null, true);
+			wh.copyPixels(pink, pink.rect, new Point(350, top + 70), null, null, true);
+			wh.copyPixels(userCrop, userCrop.rect, new Point(350, top), null, null, true);
 			
-			var b:Bitmap = new Bitmap(wh);
-			addChild(b);
+			var ov:BitmapData = new overlay();
+			wh.copyPixels(ov, new Rectangle(0, 0, 1080, 1080), new Point(), null, null, true);
+			
+			finalImage.bitmapData = wh;
+			if(!myContainer.contains(finalImage)){
+				myContainer.addChild(finalImage);
+			}
 		}
-
-		
 	}
 	
 }
