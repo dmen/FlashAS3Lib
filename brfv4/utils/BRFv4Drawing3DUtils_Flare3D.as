@@ -37,6 +37,7 @@ package brfv4.utils {
 		private var videoPlaneMaterial : Shader3D;
 		private var videoPlane : Plane;
 		private var light : Light3D;
+		
 
 		public function BRFv4Drawing3DUtils_Flare3D(resolution : Rectangle) 
 		{			
@@ -98,6 +99,7 @@ package brfv4.utils {
 	
 			var baseNode : Pivot3D = baseNodes[index];
 			
+			
 			var occlusionNode:Pivot3D;
 			if (occlusionNodes.length){
 				occlusionNode = occlusionNodes[index];
@@ -112,9 +114,9 @@ package brfv4.utils {
 				var y : Number = -(face.translationY - (renderHeight * 0.5));
 				var z : Number =  modelZ;
 	
-				var rx : Number = BRFv4PointUtils.toDegree(-face.rotationX);
-				var ry : Number = BRFv4PointUtils.toDegree( face.rotationY);
-				var rz : Number = BRFv4PointUtils.toDegree(-face.rotationZ);
+				var rx : Number = -face.rotationX * 57.29577951308233;//radians to degrees
+				var ry : Number = face.rotationY * 57.29577951308233;
+				var rz : Number = -face.rotationZ * 57.29577951308233;
 				
 				// Some fiddling around with the angles to get a better rotated 3d model.
 				
@@ -127,9 +129,7 @@ package brfv4.utils {
 				}
 				
 				baseNode.transform.identity();
-				//baseNode.setPosition(x, y*1.25, z+1);
 				baseNode.setPosition(x, y, z);
-				//baseNode.setScale(s*.85, s, s*.8);
 				baseNode.setScale(s, s, s);
 				baseNode.setRotation(rx, ry, rz);
 				
@@ -214,9 +214,8 @@ package brfv4.utils {
 		private function getHolder() : Pivot3D {
 			var p : Pivot3D = new Pivot3D();
 		
-			p.setPosition(-5, -20, 125);
-			p.setScale(1.5, 1.6, 1.2);
-			p.setRotation(-20, 0, 0);
+			p.setPosition(0, -10, -5);
+			p.setScale(1.9, 1.9, 1.9);
 		
 			return p;
 		}
@@ -315,7 +314,7 @@ package brfv4.utils {
 			
 			scene.context.clear();
 			
-			//onRender();
+			onRender();
 			
 			scene.render();
 			scene.context.drawToBitmapData(bmd);

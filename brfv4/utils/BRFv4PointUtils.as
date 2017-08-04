@@ -86,7 +86,7 @@ package brfv4.utils {
 		}
 		
 		public static function toDegree(x : Number) : Number {
-			return x * 180.0 / Math.PI;
+			return x * 57.29577951308233;
 		}
 		
 		public static function toRadian(x : Number) : Number {

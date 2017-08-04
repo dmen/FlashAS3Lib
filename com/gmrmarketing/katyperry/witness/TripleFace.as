@@ -16,6 +16,7 @@ package com.gmrmarketing.katyperry.witness
 	import com.chargedweb.utils.MatrixUtil;
 	import net.hires.debug.Stats;
 	
+	
 	public class TripleFace extends EventDispatcher
 	{
 		private var brfManager:BRFManager;
@@ -49,7 +50,7 @@ package com.gmrmarketing.katyperry.witness
 		//private var photo:BitmapData; //cropped image from the camera
 		private var doTakePhoto:Boolean;
 		
-		private var f3d:BRFv4Drawing3DUtils_Flare3D;		
+		private var f3d:HeadMask;		
 		
 		private var maskDisplay:Bitmap;
 		private var maskDisplayMatrix:Matrix;
@@ -60,15 +61,19 @@ package com.gmrmarketing.katyperry.witness
 		
 		private var clip:MovieClip;
 		private var myContainer:DisplayObjectContainer;
-		private var finalImage:Bitmap;
+		private var finalImage:Bitmap;//container for the final image from createTriple()
+		
+		private var bg:MovieClip;//background graphic
+		
 		
 		
 		public function TripleFace()
 		{	
+			bg = new background();
 			clip = new triple();
 			rDialog = new rotDialog();
 			finalImage = new Bitmap();
-			stats = new Stats();
+			//stats = new Stats();
 		}
 		
 		
@@ -132,15 +137,15 @@ package com.gmrmarketing.katyperry.witness
 			
 			//add behind faceHole on stage already in the clip
 			clip.addChildAt(drawSprite, 0);
-			clip.addChildAt(camImage, 0);
+			//clip.addChildAt(camImage, 0);
 			
-			maskDisplay = new Bitmap(new BitmapData(480, 270, true, 0x00000000));
+			maskDisplay = new Bitmap(new BitmapData(640, 360, true, 0x00000000));
 			maskDisplayMatrix = new Matrix();
 			maskDisplayMatrix.scale(.5, .5);
 			
-			doTakePhoto = true;
+			doTakePhoto = false;
 			
-			//clip.addChild(maskDisplay);
+			clip.addChild(maskDisplay);
 			clip.addChild(rDialog);
 			
 			maskBlur = new BlurFilter(5, 5, 2);			
@@ -157,15 +162,18 @@ package com.gmrmarketing.katyperry.witness
 			brfManager.setFaceTrackingStartParams(maxFaceSize * 0.20, maxFaceSize * 1.00, 32, 35, 32);
 			brfManager.setFaceTrackingResetParams(maxFaceSize * 0.15, maxFaceSize * 1.00, 40, 55, 32);
 			
+			//clip.addChildAt(bg, 0);
+			
 			if(f3d == null) {
-				f3d = new BRFv4Drawing3DUtils_Flare3D(resolution);
-				clip.addChild(f3d);
-			}
+				f3d = new HeadMask(resolution);
+				clip.addChildAt(f3d, 0);
+			}			
 			
-			clip.addChild(stats);
-			stats.x = 1500;
+			//clip.addChild(stats);
+			//stats.x = 1500;
 			
-			loadModels();			
+			clip.btnFace1.addEventListener(MouseEvent.MOUSE_DOWN, useFace1, false, 0, true);
+			clip.btnFace2.addEventListener(MouseEvent.MOUSE_DOWN, useFace2, false, 0, true);					
 			
 			clip.addEventListener(Event.ENTER_FRAME, update);
 		}
@@ -176,20 +184,15 @@ package com.gmrmarketing.katyperry.witness
 			cameraData.draw(video, camMatrix);//just flips image horizontally			
 			brfManager.update(cameraData);		
 			
-			if(f3d) {
-				f3d.hideAll(); // Hide 3d models. Only show them on top of tracked faces.
-				//f3d.updateVideo(cameraData);
-			}
-	
 			drawing.clear();
 	
 			// Get all faces. 	
-			var faces : Vector.<BRFFace> = brfManager.getFaces();
+			var faces:Vector.<BRFFace> = brfManager.getFaces();
 	
 			// If no face was tracked: hide the image overlays.	
 			for(var i:int = 0; i < faces.length; i++) {
 	
-				var face:BRFFace = faces[i];			// get face
+				var face:BRFFace = faces[i]; // get face
 				
 				if(face.state == brfv4.BRFState.FACE_TRACKING_START || face.state == brfv4.BRFState.FACE_TRACKING) {
 					
@@ -213,17 +216,17 @@ package com.gmrmarketing.katyperry.witness
 						
 						//TESTING
 						//maskDisplay.bitmapData.fillRect(new Rectangle(0, 0, _width, _height), 0x00000000);
-						//maskDisplay.bitmapData.draw(cameraData, maskDisplayMatrix, null, null, null, true);
-						//maskDisplay.bitmapData.draw(b, maskDisplayMatrix, null, BlendMode.DIFFERENCE, null, true);
+						maskDisplay.bitmapData.draw(cameraData, maskDisplayMatrix, null, null, null, true);
+						maskDisplay.bitmapData.draw(b, maskDisplayMatrix, null, BlendMode.DIFFERENCE, null, true);
 						//TESTING						
 						
 						rDialog.sc.text = face.scale;
 						rDialog.ry.text = face.rotationY;
 					}
 					
-					if (face.scale < 260){
+					if (face.scale < 215){
 						clip.scaleText.text = "Come Closer";
-					}else if (face.scale > 280){
+					}else if (face.scale > 290){
 						clip.scaleText.text = "Too Close";
 					}else{
 						clip.scaleText.text = "Good";
@@ -238,12 +241,13 @@ package com.gmrmarketing.katyperry.witness
 						clip.turnText.text = "Good";
 					}
 					
-					if (doTakePhoto && face.scale > 260 && face.scale < 280 && face.rotationY > .2 && face.rotationY < .5){//was > .35
+					if (doTakePhoto && face.scale > 215 && face.scale < 290 && face.rotationY > .35 && face.rotationY < .5){//was > .35
 						
 						//FACE IN CORRECT SPOT - TAKE THE PIC
 						clip.faceHole.visible = false;
 						clip.noseLine.visible = false;
 						
+						//draw the full triple clip into sPic
 						var sPic:BitmapData = new BitmapData(1920,1080);						
 						sPic.draw(clip);
 						
@@ -257,19 +261,22 @@ package com.gmrmarketing.katyperry.witness
 						clip.faceHole.visible = true;
 						clip.noseLine.visible = true;
 						
-						clip.addEventListener(KeyboardEvent.KEY_DOWN, checkKey, false, 0, true);
+						clip.stage.addEventListener(KeyboardEvent.KEY_DOWN, checkKey, false, 0, true);
 					}	
 				}
 			}
 		}
 		
 		
-		public function loadModels():void 
-		{			
-			if(f3d) {	
-				f3d.removeAll();
-				f3d.loadModel("assets/female.zf3d", 1);
-			}
+		private function useFace1(e:MouseEvent):void
+		{
+			f3d.showHead1();
+		}
+		
+		
+		private function useFace2(e:MouseEvent):void
+		{
+			f3d.showHead2();
 		}
 		
 		
@@ -277,6 +284,8 @@ package com.gmrmarketing.katyperry.witness
 		{
 			if (e.charCode == 32) {
 				doTakePhoto = true;
+				clip.stage.removeEventListener(KeyboardEvent.KEY_DOWN, checkKey);
+				photoFull.dispose();
 				finalImage.bitmapData.dispose();
 			}
 		}
@@ -318,13 +327,14 @@ package com.gmrmarketing.katyperry.witness
 			pinkNinety.draw(pink, sm2, null, null, null, true);			
 			
 			var top:int = 50;
-			wh.copyPixels(pink, pink.rect, new Point(210, top + 70), null, null, true);
-			wh.copyPixels(userEighty, userEighty.rect, new Point(210, top + 20), null, null, true);
-			wh.copyPixels(pink, pink.rect, new Point(283, top + 70), null, null, true);
-			wh.copyPixels(userNinety, userNinety.rect, new Point(283, top + 10), null, null, true);
+			wh.copyPixels(pink, pink.rect, new Point(130, top + 70), null, null, true);
+			wh.copyPixels(userEighty, userEighty.rect, new Point(130, top + 20), null, null, true);
+			wh.copyPixels(pink, pink.rect, new Point(243, top + 70), null, null, true);
+			wh.copyPixels(userNinety, userNinety.rect, new Point(243, top + 10), null, null, true);
 			wh.copyPixels(pink, pink.rect, new Point(350, top + 70), null, null, true);
 			wh.copyPixels(userCrop, userCrop.rect, new Point(350, top), null, null, true);
 			
+			//white fade with Witness logo
 			var ov:BitmapData = new overlay();
 			wh.copyPixels(ov, new Rectangle(0, 0, 1080, 1080), new Point(), null, null, true);
 			
