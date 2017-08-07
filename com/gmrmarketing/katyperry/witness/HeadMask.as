@@ -97,14 +97,14 @@ package com.gmrmarketing.katyperry.witness
 		{
 			//if (!daveHolder) return;
 				
-			var s : Number =  (face.scale / 180);
+			var s : Number =  face.scale * 0.0055555555555556;// / 180;
 			var x : Number =  (face.translationX - (renderWidth  * 0.5));
 			var y : Number = -(face.translationY - (renderHeight * 0.5));
 			var z : Number =  modelZ;
 
-			var rx : Number = -face.rotationX * 57.29577951308233;//radians to degrees
-			var ry : Number = face.rotationY * 57.29577951308233;
-			var rz : Number = -face.rotationZ * 57.29577951308233;
+			var rx : Number = -face.rotationX * 57.29578;// 57.29577951308233;//radians to degrees
+			var ry : Number = face.rotationY * 57.29578;//57.29577951308233;
+			var rz : Number = -face.rotationZ * 57.29578;//57.29577951308233;
 			
 			// Some fiddling around with the angles to get a better rotated 3d model.
 			
@@ -112,7 +112,7 @@ package com.gmrmarketing.katyperry.witness
 				rx = rx * 1.35 + 5;
 				//rz = rz / 2.00;	
 			} else {
-				var ryp : Number = Math.abs(ry) / 40.0;
+				var ryp : Number = Math.abs(ry) * .025;// / 40.0;
 				rx = rx * (1.0 - ryp * 1.0) + 5;
 			}				
 			
@@ -171,9 +171,7 @@ package com.gmrmarketing.katyperry.witness
 		{			
 			var bmd : BitmapData = new BitmapData(scene.viewPort.width, scene.viewPort.height, true, 0x00000000);
 			
-			scene.context.clear();
-			
-			//onRender();
+			scene.context.clear();			
 			
 			scene.render();
 			scene.context.drawToBitmapData(bmd);

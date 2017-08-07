@@ -6,6 +6,10 @@ package com.gmrmarketing.katyperry.witness
 	
 	public class GroupPhoto extends EventDispatcher
 	{
+		public static const COMPLETE:String = "groupComplete";
+		
+		private var brfManager:BRFManager;//instantiated in Main
+		
 		private var myContainer:DisplayObjectContainer;
 		private var clip:MovieClip;
 		
@@ -22,11 +26,13 @@ package com.gmrmarketing.katyperry.witness
 		}
 		
 		
-		public function show():void
+		public function show(b:BRFManager):void
 		{
 			if (!myContainer.contains(clip)){
 				myContainer.addChild(clip);
 			}
+			
+			brfManager = b;
 			
 			clip.btnFilter.addEventListener(MouseEvent.MOUSE_DOWN, addFilter, false, 0, true);
 			clip.btnNoFilter.addEventListener(MouseEvent.MOUSE_DOWN, removeFilter, false, 0, true);

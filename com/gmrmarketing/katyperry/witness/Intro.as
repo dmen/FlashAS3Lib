@@ -30,6 +30,18 @@ package com.gmrmarketing.katyperry.witness
 				myContainer.addChild(clip);
 			}
 			
+			enableRemote();
+		}
+		
+		
+		public function disableRemote():void
+		{
+			clip.stage.removeEventListener(KeyboardEvent.KEY_DOWN, introCheck);
+		}
+		
+		
+		public function enableRemote():void
+		{
 			clip.stage.addEventListener(KeyboardEvent.KEY_DOWN, introCheck, false, 0, true);
 		}
 		
