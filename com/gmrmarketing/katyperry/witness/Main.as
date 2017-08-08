@@ -115,13 +115,13 @@ package com.gmrmarketing.katyperry.witness
 				
 				brfManager.setNumFacesToTrack(1);
 				solo.addEventListener(SoloFace.COMPLETE, soloComplete, false, 0, true);
-				solo.show(brfManager, false);
+				solo.show(brfManager, false, cityDialog.getColorValues(), cityDialog.cityImage);
 				
 			}else{
 				
 				brfManager.setNumFacesToTrack(4);
 				solo.addEventListener(SoloFace.COMPLETE, soloComplete, false, 0, true);
-				solo.show(brfManager, true);
+				solo.show(brfManager, true, cityDialog.getColorValues(), cityDialog.cityImage);
 				
 			}
 		}

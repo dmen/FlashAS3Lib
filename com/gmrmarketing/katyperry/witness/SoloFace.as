@@ -4,13 +4,13 @@ package com.gmrmarketing.katyperry.witness
 	import flash.events.*;
 	import flash.net.*;
 	import flash.media.*;
+	import flash.filters.*;
 	import brfv4.BRFFace;//in the ANE
 	import brfv4.BRFManager;//in the ANE
 	import brfv4.as3.DrawingUtils;
 	import brfv4.utils.BRFv4PointUtils;
 	import brfv4.utils.BRFv4Drawing3DUtils_Flare3D;
-	import flash.display3D.textures.RectangleTexture;
-	import flash.filters.BlurFilter;
+	import flash.display3D.textures.RectangleTexture;	
 	import flash.geom.*;
 	import flare.basic.*;
 	import com.chargedweb.utils.MatrixUtil;
@@ -47,8 +47,7 @@ package com.gmrmarketing.katyperry.witness
 		private var faceMask:BitmapData;
 		
 		private var rDialog:MovieClip;
-		
-		private var photoFull:BitmapData;		
+				
 		private var doTakePhoto:Boolean;
 		
 		private var f3d:HeadMask;		
@@ -67,6 +66,12 @@ package com.gmrmarketing.katyperry.witness
 		private var isTriple:Boolean;
 		private var isGroup:Boolean;
 		
+		private var colorVals:Array;//brightness,contrast,saturation from cityDialog
+		
+		private var eroder:GlowFilter;
+		
+		private var cityImage:BitmapData;//text image of the city name from the cityDialog
+		
 		
 		public function SoloFace()
 		{	
@@ -83,7 +88,7 @@ package com.gmrmarketing.katyperry.witness
 		}
 		
 		
-		public function show(b:BRFManager, group:Boolean):void
+		public function show(b:BRFManager, group:Boolean, colorValues:Array, cIm:BitmapData):void
 		{			
 			if (!myContainer.contains(clip)){
 				myContainer.addChild(clip);
@@ -91,21 +96,21 @@ package com.gmrmarketing.katyperry.witness
 			
 			brfManager = b;
 			isGroup = group;
+			colorVals = colorValues;
+			cityImage = cIm;
 			
 			//if group - hide the triple face and head shape buttons
 			if (isGroup){
-				clip.btnTriple.visible = false;
-				clip.btnFace1.visible = false;
-				clip.btnFace2.visible = false;				
+				clip.btnTriple.visible = false;						
 			}else{
 				//solo
 				clip.btnTriple.visible = true;
-				clip.btnFace1.visible = true;
-				clip.btnFace2.visible = true;
 			}
 			
 			clip.turnText.visible = false;
 			clip.scaleText.visible = false;
+			clip.btnFace1.visible = false;
+			clip.btnFace2.visible = false;		
 			
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, uvsLoaded);
@@ -122,9 +127,7 @@ package com.gmrmarketing.katyperry.witness
 			}			
 			
 			drawSprite = new Sprite();
-			drawing	= new DrawingUtils(drawSprite);			
-			
-			photoFull = new BitmapData(_width, _height, true, 0x00000000);
+			drawing	= new DrawingUtils(drawSprite);						
 			
 			faceMask = new BitmapData(_width, _height, true, 0x00000000);
 			
@@ -163,7 +166,8 @@ package com.gmrmarketing.katyperry.witness
 			clip.addChild(maskDisplay);
 			clip.addChild(rDialog);
 			
-			maskBlur = new BlurFilter(5, 5, 2);			
+			maskBlur = new BlurFilter(10, 10, 2);
+			eroder = new GlowFilter(0x000000, 1, 3, 3, 3, 2, true, false);
 			
 			clip.addChildAt(bg, 0);
 			
@@ -192,6 +196,8 @@ package com.gmrmarketing.katyperry.witness
 			isTriple = false;
 			clip.turnText.visible = false;
 			clip.scaleText.visible = false;
+			clip.btnFace1.visible = false;
+			clip.btnFace2.visible = false;
 			enableTakePhoto();
 		}
 		
@@ -202,6 +208,8 @@ package com.gmrmarketing.katyperry.witness
 			isTriple = false;
 			clip.turnText.visible = false;
 			clip.scaleText.visible = false;
+			clip.btnFace1.visible = false;
+			clip.btnFace2.visible = false;
 			drawing.clear();//remove makeup from the overlay
 			enableTakePhoto();
 		}
@@ -213,6 +221,8 @@ package com.gmrmarketing.katyperry.witness
 			isTriple = true;
 			clip.turnText.visible = true;
 			clip.scaleText.visible = true;
+			clip.btnFace1.visible = true;
+			clip.btnFace2.visible = true;
 			disableTakePhoto();
 		}
 		
@@ -261,23 +271,33 @@ package com.gmrmarketing.katyperry.witness
 							//f3d only used for the triple face
 							if (f3d){
 								f3d.update(i, face, true);
+								
+								
+	//////////////////////////////////////////
 								faceMask = f3d.getScreenshot();
 								
-								b.threshold(faceMask, new Rectangle(0, 0, _width, _height), new Point(), ">", 0x00000000, 0xffffffff, 0x00ffffff);
+								//turn anything not black to pure white
+								b.threshold(faceMask, new Rectangle(0, 0, _width, _height), new Point(), ">", 0x00000000, 0xffffffff, 0x00ffffff);								
+								
+								//inner black glow for the erosion
+								b.applyFilter(b, new Rectangle(0, 0, _width, _height), new Point(), eroder);		
+								
+								//threshold the inner glow image to get only the white pixels - which effectively erodes the edges								
+								b.threshold(b, new Rectangle(0, 0, _width, _height), new Point(), ">", 0x00EEEEEE, 0xFFFFFFFF, 0x00FFFFFF, false);								
 								
 								//fill right half of the mask with white
-								b.fillRect(new Rectangle(_width * .5, 0, _width * .5, _height), 0xffffffff);
+								//b.fillRect(new Rectangle(_width * .5, 0, _width * .5, _height), 0xffffffff);
 								
-								b.applyFilter(b, new Rectangle(0, 0, _width, _height), new Point(), maskBlur);
+								//blur the edges
+								b.applyFilter(b, new Rectangle(0, 0, _width, _height), new Point(), maskBlur);								
 								
 								//TESTING
-								//maskDisplay.bitmapData.fillRect(new Rectangle(0, 0, _width, _height), 0x00000000);
 								maskDisplay.bitmapData.draw(cameraData, maskDisplayMatrix, null, null, null, true);
 								maskDisplay.bitmapData.draw(b, maskDisplayMatrix, null, BlendMode.DIFFERENCE, null, true);
-								//TESTING						
-								
 								rDialog.sc.text = face.scale;
 								rDialog.ry.text = face.rotationY;
+								//TESTING	
+////////////////////////////////////////////
 							}
 							
 							if (face.scale < 215){
@@ -300,17 +320,13 @@ package com.gmrmarketing.katyperry.witness
 							if (doTakePhoto && face.scale > 215 && face.scale < 290 && face.rotationY > .3 && face.rotationY < .6){//was > .35
 								
 								//FACE IN CORRECT SPOT - TAKE THE PIC
-								clip.faceHole.visible = false;							
-								
-								var sPic:BitmapData = new BitmapData(_width, _height);						
-								sPic.draw(cameraData);
-								sPic.draw(drawSprite);								
-												
-								photoFull.copyPixels(sPic, new Rectangle(0, 0, _width, _height), new Point(), b, new Point(), true);						
+								clip.faceHole.visible = false;
 								
 								doTakePhoto = false;
 								
-								createTriple();
+								var tmp:BitmapData = grabUserPhoto();
+								var fin:BitmapData = createTriple(tmp);
+								clip.addChild(new Bitmap(fin));
 								
 								clip.faceHole.visible = true;
 								
@@ -322,6 +338,17 @@ package com.gmrmarketing.katyperry.witness
 					}
 				}
 			}
+		}
+		
+		
+		private function grabUserPhoto():BitmapData
+		{
+			var sPic:BitmapData = new BitmapData(_width, _height);				
+			sPic.draw(cameraData);
+			if(isApplyingMakeup){
+				sPic.draw(drawSprite);
+			}
+			return sPic;
 		}
 		
 		
@@ -344,8 +371,7 @@ package com.gmrmarketing.katyperry.witness
 				clip.stage.removeEventListener(KeyboardEvent.KEY_DOWN, checkKey);
 				if(myContainer.contains(finalImage)){
 					myContainer.removeChild(finalImage);
-				}
-				photoFull = new BitmapData(_width, _height, true, 0x00000000);				
+				}								
 			}
 		}
 		
@@ -356,23 +382,44 @@ package com.gmrmarketing.katyperry.witness
 		}
 		
 		
-		//uses photoFull - 1280x720
-		private function createTriple():void
+		private function createTriple(userPhoto:BitmapData):BitmapData
 		{
-			//final is 1080x1080 for Instagram
-			var wh:BitmapData = new BitmapData(1080, 1080, false, 0xffffff);
+			faceMask = f3d.getScreenshot();			
 			
+			var finalImage:BitmapData = new BitmapData(1080, 1080, false, 0xffffff);		//final is 1080x1080 for Instagram
+			var b:BitmapData = new BitmapData(_width, _height, true, 0x00000000);	
+			var headCutout:BitmapData = new BitmapData(_width, _height, true, 0x00000000);
 			var pink:BitmapData = new pinkFade();	//458x650
+			
+			var ov:BitmapData = new overlay();
+			ov.copyPixels(cityImage, cityImage.rect, new Point(325, 800), null, null, true);
+			
+			//turn anything not black to pure white
+			b.threshold(faceMask, new Rectangle(0, 0, _width, _height), new Point(), ">", 0x00000000, 0xffffffff, 0x00ffffff);								
+			
+			//inner black glow for the erosion
+			b.applyFilter(b, new Rectangle(0, 0, _width, _height), new Point(), eroder);		
+			
+			//threshold the inner glow image to get only the white pixels - which effectively erodes the edges								
+			b.threshold(b, new Rectangle(0, 0, _width, _height), new Point(), ">", 0x00EEEEEE, 0xFFFFFFFF, 0x00FFFFFF, false);								
+			
+			//fill right half of the mask with white
+			b.fillRect(new Rectangle(_width * .5, 0, _width * .5, _height), 0xffffffff);
+			
+			//blur the edges
+			b.applyFilter(b, new Rectangle(0, 0, _width, _height), new Point(), maskBlur);
+			
+			headCutout.copyPixels(userPhoto, new Rectangle(0, 0, _width, _height), new Point(), b, new Point(), true);
 
 			//user image - crop to face circle - from 700 to 1220		
-			var userCrop:BitmapData = new BitmapData(520, 720, true, 0x00000000);
+			var faceCrop:BitmapData = new BitmapData(520, 720, true, 0x00000000);
 			//crop starting at x=380 - camImage is at 320 - 380+320 = 700
-			userCrop.copyPixels(photoFull, new Rectangle(380, 0, 520, 720), new Point(0, 0), null, null, true);
+			faceCrop.copyPixels(headCutout, new Rectangle(380, 0, 520, 720), new Point(0, 0), null, null, true);
 			
 			//these all range from -100 to 100
-			userCrop.applyFilter(userCrop, userCrop.rect, new Point(),  MatrixUtil.setContrast(parseFloat(rDialog.con.text)));
-			userCrop.applyFilter(userCrop, userCrop.rect, new Point(),  MatrixUtil.setBrightness(parseFloat(rDialog.bri.text)));
-			userCrop.applyFilter(userCrop, userCrop.rect, new Point(),  MatrixUtil.setSaturation(parseFloat(rDialog.sat.text)));			
+			faceCrop.applyFilter(faceCrop, faceCrop.rect, new Point(),  MatrixUtil.setBrightness(colorVals[0]));
+			faceCrop.applyFilter(faceCrop, faceCrop.rect, new Point(),  MatrixUtil.setContrast(colorVals[1]));			
+			faceCrop.applyFilter(faceCrop, faceCrop.rect, new Point(),  MatrixUtil.setSaturation(colorVals[2]));			
 			
 			var sm1:Matrix = new Matrix();
 			sm1.scale(.96, .96);		
@@ -380,34 +427,29 @@ package com.gmrmarketing.katyperry.witness
 			var sm2:Matrix = new Matrix();
 			sm2.scale(.98, .98);
 			
-			var userEighty:BitmapData = new BitmapData(userCrop.width * sm1.a, userCrop.height * sm1.d, true, 0x00000000);
-			var pinkEighty:BitmapData = new BitmapData(userCrop.width * sm2.a, userCrop.height * sm2.d, true, 0x00000000);
+			var userEighty:BitmapData = new BitmapData(faceCrop.width * sm1.a, faceCrop.height * sm1.d, true, 0x00000000);
+			var pinkEighty:BitmapData = new BitmapData(faceCrop.width * sm2.a, faceCrop.height * sm2.d, true, 0x00000000);
 			
-			var userNinety:BitmapData = new BitmapData(userCrop.width * sm2.a, userCrop.height * sm2.d, true, 0x00000000);
-			var pinkNinety:BitmapData = new BitmapData(userCrop.width * sm2.a, userCrop.height * sm2.d, true, 0x00000000);			
+			var userNinety:BitmapData = new BitmapData(faceCrop.width * sm2.a, faceCrop.height * sm2.d, true, 0x00000000);
+			var pinkNinety:BitmapData = new BitmapData(faceCrop.width * sm2.a, faceCrop.height * sm2.d, true, 0x00000000);			
 			
-			userEighty.draw(userCrop, sm1, null, null, null, true);
+			userEighty.draw(faceCrop, sm1, null, null, null, true);
 			pinkEighty.draw(pink, sm2, null, null, null, true);
 			
-			userNinety.draw(userCrop, sm2, null, null, null, true);
+			userNinety.draw(faceCrop, sm2, null, null, null, true);
 			pinkNinety.draw(pink, sm2, null, null, null, true);			
 			
 			var top:int = 50;
-			wh.copyPixels(pink, pink.rect, new Point(130, top + 70), null, null, true);
-			wh.copyPixels(userEighty, userEighty.rect, new Point(130, top + 20), null, null, true);
-			wh.copyPixels(pink, pink.rect, new Point(243, top + 70), null, null, true);
-			wh.copyPixels(userNinety, userNinety.rect, new Point(243, top + 10), null, null, true);
-			wh.copyPixels(pink, pink.rect, new Point(350, top + 70), null, null, true);
-			wh.copyPixels(userCrop, userCrop.rect, new Point(350, top), null, null, true);
+			finalImage.copyPixels(pink, pink.rect, new Point(130, top + 70), null, null, true);
+			finalImage.copyPixels(userEighty, userEighty.rect, new Point(130, top + 20), null, null, true);
+			finalImage.copyPixels(pink, pink.rect, new Point(243, top + 70), null, null, true);
+			finalImage.copyPixels(userNinety, userNinety.rect, new Point(243, top + 10), null, null, true);
+			finalImage.copyPixels(pink, pink.rect, new Point(350, top + 70), null, null, true);
+			finalImage.copyPixels(faceCrop, faceCrop.rect, new Point(350, top), null, null, true);
 			
-			//white fade with Witness logo
-			var ov:BitmapData = new overlay();
-			wh.copyPixels(ov, new Rectangle(0, 0, 1080, 1080), new Point(), null, null, true);
+			finalImage.copyPixels(ov, new Rectangle(0, 0, 1080, 1080), new Point(), null, null, true);//add the white overlay
 			
-			finalImage.bitmapData = wh;
-			if(!myContainer.contains(finalImage)){
-				myContainer.addChild(finalImage);
-			}
+			return finalImage;
 		}
 	}
 	

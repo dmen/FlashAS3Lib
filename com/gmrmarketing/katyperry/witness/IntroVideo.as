@@ -15,10 +15,13 @@ package com.gmrmarketing.katyperry.witness
 		private var theVideo:Video;
 		private var nc:NetConnection;
 		private var ns:NetStream;
+		private var cbOBject:Object;
+		
 		
 		public function IntroVideo()
 		{
 			clip = new introVideo();
+			cbOBject = new Object();
 			theVideo = new Video(1280, 720);
 			theVideo.x = 320;
 			theVideo.y = 180;
@@ -45,6 +48,7 @@ package com.gmrmarketing.katyperry.witness
 			nc.connect(null);
 			
 			ns = new NetStream(nc);
+			ns.client = cbOBject;
 			ns.play("assets/introVideo.mp4");
 			
 			theVideo.attachNetStream(ns);

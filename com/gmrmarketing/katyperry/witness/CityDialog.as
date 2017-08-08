@@ -23,8 +23,13 @@ package com.gmrmarketing.katyperry.witness
 			so = SharedObject.getLocal("KPCityData");
 			if (so.data.city == null){
 				so.data.city = "";
+				so.data.bri = 60;
+				so.data.con = 20;
+				so.data.sat = 30;
 				so.flush();
 			}
+			
+			tClip.theText.text = String(so.data.city).toUpperCase();
 		}
 		
 		
@@ -47,15 +52,24 @@ package com.gmrmarketing.katyperry.witness
 			clip.y = 50;
 			
 			clip.theText.text = so.data.city;
+			clip.bri.text = int(so.data.bri).toString();
+			clip.con.text = int(so.data.con).toString();
+			clip.sat.text = int(so.data.sat).toString();
 		}
 		
 		
 		public function get cityImage():BitmapData
 		{
-			var b:BitmapData = new BitmapData(750, 120, true, 0x00000000);
+			var b:BitmapData = new BitmapData(430, 60, true, 0x00000000);
 			b.draw(tClip);
 			
 			return b;
+		}
+		
+		
+		public function getColorValues():Array
+		{
+			return [so.data.bri, so.data.con, so.data.sat];
 		}
 		
 		
@@ -75,9 +89,12 @@ package com.gmrmarketing.katyperry.witness
 		private function saveCity(e:MouseEvent):void
 		{
 			so.data.city = clip.theText.text;
+			so.data.bri = parseInt(clip.bri.text);
+			so.data.con = parseInt(clip.con.text);
+			so.data.sat = parseInt(clip.sat.text);
 			so.flush();
 			
-			tClip.theText.text = so.data.city;
+			tClip.theText.text = String(so.data.city).toUpperCase();
 		}
 		
 	}
