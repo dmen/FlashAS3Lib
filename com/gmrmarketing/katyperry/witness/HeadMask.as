@@ -144,7 +144,7 @@ package com.gmrmarketing.katyperry.witness
 		public function loadModels():void
 		{
 			scene.addEventListener(Scene3D.COMPLETE_EVENT, headLoaded);			
-			scene.addChildFromFile("assets/maleHeadTorso.zf3d", head1);
+			scene.addChildFromFile("assets/maleHead.zf3d", head1);
 			scene.addChildFromFile("assets/female.zf3d", head2);
 		}
 		
@@ -159,9 +159,11 @@ package com.gmrmarketing.katyperry.witness
 		private function getHolder() : Pivot3D {
 			var p : Pivot3D = new Pivot3D();
 		
-			p.setPosition(120, -880, 425);
-			//p.setPosition(-5, -20, 125);
+			//p.setPosition(125, -840, 550);
+			p.setPosition(-5, -15, 115);
+			//p.setScale(1.5, 1.6, 1.2);
 			p.setScale(1.5, 1.6, 1.2);
+			//p.setRotation(-25, 0, 0);
 			p.setRotation(-20, 0, 0);
 		
 			return p;

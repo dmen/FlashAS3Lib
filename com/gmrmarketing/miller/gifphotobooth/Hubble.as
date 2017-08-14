@@ -58,7 +58,7 @@ package com.gmrmarketing.miller.gifphotobooth
 		{		
 			busy = true;			
 			
-			var js:String = JSON.stringify({"userName":"gmrdigital", "password":"d1gital"});
+			var js:String = JSON.stringify({"userName":"gmrdigital", "password":"n0s0upf0ru"});
 			var req:URLRequest = new URLRequest(BASE_URL + "authorize/validateuser");
 			
 			req.method = URLRequestMethod.POST;

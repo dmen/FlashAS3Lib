@@ -113,6 +113,21 @@ package com.gmrmarketing.utilities
 			}
 		}
 		
+		
+		public function show():void
+		{
+			if(hitArea){
+				if (!container.contains(hitArea)) {
+					container.addChild(hitArea);
+				}
+			}
+			if(hitArea2){
+				if (!container.contains(hitArea2)) {
+					container.addChild(hitArea2);
+				}
+			}
+		}
+		
 		/**
 		 * Initializes the click rectangles
 		 * 

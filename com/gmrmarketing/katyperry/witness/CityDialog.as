@@ -58,12 +58,17 @@ package com.gmrmarketing.katyperry.witness
 		}
 		
 		
-		public function get cityImage():BitmapData
+		public function get cityImages():Array
 		{
 			var b:BitmapData = new BitmapData(430, 60, true, 0x00000000);
+			tClip.theText.textColor = 0x000000;
 			b.draw(tClip);
 			
-			return b;
+			var c:BitmapData = new BitmapData(430, 60, true, 0x00000000);
+			tClip.theText.textColor = 0xFFFFFF;
+			c.draw(tClip);
+			
+			return [b,c];
 		}
 		
 		
