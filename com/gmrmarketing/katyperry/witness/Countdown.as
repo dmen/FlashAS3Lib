@@ -79,8 +79,12 @@ package com.gmrmarketing.katyperry.witness
 		
 		private function allDone():void
 		{
-			myContainer.removeChild(white);
-			myContainer.removeChild(clip);
+			if(myContainer.contains(white)){
+				myContainer.removeChild(white);
+			}
+			if(myContainer.contains(clip)){
+				myContainer.removeChild(clip);
+			}
 		}
 		
 	}
