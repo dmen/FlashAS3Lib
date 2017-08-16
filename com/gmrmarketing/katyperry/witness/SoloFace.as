@@ -76,7 +76,7 @@ package com.gmrmarketing.katyperry.witness
 		private var countdown:Countdown;
 		
 		private var tripleStep:int;
-		
+		private var step2Timer:Timer;
 		
 		
 		
@@ -85,7 +85,9 @@ package com.gmrmarketing.katyperry.witness
 			bg = new background();			
 			clip = new solo();
 			countdown = new Countdown();
-			rDialog = new rotDialog();		
+			rDialog = new rotDialog();	
+			step2Timer = new Timer(1000, 1);
+			step2Timer.addEventListener(TimerEvent.TIMER, doStep2);
 		}
 		
 		
@@ -423,15 +425,17 @@ CONFIG::TESTING {
 								//scale text only changes on step 1
 								if (tripleStep == 1){									
 									if (face.scale < 230){
-										clip.instructions.theText.text = "Align the Circles - Move Closer";										
+										clip.instructions.theText.text = "Align the Circles - Move Closer";
+										step2Timer.reset();
+										
 									}else if (face.scale > 270){
-										clip.instructions.theText.text = "Align the Circles - Move Back";										
+										clip.instructions.theText.text = "Align the Circles - Move Back";
+										step2Timer.reset();
+										
 									}else{
-										clip.instructions.theText.text = "Perfect!";
-										//wait .5 sec before switching to step 2
-										var tim:Timer = new Timer(500, 1);
-										tim.addEventListener(TimerEvent.TIMER, doStep2, false, 0, true);
-										tim.start();
+										clip.instructions.theText.text = "Now, keep that distance";
+										//user has to stay proper for one sec before going to step 2 - turn left
+										step2Timer.start();
 									}
 								}
 								
@@ -466,7 +470,7 @@ CONFIG::TESTING {
 							}//tripleStep == 1 || tripleStep == 2
 							
 							
-							if (doTakePhoto && face.scale > 230 && face.scale < 270 && face.rotationY > .35 && face.rotationY < .6){							
+							if (tripleStep == 2 && doTakePhoto && face.scale > 230 && face.scale < 270 && face.rotationY > .35 && face.rotationY < .6){							
 								
 								//SHOW - HOLD IT RIGHT THERE!!!
 								

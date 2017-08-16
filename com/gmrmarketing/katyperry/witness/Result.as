@@ -243,6 +243,10 @@ package com.gmrmarketing.katyperry.witness
 				if (!v){
 					errorMsg.theText.text = "Please enter a valid phone number";
 				}
+				if (clip.authCheck.currentFrame != 2){
+					v = false;
+					errorMsg.theText.text = "You must check the consent box";
+				}
 			}
 			
 			if(v){

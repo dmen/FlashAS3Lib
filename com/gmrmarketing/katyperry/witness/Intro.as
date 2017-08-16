@@ -10,11 +10,13 @@ package com.gmrmarketing.katyperry.witness
 		
 		private var myContainer:DisplayObjectContainer;
 		private var clip:MovieClip;
+		private var perlin:PerlinNoise;//for animating the bg
 		
 		
 		public function Intro()
 		{
 			clip = new intro();
+			perlin = new PerlinNoise();
 		}
 		
 		
@@ -30,6 +32,7 @@ package com.gmrmarketing.katyperry.witness
 				myContainer.addChild(clip);
 			}
 			
+			perlin.show(clip.bg);			
 			enableRemote();
 		}
 		
@@ -51,6 +54,7 @@ package com.gmrmarketing.katyperry.witness
 			if (myContainer.contains(clip)){
 				myContainer.removeChild(clip);
 			}
+			perlin.hide();
 		}
 		
 		

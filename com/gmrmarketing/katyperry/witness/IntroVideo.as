@@ -22,9 +22,9 @@ package com.gmrmarketing.katyperry.witness
 		{
 			clip = new introVideo();
 			cbOBject = new Object();
-			theVideo = new Video(1280, 720);
-			theVideo.x = 320;
-			theVideo.y = 180;
+			theVideo = new Video(1920, 1080);
+			theVideo.x = 0;
+			theVideo.y = 0;
 		}
 		
 		
