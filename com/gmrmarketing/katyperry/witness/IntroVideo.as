@@ -34,7 +34,7 @@ package com.gmrmarketing.katyperry.witness
 		}
 		
 		
-		public function show():void
+		public function show(which:String = "intro"):void
 		{
 			if (!myContainer.contains(clip)){
 				myContainer.addChild(clip);
@@ -49,7 +49,11 @@ package com.gmrmarketing.katyperry.witness
 			
 			ns = new NetStream(nc);
 			ns.client = cbOBject;
-			ns.play("assets/introVideo.mp4");
+			if(which == "intro"){
+				ns.play("assets/introVideo.mp4");
+			}else{
+				ns.play("assets/exitVideo.mp4");
+			}
 			
 			theVideo.attachNetStream(ns);
 			

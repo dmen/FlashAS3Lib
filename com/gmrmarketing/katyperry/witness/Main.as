@@ -11,6 +11,9 @@ package com.gmrmarketing.katyperry.witness
 	import com.adobe.images.JPEGEncoder;
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
+	import flash.desktop.NativeApplication;
+	import com.gmrmarketing.utilities.TimeoutHelper;
+	
 	
 	public class Main extends MovieClip
 	{
@@ -30,8 +33,11 @@ package com.gmrmarketing.katyperry.witness
 		
 		private var cityDialog:CityDialog;
 		private var cityCorner:CornerQuit;
+		private var quitCorner:CornerQuit;
 		
 		private var queue:Queue;
+		
+		private var tim:TimeoutHelper;
 		
 		
 		public function Main()
@@ -84,7 +90,14 @@ package com.gmrmarketing.katyperry.witness
 			cityDialog.container = mainContainer;
 			
 			cityCorner = new CornerQuit();
+			quitCorner = new CornerQuit();
 			cityCorner.init(cornerContainer, "ll");
+			quitCorner.init(cornerContainer, "ur");
+			quitCorner.addEventListener(CornerQuit.CORNER_QUIT, quitApp);
+			
+			tim = TimeoutHelper.getInstance();
+			tim.addEventListener(TimeoutHelper.TIMED_OUT, timReset);
+			tim.init(45000);
 			
 			init();
 			//result.show(new BitmapData(1080, 1080, false, 0xff0000));
@@ -92,8 +105,10 @@ package com.gmrmarketing.katyperry.witness
 		
 		
 		private function init():void
-		{			
-			cityCorner.addEventListener(CornerQuit.CORNER_QUIT, showCityDialog, false, 0, true);
+		{	
+			tim.stopMonitoring();
+			
+			cityCorner.addEventListener(CornerQuit.CORNER_QUIT, showCityDialog, false, 0, true);			
 			cityCorner.show();
 			
 			intro.addEventListener(Intro.COMPLETE, showCurrent, false, 0, true);
@@ -104,6 +119,8 @@ package com.gmrmarketing.katyperry.witness
 		private function showCurrent(e:Event):void
 		{
 			intro.removeEventListener(Intro.COMPLETE, showCurrent);
+			
+			tim.startMonitoring();
 			
 			//only listen for city dialog on intro screen
 			cityCorner.removeEventListener(CornerQuit.CORNER_QUIT, showCityDialog);
@@ -117,19 +134,27 @@ package com.gmrmarketing.katyperry.witness
 			
 		}
 		
+		/**
+		 * callack from CurrentCustomer - once yes/no is selected
+		 * @param	e
+		 */
 		private function showIntroVideo(e:Event):void
 		{
 			current.removeEventListener(CurrentCustomer.COMPLETE, showIntroVideo);
-			current.hide();
+			current.hide();			
+			
+			tim.stopMonitoring();
 			
 			introVideo.addEventListener(IntroVideo.COMPLETE, showSelector, false, 0, true);
-			introVideo.show();
+			introVideo.show("intro");
 		}
 		
 		private function showSelector(e:Event):void
 		{
 			introVideo.removeEventListener(IntroVideo.COMPLETE, showSelector);
 			introVideo.hide();
+			
+			tim.startMonitoring();
 			
 			selector.addEventListener(Selector.COMPLETE, showSelection, false, 0, true);
 			selector.show();
@@ -147,8 +172,14 @@ package com.gmrmarketing.katyperry.witness
 		}
 		
 		
+		/**
+		 * callback from selector - once user presses solo or group
+		 * @param	e
+		 */
 		private function showSelection(e:Event = null):void
 		{
+			tim.buttonClicked();
+			
 			selector.removeEventListener(Selector.COMPLETE, showSelection);
 			selector.hide();
 			
@@ -177,17 +208,29 @@ package com.gmrmarketing.katyperry.witness
 			solo.removeEventListener(SoloFace.BACK, showSelector);
 			solo.hide();
 			
-			result.addEventListener(Result.COMPLETE, showThanks, false, 0, true);
+			result.addEventListener(Result.COMPLETE, showExitVideo, false, 0, true);
 			result.addEventListener(Result.RETAKE, retakeFromResults, false, 0, true);
 			result.show(solo.userPhoto);
 		}
 		
 		
-		private function showThanks(e:Event):void
+		private function showExitVideo(e:Event):void
 		{
-			result.removeEventListener(Result.COMPLETE, showThanks);
+			result.removeEventListener(Result.COMPLETE, showExitVideo);
 			result.removeEventListener(Result.RETAKE, retakeFromResults);
 			result.hide();
+			
+			tim.stopMonitoring();
+			
+			introVideo.addEventListener(IntroVideo.COMPLETE, showThanks, false, 0, true);
+			introVideo.show("exit");
+		}
+		
+		
+		private function showThanks(e:Event):void
+		{
+			introVideo.removeEventListener(IntroVideo.COMPLETE, showThanks);
+			introVideo.hide();
 			
 			thanks.addEventListener(Thanks.SHOWING, sendResults, false, 0, true);
 			thanks.show();
@@ -200,6 +243,7 @@ package com.gmrmarketing.katyperry.witness
 			result.removeEventListener(Result.RETAKE, retakeFromResults);
 			result.hide();
 			
+			//should also keep their makeup/triple/nomakeup selection
 			showSelection();//photo screen with solo/group already selected - they can go back to reselect that
 		}
 		
@@ -236,6 +280,18 @@ package com.gmrmarketing.katyperry.witness
 		}
 		
 		
+		//timeout callback
+		private function timReset(e:Event):void
+		{
+			current.hide();//are you a current customer
+			selector.hide();//solo - group
+			solo.hide();
+			result.hide();
+			
+			init();
+		}
+		
+		
 		private function getBase64(ba:ByteArray):String
 		{
 			return Base64.encodeByteArray(ba);
@@ -262,6 +318,12 @@ package com.gmrmarketing.katyperry.witness
 		{
 			cityDialog.removeEventListener(CityDialog.COMPLETE, hideCityDialog);
 			intro.enableRemote();//listens for spacebar again
+		}
+		
+		
+		private function quitApp(e:Event):void
+		{
+			NativeApplication.nativeApplication.exit();
 		}
 		
 	}

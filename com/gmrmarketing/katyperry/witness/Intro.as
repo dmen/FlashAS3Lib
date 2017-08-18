@@ -2,6 +2,7 @@ package com.gmrmarketing.katyperry.witness
 {
 	import flash.events.*;
 	import flash.display.*;
+	import flash.utils.Timer;
 	
 	
 	public class Intro extends EventDispatcher  
@@ -11,12 +12,14 @@ package com.gmrmarketing.katyperry.witness
 		private var myContainer:DisplayObjectContainer;
 		private var clip:MovieClip;
 		private var perlin:PerlinNoise;//for animating the bg
+		private var circleTimer:Timer;
 		
 		
 		public function Intro()
 		{
 			clip = new intro();
 			perlin = new PerlinNoise();
+			circleTimer = new Timer(1200);			
 		}
 		
 		
@@ -34,9 +37,23 @@ package com.gmrmarketing.katyperry.witness
 			
 			perlin.show(clip.bg);			
 			enableRemote();
+			addCircle();
+			circleTimer.addEventListener(TimerEvent.TIMER, addCircle, false, 0, true);
+			circleTimer.start();
 		}
 		
 		
+		private function addCircle(e:TimerEvent = null):void
+		{			
+			var c:AnimatedCircle = new AnimatedCircle();
+			c.x = 289;
+			c.y = 325;
+			clip.addChild(c);
+		}
+		
+		/**
+		 * these are called from main if the config dialog is opened - so that space bar doesn't start the app
+		 */
 		public function disableRemote():void
 		{
 			clip.stage.removeEventListener(KeyboardEvent.KEY_DOWN, introCheck);
@@ -55,6 +72,8 @@ package com.gmrmarketing.katyperry.witness
 				myContainer.removeChild(clip);
 			}
 			perlin.hide();
+			circleTimer.removeEventListener(TimerEvent.TIMER, addCircle);
+			circleTimer.reset();
 		}
 		
 		

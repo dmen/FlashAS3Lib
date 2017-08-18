@@ -2,6 +2,7 @@ package com.gmrmarketing.katyperry.witness
 {
 	import flash.display.*;
 	import flash.events.*;
+	import flash.utils.Timer;
 	
 	
 	public class CurrentCustomer extends EventDispatcher
@@ -11,12 +12,14 @@ package com.gmrmarketing.katyperry.witness
 		private var myContainer:DisplayObjectContainer;
 		private var selection:Boolean;
 		private var perlin:PerlinNoise;//for animating the bg
+		private var circleTimer:Timer;
 		
 		
 		public function CurrentCustomer()
 		{
 			clip = new currentCust();
 			perlin = new PerlinNoise();
+			circleTimer = new Timer(1200);
 		}
 		
 		
@@ -32,10 +35,23 @@ package com.gmrmarketing.katyperry.witness
 				myContainer.addChild(clip);
 			}
 			
-			perlin.show(clip.bg);	
+			perlin.show(clip.bg);
 			
 			clip.btnYes.addEventListener(MouseEvent.MOUSE_DOWN, selectedYes, false, 0, true);
 			clip.btnNo.addEventListener(MouseEvent.MOUSE_DOWN, selectedNo, false, 0, true);
+			
+			addCircle();
+			circleTimer.addEventListener(TimerEvent.TIMER, addCircle, false, 0, true);
+			circleTimer.start();
+		}
+		
+		
+		private function addCircle(e:TimerEvent = null):void
+		{			
+			var c:AnimatedCircle = new AnimatedCircle(false);//no mask
+			c.x = 232;
+			c.y = 412;
+			clip.addChild(c);
 		}
 		
 		
@@ -45,6 +61,8 @@ package com.gmrmarketing.katyperry.witness
 				myContainer.removeChild(clip);
 			}
 			perlin.hide();
+			circleTimer.removeEventListener(TimerEvent.TIMER, addCircle);
+			circleTimer.reset();
 		}
 		
 		

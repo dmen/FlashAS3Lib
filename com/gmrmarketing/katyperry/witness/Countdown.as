@@ -34,10 +34,10 @@ package com.gmrmarketing.katyperry.witness
 				myContainer.addChild(clip);
 			}
 			
-			clip.scaleX = clip.scaleY = 3;
+			clip.scaleX = clip.scaleY = 4.5;
 			clip.alpha = 1;
 			clip.x = 960;
-			clip.y = 400;
+			clip.y = 520;
 			
 			clip.theText.text = "3";
 			

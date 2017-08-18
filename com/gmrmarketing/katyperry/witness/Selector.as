@@ -15,7 +15,7 @@ package com.gmrmarketing.katyperry.witness
 		
 		public function Selector()
 		{
-			clip = new selector();
+			clip = new selector();			
 		}
 		
 		

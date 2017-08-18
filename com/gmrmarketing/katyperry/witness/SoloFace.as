@@ -17,6 +17,7 @@ package com.gmrmarketing.katyperry.witness
 	import com.greensock.easing.*;
 	import com.greensock.TweenMax;
 	import flash.utils.Timer;
+	import com.gmrmarketing.utilities.TimeoutHelper;
 	
 	
 	public class SoloFace extends EventDispatcher
@@ -78,6 +79,7 @@ package com.gmrmarketing.katyperry.witness
 		private var tripleStep:int;
 		private var step2Timer:Timer;
 		
+		private var tim:TimeoutHelper;
 		
 		
 		public function SoloFace()
@@ -85,7 +87,10 @@ package com.gmrmarketing.katyperry.witness
 			bg = new background();			
 			clip = new solo();
 			countdown = new Countdown();
-			rDialog = new rotDialog();	
+			rDialog = new rotDialog();
+			
+			tim = TimeoutHelper.getInstance();
+			
 			step2Timer = new Timer(1000, 1);
 			step2Timer.addEventListener(TimerEvent.TIMER, doStep2);
 		}
@@ -131,8 +136,13 @@ package com.gmrmarketing.katyperry.witness
 				clip.btnTriple.visible = true;
 				clip.soloGroup.gotoAndStop(1);
 			}
-			
+			clip.innerCircle.visible = false;
 			clip.faceHole.visible = false;
+			
+			//icons for instructions
+			clip.headTurn.stop();
+			clip.headTurn.visible = false;
+			clip.iconZoom.visible = false;
 			
 			var l:URLLoader = new URLLoader();
 			l.addEventListener(Event.COMPLETE, uvsLoaded);
@@ -149,6 +159,8 @@ package com.gmrmarketing.katyperry.witness
 			clip.btnNoMakeup.removeEventListener(MouseEvent.MOUSE_DOWN, selectNoMakeup);
 			
 			video.attachCamera(null);
+			
+			step2Timer.reset();
 			
 			if (myContainer.contains(clip)){
 				myContainer.removeChild(clip);
@@ -270,6 +282,8 @@ CONFIG::TESTING{
 		
 		private function selectMakeup(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			TweenMax.killTweensOf(clip.btnTriple);
 			TweenMax.killTweensOf(clip.btnTriple.purpleCircle);
 			TweenMax.killTweensOf(clip.btnNoMakeup);
@@ -299,6 +313,8 @@ CONFIG::TESTING{
 		
 		private function selectNoMakeup(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			TweenMax.killTweensOf(clip.btnTriple);
 			TweenMax.killTweensOf(clip.btnTriple.purpleCircle);
 			TweenMax.killTweensOf(clip.btnMakeup);
@@ -330,6 +346,8 @@ CONFIG::TESTING{
 		
 		private function selectTriple(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			TweenMax.killTweensOf(clip.btnNoMakeup);
 			TweenMax.killTweensOf(clip.btnNoMakeup.purpleCircle);
 			TweenMax.killTweensOf(clip.btnMakeup);
@@ -361,6 +379,7 @@ CONFIG::TESTING{
 		//user clicked the back button
 		private function goBack(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			dispatchEvent(new Event(BACK));
 		}		
 		
@@ -427,15 +446,20 @@ CONFIG::TESTING {
 									if (face.scale < 230){
 										clip.instructions.theText.text = "Align the Circles - Move Closer";
 										step2Timer.reset();
-										
+										if(!clip.iconZoom.isPlaying || clip.iconZoom.currentFrame > 60){
+											clip.iconZoom.gotoAndPlay(1);
+										}
 									}else if (face.scale > 270){
 										clip.instructions.theText.text = "Align the Circles - Move Back";
 										step2Timer.reset();
-										
+										if(!clip.iconZoom.isPlaying || clip.iconZoom.currentFrame < 61){
+											clip.iconZoom.gotoAndPlay(61);
+										}
 									}else{
 										clip.instructions.theText.text = "Now, keep that distance";
 										//user has to stay proper for one sec before going to step 2 - turn left
 										step2Timer.start();
+										clip.iconZoom.gotoAndStop(121);//pink circle
 									}
 								}
 								
@@ -492,8 +516,15 @@ CONFIG::TESTING {
 		
 		private function doStep2(e:TimerEvent):void
 		{
+			tim.buttonClicked();
 			tripleStep = 2;
+			
+			clip.headTurn.play();
+			clip.headTurn.visible = true;
+			clip.iconZoom.visible = false;
+			clip.iconZoom.gotoAndStop(1);
 		}
+		
 		
 		private function takeTriplePic(e:TimerEvent):void
 		{
@@ -570,8 +601,11 @@ CONFIG::TESTING {
 		 */
 		private function beginCountdown(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			if (isTriple){
+				
 				//"start" button was pressed - do the triple sequence to better position the user
+				
 				clip.btnTakePhoto.removeEventListener(MouseEvent.MOUSE_DOWN, beginCountdown);
 				
 				hideButtons();
@@ -580,8 +614,7 @@ CONFIG::TESTING {
 				clip.btnTakePhoto.theText.y = -21;
 				clip.btnTakePhoto.addEventListener(MouseEvent.MOUSE_DOWN, cancelPressed, false, 0, true);
 				
-				clip.instructions.theText.text = "Try to keep your face centered";
-				clip.instructions.theText2.text = "";
+				clip.instructions.theText.text = "Try to keep your face centered";				
 				clip.instructions.visible = true;
 				clip.instructions.alpha = 0;
 				clip.innerCircle.visible = true;
@@ -618,6 +651,8 @@ CONFIG::TESTING {
 		 */
 		private function cancelPressed(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			clip.btnTakePhoto.removeEventListener(MouseEvent.MOUSE_DOWN, cancelPressed);
 			
 			clip.btnTakePhoto.theText.text = "Start";
@@ -628,6 +663,8 @@ CONFIG::TESTING {
 			TweenMax.to(clip.innerCircle, .5, {alpha:0});
 			
 			TweenMax.to(clip.instructions, .5, {alpha:0});
+			clip.headTurn.visible = false;
+			clip.iconZoom.visible = false;
 			
 			tripleStep = 0;//triple selected but start not pressed
 			
@@ -638,11 +675,14 @@ CONFIG::TESTING {
 		
 		
 		private function beginTripleSequence():void
-		{			
-			tripleStep = 1;
-			TweenMax.to(clip.instructions, .5, {alpha:1});
-			TweenMax.to(clip.innerCircle, .5, {alpha:1, delay:.25});
-			TweenMax.to(clip.faceHole, .5, {alpha:.6, delay:.25});
+		{
+			tripleStep = 1;			
+			clip.innerCircle.alpha = 1;
+			clip.faceHole.alpha = .6;
+			clip.instructions.alpha = 1;
+			clip.instructions.theText.text = "";
+			clip.iconZoom.visible = true;
+			clip.iconZoom.gotoAndStop(1);
 		}
 		
 		

@@ -54,7 +54,7 @@
 
 		private function update(e:Event):void
 		{ 
-			_n += 2;
+			_n += 1;
 			_perlinBitmapData.perlinNoise(500, 500, 2, seed, false, false, BitmapDataChannel.ALPHA, true, [new Point(-_n, -_n), new Point(-_n, _n*.5)]);			
 			masker.draw(_perlinBitmapData, gradMat, null, null, null, true);//640x360 mask to 1920x1080
 		}

@@ -8,6 +8,8 @@ package com.gmrmarketing.katyperry.witness
 	import flash.geom.Matrix;
 	import flash.text.TextFormat;
 	import com.gmrmarketing.utilities.Validator;
+	import com.gmrmarketing.utilities.TimeoutHelper;
+	
 	
 	public class Result extends EventDispatcher
 	{
@@ -31,6 +33,8 @@ package com.gmrmarketing.katyperry.witness
 		private var isEmail:Boolean;
 		
 		private var errorMsg:MovieClip;
+		
+		private var tim:TimeoutHelper;
 		
 		
 		public function Result()
@@ -63,6 +67,8 @@ package com.gmrmarketing.katyperry.witness
 			errorMsg.x = 574;
 			errorMsg.y = 500;
 			
+			tim = TimeoutHelper.getInstance();
+			
 			numpad.loadKeyFile("numpad.xml");
 			kbd.loadKeyFile("kbd.xml");
 		}
@@ -92,9 +98,15 @@ package com.gmrmarketing.katyperry.witness
 			
 			isEmail = false;
 			
-			clip.addChild(numpad);
-			clip.addChild(kbd);
-			kbd.x = 2000;
+			if(!clip.contains(numpad)){
+				clip.addChild(numpad);
+			}
+			if (!clip.contains(kbd)){
+				clip.addChild(kbd);
+			}
+			
+			numpad.x = 1067;
+			kbd.x = 2000;			
 			
 			//setup for text message
 			photoHolder.x = 127;
@@ -102,15 +114,27 @@ package com.gmrmarketing.katyperry.witness
 			clip.authCheck.x = 1067;
 			clip.authText.x = 1104;
 			clip.emailBG.alpha = 0;			
+			clip.authCheck.gotoAndStop(1);			
 			
 			clip.userInput.text = "000-000-0000";
+			clip.userInput.border = false;
+			clip.userInput.textColor = 0x000000;
+			clip.userInput.height = 64;
+			
 			clip.userInput.x = 1067;
+			clip.userInput.y = 336;
+			
+			clip.btnSend.x = 1067;
+			clip.btnSend.y = 907;
 			
 			userNumber = "";
 			
 			numpad.addEventListener(KeyBoard.KBD, numPadPress, false, 0, true);
 			kbd.addEventListener(KeyBoard.KBD, kbdPress, false, 0, true);
 			
+			clip.getYour.x = 1065;			
+			clip.btnText.x = 1063;
+			clip.btnEmail.x = 1381;
 			clip.btnText.gotoAndStop(1);//blue, selected, bg
 			clip.btnEmail.gotoAndStop(2);//clear bg
 			
@@ -131,6 +155,13 @@ package com.gmrmarketing.katyperry.witness
 				myContainer.removeChild(photoHolder);
 			}
 			
+			if (clip.contains(kbd)){
+				clip.removeChild(kbd);
+			}
+			if (clip.contains(numpad)){
+				clip.removeChild(numpad);
+			}
+			
 			numpad.removeEventListener(KeyBoard.KBD, numPadPress);
 			kbd.removeEventListener(KeyBoard.KBD, kbdPress);
 			
@@ -146,7 +177,13 @@ package com.gmrmarketing.katyperry.witness
 		{
 			var o:Object = new Object();
 			o.isEmail = isEmail;// boolean
-			o.num = userNumber;//phone number or email
+			if (!isEmail){
+				//phone number - remove dashes for NowPik
+				o.num = userNumber.split("-").join("");
+			}else{
+				o.num = userNumber;//email
+			}
+			
 			o.opt = clip.authCheck.currentFrame == 2 ? true : false;
 			
 			return o;
@@ -155,6 +192,8 @@ package com.gmrmarketing.katyperry.witness
 		
 		private function switchToText(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			isEmail = false;
 			
 			clip.btnText.gotoAndStop(1);//blue, selected, bg
@@ -188,6 +227,8 @@ package com.gmrmarketing.katyperry.witness
 		
 		private function switchToEmail(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			isEmail = true;
 			
 			clip.btnText.gotoAndStop(2);//clear bg
@@ -222,6 +263,8 @@ package com.gmrmarketing.katyperry.witness
 		
 		private function toggleAuthCheck(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			if (clip.authCheck.currentFrame == 1){
 				clip.authCheck.gotoAndStop(2);
 			}else{
@@ -232,6 +275,8 @@ package com.gmrmarketing.katyperry.witness
 		
 		private function sendPressed(e:MouseEvent):void
 		{
+			tim.buttonClicked();
+			
 			var v:Boolean;
 			if (isEmail){
 				v = Validator.isValidEmail(userNumber);
@@ -269,12 +314,14 @@ package com.gmrmarketing.katyperry.witness
 		
 		private function retakePressed(e:MouseEvent):void
 		{
+			tim.buttonClicked();
 			dispatchEvent(new Event(RETAKE));
 		}
 		
 		
 		private function numPadPress(e:Event):void
 		{
+			tim.buttonClicked();
 			var c:String = numpad.getKey();
 			
 			if (c == "<<"){
@@ -314,6 +361,7 @@ package com.gmrmarketing.katyperry.witness
 		
 		private function kbdPress(e:Event):void
 		{
+			tim.buttonClicked();
 			var c:String = kbd.getKey();
 			
 			if (c == "<<"){
