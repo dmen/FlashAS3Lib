@@ -277,6 +277,9 @@ package com.gmrmarketing.katyperry.witness
 		{
 			tim.buttonClicked();
 			
+			clip.btnSend.fill.alpha = 1;
+			TweenMax.to(clip.btnSend.fill, .3, {alpha:0});
+			
 			var v:Boolean;
 			if (isEmail){
 				v = Validator.isValidEmail(userNumber);
@@ -295,7 +298,7 @@ package com.gmrmarketing.katyperry.witness
 			}
 			
 			if(v){
-				dispatchEvent(new Event(COMPLETE));
+				TweenMax.delayedCall(.3, sendComplete);//give button highlight time to fade out
 			}else{				
 				myContainer.addChild(errorMsg);				
 				errorMsg.alpha = 0;
@@ -303,6 +306,13 @@ package com.gmrmarketing.katyperry.witness
 				TweenMax.to(errorMsg, .5, {alpha:0, delay:1, onComplete:hideError});
 			}
 		}
+		
+		
+		private function sendComplete():void
+		{
+			dispatchEvent(new Event(COMPLETE));
+		}
+		
 		
 		private function hideError():void
 		{

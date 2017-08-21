@@ -3,6 +3,7 @@ package com.gmrmarketing.katyperry.witness
 	import flash.display.*;
 	import flash.events.*;
 	import flash.utils.Timer;
+	import com.greensock.TweenMax;
 	
 	
 	public class CurrentCustomer extends EventDispatcher
@@ -39,6 +40,8 @@ package com.gmrmarketing.katyperry.witness
 			
 			clip.btnYes.addEventListener(MouseEvent.MOUSE_DOWN, selectedYes, false, 0, true);
 			clip.btnNo.addEventListener(MouseEvent.MOUSE_DOWN, selectedNo, false, 0, true);
+			clip.btnYes.fill.alpha = 0;
+			clip.btnNo.fill.alpha = 0;
 			
 			addCircle();
 			circleTimer.addEventListener(TimerEvent.TIMER, addCircle, false, 0, true);
@@ -75,6 +78,12 @@ package com.gmrmarketing.katyperry.witness
 		private function selectedYes(e:MouseEvent):void
 		{
 			selection = true;
+			clip.btnYes.fill.alpha = 1;
+			TweenMax.to(clip.btnYes.fill, .3, {alpha:0, onComplete:sendComplete});
+		}
+		
+		private function sendComplete():void
+		{
 			dispatchEvent(new Event(COMPLETE));
 		}
 		
@@ -82,7 +91,8 @@ package com.gmrmarketing.katyperry.witness
 		private function selectedNo(e:MouseEvent):void
 		{
 			selection = false;
-			dispatchEvent(new Event(COMPLETE));
+			clip.btnNo.fill.alpha = 1;
+			TweenMax.to(clip.btnNo.fill, .3, {alpha:0, onComplete:sendComplete});
 		}
 		
 	}

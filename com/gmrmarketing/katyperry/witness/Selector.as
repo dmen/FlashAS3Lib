@@ -2,6 +2,8 @@ package com.gmrmarketing.katyperry.witness
 {
 	import flash.display.*;
 	import flash.events.*;
+	import com.greensock.TweenMax;
+	
 	
 	public class Selector extends EventDispatcher
 	{
@@ -39,6 +41,8 @@ package com.gmrmarketing.katyperry.witness
 			
 			clip.btnSolo.addEventListener(MouseEvent.MOUSE_DOWN, selectSolo, false, 0, true);
 			clip.btnGroup.addEventListener(MouseEvent.MOUSE_DOWN, selectGroup, false, 0, true);
+			clip.btnSolo.fill.alpha = 0;
+			clip.btnGroup.fill.alpha = 0;
 		}
 		
 		
@@ -56,6 +60,13 @@ package com.gmrmarketing.katyperry.witness
 		private function selectSolo(e:MouseEvent):void
 		{
 			soloGroup = "solo";
+			clip.btnSolo.fill.alpha = 1;
+			TweenMax.to(clip.btnSolo.fill, .3, {alpha:0, onComplete:sendComplete});
+		}
+		
+		
+		private function sendComplete():void
+		{
 			dispatchEvent(new Event(COMPLETE));
 		}
 		
@@ -63,7 +74,8 @@ package com.gmrmarketing.katyperry.witness
 		private function selectGroup(e:MouseEvent):void
 		{
 			soloGroup = "group";
-			dispatchEvent(new Event(COMPLETE));
+			clip.btnGroup.fill.alpha = 1;
+			TweenMax.to(clip.btnGroup.fill, .3, {alpha:0, onComplete:sendComplete});
 		}
 		
 	}

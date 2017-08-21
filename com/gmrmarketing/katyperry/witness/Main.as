@@ -44,7 +44,7 @@ package com.gmrmarketing.katyperry.witness
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.SHOW_ALL;
-			//Mouse.hide();
+			Mouse.hide();
 			
 			queue = new Queue();
 			queue.fileName = "katyPerryQ";
@@ -174,11 +174,14 @@ package com.gmrmarketing.katyperry.witness
 		
 		/**
 		 * callback from selector - once user presses solo or group
+		 * if the event is null the call came from retakeFromResults() and we need to show the users selection - makeup/no/triple
 		 * @param	e
 		 */
 		private function showSelection(e:Event = null):void
 		{
 			tim.buttonClicked();
+			
+			var showLast:Boolean = e == null ? true : false;
 			
 			selector.removeEventListener(Selector.COMPLETE, showSelection);
 			selector.hide();
@@ -189,14 +192,14 @@ package com.gmrmarketing.katyperry.witness
 				brfManager.setNumFacesToTrack(1);
 				solo.addEventListener(SoloFace.COMPLETE, showResults, false, 0, true);
 				solo.addEventListener(SoloFace.BACK, backFromPhoto, false, 0, true);
-				solo.show(brfManager, false, cityDialog.getColorValues(), cityDialog.cityImages);
+				solo.show(brfManager, false, cityDialog.getColorValues(), cityDialog.cityImages, showLast);
 				
 			}else{
 				
 				brfManager.setNumFacesToTrack(4);
 				solo.addEventListener(SoloFace.COMPLETE, showResults, false, 0, true);
 				solo.addEventListener(SoloFace.BACK, backFromPhoto, false, 0, true);
-				solo.show(brfManager, true, cityDialog.getColorValues(), cityDialog.cityImages);
+				solo.show(brfManager, true, cityDialog.getColorValues(), cityDialog.cityImages, showLast);
 				
 			}
 		}
@@ -208,6 +211,8 @@ package com.gmrmarketing.katyperry.witness
 			solo.removeEventListener(SoloFace.BACK, showSelector);
 			solo.hide();
 			
+			tim.buttonClicked();
+			
 			result.addEventListener(Result.COMPLETE, showExitVideo, false, 0, true);
 			result.addEventListener(Result.RETAKE, retakeFromResults, false, 0, true);
 			result.show(solo.userPhoto);
@@ -215,7 +220,7 @@ package com.gmrmarketing.katyperry.witness
 		
 		
 		private function showExitVideo(e:Event):void
-		{
+		{			
 			result.removeEventListener(Result.COMPLETE, showExitVideo);
 			result.removeEventListener(Result.RETAKE, retakeFromResults);
 			result.hide();
@@ -246,6 +251,7 @@ package com.gmrmarketing.katyperry.witness
 			//should also keep their makeup/triple/nomakeup selection
 			showSelection();//photo screen with solo/group already selected - they can go back to reselect that
 		}
+		
 		
 		/**
 		 * called 200ms after thanks shows itself 

@@ -47,7 +47,7 @@ package com.gmrmarketing.katyperry.witness
 		
 		private function showTwo():void
 		{
-			clip.scaleX = clip.scaleY = 3;
+			clip.scaleX = clip.scaleY = 4.5;
 			clip.alpha = 1;
 			clip.theText.text = "2";
 			
@@ -57,7 +57,7 @@ package com.gmrmarketing.katyperry.witness
 		
 		private function showOne():void
 		{
-			clip.scaleX = clip.scaleY = 3;
+			clip.scaleX = clip.scaleY = 4.5;
 			clip.alpha = 1;
 			clip.theText.text = "1";
 			

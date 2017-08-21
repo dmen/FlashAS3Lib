@@ -80,6 +80,9 @@ package com.gmrmarketing.katyperry.witness
 		private var step2Timer:Timer;
 		
 		private var tim:TimeoutHelper;
+		private var restoreSelection:Boolean;//set in show
+		private var isZoomPlaying:Boolean;//flag because isPlaying doesn't seem to work 
+		
 		
 		
 		public function SoloFace()
@@ -115,8 +118,9 @@ package com.gmrmarketing.katyperry.witness
 		 * @param	group
 		 * @param	colorValues
 		 * @param	cIms Array with two bitmapData's of the city image - index 0 is black text, index 1 is white text
+		 * @param	showLastSelection if true the button state changes depending on the state of isTriple and isApplyingMakeup
 		 */
-		public function show(b:BRFManager, group:Boolean, colorValues:Array, cIms:Array):void
+		public function show(b:BRFManager, group:Boolean, colorValues:Array, cIms:Array, showLastSelection:Boolean):void
 		{			
 			if (!myContainer.contains(clip)){
 				myContainer.addChild(clip);
@@ -126,16 +130,18 @@ package com.gmrmarketing.katyperry.witness
 			isGroup = group;
 			colorVals = colorValues;
 			cityImages = cIms;
+			restoreSelection = showLastSelection; 
 			
 			//if group - hide the triple face and head shape buttons
 			if (isGroup){
 				clip.btnTriple.visible = false;	
-				clip.soloGroup.gotoAndStop(2);
+				clip.soloGroup.gotoAndStop(2);//big word on the left side
 			}else{
 				//solo
 				clip.btnTriple.visible = true;
-				clip.soloGroup.gotoAndStop(1);
+				clip.soloGroup.gotoAndStop(1);//big word on the left side
 			}
+			
 			clip.innerCircle.visible = false;
 			clip.faceHole.visible = false;
 			
@@ -238,32 +244,101 @@ CONFIG::TESTING{
 				clip.addChildAt(f3d, 0);
 			}
 			
-			isApplyingMakeup = true;
-			isTriple = false;
 			tripleStep = 0;
+			//button default - is istriple it will change to start
+			clip.btnTakePhoto.theText.text = "Take Photo";
+			clip.btnTakePhoto.theText.y = -41;
+			
+			if (restoreSelection){
+				
+				if (isTriple){
+					clip.btnTriple.alpha = 1;
+					clip.btnTriple.x = 960;
+					clip.btnTriple.y = 766;
+					clip.btnTriple.scaleX = clip.btnTriple.scaleY = 1;
+					clip.btnTriple.purpleCircle.scaleX = clip.btnTriple.purpleCircle.scaleY = 1.2;
+					
+					clip.btnMakeup.alpha = 1;
+					clip.btnMakeup.x = 835;
+					clip.btnMakeup.y = 831;
+					clip.btnMakeup.scaleX = clip.btnMakeup.scaleY = .75;
+					clip.btnMakeup.purpleCircle.scaleX = clip.btnMakeup.purpleCircle.scaleY = .75;
+					
+					clip.btnNoMakeup.alpha = 1;
+					clip.btnNoMakeup.x = 1085;
+					clip.btnNoMakeup.y = 831;
+					clip.btnNoMakeup.scaleX = clip.btnNoMakeup.scaleY = .75;
+					clip.btnNoMakeup.purpleCircle.scaleX = clip.btnNoMakeup.purpleCircle.scaleY = .75;
+					
+					//button
+					clip.btnTakePhoto.theText.text = "Start";
+					clip.btnTakePhoto.theText.y = -21;
+			
+				}else if (isApplyingMakeup){
+					clip.btnMakeup.alpha = 1;
+					clip.btnMakeup.x = 835;
+					clip.btnMakeup.y = 831;
+					clip.btnMakeup.scaleX = clip.btnMakeup.scaleY = 1;
+					clip.btnMakeup.purpleCircle.scaleX = clip.btnMakeup.purpleCircle.scaleY = 1.2;
+					
+					clip.btnTriple.alpha = 1;
+					clip.btnTriple.x = 960;
+					clip.btnTriple.y = 766;
+					clip.btnTriple.scaleX = clip.btnTriple.scaleY = .75;
+					clip.btnTriple.purpleCircle.scaleX = clip.btnTriple.purpleCircle.scaleY = .75;
+					
+					clip.btnNoMakeup.alpha = 1;
+					clip.btnNoMakeup.x = 1085;
+					clip.btnNoMakeup.y = 831;
+					clip.btnNoMakeup.scaleX = clip.btnNoMakeup.scaleY = .75;
+					clip.btnNoMakeup.purpleCircle.scaleX = clip.btnNoMakeup.purpleCircle.scaleY = .75;
+				}else{
+					clip.btnMakeup.alpha = 1;
+					clip.btnMakeup.x = 835;
+					clip.btnMakeup.y = 831;
+					clip.btnMakeup.scaleX = clip.btnMakeup.scaleY = .75;
+					clip.btnMakeup.purpleCircle.scaleX = clip.btnMakeup.purpleCircle.scaleY = .75;
+					
+					clip.btnTriple.alpha = 1;
+					clip.btnTriple.x = 960;
+					clip.btnTriple.y = 766;
+					clip.btnTriple.scaleX = clip.btnTriple.scaleY = .75;
+					clip.btnTriple.purpleCircle.scaleX = clip.btnTriple.purpleCircle.scaleY = .75;
+					
+					clip.btnNoMakeup.alpha = 1;
+					clip.btnNoMakeup.x = 1085;
+					clip.btnNoMakeup.y = 831;
+					clip.btnNoMakeup.scaleX = clip.btnNoMakeup.scaleY = 1;
+					clip.btnNoMakeup.purpleCircle.scaleX = clip.btnNoMakeup.purpleCircle.scaleY = 1.2;
+				}
+				
+			}else{
+				isApplyingMakeup = true;
+				isTriple = false;
+				
+				//makeup selected by default
+				clip.btnMakeup.alpha = 1;
+				clip.btnMakeup.x = 835;
+				clip.btnMakeup.y = 831;
+				clip.btnMakeup.scaleX = clip.btnMakeup.scaleY = 1;
+				clip.btnMakeup.purpleCircle.scaleX = clip.btnMakeup.purpleCircle.scaleY = 1.2;
+				
+				clip.btnTriple.alpha = 1;
+				clip.btnTriple.x = 960;
+				clip.btnTriple.y = 766;
+				clip.btnTriple.scaleX = clip.btnTriple.scaleY = .75;
+				clip.btnTriple.purpleCircle.scaleX = clip.btnTriple.purpleCircle.scaleY = .75;
+				
+				clip.btnNoMakeup.alpha = 1;
+				clip.btnNoMakeup.x = 1085;
+				clip.btnNoMakeup.y = 831;
+				clip.btnNoMakeup.scaleX = clip.btnNoMakeup.scaleY = .75;
+				clip.btnNoMakeup.purpleCircle.scaleX = clip.btnNoMakeup.purpleCircle.scaleY = .75;
+			}			
 			
 			clip.instructions.visible = false;
 			clip.faceHole.visible = false;
-			clip.innerCircle.visible = false;
-			
-			//makeup selected by default
-			clip.btnMakeup.alpha = 1;
-			clip.btnMakeup.x = 835;
-			clip.btnMakeup.y = 831;
-			clip.btnMakeup.scaleX = clip.btnMakeup.scaleY = 1;
-			clip.btnMakeup.purpleCircle.scaleX = clip.btnMakeup.purpleCircle.scaleY = 1.2;
-			
-			clip.btnTriple.alpha = 1;
-			clip.btnTriple.x = 960;
-			clip.btnTriple.y = 766;
-			clip.btnTriple.scaleX = clip.btnTriple.scaleY = .75;
-			clip.btnTriple.purpleCircle.scaleX = clip.btnTriple.purpleCircle.scaleY = .75;
-			
-			clip.btnNoMakeup.alpha = 1;
-			clip.btnNoMakeup.x = 1085;
-			clip.btnNoMakeup.y = 831;
-			clip.btnNoMakeup.scaleX = clip.btnNoMakeup.scaleY = .75;
-			clip.btnNoMakeup.purpleCircle.scaleX = clip.btnNoMakeup.purpleCircle.scaleY = .75;
+			clip.innerCircle.visible = false;	
 			
 			clip.btnMakeup.addEventListener(MouseEvent.MOUSE_DOWN, selectMakeup, false, 0, true);
 			clip.btnTriple.addEventListener(MouseEvent.MOUSE_DOWN, selectTriple, false, 0, true);
@@ -272,8 +347,7 @@ CONFIG::TESTING{
 			clip.btnBack.addEventListener(MouseEvent.MOUSE_DOWN, goBack, false, 0, true);
 			
 			//button
-			clip.btnTakePhoto.theText.text = "Take Photo";
-			clip.btnTakePhoto.theText.y = -41;
+			clip.btnTakePhoto.removeEventListener(MouseEvent.MOUSE_DOWN, cancelPressed);
 			clip.btnTakePhoto.addEventListener(MouseEvent.MOUSE_DOWN, beginCountdown, false, 0, true);
 			
 			clip.addEventListener(Event.ENTER_FRAME, update, false, 0, true);
@@ -444,22 +518,25 @@ CONFIG::TESTING {
 								//scale text only changes on step 1
 								if (tripleStep == 1){									
 									if (face.scale < 230){
-										clip.instructions.theText.text = "Align the Circles - Move Closer";
+										clip.instructions.theText.text = "Move Closer";
 										step2Timer.reset();
-										if(!clip.iconZoom.isPlaying || clip.iconZoom.currentFrame > 60){
+										if (!isZoomPlaying){
+											isZoomPlaying = true;
 											clip.iconZoom.gotoAndPlay(1);
 										}
 									}else if (face.scale > 270){
-										clip.instructions.theText.text = "Align the Circles - Move Back";
+										clip.instructions.theText.text = "Move Back";
 										step2Timer.reset();
-										if(!clip.iconZoom.isPlaying || clip.iconZoom.currentFrame < 61){
-											clip.iconZoom.gotoAndPlay(61);
+										if (!!isZoomPlaying){
+											isZoomPlaying = true;
+											clip.iconZoom.gotoAndPlay(1);
 										}
 									}else{
-										clip.instructions.theText.text = "Now, keep that distance";
+										clip.instructions.theText.text = "Perfect";
 										//user has to stay proper for one sec before going to step 2 - turn left
 										step2Timer.start();
-										clip.iconZoom.gotoAndStop(121);//pink circle
+										isZoomPlaying = false;
+										clip.iconZoom.gotoAndStop(76);//pink circle with check
 									}
 								}
 								
@@ -475,31 +552,25 @@ CONFIG::TESTING {
 								}else{
 									TweenMax.killTweensOf(clip.faceHole);
 									TweenMax.to(clip.faceHole, .5, {colorTransform:{tint:0xAB66B2, tintAmount:1}});
-								}
-								
-								//timer that switches between 1 and 2... cancel timer ???
+								}								
 							
-								if(tripleStep == 2){
-									//rotation goes above 0 when looking left... doesn't seem to work when looking right								
-									
+								if(tripleStep == 2){									
 									if (face.rotationY < .35){
-										clip.instructions.theText.text = "Slowly Turn Left";
+										clip.instructions.theText.text = "Turn your head to the left";
 									}else if (face.rotationY > .6){
-										clip.instructions.theText.text = "Too Far Left";
+										clip.instructions.theText.text = "Too far left";
 									}else{
-										clip.instructions.theText.text = "Hold That Pose!";
+										clip.instructions.theText.text = "Hold that pose!";
 									}
 								}
 								
 							}//tripleStep == 1 || tripleStep == 2
 							
 							
-							if (tripleStep == 2 && doTakePhoto && face.scale > 230 && face.scale < 270 && face.rotationY > .35 && face.rotationY < .6){							
-								
-								//SHOW - HOLD IT RIGHT THERE!!!
+							if (tripleStep == 2 && doTakePhoto && face.scale > 230 && face.scale < 270 && face.rotationY > .35 && face.rotationY < .6){								
 								
 								TweenMax.to(clip.faceHole, .3, {alpha:0});
-								TweenMax.to(clip.innerCircle, .3, {alpha:0});							
+								TweenMax.to(clip.innerCircle, .3, {alpha:0});					
 								
 								doTakePhoto = false;
 								
@@ -514,6 +585,12 @@ CONFIG::TESTING {
 			}
 		}
 		
+		
+		/**
+		 * Called if step2Timer times out
+		 * changes to step 2 - turn to the left
+		 * @param	e
+		 */
 		private function doStep2(e:TimerEvent):void
 		{
 			tim.buttonClicked();
@@ -523,6 +600,7 @@ CONFIG::TESTING {
 			clip.headTurn.visible = true;
 			clip.iconZoom.visible = false;
 			clip.iconZoom.gotoAndStop(1);
+			isZoomPlaying = false;
 		}
 		
 		
@@ -601,10 +679,14 @@ CONFIG::TESTING {
 		 */
 		private function beginCountdown(e:MouseEvent):void
 		{
+			clip.btnTakePhoto.fill.alpha = 1;
+			TweenMax.to(clip.btnTakePhoto.fill, .3, {alpha:0});
+			
 			tim.buttonClicked();
 			if (isTriple){
 				
 				//"start" button was pressed - do the triple sequence to better position the user
+				tripleStep = 1;
 				
 				clip.btnTakePhoto.removeEventListener(MouseEvent.MOUSE_DOWN, beginCountdown);
 				
@@ -614,16 +696,20 @@ CONFIG::TESTING {
 				clip.btnTakePhoto.theText.y = -21;
 				clip.btnTakePhoto.addEventListener(MouseEvent.MOUSE_DOWN, cancelPressed, false, 0, true);
 				
-				clip.instructions.theText.text = "Try to keep your face centered";				
+				clip.instructions.theText.text = "";				
 				clip.instructions.visible = true;
 				clip.instructions.alpha = 0;
-				clip.innerCircle.visible = true;
-				clip.innerCircle.alpha = 0;
-				clip.faceHole.visible = true;
-				clip.faceHole.alpha = 0;
 				
-				TweenMax.to(clip.instructions, .5, {alpha:1});				
-				TweenMax.to(clip.instructions, 1, {alpha:0, delay:3, onComplete:beginTripleSequence});				
+				clip.innerCircle.visible = true;
+				clip.innerCircle.alpha = 1;
+				
+				clip.faceHole.visible = true;
+				clip.faceHole.alpha = .6;
+				
+				TweenMax.to(clip.instructions, .5, {alpha:1});
+							
+				clip.iconZoom.visible = true;
+				clip.iconZoom.gotoAndPlay(1);
 				
 			}else{
 				hideButtons();
@@ -653,6 +739,8 @@ CONFIG::TESTING {
 		{
 			tim.buttonClicked();
 			
+			TweenMax.killTweensOf(clip.instructions);//prevents beginTripleSequence() callback from beginCountdown()
+			
 			clip.btnTakePhoto.removeEventListener(MouseEvent.MOUSE_DOWN, cancelPressed);
 			
 			clip.btnTakePhoto.theText.text = "Start";
@@ -671,19 +759,7 @@ CONFIG::TESTING {
 			TweenMax.to(clip.btnMakeup, .5, {scaleX:.75, scaleY:.75, x:835, y:831, alpha:1});
 			TweenMax.to(clip.btnTriple, .5, {scaleX:1, scaleY:1, x:960, y:766, alpha:1});
 			TweenMax.to(clip.btnNoMakeup, .5, {scaleX:.75, scaleY:.75, x:1085, y:831, alpha:1});
-		}
-		
-		
-		private function beginTripleSequence():void
-		{
-			tripleStep = 1;			
-			clip.innerCircle.alpha = 1;
-			clip.faceHole.alpha = .6;
-			clip.instructions.alpha = 1;
-			clip.instructions.theText.text = "";
-			clip.iconZoom.visible = true;
-			clip.iconZoom.gotoAndStop(1);
-		}
+		}		
 		
 		
 		private function createTriple(userPhoto:BitmapData):BitmapData
@@ -760,8 +836,8 @@ CONFIG::TESTING {
 			var top:int = 50;
 			finalComp.copyPixels(pink, pink.rect, new Point(130 + leftEdge * .96, top + 70), null, null, true);
 			finalComp.copyPixels(userEighty, userEighty.rect, new Point(130, top + 20), null, null, true);
-			finalComp.copyPixels(pink, pink.rect, new Point(230 + leftEdge * .98, top + 70), null, null, true);//was 243
-			finalComp.copyPixels(userNinety, userNinety.rect, new Point(230, top + 10), null, null, true);
+			finalComp.copyPixels(pink, pink.rect, new Point(240 + leftEdge * .98, top + 70), null, null, true);//was 243
+			finalComp.copyPixels(userNinety, userNinety.rect, new Point(240, top + 10), null, null, true);
 			finalComp.copyPixels(pink, pink.rect, new Point(350 + leftEdge, top + 70), null, null, true);
 			finalComp.copyPixels(faceCrop, faceCrop.rect, new Point(350, top), null, null, true);
 			
