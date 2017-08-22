@@ -76,6 +76,12 @@ package com.gmrmarketing.katyperry.witness
 			TweenMax.to(white, .5, {alpha:0, onComplete:allDone});
 		}
 		
+		public function hide():void
+		{
+			TweenMax.killTweensOf(clip);
+			TweenMax.killTweensOf(white);
+			allDone();
+		}
 		
 		private function allDone():void
 		{

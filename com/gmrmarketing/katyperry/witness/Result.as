@@ -32,8 +32,6 @@ package com.gmrmarketing.katyperry.witness
 		
 		private var isEmail:Boolean;
 		
-		private var errorMsg:MovieClip;
-		
 		private var tim:TimeoutHelper;
 		
 		
@@ -61,11 +59,7 @@ package com.gmrmarketing.katyperry.witness
 			photoScaler = new Matrix();
 			photoScaler.scale(.6055555, .6055555);//654x654
 			
-			photoHolder = new Bitmap(photo);		
-			
-			errorMsg = new errorMess();
-			errorMsg.x = 574;
-			errorMsg.y = 500;
+			photoHolder = new Bitmap(photo);
 			
 			tim = TimeoutHelper.getInstance();
 			
@@ -138,6 +132,9 @@ package com.gmrmarketing.katyperry.witness
 			clip.btnText.gotoAndStop(1);//blue, selected, bg
 			clip.btnEmail.gotoAndStop(2);//clear bg
 			
+			clip.authError.alpha = 0;
+			clip.emailError.alpha = 0;
+			
 			clip.btnText.addEventListener(MouseEvent.MOUSE_DOWN, switchToText, false, 0, true);
 			clip.btnEmail.addEventListener(MouseEvent.MOUSE_DOWN, switchToEmail, false, 0, true);
 			clip.authCheck.addEventListener(MouseEvent.MOUSE_DOWN, toggleAuthCheck, false, 0, true);
@@ -195,6 +192,8 @@ package com.gmrmarketing.katyperry.witness
 			tim.buttonClicked();
 			
 			isEmail = false;
+			clip.emailError.alpha = 0;
+			clip.authError.alpha = 0;
 			
 			clip.btnText.gotoAndStop(1);//blue, selected, bg
 			clip.btnEmail.gotoAndStop(2);//clear bg	
@@ -213,7 +212,7 @@ package com.gmrmarketing.katyperry.witness
 			TweenMax.to(clip.btnEmail, .5, {x:1381, ease:Expo.easeOut});
 			
 			TweenMax.to(clip.userInput, .5, {x:1067, y:336, ease:Expo.easeOut});
-			TweenMax.to(clip.btnSend, .5, {x:1067, y:907, ease:Expo.easeOut});
+			TweenMax.to(clip.btnSend, .5, {x:1067, y:915, ease:Expo.easeOut});
 			
 			TweenMax.to(clip.authCheck, .5, {x:1067, ease:Expo.easeOut});
 			TweenMax.to(clip.authText, .5, {x:1104, ease:Expo.easeOut});			
@@ -230,6 +229,8 @@ package com.gmrmarketing.katyperry.witness
 			tim.buttonClicked();
 			
 			isEmail = true;
+			clip.emailError.alpha = 0;
+			clip.authError.alpha = 0;
 			
 			clip.btnText.gotoAndStop(2);//clear bg
 			clip.btnEmail.gotoAndStop(1);//blue, selected bg
@@ -284,26 +285,33 @@ package com.gmrmarketing.katyperry.witness
 			if (isEmail){
 				v = Validator.isValidEmail(userNumber);
 				if (!v){
-					errorMsg.theText.text = "Please enter a valid email address";
+					TweenMax.killTweensOf(clip.emailError);
+					clip.emailError.text = "Please enter a valid email address";
+					clip.emailError.alpha = 1;
+					clip.emailError.x = 860;
+					clip.emailError.y = 420;
+					TweenMax.to(clip.emailError, 1, {alpha:0, delay:3});
 				}
 			}else{
 				v = Validator.isValidPhoneNumber(userNumber);
 				if (!v){
-					errorMsg.theText.text = "Please enter a valid phone number";
+					TweenMax.killTweensOf(clip.emailError);
+					clip.emailError.text = "Please enter a valid phone number";
+					clip.emailError.alpha = 1;
+					clip.emailError.x = 1396;
+					clip.emailError.y = 353;
+					TweenMax.to(clip.emailError, 1, {alpha:0, delay:3});
 				}
 				if (clip.authCheck.currentFrame != 2){
 					v = false;
-					errorMsg.theText.text = "You must check the consent box";
+					TweenMax.killTweensOf(clip.authError);
+					clip.authError.alpha = 1;
+					TweenMax.to(clip.authError, 1, {alpha:0, delay:3});
 				}
 			}
 			
 			if(v){
 				TweenMax.delayedCall(.3, sendComplete);//give button highlight time to fade out
-			}else{				
-				myContainer.addChild(errorMsg);				
-				errorMsg.alpha = 0;
-				TweenMax.to(errorMsg, .5, {alpha:1});
-				TweenMax.to(errorMsg, .5, {alpha:0, delay:1, onComplete:hideError});
 			}
 		}
 		
@@ -311,14 +319,6 @@ package com.gmrmarketing.katyperry.witness
 		private function sendComplete():void
 		{
 			dispatchEvent(new Event(COMPLETE));
-		}
-		
-		
-		private function hideError():void
-		{
-			if (myContainer.contains(errorMsg)){
-				myContainer.removeChild(errorMsg);
-			}
 		}
 		
 		

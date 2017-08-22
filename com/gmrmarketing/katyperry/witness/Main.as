@@ -44,7 +44,7 @@ package com.gmrmarketing.katyperry.witness
 		{
 			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			stage.scaleMode = StageScaleMode.SHOW_ALL;
-			Mouse.hide();
+			//Mouse.hide();
 			
 			queue = new Queue();
 			queue.fileName = "katyPerryQ";
@@ -97,7 +97,7 @@ package com.gmrmarketing.katyperry.witness
 			
 			tim = TimeoutHelper.getInstance();
 			tim.addEventListener(TimeoutHelper.TIMED_OUT, timReset);
-			tim.init(45000);
+			tim.init(60000);
 			
 			init();
 			//result.show(new BitmapData(1080, 1080, false, 0xff0000));

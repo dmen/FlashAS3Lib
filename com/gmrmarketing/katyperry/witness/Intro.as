@@ -56,13 +56,14 @@ package com.gmrmarketing.katyperry.witness
 		 */
 		public function disableRemote():void
 		{
-			clip.stage.removeEventListener(KeyboardEvent.KEY_DOWN, introCheck);
+			myContainer.stage.removeEventListener(KeyboardEvent.KEY_DOWN, introCheck);
 		}
 		
 		
 		public function enableRemote():void
 		{
-			clip.stage.addEventListener(KeyboardEvent.KEY_DOWN, introCheck, false, 0, true);
+			myContainer.stage.addEventListener(KeyboardEvent.KEY_DOWN, introCheck, false, 0, true);
+			myContainer.stage.focus = myContainer.stage;
 		}
 		
 		
@@ -71,6 +72,7 @@ package com.gmrmarketing.katyperry.witness
 			if (myContainer.contains(clip)){
 				myContainer.removeChild(clip);
 			}
+			myContainer.stage.removeEventListener(KeyboardEvent.KEY_DOWN, introCheck);
 			perlin.hide();
 			circleTimer.removeEventListener(TimerEvent.TIMER, addCircle);
 			circleTimer.reset();
@@ -80,7 +82,7 @@ package com.gmrmarketing.katyperry.witness
 		private function introCheck(e:KeyboardEvent):void
 		{
 			if (e.charCode == 32){
-				clip.stage.removeEventListener(KeyboardEvent.KEY_DOWN, introCheck);
+				myContainer.stage.removeEventListener(KeyboardEvent.KEY_DOWN, introCheck);
 				dispatchEvent(new Event(COMPLETE));
 			}
 		}

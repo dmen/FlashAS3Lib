@@ -158,6 +158,9 @@ package com.gmrmarketing.katyperry.witness
 		
 		public function hide():void
 		{
+			countdown.removeEventListener(Countdown.FLASH, takePic);
+			countdown.hide();
+			
 			clip.removeEventListener(Event.ENTER_FRAME, update);
 			
 			clip.btnMakeup.removeEventListener(MouseEvent.MOUSE_DOWN, selectMakeup);
@@ -679,6 +682,7 @@ CONFIG::TESTING {
 		 */
 		private function beginCountdown(e:MouseEvent):void
 		{
+			clip.btnTakePhoto.removeEventListener(MouseEvent.MOUSE_DOWN, beginCountdown);
 			clip.btnTakePhoto.fill.alpha = 1;
 			TweenMax.to(clip.btnTakePhoto.fill, .3, {alpha:0});
 			
@@ -686,9 +690,7 @@ CONFIG::TESTING {
 			if (isTriple){
 				
 				//"start" button was pressed - do the triple sequence to better position the user
-				tripleStep = 1;
-				
-				clip.btnTakePhoto.removeEventListener(MouseEvent.MOUSE_DOWN, beginCountdown);
+				tripleStep = 1;				
 				
 				hideButtons();
 				
