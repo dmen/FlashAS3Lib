@@ -1,51 +1,71 @@
-/**
- * Unique Hubble service - modify this class per project
- * Version 1 - 9/22/2015
- * 
- * Properties of the data object sent to send()
- * image - Base64 encoded String - used by the HubbleService.submitPhoto() method
- * email, name, etc. Any properties used to construct the JSON in the send() method
- * printed - If printed == true then the PrintAPI will be called
- */
+﻿// Decompiled by AS3 Sorcerer 5.64
+// www.as3sorcerer.com
+
+//com.gmrmarketing.katyperry.witness.HubbleServiceExtender
+
 package com.gmrmarketing.katyperry.witness
 {
-	import com.gmrmarketing.utilities.Utility;
-	import com.gmrmarketing.utilities.queue.HubbleService;
-	
-	public class HubbleServiceExtender extends HubbleService
-	{		
-		
-		public function HubbleServiceExtender()
-		{
-			super();
-		}
-		
-		
-		//data is original data from app, with qNumTries property added by the Queue
-		override public function send(data:Object):void
-		{
-			//Build the JSON response object from the incoming app data
-			var resp:Object = { "MethodData": { "InteractionId":496, "FieldResponses":[]}};			
-			
-			if (data.original.customer == true) {
-				resp.MethodData.FieldResponses.push( { "FieldId":4152, "ResponseID": 8491, "Response":"Yes" });
-			}else {
-				resp.MethodData.FieldResponses.push( { "FieldId":4152, "ResponseID": 8492, "Response":"No" });	
-			}
-			
-			if (data.original.isEmail == true) {
-				resp.MethodData.FieldResponses.push( { "FieldId":4157, "Response":data.original.num });			
-			}else {
-				resp.MethodData.FieldResponses.push( { "FieldId":4155, "Response":data.original.num });	
-				resp.MethodData.FieldResponses.push( { "FieldId":4156, "Response":data.original.opt });	
-			}			
-			
-			data.photoFieldID = 4154;			
-			data.printed = false;			
-			data.responseObject = resp;
-			
-			super.send(data);
-		}
-	}
-	
-}
+    import com.gmrmarketing.utilities.queue.HubbleService;
+
+    public class HubbleServiceExtender extends HubbleService 
+    {
+
+        public function HubbleServiceExtender()
+        {
+            super("gmrexp", "witness");
+        }
+
+        override public function send(_arg_1:Object):void
+        {
+            var _local_2:Object = {"MethodData":{
+                    "InteractionId":556,
+                    "FieldResponses":[]
+                }};
+            if (_arg_1.original.customer == true)
+            {
+                _local_2.MethodData.FieldResponses.push({
+                    "FieldId":4863,
+                    "OptionId":9519,
+                    "Response":"Yes"
+                });
+            }
+            else
+            {
+                _local_2.MethodData.FieldResponses.push({
+                    "FieldId":4863,
+                    "OptionId":9520,
+                    "Response":"No"
+                });
+            };
+            if (_arg_1.original.isEmail == true)
+            {
+                _local_2.MethodData.FieldResponses.push({
+                    "FieldId":4867,
+                    "Response":_arg_1.original.num
+                });
+            }
+            else
+            {
+                _local_2.MethodData.FieldResponses.push({
+                    "FieldId":4865,
+                    "Response":_arg_1.original.num
+                });
+                _local_2.MethodData.FieldResponses.push({
+                    "FieldId":4866,
+                    "Response":_arg_1.original.opt
+                });
+            };
+            _local_2.MethodData.FieldResponses.push({
+                "FieldId":4868,
+                "Response":_arg_1.original.part
+            });
+            _arg_1.photoFieldID = 0x1300;
+            _arg_1.printed = false;
+            _arg_1.responseObject = _local_2;
+            super.send(_arg_1);
+        }
+
+
+    }
+}//package com.gmrmarketing.katyperry.witness
+

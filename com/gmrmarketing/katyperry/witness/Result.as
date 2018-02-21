@@ -1,396 +1,507 @@
+﻿// Decompiled by AS3 Sorcerer 5.64
+// www.as3sorcerer.com
+
+//com.gmrmarketing.katyperry.witness.Result
+
 package com.gmrmarketing.katyperry.witness
 {
-	import flash.events.*;
-	import flash.display.*;
-	import com.dmennenoh.keyboard.KeyBoard;
-	import com.greensock.easing.*;
-	import com.greensock.TweenMax;
-	import flash.geom.Matrix;
-	import flash.text.TextFormat;
-	import com.gmrmarketing.utilities.Validator;
-	import com.gmrmarketing.utilities.TimeoutHelper;
-	
-	
-	public class Result extends EventDispatcher
-	{
-		public static const COMPLETE:String = "resultComplete";
-		public static const RETAKE:String = "retakePhoto";
-		
-		private var clip:MovieClip;
-		private var myContainer:DisplayObjectContainer;
-		
-		private var numpad:KeyBoard;
-		private var kbd:KeyBoard;
-		private var userNumber:String;
-		
-		private var spacer8Message:TextFormat;
-		private var spacer8Email:TextFormat;
-		
-		private var photo:BitmapData;
-		private var photoScaler:Matrix;
-		private var photoHolder:Bitmap;
-		
-		private var isEmail:Boolean;
-		
-		private var tim:TimeoutHelper;
-		
-		
-		public function Result()
-		{
-			clip = new results();
-			
-			numpad = new KeyBoard();
-			kbd = new KeyBoard();
-			numpad.x = 1067;
-			numpad.y = 340;
-			kbd.x = 2000;
-			kbd.y = 481;
-			
-			spacer8Message = new TextFormat(); 
-			spacer8Message.letterSpacing = 0; 
-			spacer8Message.size = 42; 
-			
-			spacer8Email = new TextFormat();
-			spacer8Email.size = 24; 
-			spacer8Email.letterSpacing = 0; 
-			
-			photo = new BitmapData(654, 654, false, 0x000000);
-			
-			photoScaler = new Matrix();
-			photoScaler.scale(.6055555, .6055555);//654x654
-			
-			photoHolder = new Bitmap(photo);
-			
-			tim = TimeoutHelper.getInstance();
-			
-			numpad.loadKeyFile("numpad.xml");
-			kbd.loadKeyFile("kbd.xml");
-		}
-		
-		
-		public function set container(c:DisplayObjectContainer):void
-		{
-			myContainer = c;
-		}
-		
-		
-		/**
-		 * photo comes in full size at 1080x1080  .592592 scale to 640x640
-		 * @param	photo
-		 */
-		public function show(p:BitmapData):void
-		{
-			if (!myContainer.contains(clip)){
-				myContainer.addChild(clip);
-			}
-			
-			if (!myContainer.contains(photoHolder)){
-				myContainer.addChild(photoHolder);
-			}
-			
-			photo.draw(p, photoScaler, null, null, null, true);
-			
-			isEmail = false;
-			
-			if(!clip.contains(numpad)){
-				clip.addChild(numpad);
-			}
-			if (!clip.contains(kbd)){
-				clip.addChild(kbd);
-			}
-			
-			numpad.x = 1067;
-			kbd.x = 2000;			
-			
-			//setup for text message
-			photoHolder.x = 127;
-			photoHolder.y = 210;
-			clip.authCheck.x = 1067;
-			clip.authText.x = 1104;
-			clip.emailBG.alpha = 0;			
-			clip.authCheck.gotoAndStop(1);			
-			
-			clip.userInput.text = "000-000-0000";
-			clip.userInput.border = false;
-			clip.userInput.textColor = 0x000000;
-			clip.userInput.height = 64;
-			
-			clip.userInput.x = 1067;
-			clip.userInput.y = 336;
-			
-			clip.btnSend.x = 1067;
-			clip.btnSend.y = 907;
-			
-			userNumber = "";
-			
-			numpad.addEventListener(KeyBoard.KBD, numPadPress, false, 0, true);
-			kbd.addEventListener(KeyBoard.KBD, kbdPress, false, 0, true);
-			
-			clip.getYour.x = 1065;			
-			clip.btnText.x = 1063;
-			clip.btnEmail.x = 1381;
-			clip.btnText.gotoAndStop(1);//blue, selected, bg
-			clip.btnEmail.gotoAndStop(2);//clear bg
-			
-			clip.authError.alpha = 0;
-			clip.emailError.alpha = 0;
-			
-			clip.btnText.addEventListener(MouseEvent.MOUSE_DOWN, switchToText, false, 0, true);
-			clip.btnEmail.addEventListener(MouseEvent.MOUSE_DOWN, switchToEmail, false, 0, true);
-			clip.authCheck.addEventListener(MouseEvent.MOUSE_DOWN, toggleAuthCheck, false, 0, true);
-			clip.btnSend.addEventListener(MouseEvent.MOUSE_DOWN, sendPressed, false, 0, true);
-			clip.btnRetake.addEventListener(MouseEvent.MOUSE_DOWN, retakePressed, false, 0, true);
-		}
-		
-		
-		public function hide():void
-		{
-			if (myContainer.contains(clip)){
-				myContainer.removeChild(clip);
-			}
-			if (myContainer.contains(photoHolder)){
-				myContainer.removeChild(photoHolder);
-			}
-			
-			if (clip.contains(kbd)){
-				clip.removeChild(kbd);
-			}
-			if (clip.contains(numpad)){
-				clip.removeChild(numpad);
-			}
-			
-			numpad.removeEventListener(KeyBoard.KBD, numPadPress);
-			kbd.removeEventListener(KeyBoard.KBD, kbdPress);
-			
-			clip.btnText.removeEventListener(MouseEvent.MOUSE_DOWN, switchToText);
-			clip.btnEmail.removeEventListener(MouseEvent.MOUSE_DOWN, switchToEmail);
-			clip.authCheck.removeEventListener(MouseEvent.MOUSE_DOWN, toggleAuthCheck);
-			clip.btnSend.removeEventListener(MouseEvent.MOUSE_DOWN, sendPressed);
-			clip.btnRetake.addEventListener(MouseEvent.MOUSE_DOWN, retakePressed);
-		}
-		
-		
-		public function get data():Object
-		{
-			var o:Object = new Object();
-			o.isEmail = isEmail;// boolean
-			if (!isEmail){
-				//phone number - remove dashes for NowPik
-				o.num = userNumber.split("-").join("");
-			}else{
-				o.num = userNumber;//email
-			}
-			
-			o.opt = clip.authCheck.currentFrame == 2 ? true : false;
-			
-			return o;
-		}
-		
-		
-		private function switchToText(e:MouseEvent):void
-		{
-			tim.buttonClicked();
-			
-			isEmail = false;
-			clip.emailError.alpha = 0;
-			clip.authError.alpha = 0;
-			
-			clip.btnText.gotoAndStop(1);//blue, selected, bg
-			clip.btnEmail.gotoAndStop(2);//clear bg	
-			
-			clip.userInput.background = false;
-			clip.userInput.text = "000-000-0000";
-			//clip.userInput.setTextFormat(spacer8Message);
-			clip.userInput.border = false;
-			clip.userInput.textColor = 0x000000;
-			clip.userInput.height = 64;
-			
-			TweenMax.to(clip.emailBG, .5, {alpha:0});
-			
-			TweenMax.to(clip.getYour, .5, {x:1065, ease:Expo.easeOut});
-			TweenMax.to(clip.btnText, .5, {x:1063, ease:Expo.easeOut});
-			TweenMax.to(clip.btnEmail, .5, {x:1381, ease:Expo.easeOut});
-			
-			TweenMax.to(clip.userInput, .5, {x:1067, y:336, ease:Expo.easeOut});
-			TweenMax.to(clip.btnSend, .5, {x:1067, y:915, ease:Expo.easeOut});
-			
-			TweenMax.to(clip.authCheck, .5, {x:1067, ease:Expo.easeOut});
-			TweenMax.to(clip.authText, .5, {x:1104, ease:Expo.easeOut});			
-			
-			TweenMax.to(numpad, .5, {x:1067, ease:Expo.easeOut});
-			TweenMax.to(kbd, .5, {x:2000, ease:Expo.easeOut});
-			
-			userNumber = "";
-		}
-		
-		
-		private function switchToEmail(e:MouseEvent):void
-		{
-			tim.buttonClicked();
-			
-			isEmail = true;
-			clip.emailError.alpha = 0;
-			clip.authError.alpha = 0;
-			
-			clip.btnText.gotoAndStop(2);//clear bg
-			clip.btnEmail.gotoAndStop(1);//blue, selected bg
-			
-			//clip.userInput.background = true;
-			clip.userInput.text = "ENTER YOUR EMAIL ADDRESS";
-			clip.userInput.setTextFormat(spacer8Email);
-			clip.userInput.textColor = 0xab66b2;
-			//clip.userInput.border = true;
-			//clip.userInput.borderColor = 0xab66b2;
-			//clip.userInput.height = 50;			
-			
-			TweenMax.to(clip.emailBG, .5, {alpha:1});
-			
-			TweenMax.to(clip.getYour, .5, {x:856, ease:Expo.easeOut});
-			TweenMax.to(clip.btnText, .5, {x:856, ease:Expo.easeOut});
-			TweenMax.to(clip.btnEmail, .5, {x:1174, ease:Expo.easeOut});
-			
-			TweenMax.to(clip.userInput, .5, {x:864, y:360, ease:Expo.easeOut});
-			TweenMax.to(clip.btnSend, .5, {x:856, y:825, ease:Expo.easeOut});
-			
-			TweenMax.to(clip.authCheck, .5, {x:1950, ease:Expo.easeOut});
-			TweenMax.to(clip.authText, .5, {x:1950, ease:Expo.easeOut});
-			
-			TweenMax.to(numpad, .5, {x:2000, ease:Expo.easeOut});
-			TweenMax.to(kbd, .5, {x:755, ease:Expo.easeOut});			
-			
-			userNumber = "";
-		}
-		
-		
-		private function toggleAuthCheck(e:MouseEvent):void
-		{
-			tim.buttonClicked();
-			
-			if (clip.authCheck.currentFrame == 1){
-				clip.authCheck.gotoAndStop(2);
-			}else{
-				clip.authCheck.gotoAndStop(1);
-			}
-		}
-		
-		
-		private function sendPressed(e:MouseEvent):void
-		{
-			tim.buttonClicked();
-			
-			clip.btnSend.fill.alpha = 1;
-			TweenMax.to(clip.btnSend.fill, .3, {alpha:0});
-			
-			var v:Boolean;
-			if (isEmail){
-				v = Validator.isValidEmail(userNumber);
-				if (!v){
-					TweenMax.killTweensOf(clip.emailError);
-					clip.emailError.text = "Please enter a valid email address";
-					clip.emailError.alpha = 1;
-					clip.emailError.x = 860;
-					clip.emailError.y = 420;
-					TweenMax.to(clip.emailError, 1, {alpha:0, delay:3});
-				}
-			}else{
-				v = Validator.isValidPhoneNumber(userNumber);
-				if (!v){
-					TweenMax.killTweensOf(clip.emailError);
-					clip.emailError.text = "Please enter a valid phone number";
-					clip.emailError.alpha = 1;
-					clip.emailError.x = 1396;
-					clip.emailError.y = 353;
-					TweenMax.to(clip.emailError, 1, {alpha:0, delay:3});
-				}
-				if (clip.authCheck.currentFrame != 2){
-					v = false;
-					TweenMax.killTweensOf(clip.authError);
-					clip.authError.alpha = 1;
-					TweenMax.to(clip.authError, 1, {alpha:0, delay:3});
-				}
-			}
-			
-			if(v){
-				TweenMax.delayedCall(.3, sendComplete);//give button highlight time to fade out
-			}
-		}
-		
-		
-		private function sendComplete():void
-		{
-			dispatchEvent(new Event(COMPLETE));
-		}
-		
-		
-		private function retakePressed(e:MouseEvent):void
-		{
-			tim.buttonClicked();
-			dispatchEvent(new Event(RETAKE));
-		}
-		
-		
-		private function numPadPress(e:Event):void
-		{
-			tim.buttonClicked();
-			var c:String = numpad.getKey();
-			
-			if (c == "<<"){
-				
-				if(userNumber.length > 0){
-					//delete the dash and the number... since the dash is auto added
-					if (userNumber.length == 5 || userNumber.length == 9 || userNumber.length == 4 || userNumber.length == 8){
-						userNumber = userNumber.substr(0, userNumber.length - 2);						
-					}else{
-						userNumber = userNumber.substr(0, userNumber.length - 1);
-					}
-				}				
-			}else{				
-				
-				if(userNumber.length < 12){
-					if (userNumber.length == 2 || userNumber.length == 6){
-						userNumber += c;
-						userNumber += "-";
-					}else if (userNumber.length == 3 || userNumber.length == 7){
-						userNumber += "-";
-						userNumber += c;						
-					}else{
-						userNumber += c;
-					}
-				}				
-			}
-			
-			if (userNumber == ""){
-				clip.userInput.text = "000-000-0000";
-			}else{
-				clip.userInput.text = userNumber;
-			}
-			
-			clip.userInput.setTextFormat(spacer8Message);			
-		}
-		
-		
-		private function kbdPress(e:Event):void
-		{
-			tim.buttonClicked();
-			var c:String = kbd.getKey();
-			
-			if (c == "<<"){
-				if (userNumber.length > 0){
-					userNumber = userNumber.substr(0, userNumber.length - 1);
-				}
-			}else{
-				userNumber += c;
-			}
-			
-			if (userNumber == ""){
-				clip.userInput.text = "ENTER YOUR EMAIL ADDRESS";
-			}else{
-				clip.userInput.text = userNumber;
-			}
-			
-			clip.userInput.setTextFormat(spacer8Email);
-		}
-		
-	}
-	
-}
+    import flash.events.EventDispatcher;
+    import flash.display.MovieClip;
+    import flash.display.DisplayObjectContainer;
+    import com.dmennenoh.keyboard.KeyBoard;
+    import flash.text.TextFormat;
+    import flash.display.BitmapData;
+    import flash.geom.Matrix;
+    import flash.display.Bitmap;
+    import com.gmrmarketing.utilities.TimeoutHelper;
+    import flash.events.MouseEvent;
+    import com.greensock.TweenMax;
+    import com.greensock.easing.Expo;
+    import com.gmrmarketing.utilities.Validator;
+    import flash.events.Event;
+    import flash.display.*;
+    import flash.events.*;
+    import com.greensock.easing.*;
+
+    public class Result extends EventDispatcher 
+    {
+
+        public static const COMPLETE:String = "resultComplete";
+        public static const RETAKE:String = "retakePhoto";
+
+        private var clip:MovieClip;
+        private var myContainer:DisplayObjectContainer;
+        private var numpad:KeyBoard;
+        private var kbd:KeyBoard;
+        private var spacer8Message:TextFormat;
+        private var spacer8Email:TextFormat;
+        private var photo:BitmapData;
+        private var photoScaler:Matrix;
+        private var photoHolder:Bitmap;
+        private var isEmail:Boolean;
+        private var tim:TimeoutHelper;
+
+        public function Result()
+        {
+            this.clip = new results();
+            this.numpad = new KeyBoard();
+            this.kbd = new KeyBoard();
+            this.numpad.x = 1067;
+            this.numpad.y = 340;
+            this.kbd.x = 2000;
+            this.kbd.y = 460;
+            this.spacer8Message = new TextFormat();
+            this.spacer8Message.letterSpacing = 0;
+            this.spacer8Message.size = 42;
+            this.spacer8Email = new TextFormat();
+            this.spacer8Email.size = 24;
+            this.spacer8Email.letterSpacing = 0;
+            this.photo = new BitmapData(654, 654, false, 0);
+            this.photoScaler = new Matrix();
+            this.photoScaler.scale(0.6055555, 0.6055555);
+            this.photoHolder = new Bitmap(this.photo);
+            this.tim = TimeoutHelper.getInstance();
+            this.numpad.loadKeyFile("numpad.xml");
+            this.kbd.loadKeyFile("kbd.xml");
+        }
+
+        public function set container(_arg_1:DisplayObjectContainer):void
+        {
+            this.myContainer = _arg_1;
+        }
+
+        public function show(_arg_1:BitmapData):void
+        {
+            if (!this.myContainer.contains(this.clip))
+            {
+                this.myContainer.addChild(this.clip);
+            };
+            if (!this.myContainer.contains(this.photoHolder))
+            {
+                this.myContainer.addChild(this.photoHolder);
+            };
+            this.photo.draw(_arg_1, this.photoScaler, null, null, null, true);
+            this.isEmail = false;
+            if (!this.clip.contains(this.numpad))
+            {
+                this.clip.addChild(this.numpad);
+            };
+            if (!this.clip.contains(this.kbd))
+            {
+                this.clip.addChild(this.kbd);
+            };
+            this.numpad.x = 1067;
+            this.kbd.x = 2000;
+            this.photoHolder.x = 127;
+            this.photoHolder.y = 210;
+            this.clip.authCheck.x = 1067;
+            this.clip.authText.x = 1104;
+            this.clip.partCheck.x = 1067;
+            this.clip.partCheck.y = 857;
+            this.clip.partText.x = 1104;
+            this.clip.partText.y = 854;
+            this.clip.authCheck.gotoAndStop(1);
+            this.clip.partCheck.gotoAndStop(2);
+            this.clip.emailBG.alpha = 0;
+            this.clip.userInput.text = "";
+            this.clip.userInput.border = false;
+            this.clip.userInput.textColor = 0;
+            this.clip.userInput.height = 64;
+            this.clip.userInput.x = 1067;
+            this.clip.userInput.y = 324;
+            this.clip.btnSend.x = 1067;
+            this.clip.btnSend.y = 931;
+            this.numpad.addEventListener(KeyBoard.KBD, this.numPadPress, false, 0, true);
+            this.kbd.addEventListener(KeyBoard.KBD, this.kbdPress, false, 0, true);
+            this.clip.getYour.x = 1065;
+            this.clip.btnText.x = 1063;
+            this.clip.btnEmail.x = 1381;
+            this.clip.btnText.gotoAndStop(1);
+            this.clip.btnEmail.gotoAndStop(2);
+            this.clip.authError.alpha = 0;
+            this.clip.emailError.alpha = 0;
+            this.clip.btnText.addEventListener(MouseEvent.MOUSE_DOWN, this.switchToText, false, 0, true);
+            this.clip.btnEmail.addEventListener(MouseEvent.MOUSE_DOWN, this.switchToEmail, false, 0, true);
+            this.clip.authCheck.addEventListener(MouseEvent.MOUSE_DOWN, this.toggleAuthCheck, false, 0, true);
+            this.clip.partCheck.addEventListener(MouseEvent.MOUSE_DOWN, this.togglePartCheck, false, 0, true);
+            this.clip.btnSend.addEventListener(MouseEvent.MOUSE_DOWN, this.sendPressed, false, 0, true);
+            this.clip.btnRetake.addEventListener(MouseEvent.MOUSE_DOWN, this.retakePressed, false, 0, true);
+            this.numpad.setFocusFields([[this.clip.userInput, 12]]);
+            this.checkEmptyVis();
+        }
+
+        public function hide():void
+        {
+            if (this.myContainer.contains(this.clip))
+            {
+                this.myContainer.removeChild(this.clip);
+            };
+            if (this.myContainer.contains(this.photoHolder))
+            {
+                this.myContainer.removeChild(this.photoHolder);
+            };
+            if (this.clip.contains(this.kbd))
+            {
+                this.clip.removeChild(this.kbd);
+            };
+            if (this.clip.contains(this.numpad))
+            {
+                this.clip.removeChild(this.numpad);
+            };
+            this.numpad.removeEventListener(KeyBoard.KBD, this.numPadPress);
+            this.kbd.removeEventListener(KeyBoard.KBD, this.kbdPress);
+            this.clip.btnText.removeEventListener(MouseEvent.MOUSE_DOWN, this.switchToText);
+            this.clip.btnEmail.removeEventListener(MouseEvent.MOUSE_DOWN, this.switchToEmail);
+            this.clip.authCheck.removeEventListener(MouseEvent.MOUSE_DOWN, this.toggleAuthCheck);
+            this.clip.partCheck.removeEventListener(MouseEvent.MOUSE_DOWN, this.togglePartCheck);
+            this.clip.btnSend.removeEventListener(MouseEvent.MOUSE_DOWN, this.sendPressed);
+            this.clip.btnRetake.addEventListener(MouseEvent.MOUSE_DOWN, this.retakePressed);
+        }
+
+        public function get data():Object
+        {
+            var _local_1:Object = new Object();
+            _local_1.isEmail = this.isEmail;
+            if (!this.isEmail)
+            {
+                _local_1.num = this.clip.userInput.text.split("-").join("");
+            }
+            else
+            {
+                _local_1.num = this.clip.userInput.text;
+            };
+            _local_1.opt = ((this.clip.authCheck.currentFrame == 2) ? true : false);
+            _local_1.part = ((this.clip.partCheck.currentFrame == 2) ? true : false);
+            return (_local_1);
+        }
+
+        private function switchToText(_arg_1:MouseEvent):void
+        {
+            if (!this.isEmail)
+            {
+                return;
+            };
+            this.tim.buttonClicked();
+            this.isEmail = false;
+            this.clip.emailError.alpha = 0;
+            this.clip.authError.alpha = 0;
+            this.clip.btnText.gotoAndStop(1);
+            this.clip.btnEmail.gotoAndStop(2);
+            this.clip.userInput.background = false;
+            this.clip.userInput.text = "";
+            this.clip.userInput.setTextFormat(this.spacer8Message);
+            this.clip.userInput.border = false;
+            this.clip.userInput.textColor = 0;
+            this.clip.userInput.height = 64;
+            TweenMax.to(this.clip.emailBG, 0.5, {"alpha":0});
+            TweenMax.to(this.clip.getYour, 0.5, {
+                "x":1065,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.btnText, 0.5, {
+                "x":1063,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.btnEmail, 0.5, {
+                "x":1381,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.userInput, 0.5, {
+                "x":1067,
+                "y":324,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.btnSend, 0.5, {
+                "x":1067,
+                "y":931,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.authCheck, 0.5, {
+                "x":1067,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.authText, 0.5, {
+                "x":1104,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.partCheck, 0.5, {
+                "x":1067,
+                "y":857,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.partText, 0.5, {
+                "x":1104,
+                "y":854,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.numpad, 0.5, {
+                "x":1067,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.kbd, 0.5, {
+                "x":2000,
+                "ease":Expo.easeOut
+            });
+            this.numpad.setFocusFields([[this.clip.userInput, 12]]);
+            this.checkEmptyVis();
+        }
+
+        private function switchToEmail(_arg_1:MouseEvent):void
+        {
+            if (this.isEmail)
+            {
+                return;
+            };
+            this.tim.buttonClicked();
+            this.isEmail = true;
+            this.clip.emailError.alpha = 0;
+            this.clip.authError.alpha = 0;
+            this.clip.btnText.gotoAndStop(2);
+            this.clip.btnEmail.gotoAndStop(1);
+            this.clip.userInput.background = false;
+            this.clip.userInput.text = "";
+            this.clip.userInput.setTextFormat(this.spacer8Email);
+            this.clip.userInput.textColor = 11232946;
+            this.clip.userInput.border = false;
+            this.clip.userInput.height = 50;
+            TweenMax.to(this.clip.emailBG, 0.5, {"alpha":1});
+            TweenMax.to(this.clip.getYour, 0.5, {
+                "x":856,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.btnText, 0.5, {
+                "x":856,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.btnEmail, 0.5, {
+                "x":1174,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.userInput, 0.5, {
+                "x":864,
+                "y":360,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.btnSend, 0.5, {
+                "x":856,
+                "y":885,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.authCheck, 0.5, {
+                "x":1950,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.authText, 0.5, {
+                "x":1950,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.partCheck, 0.5, {
+                "x":864,
+                "y":781,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.clip.partText, 0.5, {
+                "x":901,
+                "y":778,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.numpad, 0.5, {
+                "x":2000,
+                "ease":Expo.easeOut
+            });
+            TweenMax.to(this.kbd, 0.5, {
+                "x":755,
+                "ease":Expo.easeOut
+            });
+            this.kbd.setFocusFields([[this.clip.userInput, 50]]);
+            this.checkEmptyVis();
+        }
+
+        private function toggleAuthCheck(_arg_1:MouseEvent):void
+        {
+            this.tim.buttonClicked();
+            if (this.clip.authCheck.currentFrame == 1)
+            {
+                this.clip.authCheck.gotoAndStop(2);
+            }
+            else
+            {
+                this.clip.authCheck.gotoAndStop(1);
+            };
+        }
+
+        private function togglePartCheck(_arg_1:MouseEvent):void
+        {
+            this.tim.buttonClicked();
+            if (this.clip.partCheck.currentFrame == 1)
+            {
+                this.clip.partCheck.gotoAndStop(2);
+            }
+            else
+            {
+                this.clip.partCheck.gotoAndStop(1);
+            };
+        }
+
+        private function sendPressed(_arg_1:MouseEvent):void
+        {
+            var _local_2:Boolean;
+            this.tim.buttonClicked();
+            this.clip.btnSend.fill.alpha = 1;
+            TweenMax.to(this.clip.btnSend.fill, 0.3, {"alpha":0});
+            if (this.isEmail)
+            {
+                _local_2 = Validator.isValidEmail(this.clip.userInput.text);
+                if (!_local_2)
+                {
+                    TweenMax.killTweensOf(this.clip.emailBG.outline);
+                    TweenMax.to(this.clip.emailBG.outline, 0, {"colorTransform":{
+                            "tint":0xFF0000,
+                            "tintAmount":1
+                        }});
+                    TweenMax.to(this.clip.emailBG.outline, 1, {
+                        "colorTransform":{
+                            "tint":null,
+                            "tintAmount":0
+                        },
+                        "delay":3
+                    });
+                    TweenMax.killTweensOf(this.clip.emailError);
+                    this.clip.emailError.text = "Please enter a valid email address";
+                    this.clip.emailError.alpha = 1;
+                    this.clip.emailError.x = 860;
+                    this.clip.emailError.y = 420;
+                    TweenMax.to(this.clip.emailError, 1, {
+                        "alpha":0,
+                        "delay":3
+                    });
+                };
+            }
+            else
+            {
+                _local_2 = Validator.isValidPhoneNumber(this.clip.userInput.text);
+                if (!_local_2)
+                {
+                    TweenMax.killTweensOf(this.clip.emailError);
+                    this.clip.emailError.text = "Please enter a valid phone number";
+                    this.clip.emailError.alpha = 1;
+                    this.clip.emailError.x = 1067;
+                    this.clip.emailError.y = 372;
+                    TweenMax.to(this.clip.emailError, 1, {
+                        "alpha":0,
+                        "delay":3
+                    });
+                };
+                if (this.clip.authCheck.currentFrame != 2)
+                {
+                    TweenMax.killTweensOf(this.clip.authCheck.outline);
+                    TweenMax.to(this.clip.authCheck.outline, 0, {"colorTransform":{
+                            "tint":0xFF0000,
+                            "tintAmount":1
+                        }});
+                    TweenMax.to(this.clip.authCheck.outline, 1, {
+                        "colorTransform":{
+                            "tint":null,
+                            "tintAmount":0
+                        },
+                        "delay":3
+                    });
+                    _local_2 = false;
+                    TweenMax.killTweensOf(this.clip.authError);
+                    this.clip.authError.alpha = 1;
+                    TweenMax.to(this.clip.authError, 1, {
+                        "alpha":0,
+                        "delay":3
+                    });
+                };
+            };
+            if (_local_2)
+            {
+                TweenMax.delayedCall(0.3, this.sendComplete);
+            };
+        }
+
+        private function sendComplete():void
+        {
+            dispatchEvent(new Event(COMPLETE));
+        }
+
+        private function retakePressed(_arg_1:MouseEvent):void
+        {
+            this.tim.buttonClicked();
+            dispatchEvent(new Event(RETAKE));
+        }
+
+        private function numPadPress(_arg_1:Event):void
+        {
+            this.tim.buttonClicked();
+            this.checkEmptyVis();
+            this.checkPhoneFormat();
+            this.clip.userInput.setTextFormat(this.spacer8Message);
+        }
+
+        private function kbdPress(_arg_1:Event):void
+        {
+            this.tim.buttonClicked();
+            this.checkEmptyVis();
+            this.clip.userInput.setTextFormat(this.spacer8Email);
+        }
+
+        private function checkEmptyVis():void
+        {
+            if (this.clip.userInput.text.length == 0)
+            {
+                if (this.isEmail)
+                {
+                    this.clip.userInputEmpty.x = 864;
+                    this.clip.userInputEmpty.y = 360;
+                    this.clip.userInputEmpty.border = false;
+                    this.clip.userInputEmpty.text = "ENTER YOUR EMAIL ADDRESS";
+                    this.clip.userInputEmpty.textColor = 11232946;
+                    this.clip.userInputEmpty.setTextFormat(this.spacer8Email);
+                }
+                else
+                {
+                    this.clip.userInputEmpty.x = 1067;
+                    this.clip.userInputEmpty.y = 324;
+                    this.clip.userInputEmpty.text = "000-000-0000";
+                    this.clip.userInputEmpty.height = 64;
+                    this.clip.userInputEmpty.border = false;
+                    this.clip.userInputEmpty.textColor = 0;
+                    this.clip.userInputEmpty.setTextFormat(this.spacer8Message);
+                };
+                this.clip.userInputEmpty.visible = true;
+                this.clip.userInput.visible = false;
+            }
+            else
+            {
+                this.clip.userInputEmpty.visible = false;
+                this.clip.userInput.visible = true;
+            };
+        }
+
+        private function checkPhoneFormat():void
+        {
+            var _local_1:String = this.clip.userInput.text;
+            if (_local_1.length > 3)
+            {
+                if (_local_1.indexOf("-") == -1)
+                {
+                    _local_1 = ((_local_1.substr(0, 3) + "-") + _local_1.substr(3));
+                };
+            };
+            if (_local_1.length > 7)
+            {
+                if (_local_1.indexOf("-", 5) == -1)
+                {
+                    _local_1 = ((_local_1.substr(0, 7) + "-") + _local_1.substr(7));
+                };
+            };
+            this.clip.userInput.text = _local_1;
+            this.clip.userInput.setSelection(this.clip.userInput.text.length, this.clip.userInput.text.length);
+        }
+
+
+    }
+}//package com.gmrmarketing.katyperry.witness
+
